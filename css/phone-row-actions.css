@@ -1,0 +1,31 @@
+.phase-mode-count{margin-left:8px;font-size:12px;font-weight:400;white-space:nowrap}
+.app .layout.phase-multi-select-mode .phase-heading-actions>:is(#addPage,#copyPage,#copyPageToContent,#addPhaseGroup){display:none!important}
+.app .layout .phase-heading-actions>#exitPhaseComparison{display:none;box-sizing:border-box;width:26px;height:26px;padding:3px;border:1px solid #d0d4da;border-radius:5px;background:#eef2f7;color:#33445f}
+.app .layout.phase-multi-select-mode .phase-heading-actions>#exitPhaseComparison{display:grid!important;place-items:center}
+@media(min-width:851px){.app .layout.phase-multi-select-mode .phase-heading-actions>#exitPhaseComparison:is(:hover,:focus-visible){background:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important}}
+@media(max-width:850px){.app .layout.phase-multi-select-mode .phase-heading-actions>#exitPhaseComparison{-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;user-select:none}}
+.phase-heading-actions>#exitPhaseComparison svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2}
+.app .layout #phaseComparisonStatus{display:none!important}
+.app .layout.phase-multi-select-mode .page-tab-actions{display:none!important}
+.app .layout.phase-multi-select-mode #pages :is(.phone-row-actions,.phase-group-menu-trigger){display:none!important}
+.phase-multi-select-mode #toggleBattlePages{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.board-read-only .layout.phase-multi-select-mode .phase-heading-actions{display:flex!important}
+.row-action-menu-title{padding:8px 10px;border-bottom:1px solid #d0d4da;color:#60718c;font-size:12px;max-width:260px;overflow-wrap:anywhere}
+.phone-row-actions{display:none!important}
+@media(max-width:850px){.phone-row-actions,.phase-group-menu-trigger{touch-action:none;-webkit-touch-callout:none;user-select:none;-webkit-user-select:none}}
+@media(max-width:850px){
+ .app .layout :is(#pages,#objectList,#contentOptions),.app .layout :is(#pages,#objectList,#contentOptions) *{-webkit-tap-highlight-color:transparent}
+ body.phone-touch-mode .phase-group-heading:is(:hover,:has(:focus-visible)){background:#f0f4fa}
+ body.phone-touch-mode .phase-group-heading:is(.active,.contains-active-phase):is(:hover,:has(:focus-visible)){background:#eaf3ff}
+ body .app .layout :is(#pages,#objectList,#contentOptions) :is(.phone-row-actions,.phase-group-menu-trigger),body .app .layout :is(#pages,#objectList,#contentOptions) :is(.phone-row-actions,.phase-group-menu-trigger):is(:hover,:focus,:focus-visible,:active,.phone-control-pressed){background:transparent!important;color:#33445f!important;-webkit-text-fill-color:#33445f!important;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;filter:none!important}
+ .app .layout :is(#pages,#objectList,#contentOptions) .phone-row-actions{display:grid!important;place-items:center;flex:0 0 28px;width:28px;height:28px;padding:4px;border:0!important;border-radius:4px;background:transparent!important;color:#33445f!important}
+ .app .layout .phone-row-actions[hidden]{display:none!important}
+ .phone-row-actions svg{display:block;width:18px;height:18px;pointer-events:none}
+ .app .layout #pages .page-tab:not(.renaming) :is(.page-tab-edit,.page-tab-x),.app .layout #objectList .object-row :is(.object-delete,.object-lock-toggle),.app .layout #contentOptions .content-option-row:not(:has(input))>.content-row-action{display:none!important}
+ .app .layout #pages .page-tab.renaming>.phone-row-actions,.app .layout #pages .page-tab.renaming>.page-tab-edit{display:none!important}
+ .app .layout #pages .page-tab>.phone-row-actions{grid-column:-2/-1;grid-row:1;margin-left:auto}
+ .app .layout #objectList>.object-row{grid-template-columns:18px 18px 26px minmax(0,1fr) 28px!important}
+ .app .layout #objectList>.object-row>.object-visibility-toggle{display:grid!important;grid-column:3;grid-row:1}
+ .app .layout #objectList>.object-row>.object-name{grid-column:4;grid-row:1}
+ .app .layout #objectList>.object-row>.phone-row-actions{grid-column:5;grid-row:1}
+}

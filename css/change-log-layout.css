@@ -1,0 +1,6 @@
+.operation-guide-body strong{font-weight:700}
+ .operation-guide-body strong.help-destructive{color:#a33b32!important;-webkit-text-fill-color:#a33b32!important}
+ .change-log-version{white-space:nowrap}
+ #changeLogDialog .operation-guide-body>p{display:grid;grid-template-columns:max-content minmax(0,1fr);column-gap:1ch;align-items:start}
+ .change-log-description{min-width:0;overflow-wrap:anywhere}
+ .change-log-description::before{content:none}

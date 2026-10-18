@@ -1,0 +1,21 @@
+.app .layout #inspector,
+ .app .layout .battle #layoutPropertiesPanel:not([hidden]):not(.hidden){gap:6px!important}
+ .app .layout :is(#inspector,#layoutPropertiesPanel) .field{margin:0}
+ .app .layout :is(#inspector,#layoutPropertiesPanel) .field>label:not(.property-icon-toggle),
+ .app .layout #inspector .coordinate-fields>div>label{
+  margin-top:0;
+  margin-bottom:1px;
+  line-height:1.2;
+ }
+ .app .layout :is(#inspector,#layoutPropertiesPanel) :is(.coordinate-fields,.property-color-fill-row,.layout-background-colors){
+  row-gap:6px;
+  column-gap:8px;
+ }
+ .app .layout #inspector>.inspector-section-start{
+  border-top:1px solid #e5e9ef;
+  padding-top:5px;
+ }
+ .app .layout #layoutPropertiesPanel>.layout-background-colors{
+  border-top:1px solid #e5e9ef;
+  padding-top:5px;
+ }

@@ -1,0 +1,15 @@
+@media(min-width:851px){
+ .app .layout.desktop-phase-tools #objectLayerPanel>.desktop-phase-sidebar>.layer-list-group[hidden]{display:none!important}
+ .app .layout.desktop-phase-tools #objectLayerPanel .desktop-columns-toggle:disabled{opacity:.45;cursor:default}
+ .app>.top .header-mode-status{flex-shrink:0}
+ .app>.top #editModeToggle{box-sizing:border-box;flex:0 0 180px;width:180px;min-width:180px;max-width:180px}
+}
+.app>.top #editModeToggle{background:#eaf3ff!important;border-color:var(--blue)!important;color:#000!important;-webkit-text-fill-color:#000!important}
+.app>.top #editModeToggle.view-state{background:#fff!important;border-color:#999!important;color:#000!important;-webkit-text-fill-color:#000!important}
+@media(hover:hover) and (pointer:fine){
+ .app>.top #editModeToggle:hover:not(:where(.phone-touch-mode *)){background:var(--blue)!important;border-color:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important;filter:none!important}
+ .app>.top #editModeToggle.view-state:hover:not(:where(.phone-touch-mode *)){background:var(--blue)!important;border-color:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+}
+.board-read-only #toggleLayoutProperties>.comparison-property-heading{display:inline!important}
+.board-read-only #activePhaseIndex,.board-read-only #activePhaseLabel{display:none!important}
+.board-read-only #inspector{font-size:14px;line-height:1.7;color:var(--muted)!important;opacity:1}

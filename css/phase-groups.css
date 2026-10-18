@@ -1,0 +1,84 @@
+.phase-group-heading.drag-over{outline:2px solid #416da9;outline-offset:-2px}.phase-group-heading{display:flex;align-items:center;box-sizing:border-box;width:100%;height:34px;min-height:34px;flex-shrink:0;gap:9px;padding:0 5px 0 4px;border:1px solid transparent;border-radius:6px;background:#f0f4fa;color:#33445f;margin:2px 0;font-size:14px;font-weight:400}
+.phase-group-heading button{box-sizing:border-box;border:0;background:transparent;color:inherit;height:32px;min-height:0;padding:0 3px;cursor:pointer;font:inherit}
+.phase-group-heading .phase-group-name{display:flex;align-items:center;flex:1;min-width:0;text-align:left;white-space:nowrap;overflow:hidden;font-weight:400}
+.phase-group-range{flex:0 0 var(--group-name-offset,38px);font:12px 'DM Mono';color:#111;font-variant-numeric:tabular-nums}
+.phase-group-title{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.phase-group-heading.renaming{display:grid;grid-template-columns:minmax(0,1fr) 26px;height:auto;min-height:34px;row-gap:4px;padding-bottom:4px}
+.phase-group-heading.renaming>.phase-group-name{grid-column:1;grid-row:1}
+.phase-group-heading.renaming>.phase-group-toggle{grid-column:2;grid-row:1}
+.phase-group-heading.renaming>.phase-group-rename{grid-column:1/-1;grid-row:2;width:100%}
+.phase-group-rename{box-sizing:border-box;flex:1;min-width:0;min-height:32px;resize:none;font:inherit;padding:5px;border:1px solid #4769b3;border-radius:4px;background:#fff;color:#111}
+.phase-group-current{margin-left:0;padding-left:8px;flex:none;font:12px 'DM Mono';font-variant-numeric:tabular-nums}
+.phase-group-heading .phase-group-range{cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+.phase-group-heading>.phase-group-number-space{flex:0 0 16px;width:16px;min-width:16px;margin-right:-6px}
+.phase-group-heading>.phase-group-toggle{flex:0 0 26px;width:26px;min-width:26px;padding:0;text-align:center}
+@media(max-width:850px){.phase-group-heading>.phase-group-toggle{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}}
+.phase-group-heading>.phase-select-check{visibility:hidden;margin-right:-4px}
+.phase-group-heading>.phase-group-name{padding:0}
+.app .layout #pages .phase-group-heading>.phase-group-menu-trigger{display:grid;place-items:center;flex:0 0 26px;width:26px;padding:0;border-radius:4px;background:transparent!important}
+.app .layout #pages .phase-group-heading>.phase-group-menu-trigger:is(:hover:not(:where(.phone-touch-mode *)),:focus-visible){background:#dceaff!important}
+.phase-group-menu-trigger>svg{display:block;width:18px;height:18px;pointer-events:none}
+.app .layout #pages .phase-group-heading.renaming>.phase-group-menu-trigger{display:none}
+@media(min-width:851px){.app .layout #pages .phase-group-heading>.phase-group-menu-trigger{display:none}}
+.phase-group-heading.active,.phase-group-heading.contains-active-phase{background:#eaf3ff}
+.phase-group-heading.active{border-left-color:var(--blue);box-shadow:inset 2px 0 0 var(--blue)}
+.phase-group-heading{cursor:pointer}
+.phase-group-heading:is(:hover:not(:where(.phone-touch-mode *)),:has(:focus-visible)){background:#e1e9f4}
+.phase-group-heading:is(.active,.contains-active-phase):is(:hover:not(:where(.phone-touch-mode *)),:has(:focus-visible)){background:#dceaff}
+.phase-group-heading,.phase-group-heading button{color:#111;-webkit-text-fill-color:#111}
+@media(max-width:850px){
+ .phase-group-heading,.phase-group-heading button{-webkit-tap-highlight-color:transparent}
+}
+.phase-group-heading{position:relative}
+.phase-group-heading.drag-over.drop-before{outline:none}
+.phase-group-heading{border-color:#d0d4da}
+.phase-group-heading.group-expanded{border-radius:6px 6px 0 0}
+.phase-group-heading.active.group-expanded{border-top-left-radius:6px;border-bottom-left-radius:6px}
+.app .layout :is(.battle,.phone-view-content) #pages .page-tab.group-member{width:100%;box-sizing:border-box;padding-left:4px!important}
+.phase-group-heading.group-expanded::before{content:"";position:absolute;left:-1px;right:-1px;top:-1px;height:var(--group-frame-height,34px);box-sizing:border-box;border:1px solid #d0d4da;border-radius:6px;pointer-events:none;z-index:2}
+#pages .page-tab[hidden]{display:none!important}
+#pages:has(.phase-group-heading){padding-bottom:32px!important}
+#pages.phase-drop-at-end{box-shadow:inset 0 -2px #416da9}
+#addPhaseGroup{cursor:pointer}#addPhaseGroup>svg{display:block;margin:0;pointer-events:none}.phase-group-membership{grid-column:1/-1;width:100%;min-width:0;font:inherit;font-size:12px}.phase-group-tools{display:flex;justify-content:flex-end;padding:4px;gap:6px}
+.phase-group-tools button,.phase-group-overview button,.phase-group-overview select{font:inherit;padding:7px 10px;border:1px solid #ccd5e2;border-radius:6px;background:#eef2f7;color:#33445f;cursor:pointer}
+#objectLayerPanel{position:relative}
+#objectLayerPanel.group-overview-active>.phone-material-pin{visibility:hidden!important} .phase-group-overview{position:absolute;left:50%;top:50%;width:640px;height:640px;z-index:30;overflow:hidden;background:#fff;color:#17212c;padding:0;box-sizing:border-box;display:block;transform:translate(-50%,-50%) scale(var(--board-display-scale,1));transform-origin:center;pointer-events:none}
+.phase-group-overview[hidden]{display:none!important}
+.phase-group-artwork{position:absolute;inset:0;width:640px;height:640px;overflow:hidden;filter:grayscale(1);opacity:.2}
+.phase-group-artwork,.phase-group-artwork *{pointer-events:none!important}
+.phase-group-caption{position:absolute;left:24px;right:24px;top:calc(98.24900652049352% - 75.5px);bottom:0;margin:0;padding:0 18px;border:0;background:transparent;color:#fff;display:flex;justify-content:center;align-items:center;text-align:center;font-size:22px;font-weight:700;line-height:1.5;white-space:nowrap}
+.phase-group-caption-prefix,.phase-group-caption-suffix{flex:none}
+.phase-group-caption-name{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.phase-group-selected #stage{visibility:hidden}
+
+
+.phase-group-overview h2{margin:0;font-size:20px;overflow-wrap:anywhere}
+.phase-group-overview label{display:flex;flex-direction:column;gap:8px}
+.phase-group-overview input,.phase-group-overview textarea{font:inherit;box-sizing:border-box;width:100%;border:1px solid #ccd5e2;border-radius:6px;padding:10px;background:#fff;color:#17212c}
+.phase-group-overview textarea{min-height:130px;resize:vertical}
+.phase-group-overview .group-phase-links{display:flex;flex-direction:column;gap:6px}
+.phase-group-overview .group-phase-links button{text-align:left}
+.phase-group-overview .group-actions{display:flex;gap:8px;flex-wrap:wrap}
+.board-read-only:not(.phase-group-selected) #layoutPropertiesPanel>:not(.comparison-property-message){display:none!important}
+.phase-group-selected #layoutPropertiesPanel>:not(#phaseGroupProperties){display:none!important}
+.phase-group-selected #toggleLayoutProperties>:is(#activePhaseIndex,#activePhaseLabel){display:none}
+.phase-group-selected :is(#toggleLayers,#toggleInspector,#toggleLayoutProperties):disabled{opacity:1}
+@media(min-width:851px){
+ .phase-group-selected :is(#toggleLayers,#toggleInspector,#toggleLayoutProperties){pointer-events:none!important}
+ .phase-group-selected :is(#toggleLayers,#toggleInspector,#toggleLayoutProperties)::after{display:none!important}
+}
+@media(max-width:850px){
+ .phase-group-selected .phone-view-content>.content-properties{display:flex!important;flex-direction:column;min-height:180px;flex:none}
+ .phase-group-selected .phone-view-content>.content-properties>#layoutPropertiesPanel{display:flex!important;flex-direction:column;max-height:none!important}
+}
+#phaseGroupProperties{display:flex;flex-direction:column;flex:1;gap:10px;padding:0;min-width:0;min-height:0}
+#phaseGroupProperties>.field:first-child{flex:none}
+#phaseGroupProperties>.field:last-child{display:flex;flex-direction:column;flex:1;min-height:78px}
+#phaseGroupProperties>.field:last-child>textarea{flex:1;min-height:0}
+#phaseGroupProperties[hidden]{display:none!important}
+#phaseGroupProperties textarea{box-sizing:border-box;width:100%;min-height:78px;padding:7px;border:1px solid #d5dce6;border-radius:5px;background:#f8fafc;color:#17212c;font:inherit;font-size:14px;line-height:1.5;resize:none}#phaseGroupProperties textarea:focus{outline:2px solid var(--blue);outline-offset:-1px}#phaseGroupProperties textarea[readonly]{background:#fff}
+.phase-group-selected #objectList>*{display:none!important}
+.phase-group-selected #objectList::after{content:"グループを選択中です";display:block;padding:10px;color:#60718c}
+#phaseGroupMenu{max-width:calc(100vw - 16px)}
+@media(max-width:850px){#phaseGroupMenu button{min-height:44px}}
+@media(max-width:850px){#pages:has(.phase-group-heading){min-height:120px}.phase-group-overview{padding:0}.phase-group-tools button,.phase-group-overview button,.phase-group-overview select{min-height:44px}}

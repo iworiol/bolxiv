@@ -1,0 +1,10 @@
+.app .layout .left:not(.palette-hover-open):not(:focus-within):not(.pinned) .accordion-toggle[aria-controls][aria-expanded] {
+  background:#fff!important;
+  color:#000!important;
+  -webkit-text-fill-color:#000!important;
+  transition:none!important;
+}
+.app .layout .left:not(.palette-hover-open):not(:focus-within):not(.pinned) .accordion-toggle[aria-controls][aria-expanded] * {
+  color:#000!important;
+  -webkit-text-fill-color:#000!important;
+}

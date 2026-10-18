@@ -1,0 +1,29 @@
+.app .layout :is(.battle,.phone-view-content) #pages .page-tab{
+  border-color:transparent!important;
+  border-radius:6px;
+  background:transparent!important;
+  min-height:34px;
+  margin:2px 0;
+ }
+ .app .layout :is(.battle,.phone-view-content) #pages .page-tab.active{
+  background:#eaf3ff!important;
+  border-left-color:var(--blue)!important;
+ }
+ .app .layout :is(.battle,.phone-view-content) #pages .page-tab.active:not(.item-just-moved){
+  box-shadow:inset 2px 0 0 var(--blue)!important;
+ }
+ .app .layout :is(.battle,.phone-view-content) #pages .page-tab:hover:not(:where(.phone-touch-mode *)){
+  background:#f0f4fa!important;
+ }
+ .app .layout :is(.battle,.phone-view-content) #pages .page-tab.active:hover:not(:where(.phone-touch-mode *)){
+  background:#dceaff!important;
+ }
+ .app .layout :is(.battle,.phone-view-content) #pages .page-tab:hover:not(:where(.phone-touch-mode *)),
+ .app .layout :is(.battle,.phone-view-content) #pages .page-tab:hover:not(:where(.phone-touch-mode *)) *{
+  color:#17212c!important;
+  -webkit-text-fill-color:#17212c!important;
+ }
+ .app .layout :is(.battle,.phone-view-content) #pages .page-tab:focus-visible{
+  outline:2px solid var(--blue);
+  outline-offset:-2px;
+ }
