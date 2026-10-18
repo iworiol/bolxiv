@@ -1,0 +1,9 @@
+.left .tool,.left .icon-choice,.left .tool *,.left .icon-choice * {
+  -webkit-touch-callout:none;
+  user-select:none;
+  -webkit-user-select:none;
+}
+.left .tool img,.left .icon-choice img {
+  -webkit-user-drag:none;
+  pointer-events:none;
+}

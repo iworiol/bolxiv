@@ -1,0 +1,16 @@
+.about-tool-body {
+  font-size:14px;
+  line-height:1.8;
+  overflow-wrap:anywhere;
+}
+.about-tool-body h4 {
+  margin:16px 0 4px;
+  font-size:14px;
+}
+.about-tool-body p {
+  margin:8px 0;
+}
+.about-tool-body a {
+  color:#28569b;
+  text-decoration:underline;
+}

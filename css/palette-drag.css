@@ -1,0 +1,10 @@
+.app .layout .left .tool.palette-dragging,.app .layout .left .icon-choice.palette-dragging {
+  background:var(--blue)!important;
+  color:#fff!important;
+  -webkit-text-fill-color:#fff!important;
+  filter:none!important;
+}
+.app .layout .left .tool.palette-dragging .glyph {
+  color:#fff!important;
+  -webkit-text-fill-color:#fff!important;
+}

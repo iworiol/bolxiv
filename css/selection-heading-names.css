@@ -1,0 +1,19 @@
+.app .layout #toggleObjectList #selectionTitle{
+  display:flex;
+  align-items:center;
+ }
+ #selectionTitle>.phase-label-prefix,#selectionTitle>.selection-name-separator{flex:none}
+ #selectionTitle>.selection-name-separator{white-space:pre}
+ #selectionTitle>.selection-content-name{
+  flex:0 1 auto;
+  min-width:0;
+ }
+ #selectionTitle>.selection-phase-name{
+  flex:0 .65 auto;
+  min-width:0;
+ }
+ #selectionTitle>:is(.selection-content-name,.selection-phase-name){
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+ }

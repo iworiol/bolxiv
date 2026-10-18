@@ -1,0 +1,8 @@
+.phone-number-step-buttons{display:none}
+@media(max-width:850px){
+ .coordinate-control input[type="number"]{display:none!important}
+ .coordinate-control .phone-number-step-buttons{display:flex;flex:none;gap:4px}
+ .phone-number-step-buttons .btn{box-sizing:border-box;width:32px;min-width:32px;height:32px;padding:0;font-size:20px;line-height:1;touch-action:manipulation;background:#eef2f7;color:#33445f;-webkit-text-fill-color:#33445f;border:1px solid #d0d4da}
+ .phone-number-step-buttons .btn:enabled:active{background:var(--blue);color:#fff;-webkit-text-fill-color:#fff;border-color:var(--blue)}
+ .field:has(input[type="range"])>.coordinate-control{height:32px}
+}

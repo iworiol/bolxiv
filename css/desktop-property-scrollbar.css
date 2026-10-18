@@ -1,0 +1,10 @@
+@media(min-width:851px){
+ .battle #layoutPropertiesPanel,.battle #pages,.right #objectList,.right #inspector{scrollbar-gutter:stable}
+ .battle #pageListPanel,.battle .page-list-box,.right #layerListPanel,.right #propertyPanel{padding-right:0!important}
+ .battle .page-list-box{border-right:0}
+ .battle .page-list-box>.page-tab-actions{margin-right:15px}
+ /* Move parent clearance into the scrolling element to preserve item widths. */
+ .battle #pages{padding-right:calc(15px + var(--desktop-scroll-clearance,8px))!important}
+ .right .layer-list-group #objectList,.right #inspector{padding-right:calc(12px + var(--desktop-scroll-clearance,8px))!important}
+ .battle #layoutPropertiesPanel{padding-right:calc(8px + var(--desktop-scroll-clearance,8px))!important}
+}

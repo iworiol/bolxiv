@@ -1,0 +1,7 @@
+@media(max-width:850px){
+  #pages .page-tab-name,#pages .page-index{-webkit-user-select:none!important;user-select:none!important;-webkit-touch-callout:none}
+  #pages .page-index,#objectList .object-index,#contentOptions .content-option-index{touch-action:none!important;cursor:grab;min-width:24px;align-self:stretch;display:flex;align-items:center;justify-content:center;-webkit-user-select:none!important;user-select:none!important;-webkit-touch-callout:none}
+  #pages .page-tab :is(.page-tab-edit,.page-tab-x),#objectList .object-row :is(.object-delete,.object-toggle),#contentOptions .content-options-scroll>.content-option-row .content-row-action{touch-action:none!important;-webkit-user-select:none!important;user-select:none!important;-webkit-touch-callout:none}
+  #pages .page-tab input[type="checkbox"],#objectList .object-row input[type="checkbox"]{touch-action:none!important}
+  #pages .page-tab.dragging,#objectList .object-row.dragging,#contentOptions .content-option-row.dragging{opacity:.55}
+ }

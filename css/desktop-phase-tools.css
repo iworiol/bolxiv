@@ -1,0 +1,132 @@
+.desktop-phase-sidebar[hidden]{display:none!important}
+.desktop-columns-toggle{display:none}
+@media(min-width:851px){
+ .app .layout.desktop-phase-tools #objectLayerPanel .layer-list-group>.desktop-columns-toggle{display:grid;place-items:center;box-sizing:border-box;position:absolute;left:5px;top:5px;z-index:1;width:26px;height:26px;padding:3px;border:1px solid #d0d4da!important;border-radius:6px;background:#eef2f7!important;color:#33445f!important;-webkit-text-fill-color:#33445f!important;cursor:pointer;transition:background-color .12s ease}
+ .desktop-columns-toggle svg{display:block;width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+ .desktop-columns-toggle[aria-pressed="true"] svg{transform:rotate(180deg)}
+ .app .layout.desktop-phase-tools #objectLayerPanel .layer-list-group>.desktop-columns-toggle:is(:hover:not(:where(.phone-touch-mode *)),:focus-visible){background:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+ .app .layout.desktop-phase-tools #objectLayerPanel>.object-layout-rect{inset:0 260px 0 0!important}
+
+ .app .layout.desktop-phase-tools #objectLayerPanel .desktop-phase-sidebar #toggleLayers{position:relative;display:flex!important;gap:0;align-items:center;padding-left:38px!important;padding-right:11px!important;white-space:nowrap;overflow:hidden}
+ .app .layout.desktop-phase-tools .desktop-phase-sidebar #toggleLayers>#count{margin:0;font:inherit;font-size:10px;font-weight:400;white-space:pre;min-width:0;overflow:hidden;text-overflow:ellipsis;color:inherit!important;-webkit-text-fill-color:inherit!important}
+ .app .layout.desktop-phase-tools .desktop-phase-sidebar #toggleLayers::after{position:static;width:auto;line-height:normal;margin-left:auto;flex:none;float:none;content:'＋'}
+ .app .layout.desktop-phase-tools .desktop-phase-sidebar #toggleLayers[aria-expanded="true"]::after{content:'−'}
+ .app .layout.desktop-phase-tools.desktop-tools-two-columns #objectLayerPanel{grid-template-columns:minmax(0,1fr) minmax(0,554px)!important}
+ .app .layout.desktop-phase-tools.desktop-tools-two-columns #objectLayerPanel>.object-layout-rect{inset:0 518px 0 0!important}
+ .app .layout.desktop-phase-tools.desktop-tools-two-columns #objectLayerPanel>.desktop-phase-sidebar{width:min(510px,calc(100% - 16px));box-sizing:border-box;padding-left:258px}
+ .app .layout.desktop-phase-tools.desktop-tools-two-columns #objectLayerPanel>.desktop-phase-sidebar>.layer-list-group{position:absolute!important;left:0!important;top:0!important;bottom:0!important;width:252px!important;height:100%!important;min-height:0!important;max-height:none!important;flex:none!important}
+ .app .layout.desktop-phase-tools.desktop-tools-two-columns #objectLayerPanel>.desktop-phase-sidebar>#layerPropertyResize{display:none!important}
+ .app .layout.desktop-phase-tools.desktop-tools-two-columns .desktop-phase-sidebar #toggleLayers{pointer-events:none!important}
+ .app .layout.desktop-phase-tools.desktop-tools-two-columns .desktop-phase-sidebar #toggleLayers::after{display:none!important}
+ .app .layout.desktop-phase-tools #objectLayerPanel>.desktop-phase-sidebar{
+  position:absolute;top:8px;right:8px;bottom:8px;width:min(252px,calc(100% - 16px));
+  display:flex;flex-direction:column;gap:6px;min-height:0;overflow:hidden;
+ }
+ .app .layout.desktop-phase-tools .battle #contentPanel{gap:6px!important}
+ .app .layout.desktop-phase-tools .battle #contentPanel>.content-select-row{margin-bottom:0!important}
+ .app .layout.desktop-phase-tools .battle #contentPanel>.page-controls{margin-top:0!important}
+ .app .layout.desktop-phase-tools .desktop-phase-sidebar>.property-group,
+ .app .layout.desktop-phase-tools .desktop-phase-sidebar>.content-properties,
+ .app .layout.desktop-phase-tools .desktop-phase-sidebar>.phase-memo{
+  display:flex!important;position:relative!important;inset:auto!important;flex-direction:column;
+  width:100%!important;min-width:0;flex:0 0 38px!important;
+  height:38px!important;min-height:38px!important;max-height:38px!important;
+  margin:0!important;border:1px solid #d0d4da!important;border-radius:7px;overflow:hidden!important;background:#fff;
+ }
+ .app .layout.desktop-phase-tools .desktop-phase-sidebar>.layer-list-group:has(#toggleLayers[aria-expanded="true"]){
+  flex:0 1 45%!important;height:auto!important;min-height:80px!important;max-height:none!important;
+ }
+ .app .layout.desktop-phase-tools .desktop-phase-sidebar:not(:has(>.is-open))>.layer-list-group:has(#toggleLayers[aria-expanded="true"]){flex:1 1 0!important}
+ .app .layout.desktop-phase-tools .desktop-phase-sidebar>.is-open{
+  flex:1 1 0!important;height:auto!important;min-height:130px!important;max-height:none!important;
+ }
+ .app .layout.desktop-phase-tools .desktop-phase-sidebar :is(#toggleLayers,#toggleInspector,#toggleLayoutProperties){
+  display:flex!important;align-items:center;gap:4px;width:100%!important;
+  flex:0 0 36px!important;height:36px!important;min-height:36px!important;
+  margin:0!important;padding:0 11px!important;border:0!important;border-radius:0;
+  background:#eef2f7!important;color:#33445f!important;-webkit-text-fill-color:#33445f!important;
+ }
+ .app .layout.desktop-phase-tools .desktop-phase-sidebar :is(#toggleLayers,#toggleInspector,#toggleLayoutProperties):is(:hover,:focus-visible){background:#e1e9f4!important}
+ .app .layout.desktop-phase-tools .desktop-phase-sidebar #toggleLayers{text-align:left}
+ .app .layout.desktop-phase-tools .desktop-phase-sidebar :is(#toggleInspector,#toggleLayoutProperties)::after{
+  margin-left:auto;flex:none;float:none;
+ }
+ .app .layout.desktop-phase-tools .desktop-phase-sidebar>.phase-memo>summary::after{
+  content:'＋';font:inherit;
+ }
+ .app .layout.desktop-phase-tools .desktop-phase-sidebar>.phase-memo[open]>summary::after{content:'−'}
+ .app .layout.desktop-phase-tools .desktop-phase-sidebar #activePhaseLabel{
+  flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+ }
+ .app .layout.desktop-phase-tools .desktop-phase-sidebar :is(#activePhaseIndex,#activePhaseLabel,.phase-memo-phase){display:none!important}
+ .app .layout.desktop-phase-tools .desktop-phase-sidebar #toggleLayoutProperties>.comparison-property-heading{display:none!important}
+ .app .layout.desktop-phase-tools .desktop-phase-sidebar .phase-memo-preview{display:none!important}
+ .app .layout.desktop-phase-tools .desktop-phase-sidebar>.phase-memo>.phase-memo-body{min-height:0;overflow:hidden;padding-right:8px}
+ .app .layout.desktop-phase-tools .desktop-phase-sidebar>.phase-memo>.phase-memo-body>textarea{box-sizing:border-box}
+ .app .layout.desktop-phase-tools .phase-memo-reading{flex:1;min-height:0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px;line-height:1.6;overflow:auto;scrollbar-gutter:stable;padding-right:6px}
+ .app .layout.desktop-phase-tools .phase-memo-entry+.phase-memo-entry{margin-top:8px;padding-top:8px;border-top:1px solid #e5e9ef}
+ .app .layout.desktop-phase-tools .phase-memo-entry-title{font-size:14px;font-weight:700;color:#33445f;margin-bottom:3px}
+ .app .layout.desktop-phase-tools.desktop-reading-tools #objectLayerPanel .desktop-phase-sidebar :is(#toggleLayers,#toggleInspector,#toggleLayoutProperties,summary){
+  pointer-events:none!important;opacity:1!important;cursor:default!important;background:#eef2f7!important;color:#33445f!important;-webkit-text-fill-color:#33445f!important;
+ }
+ .app .layout.desktop-phase-tools.desktop-reading-tools .desktop-phase-sidebar :is(#toggleLayers,#toggleInspector,#toggleLayoutProperties,summary)::after{display:none!important}
+ .app .layout.desktop-phase-tools .desktop-phase-sidebar>.layer-list-group>#layerListPanel,
+ .app .layout.desktop-phase-tools .desktop-phase-sidebar>.property-group>#propertyPanel,
+ .app .layout.desktop-phase-tools .desktop-phase-sidebar>.content-properties>#layoutPropertiesPanel{
+  display:flex!important;flex:1 1 0!important;flex-direction:column;
+  min-height:0!important;height:auto!important;max-height:none!important;
+  margin:0!important;padding:8px!important;overflow:auto!important;background:#fff;
+ }
+ .app .layout.desktop-phase-tools .desktop-phase-sidebar :is(#layerListPanel,#propertyPanel,#layoutPropertiesPanel)[hidden]{display:none!important}
+ .app .layout.desktop-phase-tools .desktop-phase-sidebar>.layer-list-group>#layerListPanel{
+  box-sizing:border-box!important;padding-right:0!important;overflow:hidden!important;
+ }
+ .app .layout.desktop-phase-tools .desktop-phase-sidebar>.property-group>#propertyPanel{
+  box-sizing:border-box!important;padding-right:0!important;overflow:hidden!important;
+ }
+ .app .layout.desktop-phase-tools .desktop-phase-sidebar #inspector{
+  box-sizing:border-box!important;width:100%!important;min-width:0;min-height:0;
+  flex:1 1 auto!important;overflow-x:hidden!important;overflow-y:auto!important;
+  scrollbar-gutter:stable;
+  padding-right:calc(12px + var(--desktop-scroll-clearance,8px))!important;
+ }
+ .app .layout.desktop-phase-tools .desktop-phase-sidebar #objectList{
+  flex:1 1 auto!important;min-height:0!important;height:auto!important;max-height:none!important;
+  display:flex!important;box-sizing:border-box;width:100%!important;
+  overflow-x:hidden!important;overflow-y:auto!important;scrollbar-gutter:stable;
+ }
+ .app .layout.desktop-phase-tools #objectLayerPanel .desktop-phase-sidebar>.content-properties>#layoutPropertiesPanel{
+  gap:6px!important;box-sizing:border-box!important;width:100%!important;min-width:0;
+  overflow-x:hidden!important;overflow-y:auto!important;scrollbar-gutter:stable;
+  padding-right:calc(12px + var(--desktop-scroll-clearance,8px))!important;
+ }
+ .app .layout.desktop-phase-tools .desktop-phase-sidebar .layout-background-colors{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}
+ .app .layout.desktop-phase-tools .desktop-phase-sidebar>.phase-memo>summary{height:36px;min-height:36px}
+ .app .layout.desktop-phase-tools #phasePropertyResize{display:none!important}
+ .app .layout.desktop-phase-tools #objectLayerPanel .desktop-phase-sidebar :is(#toggleLayers,#toggleInspector,#toggleLayoutProperties):is(:hover,:focus-visible),
+ .app .layout.desktop-phase-tools #objectLayerPanel .desktop-phase-sidebar>.phase-memo>summary:is(:hover,:focus-visible){background:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+ .app .layout.desktop-phase-tools #objectLayerPanel .desktop-phase-sidebar :is(#toggleLayers,#toggleInspector,#toggleLayoutProperties):is(:hover,:focus-visible) *,
+ .app .layout.desktop-phase-tools #objectLayerPanel .desktop-phase-sidebar>.phase-memo>summary:is(:hover,:focus-visible) *{color:#fff!important;-webkit-text-fill-color:#fff!important}
+ .app .layout.desktop-phase-tools #objectLayerPanel .desktop-phase-sidebar>.content-properties{box-sizing:border-box;border:1px solid #d0d4da!important}
+ .app .layout.desktop-phase-tools #objectLayerPanel .desktop-phase-sidebar #layoutPropertiesPanel{border:0!important;border-radius:0!important}
+ .app .layout.desktop-phase-tools .desktop-phase-sidebar>#layerPropertyResize{
+  display:none!important;flex:0 0 6px;width:100%;height:6px;margin:0;
+  cursor:ns-resize;touch-action:none;border-radius:3px;background:#ddd;
+ }
+ .app .layout.desktop-phase-tools:not(.desktop-tools-two-columns) #objectLayerPanel>.desktop-phase-sidebar.desktop-resize-enabled>#layerPropertyResize{display:block!important}
+ .app .layout.desktop-phase-tools .desktop-phase-sidebar>#layerPropertyResize:is(:hover,:focus-visible,.resizing){background:var(--blue)}
+ .app .layout.desktop-phase-tools:not(.desktop-tools-two-columns) .desktop-phase-sidebar:has(>.is-open)>.layer-list-group:has(#toggleLayers[aria-expanded="true"]){box-sizing:border-box;flex:0 1 clamp(80px,var(--desktop-list-height,45%),max(80px,calc(100% - 240px)))!important}
+ .app .layout.desktop-phase-tools .battle #contentPanel>.page-controls{
+  flex:1 1 0!important;height:auto!important;min-height:0!important;
+ }
+ .app .layout.desktop-phase-tools .battle #contentPanel>.page-controls:has(#toggleBattlePages[aria-expanded="false"]){flex:0 0 36px!important}
+ .app .layout.desktop-phase-tools #toggleBattlePages::after{content:none!important;display:none!important}
+ .app .layout.desktop-phase-tools #toggleBattlePages[aria-controls][aria-expanded]:disabled,
+ .app .layout.desktop-phase-tools #toggleBattlePages[aria-controls][aria-expanded]:disabled:is(:hover,:focus-visible){
+  pointer-events:none!important;opacity:1!important;cursor:default!important;background:#eef2f7!important;
+  color:#33445f!important;-webkit-text-fill-color:#33445f!important;
+ }
+ .app .layout.desktop-phase-tools #toggleBattlePages[aria-controls][aria-expanded]:disabled:is(:hover,:focus-visible) *{
+  color:#33445f!important;-webkit-text-fill-color:#33445f!important;
+ }
+}

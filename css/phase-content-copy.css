@@ -1,0 +1,9 @@
+#copyPageToContent{display:grid;place-items:center}
+ #copyPageToContent svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+ .phase-content-copy-menu{box-sizing:border-box;width:min(320px,calc(100vw - 16px));overflow-y:auto}
+ .phase-content-copy-menu[hidden]{display:none!important}
+ .phase-content-copy-heading{margin:4px 10px;font-size:14px;font-weight:700}
+ .phase-content-copy-hint{margin:0 10px 6px;color:#687386;font-size:12px;line-height:1.5}
+ .phase-content-copy-menu>button{box-sizing:border-box;white-space:normal;overflow-wrap:anywhere;cursor:pointer}
+ .phase-content-copy-menu>button:is(:focus-visible,:active){background:var(--blue);color:#fff;outline:none}
+ @media(pointer:coarse){.phase-content-copy-menu>button{min-height:44px}}

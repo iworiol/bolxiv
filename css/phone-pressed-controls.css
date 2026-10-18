@@ -1,0 +1,30 @@
+@media(max-width:850px){
+ .app>.top :is(#editModeToggle,.phone-menu-toggle){-webkit-tap-highlight-color:transparent;filter:none!important;transition:none!important}
+}
+
+@media(max-width:850px){
+}
+
+@media(max-width:850px){
+ .app .layout :is(.accordion-toggle:not(#toggleObjectList):not(#toggleContent),.phase-memo>summary,#contentSelect,.content-object-pin,.content-history-button,.board-grid-toggle,.phone-content-close,.phone-material-toggle){
+  -webkit-tap-highlight-color:transparent;
+ }
+ body .app .layout.phone-materials-open>.left .accordion-toggle:not(.rail-toggle)[aria-controls][aria-expanded]:not(:active):not(.phone-control-pressed)::after{background:transparent!important;color:#33445f!important;-webkit-text-fill-color:#33445f!important}
+ body .app .layout.phone-materials-open>.left :is(#phoneCategoryFeedback,.accordion-toggle):is(#phoneCategoryFeedback,.accordion-toggle):not(.rail-toggle)[aria-controls][aria-expanded]:is(:active,.phone-control-pressed){transition:none!important;background:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+
+ .app .layout :is(.accordion-toggle:not(#toggleObjectList):not(#toggleContent),.phase-memo>summary,#contentSelect,.content-object-pin,.content-history-button,.board-grid-toggle,.phone-content-close,.phone-material-toggle):not(:disabled):is(:active,.phone-control-pressed),
+ .app .layout #toggleBattlePages#toggleBattlePages:not(:disabled):is(:active,.phone-control-pressed),
+ .app .layout #objectLayerPanel#objectLayerPanel#objectLayerPanel>.property-group>:is(#toggleLayers,#toggleInspector):not(:disabled):is(:active,.phone-control-pressed){
+  background:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important;
+ }
+ body .app .layout.phone-materials-open>.left :is(#phoneCategoryFeedback,.accordion-toggle):is(#phoneCategoryFeedback,.accordion-toggle):not(.rail-toggle)[aria-controls][aria-expanded]:is(:active,.phone-control-pressed) *,
+ body .app .layout.phone-materials-open>.left :is(#phoneCategoryFeedback,.accordion-toggle):is(#phoneCategoryFeedback,.accordion-toggle):not(.rail-toggle)[aria-controls][aria-expanded]:is(:active,.phone-control-pressed)::after{background:transparent!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+ .app .layout :is(.accordion-toggle:not(#toggleObjectList):not(#toggleContent),.phase-memo>summary,#contentSelect):not(:disabled):is(:active,.phone-control-pressed) *,
+ .app .layout :is(.accordion-toggle:not(#toggleObjectList):not(#toggleContent),.phase-memo>summary,#contentSelect):not(:disabled):is(:active,.phone-control-pressed)::after,
+ .app .layout #toggleBattlePages#toggleBattlePages:not(:disabled):is(:active,.phone-control-pressed) *,
+ .app .layout #toggleBattlePages#toggleBattlePages:not(:disabled):is(:active,.phone-control-pressed)::after,
+ .app .layout #objectLayerPanel#objectLayerPanel#objectLayerPanel>.property-group>:is(#toggleLayers,#toggleInspector):not(:disabled):is(:active,.phone-control-pressed) *,
+ .app .layout #objectLayerPanel#objectLayerPanel#objectLayerPanel>.property-group>:is(#toggleLayers,#toggleInspector):not(:disabled):is(:active,.phone-control-pressed)::after{
+  color:#fff!important;-webkit-text-fill-color:#fff!important;
+ }
+}

@@ -1,0 +1,6 @@
+.app .layout .left .tool.active,.app .layout .left .icon-choice.active,.app .layout .left .tool.active .glyph {
+  background:var(--blue)!important;
+  color:#fff!important;
+  -webkit-text-fill-color:#fff!important;
+  filter:none!important;
+}

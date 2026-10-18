@@ -1,0 +1,11 @@
+.right #inspector .property-kind-row>.property-toggles{flex:0 0 auto;margin-left:auto;justify-content:flex-end;gap:4px}
+ .right #inspector .property-icon-toggle{box-sizing:border-box;display:flex!important;align-items:center!important;justify-content:center!important;flex:0 0 26px;width:26px;height:26px;min-width:26px;min-height:26px;padding:0;margin:0}
+ .right #inspector .property-icon-toggle svg{width:18px;height:18px;flex:none;margin:0}
+ .right #inspector .property-icon-toggle{background:#fff!important;border-color:#d5dce6!important;color:#000!important;-webkit-text-fill-color:#000!important}
+ .right #inspector .property-icon-toggle:has(input:checked){background:#eaf3ff!important;border-color:var(--blue)!important}
+ .right #inspector .property-icon-toggle:has(input:not(:disabled)):hover:not(:where(.phone-touch-mode *)){background:#eef2f7!important;border-color:#d5dce6!important;color:#000!important;-webkit-text-fill-color:#000!important}
+ .right #inspector .property-icon-toggle:has(input:checked):hover:not(:where(.phone-touch-mode *)){background:#dceaff!important;border-color:var(--blue)!important}
+ .right #inspector .property-icon-toggle svg,.right #inspector .property-icon-toggle svg *{color:#000!important;stroke:#000!important}
+ @media(max-width:850px){
+  .right #inspector .property-icon-toggle{width:26px;height:26px}
+ }

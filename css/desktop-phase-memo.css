@@ -1,0 +1,68 @@
+.phase-memo{display:none}
+.phase-memo[hidden]{display:none!important}
+.phase-memo .memo-empty{color:#687386}
+@media(max-width:850px){
+ .battle #contentPanel>.phase-memo,.phone-view-content>.phase-memo{
+  display:block;flex:0 0 auto;min-height:36px;margin-top:6px;
+  border:1px solid #d0d4da;border-radius:7px;background:#fff;overflow:hidden;
+ }
+ .battle #contentPanel>.phase-memo{margin-top:0}
+ .phase-memo .phase-memo-phase{display:none}
+ .phase-memo::details-content{display:contents}
+ .phase-memo[open]>.phase-memo-body{flex:1;min-height:0;overflow:hidden}
+ .phase-memo[open]>.phase-memo-body>textarea{flex:1;min-height:0;resize:none}
+ .phase-memo[open] .phase-memo-reading{flex:1;min-height:0;max-height:none;overflow:auto}
+ .board-read-only .phone-view-content>.phase-memo{flex:0 0 auto;margin-top:8px!important;margin-bottom:0!important}
+ .phone-view-content>.phase-memo .phase-memo-preview{display:none}
+ .phone-view-content>.phase-memo .phase-memo-reading{flex:none;height:min(30dvh,180px);max-height:min(30dvh,180px);overflow-y:auto;scrollbar-gutter:stable}
+ .phase-memo>summary{display:flex;align-items:center;gap:8px;min-height:36px;padding:0 11px;list-style:none;background:#eef2f7;color:#33445f;font:inherit;font-size:14px;font-weight:700;cursor:pointer}
+ .phase-memo>summary::-webkit-details-marker{display:none}
+ .phase-memo>summary::after{content:'＋';margin-left:auto;flex:none}
+ .phase-memo[open]>summary::after{content:'−'}
+ .phase-memo-preview{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:400;color:#687386}
+ .phase-memo[open] .phase-memo-preview{display:none}
+ .phase-memo-body{padding:8px;display:flex;flex-direction:column;gap:4px}
+ .phase-memo:not([open])>.phase-memo-body{display:none}
+ .phase-memo-phase{font-size:12px;color:#687386}
+ .phase-memo-body>textarea{box-sizing:border-box;width:100%;min-height:96px;padding:7px;border:1px solid #d5dce6;border-radius:5px;background:#f8fafc;color:#17212c;font:inherit;font-size:14px;line-height:1.5;resize:vertical}
+ .phase-memo-reading{white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px;line-height:1.6;max-height:140px;overflow:auto}
+}
+@media(min-width:851px){
+ .battle #contentPanel>.phase-memo{
+  display:flex;flex-direction:column;flex:0 0 36px;min-height:36px;
+  border:1px solid #d0d4da;border-radius:7px;background:#fff;overflow:hidden;
+ }
+ .battle #contentPanel>.phase-memo[open]{flex:1 1 0;min-height:144px}
+ .phase-memo>summary{
+  display:flex;align-items:center;gap:8px;flex:none;height:35px;min-height:35px;
+  padding:0 11px;list-style:none;background:#eef2f7;color:#33445f;font-family:inherit;font-size:14px;font-weight:700;text-align:left;cursor:pointer;
+ }
+ .phase-memo>summary::-webkit-details-marker{display:none}
+ .phase-memo>summary::after{content:'+';margin-left:auto;flex:none}
+ .phase-memo[open]>summary::after{content:'−'}
+ .phase-memo>summary:is(:hover,:focus-visible){background:#e1e9f4}
+ .phase-memo>summary:focus-visible{outline:2px solid var(--blue);outline-offset:-2px}
+ .phase-memo-caption{flex:none}
+ .phase-memo-preview{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#687386;font-weight:400}
+ .phase-memo[open] .phase-memo-preview{display:none}
+ .phase-memo::details-content{display:contents}
+ .phase-memo-body{display:flex;flex-direction:column;gap:4px;min-height:0;flex:1;padding:8px}
+ .phase-memo:not([open])>.phase-memo-body{display:none}
+ .phase-memo-phase{font-size:12px;color:#687386;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ .phase-memo-body>textarea{
+  width:100%;flex:1;min-height:78px;resize:none;padding:7px;
+  border:1px solid #d5dce6;border-radius:5px;background:#f8fafc;color:#17212c;
+  font:inherit;font-size:14px;line-height:1.5;
+ }
+ .phase-memo-body>textarea:focus{outline:2px solid var(--blue);outline-offset:-1px}
+ .phase-memo-body>textarea[readonly]{background:#fff}
+ .battle #contentPanel:has(>.phase-memo[open])>.page-controls{
+  flex:0 1 var(--layer-panel-height,50%)!important;min-height:120px!important;
+ }
+ .battle #contentPanel:has(>.phase-memo[open])>.page-controls:has(#toggleBattlePages[aria-expanded="false"]){
+  flex:0 0 36px!important;min-height:36px!important;
+ }
+ .battle #contentPanel:has(>.phase-memo[open])>.content-properties{
+  flex:0 0 36px!important;min-height:36px!important;height:36px!important;
+ }
+}

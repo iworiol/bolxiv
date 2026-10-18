@@ -1,0 +1,72 @@
+@media(max-width:850px){
+ .app .layout #contentOptions .content-option-row:not(.content-option-add-row){
+  height:auto;
+  min-height:34px;
+  max-height:none;
+  padding-top:4px;
+  padding-bottom:4px;
+ }
+ .app .layout #contentOptions .content-option-select{
+  height:auto;
+  min-height:26px;
+  max-height:none;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  text-overflow:clip;
+  line-height:1.5;
+ }
+ .app>.layout.phone-content-open .battle #toggleLayoutProperties,
+ .app>.layout.phone-content-open .battle .phase-heading-row>#toggleBattlePages,
+ .board-read-only .app .layout .right .phone-view-content .phase-heading-row>#toggleBattlePages,
+ .app .layout[data-phone-pane="canvas"] #objectLayerPanel#objectLayerPanel#objectLayerPanel>.property-group>#toggleLayers,
+ .app .layout[data-phone-pane="canvas"] #objectLayerPanel#objectLayerPanel#objectLayerPanel>.property-group>#toggleInspector{
+  background:#eef2f7!important;
+  color:#33445f!important;
+  -webkit-text-fill-color:#33445f!important;
+  border-color:#d0d4da!important;
+ }
+ .app .layout.phone-materials-open>.left .accordion-toggle:not(.rail-toggle),
+ .app .layout.phone-materials-open>.left .accordion-toggle:not(.rail-toggle) *,
+ .app .layout.phone-materials-open>.left .accordion-toggle:not(.rail-toggle)::after{
+  background:#eef2f7!important;
+  color:#33445f!important;
+  -webkit-text-fill-color:#33445f!important;
+  border-color:transparent!important;
+ }
+ .app .layout[data-phone-pane="canvas"] #objectLayerPanel#objectLayerPanel#objectLayerPanel>.property-group{
+  border-color:#d0d4da!important;
+ }
+ .app .layout.phone-materials-open>.left :is(.tool,.icon-choice){border-color:transparent!important}
+ .app .layout.phone-materials-open>.left :is(.tool,.icon-choice).active{
+  background:#eaf3ff!important;
+  border-color:var(--blue)!important;
+ }
+ /* Both accordions use the content panel width, never their contents' width. */
+ .app>.layout.phone-content-open .battle #contentPanel>.page-controls,
+ .app>.layout.phone-content-open .battle #contentPanel>.content-properties{
+  box-sizing:border-box!important;
+  width:100%!important;
+  min-width:0!important;
+  max-width:100%!important;
+  margin-left:0!important;
+  margin-right:0!important;
+  align-self:stretch!important;
+ }
+ .app>.layout.phone-content-open .battle #pageListPanel,
+ .app>.layout.phone-content-open .battle #layoutPropertiesPanel{
+  box-sizing:border-box!important;
+  width:100%!important;
+  min-width:0!important;
+  max-width:100%!important;
+  padding:8px!important;
+ }
+ .app>.layout.phone-content-open .battle .page-list-box,
+ .app>.layout.phone-content-open .battle #pages{
+  box-sizing:border-box!important;
+  width:100%!important;
+  min-width:0!important;
+  max-width:100%!important;
+  padding-left:0!important;
+  padding-right:0!important;
+ }
+}
