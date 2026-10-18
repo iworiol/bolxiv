@@ -1,0 +1,10 @@
+.app .layout .left.palette-opening-neutral :is(#toggleBattlePages,#toggleLayoutProperties,#toggleLayers,#toggleInspector,.accordion-toggle)[aria-controls][aria-expanded] {
+  background:var(--accent)!important;
+  color:#fff!important;
+  -webkit-text-fill-color:#fff!important;
+  filter:none!important;
+}
+.app .layout .left.palette-opening-neutral :is(#toggleBattlePages,#toggleLayoutProperties,#toggleLayers,#toggleInspector,.accordion-toggle)[aria-controls][aria-expanded] * {
+  color:#fff!important;
+  -webkit-text-fill-color:#fff!important;
+}

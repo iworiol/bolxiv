@@ -1,0 +1,7 @@
+.stage.field-image:not(.field-image4)::before{background-image:linear-gradient(#71809055 1px,transparent 1px),linear-gradient(90deg,#71809055 1px,transparent 1px)!important;background-size:32px 32px!important;z-index:1}
+ .stage.grid-hidden.field-image:not(.field-image4)::before{background-image:none!important}
+ .field-image-visual{position:absolute;left:50%;top:50%;width:var(--field-width);height:var(--field-height);max-width:none;transform:translate(-50%,-50%);pointer-events:none;z-index:0}
+ .image4-cell>.field-image-tile{position:absolute;left:50%;top:50%;width:var(--image4-tile-width);height:var(--image4-tile-height);transform:translate(-50%,-50%)}
+ .field-image-visual>img,.field-image-tile>img{display:block;width:100%;height:100%;max-width:none}
+ .field-image-tint{position:absolute;inset:0;background:var(--field-image-tint-color,#000000);opacity:var(--field-image-tint-strength,0);pointer-events:none}
+ .stage.field-hidden>.field-image-visual{display:none}

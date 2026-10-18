@@ -1,0 +1,46 @@
+.phone-view-content { display:none; }
+@media(max-width:850px) {
+ .board-read-only .app>.layout[data-phone-pane="canvas"]>.right #objectLayerPanel#objectLayerPanel#objectLayerPanel { position:relative; }
+ .board-read-only .app>.layout[data-phone-pane="canvas"]>.right #objectLayerPanel#objectLayerPanel#objectLayerPanel:has(.phone-view-content #toggleBattlePages[aria-expanded="true"]) {
+   grid-template-rows:auto minmax(0,1fr)!important;
+   align-content:start!important;
+ }
+ .board-read-only .app>.layout[data-phone-pane="canvas"]>.right #objectLayerPanel#objectLayerPanel#objectLayerPanel:has(.phone-view-content #toggleBattlePages[aria-expanded="true"])>.object-layout-rect {
+   height:auto!important;
+   aspect-ratio:1!important;
+   align-self:start!important;
+ }
+ .board-read-only .app>.layout[data-phone-pane="canvas"]>.right #objectLayerPanel#objectLayerPanel#objectLayerPanel:has(.phone-view-content #toggleBattlePages[aria-expanded="false"]) {
+   grid-template-rows:minmax(0,1fr) 80px!important;
+   align-content:stretch!important;
+   overflow:hidden!important;
+ }
+ .board-read-only .app>.layout[data-phone-pane="canvas"]>.right #objectLayerPanel#objectLayerPanel#objectLayerPanel:has(.phone-view-content #toggleBattlePages[aria-expanded="false"])>.object-layout-rect {
+   height:100%!important;
+   min-height:0!important;
+   aspect-ratio:auto!important;
+   align-self:stretch!important;
+   overflow:auto!important;
+ }
+ .board-read-only .phone-view-content { display:flex; flex-direction:column; position:absolute; grid-column:auto; grid-row:auto; top:0; left:6px; right:6px; min-width:0; min-height:0; z-index:10020; background:#fff; }
+ .phone-view-content .content-select-row { margin:0; }
+ .phone-view-content .page-controls { display:flex; flex-direction:column; margin-top:8px!important; height:auto!important; min-height:36px!important; }
+ .phone-view-content .phase-heading-row { flex:none; }
+ .phone-view-content>.content-select-row { flex:none; }
+ .phone-view-content:has(#toggleBattlePages[aria-expanded="false"]) .content-options { top:auto; bottom:calc(100% + 3px); }
+ .board-read-only .app .layout .right .phone-view-content>.page-controls:has(#toggleBattlePages[aria-expanded="true"]) { flex:1 1 0!important; height:auto!important; min-height:36px!important; margin-bottom:0!important; }
+ .board-read-only .app .layout .right .phone-view-content>.page-controls:has(#toggleBattlePages[aria-expanded="false"]) { flex:0 0 36px!important; margin-bottom:0!important; }
+ .phone-view-content #toggleBattlePages { width:100%; min-height:36px; }
+ .board-read-only .app .layout .right .phone-view-content .phase-heading-row>#toggleBattlePages {
+   background:var(--accent)!important;
+   color:#fff!important;
+   -webkit-text-fill-color:#fff!important;
+ }
+ .board-read-only .app .layout .right .phone-view-content .phase-heading-row>#toggleBattlePages:is(:hover:not(:where(.phone-touch-mode *)),:focus-visible) { background:var(--blue)!important; }
+ .phone-view-content .page-list-panel:not(.hidden):not([hidden]) { flex:1 1 0!important; height:auto!important; min-height:0!important; max-height:none!important; overflow:hidden!important; }
+ .phone-view-content .page-list-box { flex:1 1 0!important; height:auto!important; min-height:0!important; overflow:hidden!important; }
+ .phone-view-content .page-tabs { flex:1 1 0!important; height:auto!important; min-height:0!important; max-height:none!important; overflow-y:auto!important; }
+ .board-read-only .app>.layout[data-phone-pane="canvas"]>.right:has(.phone-view-content .content-options:not([hidden])),
+ .board-read-only .app>.layout[data-phone-pane="canvas"]>.right .layer-group:has(.phone-view-content .content-options:not([hidden])),
+ .board-read-only .app>.layout[data-phone-pane="canvas"]>.right #objectLayerPanel#objectLayerPanel#objectLayerPanel:has(.phone-view-content .content-options:not([hidden])) { overflow:visible!important; }
+}

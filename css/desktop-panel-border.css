@@ -1,0 +1,10 @@
+@media(min-width:851px){
+ .app>.layout :is(.battle .content-group,.battle #contentPanel>.page-controls,.battle #contentPanel>.content-properties,.left .accordion-group,.right .right-group,.right #objectLayerPanel>.property-group){
+  border-color:#d0d4da!important;
+ }
+}
+@media(max-width:850px){
+ .app>.layout :is(.battle .content-group,.battle #contentPanel>.page-controls,.battle #contentPanel>.content-properties,.left .accordion-group,.right .right-group,.right #objectLayerPanel>.property-group,.phone-view-content>.page-controls){
+  border-color:#d0d4da!important;
+ }
+}

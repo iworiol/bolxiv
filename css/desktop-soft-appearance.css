@@ -1,0 +1,141 @@
+.app .layout :is(.battle,.phone-view-content) .page-controls>.phase-heading-row{
+  border:0!important;
+ }
+ .app>.top,.app>.layout>.battle,.app>.layout>.left{background:#f4f6f9}
+ .app .layout>.left:not(.palette-hover-open):not(:focus-within):not(.pinned) .accordion-group{
+  border:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+ }
+ .app .layout>.left:not(.palette-hover-open):not(:focus-within):not(.pinned) .accordion-group>.accordion-toggle:not(.rail-toggle)[aria-controls][aria-expanded]{
+  border-color:transparent!important;
+  background:#eef2f7!important;
+ }
+ .app .layout>.left:not(.palette-hover-open):not(:focus-within):not(.pinned) .accordion-group>.accordion-toggle:not(.rail-toggle)[aria-controls][aria-expanded]:hover:not(:where(.phone-touch-mode *)){
+  background:#e1e9f4!important;
+ }
+ .app>.layout :is(#toggleBattlePages,#toggleLayoutProperties,#toggleLayers,#toggleInspector),
+ .app>.layout>.left:is(.pinned,.palette-hover-open,:focus-within) .accordion-toggle:not(.rail-toggle){
+  background:#eef2f7!important;
+  border-color:transparent!important;
+  color:#33445f!important;
+  -webkit-text-fill-color:#33445f!important;
+ }
+ .app>.layout :is(#toggleBattlePages,#toggleLayoutProperties,#toggleLayers,#toggleInspector) *,
+ .app>.layout>.left:is(.pinned,.palette-hover-open,:focus-within) .accordion-toggle:not(.rail-toggle) *,
+ .app>.layout>.left:is(.pinned,.palette-hover-open,:focus-within) .accordion-toggle:not(.rail-toggle)::after{
+  color:#33445f!important;
+  -webkit-text-fill-color:#33445f!important;
+ }
+ .app>.layout :is(#toggleBattlePages,#toggleLayoutProperties,#toggleLayers,#toggleInspector):is(:hover:not(:where(.phone-touch-mode *)),:focus-visible),
+ .app>.layout>.left:is(.pinned,.palette-hover-open,:focus-within) .accordion-toggle:not(.rail-toggle):is(:hover:not(:where(.phone-touch-mode *)),:focus-visible){
+  background:#e1e9f4!important;
+ }
+ .app>.layout #contentOptions .content-option-row:not(.content-option-add-row),
+ .app>.layout #objectList .object-row{
+  border-color:transparent!important;
+  background:transparent!important;
+  border-radius:6px;
+  min-height:34px;
+  margin-top:2px;
+  margin-bottom:2px;
+ }
+ .app>.layout #objectList .object-row{
+  height:34px!important;
+  min-height:34px!important;
+  max-height:34px!important;
+ }
+ .app .layout :is(.battle,.phone-view-content) #pages .page-tab{
+  box-sizing:border-box;
+  min-height:34px!important;
+ }
+ .app .layout :is(#pages,#objectList){row-gap:4px!important}
+ .app>.layout #contentOptions .content-option-row.active,
+ .app>.layout #objectList .object-row.selected{
+  background:#eaf3ff!important;
+  border-left-color:var(--blue)!important;
+ }
+ .app>.layout #objectList .object-row.selected:not(.item-just-moved){box-shadow:inset 2px 0 0 var(--blue)!important}
+ .app>.layout #contentOptions .content-option-row:hover:not(:where(.phone-touch-mode *)),
+ .app>.layout #objectList .object-row:hover:not(:where(.phone-touch-mode *)){background:#f0f4fa!important}
+ .app>.layout #contentOptions .content-option-row.active:hover:not(:where(.phone-touch-mode *)),
+ .app>.layout #objectList .object-row.selected:hover:not(:where(.phone-touch-mode *)){background:#dceaff!important}
+ .app>.layout #contentOptions .content-option-row .content-option-select{
+  background:transparent!important;
+ }
+ .app>.layout #contentOptions .content-option-row:hover:not(:where(.phone-touch-mode *)) .content-row-action:not(:hover){
+  background:transparent!important;
+  border-color:transparent!important;
+ }
+ .app>.layout #contentOptions .content-option-row,
+ .app>.layout #contentOptions .content-option-row:hover:not(:where(.phone-touch-mode *)) *,
+ .app>.layout #objectList .object-row:hover:not(:where(.phone-touch-mode *)),
+ .app>.layout #objectList .object-row:hover:not(:where(.phone-touch-mode *)) *{
+  color:#17212c!important;
+  -webkit-text-fill-color:#17212c!important;
+ }
+ .app>.layout #objectList .object-name{
+  background:transparent!important;
+  border-color:transparent!important;
+ }
+ .app>.layout #objectList .object-toggle{
+  border-color:#d5dce6!important;
+  background:#fff!important;
+ }
+ .app>.layout #objectList .object-toggle.active{
+  background:#eaf3ff!important;
+  border-color:var(--blue)!important;
+ }
+ .app>.layout #objectList .object-toggle:hover:not(:where(.phone-touch-mode *)){
+  background:#eef2f7!important;
+  border-color:#d5dce6!important;
+ }
+ .app>.layout #objectList .object-toggle.active:hover:not(:where(.phone-touch-mode *)){
+  background:#dceaff!important;
+  border-color:var(--blue)!important;
+ }
+ .app>.layout :is(.battle,.phone-view-content) #pages .page-tab:hover:not(:where(.phone-touch-mode *)) .page-tab-x:not(:hover),
+ .app>.layout #objectList .object-row:hover:not(:where(.phone-touch-mode *)) .object-delete:not(:hover){
+  background:transparent!important;
+  border-color:transparent!important;
+  color:#17212c!important;
+  -webkit-text-fill-color:#17212c!important;
+ }
+ .app>.layout #objectList .object-delete:hover:not(:where(.phone-touch-mode *)),
+ .app>.layout :is(.battle,.phone-view-content) #pages .page-tab .page-tab-x:hover:not(:where(.phone-touch-mode *)),
+ .app>.layout #contentOptions .content-row-delete:hover:not(:where(.phone-touch-mode *)){
+  background:#feecec!important;
+  color:#b42318!important;
+  -webkit-text-fill-color:#b42318!important;
+  border-color:transparent!important;
+ }
+ .app>.layout :is(#layoutPropertiesPanel,#inspector) .field{margin-bottom:0}
+ .app>.layout :is(#layoutPropertiesPanel,#inspector) .field>label:not(.property-icon-toggle){margin-bottom:1px}
+ .app>.layout :is(#layoutPropertiesPanel,#inspector) :is(select,textarea,input[type="number"],input[type="text"],.color-trigger),
+ .app>.layout #contentSelect{
+  border-color:#d5dce6!important;
+  background:#f8fafc!important;
+ }
+ .app>.layout #contentSelect[aria-expanded="false"]{background:#eef2f7!important}
+ .app>.layout #contentSelect[aria-expanded="false"]:is(:hover:not(:where(.phone-touch-mode *)),:focus-visible){background:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+ .app>.layout #contentSelect[aria-expanded="false"]:is(:hover:not(:where(.phone-touch-mode *)),:focus-visible)::after{color:#fff!important;-webkit-text-fill-color:#fff!important}
+ .app>.layout :is(#layoutPropertiesPanel,#inspector) :is(select,textarea,input[type="number"],input[type="text"],.color-trigger):focus-visible,
+ .app>.layout #contentSelect:focus-visible{
+  outline:2px solid var(--blue)!important;
+  outline-offset:1px;
+ }
+ .app>.layout>.left:is(.pinned,.palette-hover-open,:focus-within) :is(.tool,.icon-choice){
+  border-color:transparent!important;
+  border-radius:6px;
+ }
+ .app>.layout>.left:is(.pinned,.palette-hover-open,:focus-within) :is(.tool,.icon-choice):hover:not(:where(.phone-touch-mode *)){background:#eaf3ff!important}
+ .app>.layout>.left:is(.pinned,.palette-hover-open,:focus-within) :is(.tool,.icon-choice).active{
+  background:#eaf3ff!important;
+  border-color:var(--blue)!important;
+ }
+ .app>.layout>.left:is(.pinned,.palette-hover-open,:focus-within) :is(.tool,.icon-choice):focus-visible{
+  outline:2px solid var(--blue)!important;
+  outline-offset:-2px;
+ }
+ .app>.layout #contentOptions .content-option-row:focus-within,
+ .app>.layout #objectList .object-row:focus-visible{outline:2px solid var(--blue);outline-offset:-2px}

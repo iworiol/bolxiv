@@ -1,0 +1,3 @@
+.phase-item-menu{box-sizing:border-box;max-width:calc(100vw - 16px);overflow-y:auto}
+ .phase-item-menu>button:focus-visible,.canvas-context-menu>button:is(:focus-visible,:active){background:var(--blue);color:#fff;outline:none}
+ @media(pointer:coarse){.phase-item-menu>button,.canvas-context-menu>button{min-height:44px}}

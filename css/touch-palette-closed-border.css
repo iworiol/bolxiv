@@ -1,0 +1,15 @@
+@media(hover:none) {
+  .app .layout>.left:not(.pinned):not(:focus-within) .accordion-group {
+    border:0!important;
+    border-radius:0!important;
+    overflow:visible!important;
+    background:transparent!important;
+    box-shadow:none!important;
+  }
+  .app .layout>.left:not(.pinned):not(:focus-within) .accordion-group>.accordion-toggle:not(.rail-toggle) {
+    box-sizing:border-box!important;
+    border:1px solid #999!important;
+    border-radius:7px!important;
+    box-shadow:none!important;
+  }
+}

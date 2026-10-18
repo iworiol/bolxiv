@@ -1,0 +1,26 @@
+.phone-object-tabs{display:none}
+@media(max-width:850px){
+ .app .layout[data-phone-pane="canvas"] #objectLayerPanel#objectLayerPanel#objectLayerPanel.phone-object-tabbed>.property-group{grid-column:1/3!important;grid-row:2!important;width:100%!important}
+ .app .layout[data-phone-pane="canvas"] #objectLayerPanel#objectLayerPanel#objectLayerPanel.phone-object-tabbed[data-object-tab="list"]>.property-group:not(.layer-list-group),
+ .app .layout[data-phone-pane="canvas"] #objectLayerPanel#objectLayerPanel#objectLayerPanel.phone-object-tabbed[data-object-tab="properties"]>.layer-list-group{display:none!important}
+ .app .layout[data-phone-pane="canvas"] #objectLayerPanel#objectLayerPanel#objectLayerPanel#objectLayerPanel.phone-object-tabbed :is(#toggleLayers,#toggleInspector){display:none!important}
+ .phone-object-tabbed>.property-group>.phone-object-tabs{display:flex;align-items:center;flex:0 0 auto;gap:6px;min-height:36px;padding:3px 6px 3px 11px;background:#eef2f7;color:#33445f}
+ .phone-object-tabs-title{flex:1;min-width:0;font-size:14px;overflow-wrap:anywhere;line-height:1.4}
+ .phone-object-tabs button{display:grid;place-items:center;flex:none;width:26px;height:26px;min-height:26px;border:1px solid #d0d4da;border-radius:6px;background:#eef2f7;color:#33445f;padding:3px;font-size:14px}
+ .phone-object-tabs button svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+ .app .layout .phone-object-tabs .phone-object-collapse{border:0!important;background:#eef2f7!important;color:#33445f!important;-webkit-text-fill-color:#33445f!important;box-shadow:none!important}
+ .app .layout .phone-object-tabs button{background:#eef2f7!important;color:#33445f!important;-webkit-text-fill-color:#33445f!important}
+ .app .layout .phone-object-tabs button:active{background:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+ .phone-object-tabs-title{cursor:pointer;-webkit-tap-highlight-color:transparent}
+ body .app .layout .phone-object-tabs:has(:is(.phone-object-tabs-title,.phone-object-collapse):is(:active,.phone-control-pressed)){background:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+ body .app .layout .phone-object-tabs,body .app .layout .phone-object-tabs button,body .app .layout .phone-object-tabs button:is(:hover,:focus,:focus-visible,:active,.phone-control-pressed){background:#eef2f7!important;color:#33445f!important;-webkit-text-fill-color:#33445f!important;-webkit-tap-highlight-color:transparent}
+ body .app .layout .phone-object-tabs *,body .app .layout .phone-object-tabs button:is(:active,.phone-control-pressed) *{color:#33445f!important;-webkit-text-fill-color:#33445f!important}
+ body .app .layout .phone-object-tabs:has(:is(.phone-object-tabs-title,.phone-object-collapse):is(:active,.phone-control-pressed)) :is(.phone-object-tabs-title,.phone-object-tabs-title *,.phone-object-collapse){background:transparent!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+ body .app .layout .phone-object-tabs button:is(:active,.phone-control-pressed){background:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+
+ .app .layout[data-phone-pane="canvas"] #objectLayerPanel#objectLayerPanel#objectLayerPanel.phone-object-tabbed[data-object-expanded="false"]{grid-template-rows:minmax(0,1fr) 38px!important;align-content:stretch!important}
+ .app .layout[data-phone-pane="canvas"] #objectLayerPanel#objectLayerPanel#objectLayerPanel.phone-object-tabbed[data-object-expanded="false"]>.property-group{box-sizing:border-box!important;height:38px!important;min-height:38px!important;max-height:38px!important;border:1px solid #d0d4da!important;padding:0!important;gap:0!important;background:#eef2f7!important;box-shadow:none!important}
+
+ .phone-object-tabbed[data-object-expanded="false"]>.property-group>.phone-object-tabs{box-sizing:border-box;flex:1 0 0;min-height:0;height:100%;border:0;box-shadow:none}
+ .phone-object-tabs .phone-object-collapse{width:26px;padding:3px}
+}

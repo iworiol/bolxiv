@@ -1,0 +1,4 @@
+.app .layout .phase-heading-actions>#copyPageToContent{display:none!important}
+#copyPage{position:relative}#phaseCopyMenu button[hidden]{display:none!important}
+#copyPage .phase-copy-caret{position:absolute;right:0;bottom:1px;font-size:9px;line-height:1;pointer-events:none}
+@media(max-width:850px){#phaseCopyMenu button{min-height:44px}}

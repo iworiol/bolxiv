@@ -1,0 +1,22 @@
+@media(min-width:851px){
+  .app>.layout>.left:is(.palette-hover-open,:focus-within,.pinned),
+  .app>.layout>.left .accordion-panel{scrollbar-gutter:stable}
+ }
+ #phoneIconHelp .phone-icon-help-guide{background:#eef2f7!important;color:#33445f!important;-webkit-text-fill-color:#33445f!important;border:1px solid #d0d4da!important}
+ #phoneIconHelp .phone-icon-help-guide:is(:hover,:focus-visible,:active){background:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+ .phone-icon-help-contents{display:grid;gap:4px;padding:10px;margin-bottom:14px;border:1px solid #d0d4da;border-radius:6px;background:#f8fafc}
+ .phone-icon-help-contents>p{margin:0 0 4px;line-height:1.5}
+ .phone-icon-help-contents>a{display:block;padding:6px 0;color:#334f86!important;-webkit-text-fill-color:#334f86!important;text-decoration:underline;text-underline-offset:3px}
+ .phone-icon-help-section{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:14px 0 4px;padding-top:10px;border-top:1px solid #d0d4da;font-size:14px;color:#33445f}
+ #phoneIconHelp .phone-icon-help-back{flex:none;min-height:30px;padding:3px 6px;border:1px solid #d0d4da!important;border-radius:5px;background:#eef2f7!important;color:#33445f!important;-webkit-text-fill-color:#33445f!important;font:inherit;font-size:14px;font-weight:400;cursor:pointer}
+ .phone-icon-help-section:first-child{margin-top:0;padding-top:0;border-top:0}
+ .help-contents{padding:12px;margin-bottom:18px;border:1px solid #d0d4da;border-radius:7px;background:#f8fafc}
+ .help-contents-title{margin:0 0 8px;font-size:14px;font-weight:700}
+ .help-contents ul{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 16px;margin:0;padding:0;list-style:none}
+ .help-contents a{display:block;padding:5px 0;color:#334f86;text-decoration:underline;text-underline-offset:3px;overflow-wrap:anywhere}
+ .operation-guide .help-section-heading{display:flex;align-items:center;justify-content:space-between;gap:10px}
+ .operation-guide .help-section-heading>span{min-width:0}
+ .operation-guide-body>.help-section-separator{height:0;margin:22px 0;border:0;border-top:1px solid #d0d4da}
+ .operation-guide .help-back-to-contents{flex:none;padding:4px 8px;border:1px solid #d0d4da;border-radius:5px;background:#eef2f7;color:#33445f;font:inherit;font-size:14px;font-weight:400;cursor:pointer}
+ .operation-guide .help-back-to-contents:is(:hover,:focus-visible,:active){background:var(--blue)!important;color:#fff!important}
+ @media(max-width:850px){.help-contents ul{grid-template-columns:minmax(0,1fr)}.help-contents a{padding:7px 0}.operation-guide .help-back-to-contents{min-height:32px}}

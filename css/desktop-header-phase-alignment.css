@@ -1,0 +1,16 @@
+@media(min-width:851px){
+ .app>.top{display:grid!important;grid-template-columns:minmax(max-content,var(--phase-pane-header-left,336px)) auto minmax(0,1fr);column-gap:0;padding-left:0!important;padding-right:var(--phase-pane-header-right,22px);position:relative;overflow:visible;z-index:10050}
+ .app>.top>.brand{min-width:0;max-width:100%;margin-left:16px;margin-right:8px;overflow:hidden}
+ .app>.top>.header-mode-status{grid-column:2;grid-row:1;justify-self:start;margin:0}
+ .app>.top>.phone-menu-toggle{display:flex;align-items:center;justify-content:center;font-size:14px;gap:7px;grid-column:3;grid-row:1;justify-self:end;margin-left:12px;padding:0 12px;box-sizing:border-box;height:34px;min-height:34px;border:1px solid #999;border-radius:6px;background:#fff;color:#111;cursor:pointer}
+ .app>.top>.phone-menu-toggle svg{width:20px;height:20px}
+ .app>.top>.phone-menu-toggle:is(:hover:not(:where(.phone-touch-mode *)),:focus-visible),.app>.top.phone-menu-open>.phone-menu-toggle{background:var(--blue);border-color:var(--blue);color:#fff;-webkit-text-fill-color:#fff;filter:none}
+ .app>.top>.actions{display:none!important}
+ .app>.top.phone-menu-open>.actions{display:flex!important;position:absolute;left:auto;right:var(--header-menu-right,22px);top:calc(100% + 4px);width:260px;max-height:calc(100dvh - 80px);overflow:auto;flex-direction:column;gap:6px;margin:0;padding:8px;background:#fff;border:1px solid #999;border-radius:8px;box-shadow:0 6px 20px #0003}
+ .app>.top.phone-menu-open>.actions>.btn{display:block!important;width:100%!important;min-width:0!important;min-height:40px!important;flex:none!important;text-align:left}
+ .app>.top.phone-menu-open>.actions>#operationGuideBtn{text-align:center!important}
+ #jsonExportMenu,#jsonImportMenu,#helpMenu{z-index:10060}
+}
+@media(max-width:850px){
+ .phone-menu-toggle>.header-menu-label{display:none}
+}

@@ -1,0 +1,45 @@
+@media(hover:none) {
+  .app .layout>.left:not(.pinned):not(:focus-within) {
+    width:56px!important;
+    max-width:56px!important;
+    padding:17px 7px!important;
+    box-shadow:none!important;
+    overflow:visible!important;
+  }
+  .app .layout>.left:not(.pinned):not(:focus-within) .accordion-panel {
+    display:none!important;
+  }
+  .app .layout>.left:not(.pinned):not(:focus-within) .accordion-toggle:not(.rail-toggle) {
+    width:40px!important;
+    min-width:40px!important;
+    max-width:40px!important;
+    height:40px!important;
+    min-height:40px!important;
+    max-height:40px!important;
+    box-sizing:border-box!important;
+    padding:0!important;
+    display:flex!important;
+    justify-content:center!important;
+    align-items:center!important;
+    gap:0!important;
+    font-size:0!important;
+    background:#fff!important;
+    color:#000!important;
+    -webkit-text-fill-color:#000!important;
+    transition:none!important;
+  }
+  .app .layout>.left:not(.pinned):not(:focus-within) .accordion-toggle::after,.app .layout>.left:not(.pinned):not(:focus-within) #categoryModeToggle {
+    display:none!important;
+  }
+  .app .layout>.left:not(.pinned):not(:focus-within) .palette-category-icon {
+    display:block!important;
+    visibility:visible!important;
+    opacity:1!important;
+    flex:none!important;
+    width:24px!important;
+    height:24px!important;
+    margin:0!important;
+    color:#000!important;
+    -webkit-text-fill-color:#000!important;
+  }
+}

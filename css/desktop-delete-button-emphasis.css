@@ -1,0 +1,14 @@
+@media(min-width:851px){
+ .app .layout :is(.battle,.phone-view-content) #pages .page-tab:not(:hover):not(:focus-within) .page-tab-x,
+ .app .layout #contentOptions .content-option-row:not(:hover):not(:focus-within) .content-row-delete,
+ .app .layout #objectList .object-row:not(:hover):not(:focus-within) .object-delete{
+  color:#8b94a3!important;
+  -webkit-text-fill-color:#8b94a3!important;
+ }
+ .app .layout :is(.battle,.phone-view-content) #pages .page-tab:focus-within .page-tab-x:not(:hover),
+ .app .layout #contentOptions .content-option-row:is(:hover,:focus-within) .content-row-delete:not(:hover),
+ .app .layout #objectList .object-row:focus-within .object-delete:not(:hover){
+  color:#17212c!important;
+  -webkit-text-fill-color:#17212c!important;
+ }
+}

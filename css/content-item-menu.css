@@ -1,0 +1,3 @@
+@media(max-width:850px){#contentOptions .content-option-select{-webkit-user-select:none!important;user-select:none!important;-webkit-touch-callout:none}}
+ .content-item-menu>button:focus-visible{background:var(--blue);color:#fff;outline:none}
+ @media(pointer:coarse){.content-item-menu>button{min-height:44px}}
