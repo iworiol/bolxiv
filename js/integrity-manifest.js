@@ -3,7 +3,7 @@ window.BolxivIntegrity = {
   "schema": 1,
   "release": "0.5.0",
   "files": {
-    "bolxiv.js": "sha384-QS6tQ7xqNlMeDOeQoP1Nqfb8CJRi/u1Org3CJ7GxkZlIqf9pq8yH+bSoCvOhqvfC",
+    "bolxiv.js": "sha384-v2+c2gR1zOFutkwC4AYnin1kwy16XQ8sXTdTJ/Kdb4XMwVEI9eR4PVarPMqLZKYa",
     "css/about-tool.css": "sha384-kVNiBRjEshdKY3CAyCqgt/ZwNwqhUw+aqbN0bE2QhwlYL5ulpKpw8gUe3Tfbzjhd",
     "css/base.css": "sha384-D/AmuAFDyUHZEMmRu/O5Q++nnvqrKlIm3ol8+PSKRnJJwxep6BoZRfvgliYlI7h5",
     "css/board-zoom-menu.css": "sha384-LYZvouc4eZS+q9pbi7qxbsSLEPSAAwjl4PjEqmX1MoSQJYgQn3gWHES74u6OA6by",
@@ -79,7 +79,7 @@ window.BolxivIntegrity = {
     "js/help/pc-tutorial.js": "sha384-BIr8Q7YQw8DOaHo/OUozg8DQHV8vc04NzQbWoybLwDNojuL0aRbTbviJSomfZMrP",
     "js/history.js": "sha384-CtoXJ0P30ECSG6Jczbyd63aotWE11VjJ9ZjypmgR2m31+eLqWwdoiYzEg4BfE+im",
     "js/images.js": "sha384-f16fnAVZPpxtFY1TJ8T8XXxxjt0/VXOJtTvsNXLWiRoHOEtJV/I9C/tDIy5MtfFw",
-    "js/integrity-loader.js": "sha384-d4G80OouMzlYN9P+4bDZnheNe8QiD4WrKngWCvJQD4CaGJ7Gvh1pTP+nE+hHdTHe",
+    "js/integrity-loader.js": "sha384-7J9IDunbvPMLSjSXKakStyznFjwF/p09DGB83TU+bIDgMEBW6+s/VjVQ6PFzckDH",
     "js/load-order.js": "sha384-r38GHmkr3kSJLZTEo9rgqCCpFb+MZHN2vLvokLXfLsiZvhJ01jjd0SH7jW1o4P+I",
     "js/mobile/mobile-content-panel.js": "sha384-HUBS+kiA6NkEUCAsO9SeUWJ42WlScrbmGJgpNrgaLr2QdjM+PmS/cehFz9RGh/Of",
     "js/mobile/mobile-delete-dialog.js": "sha384-uCdrm9uTgHaD9fWMdqRKqp1i6YBoRS9hu8U9k708ahfXfajUZI0ZWR2nWKq+/cv9",
