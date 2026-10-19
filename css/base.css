@@ -8526,3 +8526,6 @@ body:not(.board-read-only) .page-list-box>.page-tab-actions {
 #aoeTools>[data-aoe-icon="divebomb"],#aoeTools>[data-aoe-icon="tower1"] {
   grid-column:1;
 }
+
+/* The preview carries navigation with the pane; no animation-frame geometry reads. */
+@media(max-width:850px){.phone-content-preview>.phone-phase-navigation{position:absolute;left:8px;right:8px;bottom:2px;top:auto;width:auto;z-index:1}}

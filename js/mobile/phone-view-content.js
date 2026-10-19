@@ -9,13 +9,13 @@
  function size(){
   if(!active)return;
   const note=host.querySelector('.phase-memo'),noteHeight=note&&!note.hidden?note.getBoundingClientRect().height+8:0;
-  const closed=phaseToggle.getAttribute('aria-expanded')==='false',rowHeight=row.getBoundingClientRect().height,closedHeight=rowHeight+8+36+noteHeight;
+  const closed=phaseToggle.getAttribute('aria-expanded')==='false',rowHeight=row.getBoundingClientRect().height,metrics=phoneReaderLayoutMetrics(panel,noteHeight,rowHeight),closedHeight=metrics.closedControlsHeight;
   if(closed){
    panel.style.setProperty('--phone-reader-controls-height',closedHeight+'px');
    return;
   }
-  const reserved=230+noteHeight;
-  const height=phoneCanvasDisplayHeight(panel)+'px';
+  const reserved=metrics.controlsMinHeight;
+  const height=metrics.canvasHeight+'px';
   if(panel.style.getPropertyValue('--phone-reader-canvas-height')!==height)panel.style.setProperty('--phone-reader-canvas-height',height);
   if(panel.style.getPropertyValue('--phone-reader-controls-height')!==reserved+'px')panel.style.setProperty('--phone-reader-controls-height',reserved+'px');
  }

@@ -2,6 +2,14 @@
  .app .layout .phase-heading-actions>:is(#addPage,#copyPage,#copyPageToContent,#addPhaseGroup){display:grid;place-items:center;box-sizing:border-box;flex:none;width:26px!important;min-width:26px!important;height:26px!important;min-height:26px!important;margin:0!important;padding:3px!important;border:1px solid #d0d4da!important;border-radius:5px;background:#eef2f7!important;color:#33445f!important;-webkit-text-fill-color:#33445f!important;font-size:18px;line-height:1;filter:none!important;transition:none!important;-webkit-tap-highlight-color:transparent;}
  .app .layout .phase-heading-actions>:is(#addPage,#copyPage,#copyPageToContent,#addPhaseGroup):enabled:is(:hover:not(:where(.phone-touch-mode *)),:active,:focus-visible,.phone-control-pressed){background:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important;filter:none!important}
  .app .layout .page-tab-actions:has(>#phaseComparisonStatus[hidden]):not(:has(>#addPage)){display:none!important}
- .board-read-only .phase-heading-actions{display:none!important}
+ @media(max-width:850px){.board-read-only .phase-heading-actions{display:none!important}}
  .app .layout :is(#undo,#redo,#contentObjectPin,#addPage,#copyPage,#copyPageToContent){display:grid!important;place-items:center!important;box-sizing:border-box;padding:0!important;line-height:1}
  .app .layout :is(#undo,#redo,#contentObjectPin,#addPage,#copyPage,#copyPageToContent)>svg{display:block;width:18px;height:18px;margin:0;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+
+@media(min-width:851px){
+ .board-read-only .phase-heading-actions{display:flex!important}
+ .board-read-only .phase-heading-actions>:is(#addPage,#copyPage,#copyPageToContent,#addPhaseGroup):disabled{opacity:.45;cursor:not-allowed}
+}
+@media(max-width:850px){
+ .board-read-only .app .layout :is(#addContent,.content-option-add,.content-list-history-button,.content-row-action,#addPage,#copyPage,#copyPageToContent,#addPhaseGroup,.page-tab-edit,.page-tab-x,.phone-row-actions,.phase-group-menu-trigger,#clearBtn){display:none!important}
+}

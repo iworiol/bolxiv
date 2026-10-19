@@ -1,8 +1,8 @@
-function phoneCanvasDisplayHeight(panel){
+function phoneCanvasDisplayHeight(panel,zoom=boardDisplayZoom,reserved=230){
  const style=getComputedStyle(panel),pixels=value=>parseFloat(value)||0;
- const remaining=Math.max(0,panel.clientHeight-pixels(style.paddingTop)-pixels(style.paddingBottom)-pixels(style.rowGap)-230);
+ const remaining=Math.max(0,panel.clientHeight-pixels(style.paddingTop)-pixels(style.paddingBottom)-pixels(style.rowGap)-reserved);
  const surface=document.querySelector('.phase-comparison-grid')||document.getElementById('stage');
- const desired=(surface.offsetHeight||640)*boardDisplayZoom/100+60;
+ const desired=(surface.offsetHeight||640)*zoom/100+60;
  return Math.min(remaining,desired);
 }
 (()=>{
@@ -17,3 +17,5 @@ function phoneCanvasDisplayHeight(panel){
  mobile.addEventListener('change',update);
  update();
 })();
+
+function phoneReaderLayoutMetrics(panel,footerHeight,rowHeight,zoom=boardDisplayZoom){const controlsMinHeight=230+footerHeight;return {canvasHeight:phoneCanvasDisplayHeight(panel,zoom,controlsMinHeight),controlsMinHeight,closedControlsHeight:rowHeight+8+38+footerHeight}}

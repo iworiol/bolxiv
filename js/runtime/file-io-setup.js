@@ -11,7 +11,7 @@ jsonExportMenu.setAttribute('role','menu');
 
 jsonExportMenu.hidden=true;
 
-jsonExportMenu.innerHTML='<div class="export-menu-label" role="presentation">再編集・バックアップ用</div><button type="button" role="menuitem" data-json-scope="all">編集データを保存（全コンテンツ・JSON）</button><div class="json-backup-status" data-backup-status="all" role="note"></div><button type="button" role="menuitem" data-json-scope="selected">編集データを保存（選択中コンテンツ・JSON）</button><div class="json-backup-status" data-backup-status="selected" role="note"></div><div class="export-menu-separator" role="separator"></div><div class="export-menu-label" role="presentation">閲覧・画像共有用</div><button type="button" role="menuitem" data-png-scale="1">PNG生成（1倍・640 × 640 px）</button><button type="button" role="menuitem" data-png-scale="2">PNG生成（2倍・1280 × 1280 px）</button>';
+jsonExportMenu.innerHTML='<div class="export-menu-label" role="presentation">再編集・バックアップ用</div><button type="button" role="menuitem" data-json-scope="all">編集データを保存（全コンテンツ・JSON）</button><div class="json-backup-status" data-backup-status="all" role="note"></div><button type="button" role="menuitem" data-json-scope="selected">編集データを保存（選択中コンテンツ・JSON）</button><div class="json-backup-status" data-backup-status="selected" role="note"></div><div class="export-menu-separator" role="separator"></div><div class="export-menu-label" role="presentation">閲覧・画像共有用</div><button type="button" role="menuitem" data-png-scale="1">PNG生成</button>';
 
 document.body.appendChild(jsonExportMenu);
 
@@ -19,8 +19,6 @@ $('#exportBtn').onclick=async()=>{
  if(!jsonExportMenu.hidden){closeJsonExportMenu();return}
  closeJsonImportMenu();closeHelpMenu();
  await updateJsonBackupStatus();
- const size=phaseComparisonActive()?phaseComparisonLayout():{width:640,height:640};
- for(const item of jsonExportMenu.querySelectorAll('[data-png-scale]')){const scale=Number(item.dataset.pngScale);item.textContent='PNG生成（'+scale+'倍・'+(size.width*scale)+' × '+(size.height*scale)+' px）'}
  const rect=$('#exportBtn').getBoundingClientRect();jsonExportMenu.hidden=false;
  jsonExportMenu.style.left=Math.max(8,Math.min(rect.left,window.innerWidth-jsonExportMenu.offsetWidth-8))+'px';
  jsonExportMenu.style.top=Math.max(8,Math.min(rect.bottom+4,window.innerHeight-jsonExportMenu.offsetHeight-8))+'px';
@@ -33,7 +31,7 @@ window.addEventListener('resize',()=>closeJsonExportMenu());
 
 jsonExportMenu.addEventListener('keydown',e=>{const items=Array.from(jsonExportMenu.querySelectorAll('button')),index=items.indexOf(document.activeElement);if(e.key==='Escape'){e.preventDefault();closeJsonExportMenu(true)}else if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();items[(index+(e.key==='ArrowDown'?1:items.length-1))%items.length].focus()}else if(e.key==='Tab')closeJsonExportMenu()});
 
-jsonExportMenu.addEventListener('click',async e=>{const item=e.target.closest('[data-json-scope],[data-png-scale]');if(!item)return;closeJsonExportMenu(true);const isPng=!!item.dataset.pngScale;try{if(isPng){let target=window.showSaveFilePicker?window.showSaveFilePicker(exportPickerOptions(safeExportName('.png'),'image/png','PNG画像')):null;if(target)target=await target;await exportPng(target,Number(item.dataset.pngScale))}else await exportJson(item.dataset.jsonScope)}catch(error){if(error?.name==='AbortError')return;console.error(isPng?'PNG export failed':'JSON export failed',error);notify((isPng?'PNG':'JSON')+'を書き出せませんでした：'+(error?.message||String(error)))}});
+jsonExportMenu.addEventListener('click',async e=>{const item=e.target.closest('[data-json-scope],[data-png-scale]');if(!item)return;closeJsonExportMenu(true);const isPng=!!item.dataset.pngScale;try{if(isPng){await window.Bolxiv.pngPreview.open(Number(item.dataset.pngScale))}else await exportJson(item.dataset.jsonScope)}catch(error){if(error?.name==='AbortError')return;console.error(isPng?'PNG export failed':'JSON export failed',error);notify((isPng?'PNG':'JSON')+'を書き出せませんでした：'+(error?.message||String(error)))}});
 
 let jsonImportMode='replace';
 

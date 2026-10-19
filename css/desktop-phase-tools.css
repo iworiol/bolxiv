@@ -154,3 +154,10 @@
 @media(min-width:851px){
  .app .layout.desktop-phase-tools #objectLayerPanel .desktop-phase-sidebar>.phase-memo>.phase-memo-body{box-sizing:border-box;width:100%;padding-right:calc(12px + var(--desktop-scroll-clearance,8px));scrollbar-gutter:stable}
 }
+
+@media(min-width:851px){
+ .board-read-only .app .layout.desktop-phase-tools .desktop-phase-sidebar :is(.desktop-phase-switch,.desktop-phase-collapse,.desktop-columns-toggle):disabled{opacity:.45!important;cursor:not-allowed!important}
+ .board-read-only .app .layout.desktop-phase-tools .desktop-phase-sidebar :is(.desktop-phase-switch,.desktop-phase-collapse,.desktop-columns-toggle):disabled:is(:hover,:focus-visible){background:#eef2f7!important;color:#33445f!important;-webkit-text-fill-color:#33445f!important}
+}
+
+@media(min-width:851px){.board-read-only .app .layout.desktop-phase-tools #desktopPhasePanelTitle:disabled{opacity:1!important;color:#33445f!important;-webkit-text-fill-color:#33445f!important}}

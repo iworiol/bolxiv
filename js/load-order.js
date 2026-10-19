@@ -41,6 +41,7 @@ window.BolxivFiles = {
     "js/mobile/phone-phase-navigation.js",
     "js/mobile/phone-view-content.js",
     "js/canvas/board-zoom-menu.js",
+    "js/canvas/png-preview.js",
     "js/canvas/number-input-commit.js",
     "js/desktop/desktop-header-phase-alignment.js",
     "js/desktop/desktop-scroll-clearance.js",

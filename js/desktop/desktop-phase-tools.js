@@ -124,7 +124,7 @@
  function selectionChanged(){
   const groupSelected=!!data.activePhaseGroup;
   if(active&&groupSelected&&!groupWasSelected){toolBeforeGroup=readingMode?editingTool:currentTool;listBeforeGroup={twoColumns,open:listButton.getAttribute('aria-expanded')==='true'};twoColumns=false}
-  if(active&&!groupSelected&&groupWasSelected){if(listBeforeGroup){twoColumns=listBeforeGroup.twoColumns;setDisclosure(listButton,document.getElementById('layerListPanel'),listBeforeGroup.open);listBeforeGroup=null}if(!boardReadOnly&&!phaseComparisonActive())showTool(toolBeforeGroup)}
+  if(active&&!groupSelected&&groupWasSelected){if(listBeforeGroup){twoColumns=listBeforeGroup.twoColumns;setDisclosure(listButton,document.getElementById('layerListPanel'),listBeforeGroup.open);listBeforeGroup=null}if(boardReadOnly||phaseComparisonActive())showTool('memo',false);else showTool(toolBeforeGroup)}
   if(active&&groupSelected){twoColumns=false;setDisclosure(listButton,document.getElementById('layerListPanel'),false);showTool('phase',false);memo.open=true;memo.classList.add('is-open')}
   listButton.disabled=readingMode||groupSelected;objectButton.disabled=readingMode||groupSelected;phaseButton.disabled=readingMode||groupSelected;
   groupWasSelected=groupSelected;

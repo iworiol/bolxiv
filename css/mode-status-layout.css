@@ -7,8 +7,8 @@
 .app>.top #editModeToggle{background:#eaf3ff!important;border-color:var(--blue)!important;color:#000!important;-webkit-text-fill-color:#000!important}
 .app>.top #editModeToggle.view-state{background:#fff!important;border-color:#999!important;color:#000!important;-webkit-text-fill-color:#000!important}
 @media(hover:hover) and (pointer:fine){
- .app>.top #editModeToggle:hover:not(:where(.phone-touch-mode *)){background:var(--blue)!important;border-color:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important;filter:none!important}
- .app>.top #editModeToggle.view-state:hover:not(:where(.phone-touch-mode *)){background:var(--blue)!important;border-color:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+ .app>.top #editModeToggle:enabled:hover:not(:where(.phone-touch-mode *)){background:var(--blue)!important;border-color:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important;filter:none!important}
+ .app>.top #editModeToggle.view-state:enabled:hover:not(:where(.phone-touch-mode *)){background:var(--blue)!important;border-color:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
 }
 .board-read-only #toggleLayoutProperties>.comparison-property-heading{display:inline!important}
 .board-read-only #activePhaseIndex,.board-read-only #activePhaseLabel{display:none!important}
@@ -68,3 +68,9 @@
 }
 
 .phone-display-menu-separator{height:1px;margin:6px 4px;background:#d0d4da}
+
+@media(max-width:850px){.app>.top>.brand strong{grid-column:2/4}.app>.top>.brand{grid-template-columns:30px minmax(0,max-content) max-content}.app>.top>.brand>.brand-version{justify-self:start}}
+
+@media(max-width:850px){.app>.top>.brand{grid-template-columns:30px max-content max-content}.board-read-only .app>.top .header-history-actions{display:none!important}}
+
+@media(max-width:850px){.board-read-only .app .layout .right .board-display-toolbar>#clearBtn+.board-toolbar-separator{display:none!important}}
