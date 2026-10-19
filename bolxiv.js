@@ -31,7 +31,7 @@ window.addEventListener('load',revealRestoredApp,{once:true});
    if(!window.BolxivIntegrityChecked)resolve();
   })}
   let index=0;
-  return Promise.all(Array.from({length:Math.min(2,files.length)},async()=>{
+  return Promise.all(Array.from({length:Math.min(3,files.length)},async()=>{
    while(index<files.length)await preload(files[index++]);
   }));
  }

@@ -8,20 +8,45 @@ FF14由来の画像・素材：© SQUARE ENIX
 <html lang="ja" class="app-restoring">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>BOARD OF LIGHT XIV</title><link rel="bolxiv-stylesheet" href="css/startup.css" data-startup-style>
+<title>BOARD OF LIGHT XIV</title><style id="startupInline">/* Small first paint, independent of the editor's styles and scripts. */
+.integrity-notice{position:fixed;bottom:6px;left:8px;z-index:20000;padding:3px 7px;border-radius:3px;background:#fff;color:#526078;font:11px 'Yu Gothic UI',sans-serif;pointer-events:none}
+#startupError{box-sizing:border-box;max-width:640px;margin:12vh auto;padding:24px;background:#fff;color:#33445f;font:14px/1.7 'Yu Gothic UI',sans-serif;overflow-wrap:anywhere}
+#startupError h1{font-size:20px}
+#startupError button{padding:10px 20px;background:#293c66;color:#fff;border:0;border-radius:4px;cursor:pointer}
+body.session-blocked>:not(#sessionBlocked){display:none!important}
+#sessionBlocked{box-sizing:border-box;max-width:560px;margin:15vh auto;padding:28px;background:#fff;color:#33445f;border:1px solid #d0d4da;border-radius:8px;font:14px/1.7 'Yu Gothic UI',sans-serif}
+#sessionBlocked h1{font-size:20px;margin:0 0 14px}
+#sessionBlocked button{padding:10px 24px;background:#293c66;color:#fff;border:0;border-radius:4px;font:inherit;cursor:pointer}
+@media(max-width:600px){#sessionBlocked{margin:15vh 16px;padding:22px}}
+html.app-restoring body{margin:0;background:#f3f4f6;font:14px 'Yu Gothic UI',sans-serif;color:#33445f}
+html.app-restoring:not(.app-shell-ready) .app{visibility:hidden}
+.startup-shell{display:none}
+html.app-restoring:not(.app-shell-ready) .startup-shell{display:grid;position:fixed;inset:0;grid-template-rows:64px 1fr;background:#f3f4f6}
+.startup-shell-header{display:flex;align-items:center;padding:0 22px;background:#10161e;color:#e9edf2;gap:12px}
+.startup-shell-header strong{font-size:14px;letter-spacing:.02em}
+.startup-shell-header small{display:block;font-size:11px;letter-spacing:.1em;color:#a1aab8;margin-top:3px}
+.startup-shell-logo{color:#8ce5fa;font-size:28px}
+.startup-shell-layout{display:grid;grid-template-columns:260px 64px 1fr;min-height:0;gap:1px;background:#d0d4da}
+.startup-shell-pane{background:#fff;padding:16px}
+.startup-shell-canvas{display:grid;grid-template-rows:40px 1fr;background:#eef2f7;padding:12px;min-width:0}
+.startup-shell-field{align-self:center;justify-self:center;width:min(65vw,60vh);aspect-ratio:1;border:1px solid #d0d4da;background:#fff}
+.startup-status{display:none}
+html.app-restoring .startup-status{display:block;position:fixed;right:16px;bottom:16px;z-index:20000;padding:10px 16px;border:1px solid #d0d4da;border-radius:6px;background:#fff;color:#33445f;font:14px 'Yu Gothic UI',sans-serif;box-shadow:0 2px 10px #0001}
+@media(max-width:850px){
+ .startup-shell-layout{grid-template-columns:1fr}
+ .startup-shell-pane{display:none}
+ .startup-shell-header{padding:0 12px}
+ .startup-shell-field{width:min(85vw,55vh)}
+}
+
+html.app-restoring body{display:block!important}
+</style><link rel="bolxiv-stylesheet" href="css/startup.css" data-startup-style>
 
 
-<link rel="bolxiv-stylesheet" media="print" href="css/base.css"><link rel="bolxiv-stylesheet" media="print" href="css/palette-touch.css"><link rel="bolxiv-stylesheet" media="print" href="css/palette-drag.css"><link rel="bolxiv-stylesheet" media="print" href="css/palette-selection.css"><link rel="bolxiv-stylesheet" media="print" href="css/palette-touch-behavior.css"><link rel="bolxiv-stylesheet" media="print" href="css/palette-placement-preview.css"><link rel="bolxiv-stylesheet" media="print" href="css/palette-opening-neutral.css"><link rel="bolxiv-stylesheet" media="print" href="css/collapsed-palette-background.css"><link rel="bolxiv-stylesheet" media="print" href="css/touch-palette-closed.css"><link rel="bolxiv-stylesheet" media="print" href="css/touch-palette-closed-border.css"><link rel="bolxiv-stylesheet" media="print" href="css/about-tool.css"><script id="integrityEntry" data-src="js/integrity-loader.js" data-integrity="sha384-d4G80OouMzlYN9P+4bDZnheNe8QiD4WrKngWCvJQD4CaGJ7Gvh1pTP+nE+hHdTHe" data-startup-integrity="sha384-RQIoZCVJ+bfmO2r6S41oLdSjTUPbwO4mKkRWkYeYO0eqhPu6JxTebvTmLsCFMeqF" data-manifest-integrity="sha384-YpUa2Wt5SKzFNkLnzDov8nVwJWRa2m+nKVrm9v/W7b3MBi2dEqxjFXwUl3+LUq/V">
+<link rel="bolxiv-stylesheet" media="print" href="css/base.css"><link rel="bolxiv-stylesheet" media="print" href="css/palette-touch.css"><link rel="bolxiv-stylesheet" media="print" href="css/palette-drag.css"><link rel="bolxiv-stylesheet" media="print" href="css/palette-selection.css"><link rel="bolxiv-stylesheet" media="print" href="css/palette-touch-behavior.css"><link rel="bolxiv-stylesheet" media="print" href="css/palette-placement-preview.css"><link rel="bolxiv-stylesheet" media="print" href="css/palette-opening-neutral.css"><link rel="bolxiv-stylesheet" media="print" href="css/collapsed-palette-background.css"><link rel="bolxiv-stylesheet" media="print" href="css/touch-palette-closed.css"><link rel="bolxiv-stylesheet" media="print" href="css/touch-palette-closed-border.css"><link rel="bolxiv-stylesheet" media="print" href="css/about-tool.css"><script id="integrityEntry" data-src="js/integrity-loader.js" data-integrity="sha384-7J9IDunbvPMLSjSXKakStyznFjwF/p09DGB83TU+bIDgMEBW6+s/VjVQ6PFzckDH" data-startup-integrity="sha384-RQIoZCVJ+bfmO2r6S41oLdSjTUPbwO4mKkRWkYeYO0eqhPu6JxTebvTmLsCFMeqF" data-manifest-integrity="sha384-7HIfD1atop5k3R8VGaMePengdBULi44Lcf0yxEmp71/zkUD985vXYJ/oBbOqcA82">
 (function bootIntegrity(){
  const anchor=document.currentScript,node=document.createElement('script');
- const startup=document.querySelector('link[data-startup-style]');
- if(startup){
-  const style=document.createElement('link');style.rel='stylesheet';style.setAttribute('blocking','render');style.setAttribute('data-startup-style','');
-  if(location.protocol!=='file:'){style.integrity=anchor.dataset.startupIntegrity;style.crossOrigin='anonymous'}
-  const styleUrl=new URL(startup.href);if(location.protocol!=='file:')styleUrl.searchParams.set('integrity',anchor.dataset.startupIntegrity);
-  style.href=styleUrl.href;startup.replaceWith(style);
- }
- node.dataset.manifestIntegrity=anchor.dataset.manifestIntegrity;
+  node.dataset.manifestIntegrity=anchor.dataset.manifestIntegrity;
  if(location.protocol!=='file:'){node.integrity=anchor.dataset.integrity;node.crossOrigin='anonymous'}
  const loaderUrl=new URL(anchor.dataset.src,document.baseURI);if(location.protocol!=='file:')loaderUrl.searchParams.set('integrity',anchor.dataset.integrity);
  node.src=loaderUrl.href;
