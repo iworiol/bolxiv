@@ -9,6 +9,9 @@
    document.body.append(probe);const width=probe.offsetWidth-probe.clientWidth;probe.remove();
    panel.style.setProperty('--desktop-scroll-clearance',width>0?'8px':'16px');
   }
+  const properties=document.getElementById('layoutPropertiesPanel'),layout=document.querySelector('.layout');
+  // The memo body is created later; inherit the same clearance from its layout.
+  if(properties&&layout)layout.style.setProperty('--desktop-scroll-clearance',getComputedStyle(properties).getPropertyValue('--desktop-scroll-clearance'));
  }
  desktop.addEventListener('change',update);window.addEventListener('resize',update);update();
 })();

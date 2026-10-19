@@ -4,3 +4,29 @@
   -webkit-text-fill-color:#fff!important;
   filter:none!important;
 }
+
+@media(min-width:851px){
+ .app .layout>.left{transition:width .18s ease,padding-top .18s ease,padding-right .18s ease,padding-bottom .18s ease}
+ .app .layout>.left :is(#leftRailToggle,#categoryModeToggle),
+ .app .layout>.left .accordion-toggle[data-rail-icon]{box-sizing:border-box;height:34px!important;min-height:34px!important;max-height:34px!important}
+ .app .layout>.left :is(#leftRailToggle,#categoryModeToggle),
+ .app .layout>.left:not(.palette-hover-open):not(:focus-within):not(.pinned) .accordion-toggle[data-rail-icon]{width:34px!important;min-width:34px!important;max-width:34px!important;height:34px!important;min-height:34px!important;max-height:34px!important;padding:0!important;border-radius:6px;flex:0 0 34px}
+ .app .layout>.left:not(.palette-hover-open):not(:focus-within):not(.pinned) .accordion-toggle[data-rail-icon]{margin-left:3px;margin-right:0}
+ .app .layout>.left:not(.palette-hover-open):not(:focus-within):not(.pinned) .object-pane-actions{justify-content:flex-start;padding-left:3px}
+ .app .layout>.left:is(.pinned,.palette-hover-open,:focus-within){padding-left:10px!important}
+ .app .layout>.left:is(.pinned,.palette-hover-open,:focus-within) .accordion-toggle[data-rail-icon]{padding-left:4px!important;white-space:nowrap;display:flex;align-items:center;gap:8px;overflow:hidden}
+ .app .layout>.left:is(.pinned,.palette-hover-open,:focus-within) .accordion-toggle[data-rail-icon]>.palette-category-icon{display:block;width:24px;height:24px;flex:none;margin:0}
+ .app .layout>.left:is(.pinned,.palette-hover-open,:focus-within) .accordion-toggle[data-rail-icon]::after{float:none;flex:none;margin-left:auto}
+ /* Keep the category heading's border inside its fixed 34px box. */
+ .app .layout>.left:is(.pinned,.palette-hover-open,:focus-within) .accordion-group:has(>.accordion-toggle[data-rail-icon][aria-expanded="true"]){border:0!important;box-shadow:none;outline:1px solid #d0d4da;outline-offset:-1px}
+ .app .layout>.left:is(.pinned,.palette-hover-open,:focus-within) .accordion-toggle[data-rail-icon][aria-expanded="true"]{border:1px solid #d0d4da!important;border-radius:6px 6px 0 0!important}
+}
+
+@media(min-width:851px){
+ .app .layout>.left:not(.palette-hover-open):not(:focus-within):not(.pinned) .accordion-group>.accordion-toggle[data-rail-icon]:not(.rail-toggle)[aria-controls][aria-expanded],
+ .app .layout>.left:is(.pinned,.palette-hover-open,:focus-within) .accordion-group>.accordion-toggle[data-rail-icon][aria-controls][aria-expanded]{border-color:#d0d4da!important}
+}
+
+@media(min-width:851px) and (hover:hover) and (pointer:fine){
+ .app .layout>.left:is(.pinned,.palette-hover-open,:focus-within) .accordion-toggle[data-rail-icon][aria-controls][aria-expanded]:is(:hover:not(:where(.phone-touch-mode *)),:focus-visible)::after{color:#fff!important;-webkit-text-fill-color:#fff!important}
+}

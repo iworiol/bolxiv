@@ -21,11 +21,12 @@
  .app .layout :is(#pages,#objectList,#contentOptions) .phone-row-actions{display:grid!important;place-items:center;flex:0 0 28px;width:28px;height:28px;padding:4px;border:0!important;border-radius:4px;background:transparent!important;color:#33445f!important}
  .app .layout .phone-row-actions[hidden]{display:none!important}
  .phone-row-actions svg{display:block;width:18px;height:18px;pointer-events:none}
- .app .layout #pages .page-tab:not(.renaming) :is(.page-tab-edit,.page-tab-x),.app .layout #objectList .object-row :is(.object-delete,.object-lock-toggle),.app .layout #contentOptions .content-option-row:not(:has(input))>.content-row-action{display:none!important}
+ .app .layout #pages .page-tab:not(.renaming) :is(.page-tab-edit,.page-tab-x),.app .layout #objectList .object-row .object-delete,.app .layout #contentOptions .content-option-row:not(:has(input))>.content-row-action{display:none!important}
  .app .layout #pages .page-tab.renaming>.phone-row-actions,.app .layout #pages .page-tab.renaming>.page-tab-edit{display:none!important}
  .app .layout #pages .page-tab>.phone-row-actions{grid-column:-2/-1;grid-row:1;margin-left:auto}
- .app .layout #objectList>.object-row{grid-template-columns:18px 18px 26px minmax(0,1fr) 28px!important}
+ .app .layout #objectList>.object-row{grid-template-columns:18px 18px 26px 26px minmax(0,1fr) 28px!important}
  .app .layout #objectList>.object-row>.object-visibility-toggle{display:grid!important;grid-column:3;grid-row:1}
- .app .layout #objectList>.object-row>.object-name{grid-column:4;grid-row:1}
- .app .layout #objectList>.object-row>.phone-row-actions{grid-column:5;grid-row:1}
+ .app .layout #objectList>.object-row>.object-lock-toggle{display:grid!important;place-items:center;grid-column:4;grid-row:1}
+ .app .layout #objectList>.object-row>.object-name{grid-column:5;grid-row:1}
+ .app .layout #objectList>.object-row>.phone-row-actions{grid-column:6;grid-row:1}
 }

@@ -130,3 +130,27 @@
   color:#33445f!important;-webkit-text-fill-color:#33445f!important;
  }
 }
+
+.desktop-phase-shared-heading[hidden]{display:none!important}
+@media(min-width:851px){
+ .app .layout.desktop-phase-tools #objectLayerPanel .desktop-phase-shared-heading{display:flex;align-items:center;gap:4px;box-sizing:border-box;flex:0 0 38px;min-height:38px;padding:3px 6px 3px 10px;border:1px solid #d0d4da;border-radius:7px;background:#eef2f7;color:#33445f}
+ .app .layout.desktop-phase-tools #objectLayerPanel .desktop-phase-shared-heading>button{appearance:none;color:inherit!important;-webkit-text-fill-color:inherit!important;background:transparent!important;border:0!important;padding:0;font:inherit;cursor:pointer;filter:none;box-shadow:none!important;text-decoration:none!important}
+ .app .layout.desktop-phase-tools #objectLayerPanel .desktop-phase-shared-heading>.desktop-phase-panel-title{flex:1;min-width:0;align-self:stretch;text-align:left;font-size:14px;font-weight:400;line-height:1.4;white-space:nowrap;border-radius:0;outline-offset:2px}
+ .desktop-phase-panel-title strong{font-weight:700;color:inherit!important;-webkit-text-fill-color:inherit!important}
+ .app .layout.desktop-phase-tools #objectLayerPanel .desktop-phase-shared-heading>.desktop-phase-switch,
+ .app .layout.desktop-phase-tools #objectLayerPanel .desktop-phase-shared-heading>.desktop-phase-collapse{display:grid;place-items:center;box-sizing:border-box;flex:none;width:26px;height:26px;border-radius:5px;font-size:14px}
+ .app .layout.desktop-phase-tools #objectLayerPanel .desktop-phase-shared-heading>.desktop-phase-switch{border:1px solid #d0d4da!important;background:#eef2f7!important;color:#33445f!important;-webkit-text-fill-color:#33445f!important}
+ .desktop-phase-switch svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+ .desktop-phase-shared-heading>button:disabled{cursor:default;opacity:1}
+ .app .layout.desktop-phase-tools #objectLayerPanel .desktop-phase-shared-heading:has(>.desktop-phase-panel-title:not(:disabled)):is(:hover,:has(>.desktop-phase-panel-title:focus-visible,>.desktop-phase-collapse:focus-visible)):not(:has(>.desktop-phase-switch:is(:hover,:focus-visible))){background:var(--blue);color:#fff;-webkit-text-fill-color:#fff}
+ .app .layout.desktop-phase-tools #objectLayerPanel .desktop-phase-shared-heading>.desktop-phase-switch:is(:hover,:focus-visible):not(:disabled){background:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+ .app .layout.desktop-phase-tools #objectLayerPanel .desktop-phase-shared-heading[data-expanded="true"]{border-radius:7px 7px 0 0}
+ .app .layout.desktop-phase-tools #objectLayerPanel .desktop-phase-sidebar:not(.desktop-group-tools)>.content-properties>#toggleLayoutProperties,
+ .app .layout.desktop-phase-tools #objectLayerPanel .desktop-phase-sidebar:not(.desktop-group-tools)>.phase-memo>summary{display:none!important}
+ .app .layout.desktop-phase-tools #objectLayerPanel .desktop-phase-sidebar:not(.desktop-group-tools)>:is(.content-properties,.phase-memo):not(.is-open){display:none!important}
+ .app .layout.desktop-phase-tools #objectLayerPanel .desktop-phase-sidebar:not(.desktop-group-tools)>:is(.content-properties,.phase-memo).is-open{margin-top:-6px!important;border-top:0!important;border-radius:0 0 7px 7px;min-height:100px!important}
+}
+
+@media(min-width:851px){
+ .app .layout.desktop-phase-tools #objectLayerPanel .desktop-phase-sidebar>.phase-memo>.phase-memo-body{box-sizing:border-box;width:100%;padding-right:calc(12px + var(--desktop-scroll-clearance,8px));scrollbar-gutter:stable}
+}

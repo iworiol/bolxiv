@@ -82,6 +82,8 @@ function renderFieldImageAppearance(){
 
 function showLockedSelection(o,el){
  if(!o.locked||!selectedIds.includes(o.id)||boardReadOnly||phaseComparisonRendering)return;
+ // The lock frame already represents selection; suppress the object's fallback outline.
+ el.classList.add('has-selection-controls');
  const box=document.createElement('div');box.className='controlbox locked-selection-control';box.setAttribute('role','img');box.setAttribute('aria-label','編集不可のオブジェクト');box.style.left=o.x+'%';box.style.top=o.y+'%';box.style.width=(o.width||el.offsetWidth||34)+'px';box.style.height=(o.type==='text'?el.offsetHeight:o.height||el.offsetHeight||34)+'px';box.style.setProperty('--rot',(o.rotation||0)+'deg');
  let frame=box;
  if(['stack','linestack','targetcircle','aoe'].includes(o.type)){const names={stack:'stack',linestack:'stack',targetcircle:'targetcircle',aoe:'aoe'},name=names[o.type];box.classList.add(name+'-control');frame=document.createElement('div');frame.className=name+'-control-frame';box.append(frame);if(name==='stack')fitStackControl(o,box);else if(name==='targetcircle')fitTargetCircleControl(o,box);else fitAoeControl(o,box)}
@@ -381,7 +383,7 @@ function applyShapeStyle(el,o){if(o.type==='gaze'){el.style.background='transpar
 
 function aoeControlBounds(o){const g=aoeGeometry(o),extent=90*Math.sin(Math.min(g.rad,Math.PI/2));return {left:(50-extent)/100,top:Math.min(5,g.endY)/100,right:(50+extent)/100,bottom:.95}}
 
-function fitAoeControl(o,box){const frame=box.querySelector('.aoe-control-frame');if(!frame)return;const b=aoeControlBounds(o),pad=3;frame.style.left=(b.left*o.width-pad)+'px';frame.style.top=(b.top*o.height-pad)+'px';frame.style.width=((b.right-b.left)*o.width+2*pad)+'px';frame.style.height=((b.bottom-b.top)*o.height+2*pad)+'px';const rotate=box.querySelector('.handle.rotate');if(rotate){rotate.style.left=((b.left+b.right)/2*o.width-6)+'px';rotate.style.top=(b.top*o.height-pad-25)+'px'}}
+function fitAoeControl(o,box){const frame=box.querySelector('.aoe-control-frame');if(!frame)return;const b=aoeControlBounds(o),pad=3;frame.style.left=(b.left*o.width-pad)+'px';frame.style.top=(b.top*o.height-pad)+'px';frame.style.width=((b.right-b.left)*o.width+2*pad)+'px';frame.style.height=((b.bottom-b.top)*o.height+2*pad)+'px';const rotate=box.querySelector('.handle.rotate');if(rotate){rotate.style.left='calc('+((b.left+b.right)/2*o.width)+'px - var(--rotation-handle-size,12px)/2)';rotate.style.top='calc('+(b.top*o.height-pad)+'px - var(--rotation-handle-distance,25px))'}}
 
 function integerTargetCircleSize(value){return Math.max(20,Math.min(960,Math.round(Number(value)||110)))}
 
