@@ -24,7 +24,7 @@ window.addEventListener('load',revealRestoredApp,{once:true});
   function preload(file,attempt=0){return new Promise((resolve,reject)=>{
    const link=document.createElement('link');link.rel='preload';link.as='script';
    const hash=expectedIntegrity(file);if(window.BolxivIntegrityChecked){link.integrity=hash;link.crossOrigin='anonymous'}
-   const url=new URL(file,base);if(attempt)url.searchParams.set('retry',String(attempt));
+   const url=new URL(file,base);if(window.BolxivIntegrityChecked)url.searchParams.set('integrity',hash);if(attempt)url.searchParams.set('retry',String(attempt));
    link.href=url.href;link.onload=resolve;
    link.onerror=()=>{link.remove();if(attempt<2)setTimeout(()=>preload(file,attempt+1).then(resolve,reject),300*(attempt+1));else reject(new Error('読み込みまたは整合性検査に失敗しました: '+file))};
    document.head.append(link);
@@ -39,6 +39,7 @@ window.addEventListener('load',revealRestoredApp,{once:true});
   return new Promise((resolve,reject) => {
    const script=document.createElement('script'),url=new URL(file,base);
    const hash=expectedIntegrity(file);if(window.BolxivIntegrityChecked){script.integrity=hash;script.crossOrigin='anonymous'}
+   if(window.BolxivIntegrityChecked)url.searchParams.set('integrity',hash);
    if(attempt)url.searchParams.set('retry',String(attempt));
    script.src=url.href;script.async=false;
    const runtimeError=event=>{if(event.filename===script.src){cleanup();reject(event.error||new Error(event.message))}};
