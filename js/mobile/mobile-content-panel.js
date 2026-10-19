@@ -91,5 +91,5 @@
  },true);
  new MutationObserver(sync).observe(layout,{attributes:true,attributeFilter:['class']});
  mobile.addEventListener('change',()=>{layout.classList.remove('phone-content-open');sync()});sync();
- document.addEventListener('pointerdown',event=>{if(!mobile.matches||!visible||event.target.closest('.battle,.phone-phase-navigation,.phone-content-backdrop,.phone-content-close,.color-popover,.native-color-picker,.phone-nav,.phone-content-icon,.phase-content-copy-menu,.phase-item-menu,.content-item-menu,.phase-group-menu,.phase-copy-menu,#pcTutorial'))return;close()},true);
+ document.addEventListener('pointerdown',event=>{if(!mobile.matches||!visible||event.target.closest('#undo,#redo,.battle,.phone-phase-navigation,.phone-content-backdrop,.phone-content-close,.color-popover,.native-color-picker,.phone-nav,.phone-content-icon,.phase-content-copy-menu,.phase-item-menu,.content-item-menu,.phase-group-menu,.phase-copy-menu,#pcTutorial'))return;close()},true);
 })();

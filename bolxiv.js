@@ -20,6 +20,7 @@ window.addEventListener('load',revealRestoredApp,{once:true});
  }
  function startupStatus(message){const node=document.querySelector('.startup-status');if(node)node.textContent=message}
  function preloadScripts(files){
+  if(!window.BolxivIntegrityChecked)return Promise.resolve();
   function preload(file,attempt=0){return new Promise((resolve,reject)=>{
    const link=document.createElement('link');link.rel='preload';link.as='script';
    const hash=expectedIntegrity(file);if(window.BolxivIntegrityChecked){link.integrity=hash;link.crossOrigin='anonymous'}
@@ -29,7 +30,10 @@ window.addEventListener('load',revealRestoredApp,{once:true});
    document.head.append(link);
    if(!window.BolxivIntegrityChecked)resolve();
   })}
-  return Promise.all(files.map(file=>preload(file)));
+  let index=0;
+  return Promise.all(Array.from({length:Math.min(2,files.length)},async()=>{
+   while(index<files.length)await preload(files[index++]);
+  }));
  }
  function load(file, attempt=0) {
   return new Promise((resolve,reject) => {
@@ -87,9 +91,9 @@ window.addEventListener('load',revealRestoredApp,{once:true});
   await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
   window.Bolxiv.ready=true;
  },showStartupError,showSessionBlocked};
- const styles=Array.from(document.querySelectorAll('link[rel="stylesheet"]'));
  const stylesReady=window.BolxivIntegrityStyles.then(()=>{
-  for(const link of styles)if(link.media==='print')link.media='all';
+  // Bounded loading adds links over time: collect them after all styles arrive.
+  for(const link of document.querySelectorAll('link[rel="stylesheet"]'))if(link.media==='print')link.media='all';
   document.documentElement.classList.add('app-shell-ready');
   document.body.style.removeProperty('display');
  });

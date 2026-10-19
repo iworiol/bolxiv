@@ -9,3 +9,20 @@
  document.addEventListener('keydown',event=>{if(event.key==='Escape'&&header.classList.contains('phone-menu-open')){close();button.focus()}});
  mobile.addEventListener('change',close);
 })();
+
+(function setupPhoneSaveSubtitle(){
+ const mobile=matchMedia('(max-width:850px)'),status=document.getElementById('saved'),home=status.parentElement,brand=document.querySelector('.top>.brand');
+ let timer,lastText=status.textContent.trim(),savedUntil=0;
+ function update(){
+  clearTimeout(timer);
+  const text=status.textContent.trim();
+  if(text!==lastText){savedUntil=text==='保存済み'?Date.now()+3000:0;lastText=text}
+  if(!mobile.matches){home.append(status);brand.classList.remove('phone-save-status-visible');return}
+  brand.append(status);
+  const remaining=savedUntil-Date.now();
+  brand.classList.toggle('phone-save-status-visible',text!=='保存済み'||remaining>0);
+  if(text==='保存済み'&&remaining>0)timer=setTimeout(update,remaining);
+ }
+ new MutationObserver(update).observe(status,{childList:true,characterData:true,subtree:true});
+ mobile.addEventListener('change',update);update();
+})();

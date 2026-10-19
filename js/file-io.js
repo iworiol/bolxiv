@@ -92,9 +92,10 @@ function parseImportedBoards(text){
 
 function applyImportedBoards(imported,mode){if(boardReadOnly)throw new Error("閲覧中はインポートできません");
  flushScheduledBoardSave();storeContentHistory();contentBoards[activeContent]=data;
- if(mode==='append'){contentBoards=[...contentBoards,...imported]}
+ const before=captureContentList();if(mode==='append'){contentBoards=[...contentBoards,...imported]}
  else{contentBoards=imported;activeContent=0;data=contentBoards[0];restoreContentHistory()}
  selected=null;selectedIds=[];selectedPhaseIndexes=[];phaseSelectionOwner=data;
+ recordContentListChange(mode==='append'?'JSONによる追加':'JSONによる置換',before);
  renderAllIconGrids();renderAndSave();flushScheduledBoardSave();
 }
 

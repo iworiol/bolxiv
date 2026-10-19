@@ -4647,6 +4647,10 @@ input[type="number"] {
 .content-options .content-option-add-row {
   justify-content:flex-start;
 }
+.content-list-history-actions{margin-left:auto;display:flex;gap:6px}
+.content-list-history-button{display:grid;place-items:center;width:34px;height:31px;padding:0;border:1px solid #999;border-radius:6px;background:#fff;color:#000;cursor:pointer}
+.content-list-history-button>svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+.content-list-history-button:disabled{opacity:.4;cursor:default}
 :is(.battle,.phone-view-content) .content-options .content-option-add {
   width:34px;
   min-width:34px;

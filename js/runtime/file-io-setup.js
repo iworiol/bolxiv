@@ -87,10 +87,10 @@ $('#fileInput').onchange=e=>{
   let imported;
   try{imported=parseImportedBoards(reader.result)}catch(error){notify('JSON読み込みに失敗：'+(error?.message||String(error)));e.target.value='';return}
   if(mode==='replace'&&!await confirmReplaceImport(imported)){e.target.value='';return}
-  const previous={data,contentBoards,activeContent,history:history.slice(),future:future.slice(),selected,selectedIds:selectedIds.slice(),selectedPhaseIndexes:selectedPhaseIndexes.slice(),phaseSelectionOwner};
+  const previous={data,contentBoards,activeContent,listHistory:contentListHistory.slice(),listFuture:contentListFuture.slice(),history:history.slice(),future:future.slice(),selected,selectedIds:selectedIds.slice(),selectedPhaseIndexes:selectedPhaseIndexes.slice(),phaseSelectionOwner};
   try{applyImportedBoards(imported,mode);notify(mode==='append'?imported.length+' 件のコンテンツを末尾に追加しました':'全コンテンツを読み込みデータに置き換えました')}
   catch(error){
-   data=previous.data;contentBoards=previous.contentBoards;activeContent=previous.activeContent;history=previous.history;future=previous.future;selected=previous.selected;selectedIds=previous.selectedIds;selectedPhaseIndexes=previous.selectedPhaseIndexes;phaseSelectionOwner=previous.phaseSelectionOwner;
+   contentListHistory.splice(0,contentListHistory.length,...previous.listHistory);contentListFuture.splice(0,contentListFuture.length,...previous.listFuture);contentSelectorCache=null;data=previous.data;contentBoards=previous.contentBoards;activeContent=previous.activeContent;history=previous.history;future=previous.future;selected=previous.selected;selectedIds=previous.selectedIds;selectedPhaseIndexes=previous.selectedPhaseIndexes;phaseSelectionOwner=previous.phaseSelectionOwner;
    try{renderAndSave()}catch(recoveryError){console.error('Import recovery failed',recoveryError)}
    console.error('Board import failed',error);notify('JSON読み込みに失敗：'+(error?.message||String(error)));clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').classList.remove('show'),15000);
   }

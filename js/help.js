@@ -11,8 +11,8 @@ function positionToast(){
  const width=Math.max(0,right-left-24);
  toast.style.maxWidth=width+'px';
  toast.style.left=(left+right)/2+'px';
- toast.style.bottom='auto';
- toast.style.top=(top+12)+'px';
+ toast.style.top='auto';
+ toast.style.bottom=(window.innerHeight-bottom+12)+'px';
 }
 
 function notify(s,names=[]){

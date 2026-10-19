@@ -1,5 +1,5 @@
 // storage: shared function declarations; initialized by bolxiv.js in the documented order.
-function persistBoardSafely(value,navigationOnly=false){return window.boardStorage.save(value,{navigationOnly,imageAssets:boardImageLibrary.entries(contentBoards)})}
+function persistBoardSafely(value,navigationOnly=false){if(boardSaveSuspended)return false;return window.boardStorage.save(value,{navigationOnly,imageAssets:boardImageLibrary.entries(contentBoards)})}
 
 function renderAndSave(){contentBoards[activeContent]=data;render();save(false,true)}
 
@@ -17,6 +17,7 @@ function boardSaveState(){contentBoards[activeContent]=data;return {version:4,ac
 function cancelScheduledBoardSave(){clearTimeout(boardSaveDelayTimer);clearTimeout(boardSaveMaxTimer);boardSaveDelayTimer=boardSaveMaxTimer=null;boardSavePending=false;boardSaveNavigationOnly=false;boardSaveNoteOnly=false;boardSavePropertyOnly=false;}
 
 function flushScheduledBoardSave(){
+ if(boardSaveSuspended)return;
  if(!boardSavePending)return;
  const navigationOnly=boardSaveNavigationOnly,noteOnly=boardSaveNoteOnly,propertyOnly=boardSavePropertyOnly;
  cancelScheduledBoardSave();
@@ -30,6 +31,7 @@ function flushScheduledBoardSave(){
 }
 
 function scheduleBoardSave(navigationOnly=false){
+ if(boardSaveSuspended)return;
  if(phaseComparisonRendering)return;
  const state=boardSaveState();
  if(boardSaveCheckpoint===null){boardSaveCheckpoint=cloneBoardSaveState(state);return}
@@ -47,6 +49,7 @@ function scheduleBoardSave(navigationOnly=false){
 }
 
 function scheduleObjectPropertySave(){
+ if(boardSaveSuspended)return;
  if(phaseComparisonRendering)return;
  contentBoards[activeContent]=data;boardSaveCheckpointDirty=true;
  const propertyOnly=!boardSavePending||boardSaveNavigationOnly||boardSavePropertyOnly;
@@ -58,6 +61,7 @@ function scheduleObjectPropertySave(){
 }
 
 function scheduleNoteSave(){
+ if(boardSaveSuspended)return;
  if(phaseComparisonRendering)return;
  contentBoards[activeContent]=data;
  boardSavePropertyOnly=false;

@@ -1,5 +1,6 @@
 // Initialization stage: storage-setup. Load order is owned by bolxiv.js.
 let boardSaveCheckpoint=null;
+let boardSaveSuspended=false;
 
 const boardSaveDelay=500,boardSaveMaxWait=3000,phaseSaveDelay=2000,phaseSaveMaxWait=10000;
 
