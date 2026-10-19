@@ -18,7 +18,7 @@
  }
  function configure(node,file,hash,attempt){
   if(checked){if(!/^sha384-[A-Za-z0-9+/]+={0,2}$/.test(hash||''))throw new Error('照合表にありません: '+file);node.integrity=hash;node.crossOrigin='anonymous'}
-  const url=new URL(file,base);if(attempt)url.searchParams.set('retry',String(attempt));
+  const url=new URL(file,base);if(checked)url.searchParams.set('integrity',hash);if(attempt)url.searchParams.set('retry',String(attempt));
   if(node.tagName==='SCRIPT')node.src=url.href;else node.href=url.href;
  }
  function script(file,hash,attempt=0){return new Promise((resolve,reject)=>{

@@ -11,18 +11,20 @@ FF14由来の画像・素材：© SQUARE ENIX
 <title>BOARD OF LIGHT XIV</title><link rel="bolxiv-stylesheet" href="css/startup.css" data-startup-style>
 
 
-<link rel="bolxiv-stylesheet" media="print" href="css/base.css"><link rel="bolxiv-stylesheet" media="print" href="css/palette-touch.css"><link rel="bolxiv-stylesheet" media="print" href="css/palette-drag.css"><link rel="bolxiv-stylesheet" media="print" href="css/palette-selection.css"><link rel="bolxiv-stylesheet" media="print" href="css/palette-touch-behavior.css"><link rel="bolxiv-stylesheet" media="print" href="css/palette-placement-preview.css"><link rel="bolxiv-stylesheet" media="print" href="css/palette-opening-neutral.css"><link rel="bolxiv-stylesheet" media="print" href="css/collapsed-palette-background.css"><link rel="bolxiv-stylesheet" media="print" href="css/touch-palette-closed.css"><link rel="bolxiv-stylesheet" media="print" href="css/touch-palette-closed-border.css"><link rel="bolxiv-stylesheet" media="print" href="css/about-tool.css"><script id="integrityEntry" data-src="js/integrity-loader.js" data-integrity="sha384-A5fOL0GBZdg3ebbleLSNPTTuGXa02v08h0HSE7MXoNkCZby//5BFeGzmGchzQSF9" data-startup-integrity="sha384-RQIoZCVJ+bfmO2r6S41oLdSjTUPbwO4mKkRWkYeYO0eqhPu6JxTebvTmLsCFMeqF" data-manifest-integrity="sha384-0eNoN6luL1W/+Oe3OgEGsgwkRly8gSwqoSvwZXAvbK8QFsvrIq+ckbSgCHdFtWMj">
+<link rel="bolxiv-stylesheet" media="print" href="css/base.css"><link rel="bolxiv-stylesheet" media="print" href="css/palette-touch.css"><link rel="bolxiv-stylesheet" media="print" href="css/palette-drag.css"><link rel="bolxiv-stylesheet" media="print" href="css/palette-selection.css"><link rel="bolxiv-stylesheet" media="print" href="css/palette-touch-behavior.css"><link rel="bolxiv-stylesheet" media="print" href="css/palette-placement-preview.css"><link rel="bolxiv-stylesheet" media="print" href="css/palette-opening-neutral.css"><link rel="bolxiv-stylesheet" media="print" href="css/collapsed-palette-background.css"><link rel="bolxiv-stylesheet" media="print" href="css/touch-palette-closed.css"><link rel="bolxiv-stylesheet" media="print" href="css/touch-palette-closed-border.css"><link rel="bolxiv-stylesheet" media="print" href="css/about-tool.css"><script id="integrityEntry" data-src="js/integrity-loader.js" data-integrity="sha384-d4G80OouMzlYN9P+4bDZnheNe8QiD4WrKngWCvJQD4CaGJ7Gvh1pTP+nE+hHdTHe" data-startup-integrity="sha384-RQIoZCVJ+bfmO2r6S41oLdSjTUPbwO4mKkRWkYeYO0eqhPu6JxTebvTmLsCFMeqF" data-manifest-integrity="sha384-YpUa2Wt5SKzFNkLnzDov8nVwJWRa2m+nKVrm9v/W7b3MBi2dEqxjFXwUl3+LUq/V">
 (function bootIntegrity(){
  const anchor=document.currentScript,node=document.createElement('script');
  const startup=document.querySelector('link[data-startup-style]');
  if(startup){
   const style=document.createElement('link');style.rel='stylesheet';style.setAttribute('blocking','render');style.setAttribute('data-startup-style','');
   if(location.protocol!=='file:'){style.integrity=anchor.dataset.startupIntegrity;style.crossOrigin='anonymous'}
-  style.href=startup.href;startup.replaceWith(style);
+  const styleUrl=new URL(startup.href);if(location.protocol!=='file:')styleUrl.searchParams.set('integrity',anchor.dataset.startupIntegrity);
+  style.href=styleUrl.href;startup.replaceWith(style);
  }
  node.dataset.manifestIntegrity=anchor.dataset.manifestIntegrity;
  if(location.protocol!=='file:'){node.integrity=anchor.dataset.integrity;node.crossOrigin='anonymous'}
- node.src=anchor.dataset.src;
+ const loaderUrl=new URL(anchor.dataset.src,document.baseURI);if(location.protocol!=='file:')loaderUrl.searchParams.set('integrity',anchor.dataset.integrity);
+ node.src=loaderUrl.href;
  node.onerror=()=>{
   const show=()=>{
    document.body.style.removeProperty('display');
