@@ -3,7 +3,7 @@ window.BolxivIntegrity = {
   "schema": 1,
   "release": "0.5.0",
   "files": {
-    "bolxiv.js": "sha384-v2+c2gR1zOFutkwC4AYnin1kwy16XQ8sXTdTJ/Kdb4XMwVEI9eR4PVarPMqLZKYa",
+    "bolxiv.js": "sha384-5PrqiwFkmvrA2BeVmSlUo9Wr0DAOxsNnRZvau0fMnwCumot64CuYgwqms8iw4V/A",
     "css/about-tool.css": "sha384-kVNiBRjEshdKY3CAyCqgt/ZwNwqhUw+aqbN0bE2QhwlYL5ulpKpw8gUe3Tfbzjhd",
     "css/base.css": "sha384-D/AmuAFDyUHZEMmRu/O5Q++nnvqrKlIm3ol8+PSKRnJJwxep6BoZRfvgliYlI7h5",
     "css/board-zoom-menu.css": "sha384-LYZvouc4eZS+q9pbi7qxbsSLEPSAAwjl4PjEqmX1MoSQJYgQn3gWHES74u6OA6by",
@@ -55,6 +55,10 @@ window.BolxivIntegrity = {
     "css/touch-list-reorder.css": "sha384-ocxY1hi+Se2c8PFY/hfAMqSKubou1YlPijCAiVi0C99EdSDoJx3Rcpo1YGmWx4sB",
     "css/touch-palette-closed-border.css": "sha384-6vE6pFKtHK8clykvtS0eqjSFDxLbJwX6uOk4ogcJyAy5+Z7pGUrIgq/5f7Wdr20s",
     "css/touch-palette-closed.css": "sha384-KwZoc76vD5LaKHqOnzcCBlr4RBDlf1rqfN8UDYGgmxpSRQMW2wz3eWLCwHulRlbD",
+    "dist/application.css": "sha384-A9fi8upPT2L/Z9o/t/cm8D0dgGfeav0DKQ1QQnvJIY+rdKPJfQKji0Zgn3uJoTkh",
+    "dist/definitions.js": "sha384-BS6s6bsdSDBQqP0xcCIGCGWJEisf3grp+KNLwBmIvewal5bwLIIVFVH8sfUv/yRb",
+    "dist/features.js": "sha384-7T1zeE3d8cbfwpDFPI2HE10kCAbVZWYK5m50EjaBtNUB7smVDrGED/+Dq0T27aDZ",
+    "dist/initializers.js": "sha384-H8CAuMc9VPpTieqhyUlJw7w4atbVo8dU5YEiI2v1SKOWEvKAFpCkZFKxkjkiAqoE",
     "js/canvas.js": "sha384-6wkIyQQRR41NAzInTgrUBJZ0Lo891mXOFxnXt8KCQvVE+OeIGXeTHKo5xmtoRuz7",
     "js/canvas/board-zoom-menu.js": "sha384-nBs8sFDRG6PjDK7OQfSukzevaPkLCNzu7XRFX1DDvFiaNphY/fFSsvLabe3B+Bi7",
     "js/canvas/edit-mode-setup.js": "sha384-LEaSj4KhgYseZ7vSm9a2WQry1jpKrQdSiQUv8/z2cAt0B/+IGhNq0BxMIUvkdIUx",
@@ -79,7 +83,7 @@ window.BolxivIntegrity = {
     "js/help/pc-tutorial.js": "sha384-BIr8Q7YQw8DOaHo/OUozg8DQHV8vc04NzQbWoybLwDNojuL0aRbTbviJSomfZMrP",
     "js/history.js": "sha384-CtoXJ0P30ECSG6Jczbyd63aotWE11VjJ9ZjypmgR2m31+eLqWwdoiYzEg4BfE+im",
     "js/images.js": "sha384-f16fnAVZPpxtFY1TJ8T8XXxxjt0/VXOJtTvsNXLWiRoHOEtJV/I9C/tDIy5MtfFw",
-    "js/integrity-loader.js": "sha384-7J9IDunbvPMLSjSXKakStyznFjwF/p09DGB83TU+bIDgMEBW6+s/VjVQ6PFzckDH",
+    "js/integrity-loader.js": "sha384-ElfcweF4Oi23LlHuY03Ze2B+S1u5/ii5TqxpKS2gaqYIVJVRCRtCL+LmDXM1pLG8",
     "js/load-order.js": "sha384-r38GHmkr3kSJLZTEo9rgqCCpFb+MZHN2vLvokLXfLsiZvhJ01jjd0SH7jW1o4P+I",
     "js/mobile/mobile-content-panel.js": "sha384-HUBS+kiA6NkEUCAsO9SeUWJ42WlScrbmGJgpNrgaLr2QdjM+PmS/cehFz9RGh/Of",
     "js/mobile/mobile-delete-dialog.js": "sha384-uCdrm9uTgHaD9fWMdqRKqp1i6YBoRS9hu8U9k708ahfXfajUZI0ZWR2nWKq+/cv9",
@@ -122,5 +126,13 @@ window.BolxivIntegrity = {
     "js/state.js": "sha384-+kU+fvFt7wvuRUTA0ipCyey74R1u9Ef3P5MORcM0Fpx9rOdcVe5RF6If1n+PXVu4",
     "js/storage-bootstrap.js": "sha384-zFJBJ8ZCjvMPge/Cw4uW2uv4wCfMJzsjk7nSPhpwa2eo7hsoSTLb4sZ+kd0XORnP",
     "js/storage.js": "sha384-zZB5zdPQ5wq4nBGMPAaTfIKi30/EPxnN1FHlXIBQJW1WVeQ0ZN1goQD4UwNKPYRc"
+  },
+  "bundles": {
+    "scripts": [
+      "dist/definitions.js",
+      "dist/initializers.js",
+      "dist/features.js"
+    ],
+    "style": "dist/application.css"
   }
 };
