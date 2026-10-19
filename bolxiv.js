@@ -82,7 +82,7 @@ window.addEventListener('load',revealRestoredApp,{once:true});
   // have already started while those styles were loading.
   startupStatus('ファイルを確認しています…');
   await Promise.all([stylesReady,window.BolxivApplicationScripts]);
-  const files=Object.values(window.BolxivFiles).flat();let completed=0;
+  const files=(window.BolxivIntegrity.bundles?.scripts||Object.values(window.BolxivFiles).flat());let completed=0;
   startupStatus('画面を準備しています…');
   for(const file of files){await load(file);completed++;if(completed%10===0)startupStatus('画面を準備しています… '+completed+' / '+files.length)}
   Object.defineProperty(window.Bolxiv,'state',{get:()=>({data,selected,selectedIds,boardReadOnly})});
@@ -103,7 +103,7 @@ window.addEventListener('load',revealRestoredApp,{once:true});
  load('js/session-guard.js').then(()=>window.BolxivSession.acquire()).then(acquired=>{
   if(!acquired){showSessionBlocked();return}
   return load('js/load-order.js').then(()=>{
-  window.BolxivApplicationScripts=preloadScripts(Object.values(window.BolxivFiles).flat());
+  window.BolxivApplicationScripts=preloadScripts(window.BolxivIntegrity.bundles?.scripts||Object.values(window.BolxivFiles).flat());
   window.BolxivApplicationScripts.catch(()=>{});
   startupStatus('保存データを読み込んでいます…');
   return load('js/storage-bootstrap.js');

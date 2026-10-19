@@ -37,7 +37,13 @@
  domReady.then(()=>script('js/integrity-manifest.js',entry.dataset.manifestIntegrity)).then(()=>{
   const manifest=window.BolxivIntegrity;
   if(manifest?.schema!==1||!manifest.files)throw new Error('照合表の形式が不正です');
-  const styles=Array.from(document.querySelectorAll('link[rel="bolxiv-stylesheet"]')).filter(node=>{if(node.hasAttribute('data-startup-style')&&document.getElementById('startupInline')){node.remove();return false}return true});
+  let styles=Array.from(document.querySelectorAll('link[rel="bolxiv-stylesheet"]')).filter(node=>{if(node.hasAttribute('data-startup-style')&&document.getElementById('startupInline')){node.remove();return false}return true});
+  if(manifest.bundles?.style){
+   const original=styles[0];
+   for(const node of styles.slice(1))node.remove();
+   original.href=new URL(manifest.bundles.style,base).href;
+   styles=[original];
+  }
   // Small local servers may reject a burst of dozens of stylesheet requests.
   // Links remain in document order, preserving the CSS cascade.
   let styleIndex=0;
