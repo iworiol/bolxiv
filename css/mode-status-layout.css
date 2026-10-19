@@ -7,9 +7,70 @@
 .app>.top #editModeToggle{background:#eaf3ff!important;border-color:var(--blue)!important;color:#000!important;-webkit-text-fill-color:#000!important}
 .app>.top #editModeToggle.view-state{background:#fff!important;border-color:#999!important;color:#000!important;-webkit-text-fill-color:#000!important}
 @media(hover:hover) and (pointer:fine){
- .app>.top #editModeToggle:hover:not(:where(.phone-touch-mode *)){background:var(--blue)!important;border-color:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important;filter:none!important}
- .app>.top #editModeToggle.view-state:hover:not(:where(.phone-touch-mode *)){background:var(--blue)!important;border-color:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+ .app>.top #editModeToggle:enabled:hover:not(:where(.phone-touch-mode *)){background:var(--blue)!important;border-color:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important;filter:none!important}
+ .app>.top #editModeToggle.view-state:enabled:hover:not(:where(.phone-touch-mode *)){background:var(--blue)!important;border-color:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
 }
 .board-read-only #toggleLayoutProperties>.comparison-property-heading{display:inline!important}
 .board-read-only #activePhaseIndex,.board-read-only #activePhaseLabel{display:none!important}
 .board-read-only #inspector{font-size:14px;line-height:1.7;color:var(--muted)!important;opacity:1}
+
+.header-mode-status>.header-history-actions{display:flex;gap:8px;align-items:center;flex:none}
+.header-history-actions>.content-history-button{display:grid;place-items:center;box-sizing:border-box;flex:none;width:34px;min-width:34px;height:34px;min-height:34px;padding:6px;border:1px solid #999;border-radius:6px;background:#fff;color:#111}
+.header-history-actions>.content-history-button svg{width:20px;height:20px}
+.header-history-actions>.content-history-button:disabled{opacity:.4;cursor:default}
+@media(hover:hover) and (pointer:fine){
+ .header-history-actions>.content-history-button:is(:hover,:focus-visible):not(:disabled){background:var(--blue);border-color:var(--blue);color:#fff;filter:none}
+}
+@media(max-width:850px){
+ .app>.top>.header-mode-status{display:flex;gap:8px;align-items:center}
+ .app>.top #editModeToggle{box-sizing:border-box;width:36px;min-width:36px;height:36px;min-height:36px;padding:0}
+ .header-mode-status>.header-history-actions{display:flex;gap:8px;align-items:center}
+ .header-history-actions>.content-history-button{display:grid;place-items:center;box-sizing:border-box;flex:none;width:36px;min-width:36px;height:36px;min-height:36px;padding:6px;border:1px solid #999;border-radius:6px;background:#fff;color:#111}
+ .header-history-actions>.content-history-button svg{width:22px;height:22px}
+ .header-history-actions>.content-history-button:disabled{opacity:.4;cursor:default}
+}
+
+@media(max-width:850px){
+ .app>.top>.brand{position:relative}
+ .app>.top>.brand>.brand-version{grid-row:2;align-self:baseline}
+ .app>.top>.brand small{align-self:baseline}
+ .app>.top>.brand>.content-save-status{display:none;position:absolute;grid-column:2;grid-row:2;align-self:center;justify-self:stretch;left:0;right:0;min-width:0;max-width:100%;margin:0;font-size:12px;line-height:normal;letter-spacing:.05em;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ .app>.top>.brand.phone-save-status-visible small{visibility:hidden}
+ .app>.top>.brand.phone-save-status-visible>.content-save-status{display:block}
+}
+
+@media(min-width:851px){
+ .app>.top>.brand{display:grid;grid-template-columns:30px max-content auto;grid-template-rows:auto auto;column-gap:11px;row-gap:2px;justify-content:start}
+ .app>.top>.brand>.logo{grid-column:1;grid-row:1/3}
+ .app>.top>.brand>div:not(.logo){display:contents}
+ .app>.top>.brand strong{grid-column:2/4;grid-row:1}
+ .app>.top>.brand small{grid-column:2;grid-row:2;align-self:baseline;margin-top:0}
+ .app>.top>.brand>.brand-version{grid-column:3;grid-row:2;align-self:baseline;margin-left:0}
+}
+
+.phone-display-menu-toggle{display:none!important}
+.phone-display-menu[hidden]{display:none}
+.phone-display-menu{position:fixed;z-index:10060;min-width:220px;max-width:calc(100vw - 16px);padding:6px;border:1px solid #999;border-radius:8px;background:#fff;color:#111;box-shadow:0 6px 20px #0003}
+.phone-display-menu>button{display:flex;align-items:center;justify-content:space-between;gap:18px;width:100%;min-height:42px;padding:8px 10px;border-radius:4px;background:#fff;color:#111;text-align:left;font-size:14px}
+.phone-display-menu>button:focus-visible{outline:2px solid var(--blue);outline-offset:-2px}
+.phone-display-state{position:relative;display:inline-block;flex:none;width:34px;height:20px;border:1px solid #777;border-radius:999px;background:#888;font-size:0;color:transparent;transition:background-color .15s,border-color .15s}
+.phone-display-state::before{content:"";position:absolute;left:2px;top:2px;width:14px;height:14px;border-radius:50%;background:#fff;box-shadow:0 1px 2px #0003;transition:transform .15s}
+.phone-display-menu>button[aria-checked="true"] .phone-display-state{background:var(--blue);border-color:var(--blue)}
+.phone-display-menu>button[aria-checked="true"] .phone-display-state::before{transform:translateX(14px)}
+@media(prefers-reduced-motion:reduce){.phone-display-state,.phone-display-state::before{transition:none}}
+@media(max-width:850px){
+ .right .board-title-row .board-display-toolbar>.phone-display-menu-toggle{display:grid!important}
+ .board-display-toolbar>:is(#gridToggle,#fieldToggle,#clipToggle){display:none!important}
+}
+
+@media(max-width:850px){
+ .right .board-title-row .board-display-toolbar>#clearBtn+.board-toolbar-separator{margin-left:8px;margin-right:8px}
+}
+
+.phone-display-menu-separator{height:1px;margin:6px 4px;background:#d0d4da}
+
+@media(max-width:850px){.app>.top>.brand strong{grid-column:2/4}.app>.top>.brand{grid-template-columns:30px minmax(0,max-content) max-content}.app>.top>.brand>.brand-version{justify-self:start}}
+
+@media(max-width:850px){.app>.top>.brand{grid-template-columns:30px max-content max-content}.board-read-only .app>.top .header-history-actions{display:none!important}}
+
+@media(max-width:850px){.board-read-only .app .layout .right .board-display-toolbar>#clearBtn+.board-toolbar-separator{display:none!important}}

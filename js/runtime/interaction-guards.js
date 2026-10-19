@@ -50,7 +50,7 @@ let boardReadOnly=false;
 
 try{boardReadOnly=localStorage.getItem('bolxiv-read-only')==='true'}catch{}
 
-const readOnlyEditTargets='#importBtn,#jsonImportMenu,#fileInput,#fieldImageInput,#clearUserDataBtn,#addContent,.content-option-add,.content-row-action,.content-option-input,#addPage,#copyPage,#copyPageToContent,.page-tab-edit,.page-tab-x,.page-tab-input,#undo,#redo,#clearBtn,.left .tool,.left .icon-choice,#layoutPropertiesPanel input,#layoutPropertiesPanel select,#layoutPropertiesPanel textarea,#layoutPropertiesPanel button,#layoutPropertiesPanel .color-picker,#objectList,#inspector,#objectContextMenu,.confirm-dialog';
+const readOnlyEditTargets='#importBtn,#jsonImportMenu,#fileInput,#fieldImageInput,#clearUserDataBtn,#addContent,.content-option-add,.content-list-history-button,.content-row-action,.content-option-input,#addPage,#copyPage,#copyPageToContent,#addPhaseGroup,.page-tab-edit,.page-tab-x,.page-tab-input,#undo,#redo,#clearBtn,.left .tool,.left .icon-choice,#layoutPropertiesPanel input,#layoutPropertiesPanel select,#layoutPropertiesPanel textarea,#layoutPropertiesPanel button,#layoutPropertiesPanel .color-picker,#objectList,#inspector,#objectContextMenu,.confirm-dialog';
 
 let readOnlyPan=null;
 

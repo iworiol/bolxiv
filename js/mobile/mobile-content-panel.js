@@ -50,16 +50,14 @@
    closeAnimation=closeButton.animate([{transform:offscreen},{transform:'translateX(0)'}],{duration:duration(),easing:'ease-out'});
    backdropAnimation=backdrop.animate([{opacity:0},{opacity:1}],{duration:duration(),easing:'ease-out'});
    // Hold the pane offscreen until the live preview has its final size.
-   // The next frame presents that prepared picture before the slide starts.
+   // fitPreview is queued first, so start the slide in the same prepared frame.
    const opening=panelAnimation;
    panelAnimation.pause();closeAnimation.pause();backdropAnimation.pause();
    syncPreview(true);
    mountFrame=requestAnimationFrame(()=>{
-    mountFrame=requestAnimationFrame(()=>{
-     mountFrame=null;
-     if(!visible||closing||!mobile.matches||panelAnimation!==opening)return;
-     panelAnimation.play();closeAnimation.play();backdropAnimation.play();
-    });
+    mountFrame=null;
+    if(!visible||closing||!mobile.matches||panelAnimation!==opening)return;
+    panelAnimation.play();closeAnimation.play();backdropAnimation.play();
    });
   }
  }
@@ -91,5 +89,5 @@
  },true);
  new MutationObserver(sync).observe(layout,{attributes:true,attributeFilter:['class']});
  mobile.addEventListener('change',()=>{layout.classList.remove('phone-content-open');sync()});sync();
- document.addEventListener('pointerdown',event=>{if(!mobile.matches||!visible||event.target.closest('.battle,.phone-phase-navigation,.phone-content-backdrop,.phone-content-close,.color-popover,.native-color-picker,.phone-nav,.phone-content-icon,.phase-content-copy-menu,.phase-item-menu,.content-item-menu,.phase-group-menu,.phase-copy-menu,#pcTutorial'))return;close()},true);
+ document.addEventListener('pointerdown',event=>{if(!mobile.matches||!visible||event.target.closest('#undo,#redo,.battle,.phone-phase-navigation,.phone-content-backdrop,.phone-content-close,.color-popover,.native-color-picker,.phone-nav,.phone-content-icon,.phase-content-copy-menu,.phase-item-menu,.content-item-menu,.phase-group-menu,.phase-copy-menu,#pcTutorial'))return;close()},true);
 })();

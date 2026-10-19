@@ -4,6 +4,7 @@ const donutMinRingWidth=4;
 let contentBoards=[data],activeContent=0;
 
 const contentHistoryStore=new WeakMap();
+const contentListHistory=[],contentListFuture=[];
 
 let editingContentIndex=-1,contentEditDraft='',pendingContentAddition=null;
 

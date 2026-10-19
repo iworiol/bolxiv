@@ -24,3 +24,7 @@
  .phone-object-tabbed[data-object-expanded="false"]>.property-group>.phone-object-tabs{box-sizing:border-box;flex:1 0 0;min-height:0;height:100%;border:0;box-shadow:none}
  .phone-object-tabs .phone-object-collapse{width:26px;padding:3px}
 }
+
+@media(max-width:850px){
+ .app .layout .phone-object-tabs button:not(.phone-object-collapse){border-color:#d0d4da!important}
+}

@@ -4390,8 +4390,8 @@ body,.app,.layout,.center,.stagewrap,.footer,.top,.battle,.left,.right,.boardbar
   border-color:#42b8ff;
 }
 .handle.rotate {
-  top:-25px;
-  left:calc(50% - 6px);
+  top:calc(0px - var(--rotation-handle-distance,25px));
+  left:calc(50% - var(--rotation-handle-size,12px)/2);
   cursor:grab;
 }
 .handle.rotate:after {
@@ -4399,7 +4399,7 @@ body,.app,.layout,.center,.stagewrap,.footer,.top,.battle,.left,.right,.boardbar
   position:absolute;
   left:50%;
   top:100%;
-  height:13px;
+  height:calc(var(--rotation-handle-distance,25px) - var(--rotation-handle-size,12px));
   border-left:1px solid #42b8ff;
   pointer-events:none;
 }
@@ -4647,6 +4647,10 @@ input[type="number"] {
 .content-options .content-option-add-row {
   justify-content:flex-start;
 }
+.content-list-history-actions{margin-left:auto;display:flex;gap:6px}
+.content-list-history-button{display:grid;place-items:center;width:34px;height:31px;padding:0;border:1px solid #999;border-radius:6px;background:#fff;color:#000;cursor:pointer}
+.content-list-history-button>svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+.content-list-history-button:disabled{opacity:.4;cursor:default}
 :is(.battle,.phone-view-content) .content-options .content-option-add {
   width:34px;
   min-width:34px;
@@ -6782,6 +6786,10 @@ dialog.confirm-dialog {
     min-width:20px;
     min-height:20px;
   }
+  .controlbox {
+    --rotation-handle-distance:50px;
+    --rotation-handle-size:20px;
+  }
   .app {
     display:grid!important;
     height:100dvh!important;
@@ -8518,3 +8526,6 @@ body:not(.board-read-only) .page-list-box>.page-tab-actions {
 #aoeTools>[data-aoe-icon="divebomb"],#aoeTools>[data-aoe-icon="tower1"] {
   grid-column:1;
 }
+
+/* The preview carries navigation with the pane; no animation-frame geometry reads. */
+@media(max-width:850px){.phone-content-preview>.phone-phase-navigation{position:absolute;left:8px;right:8px;bottom:2px;top:auto;width:auto;z-index:1}}

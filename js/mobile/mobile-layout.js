@@ -49,3 +49,26 @@
  // Pane changes retain the current zoom and browser scroll position.
  // Fitting is performed only by the explicit fit button.
 })();
+
+(function setupPhoneDisplayMenu(){
+ const mobile=matchMedia('(max-width:850px)'),toolbar=document.querySelector('.board-display-toolbar'),trigger=document.createElement('button'),menu=document.createElement('div');
+ trigger.type='button';trigger.className='board-grid-toggle phone-display-menu-toggle';trigger.title='表示設定';trigger.setAttribute('aria-label','表示設定');trigger.setAttribute('aria-haspopup','menu');trigger.setAttribute('aria-expanded','false');trigger.setAttribute('aria-controls','phoneDisplayMenu');
+ trigger.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 3v4m0 5v9M12 3v10m0 5v3M19 3v4m0 5v9"/><rect x="2.5" y="7" width="5" height="5" rx="1"/><rect x="9.5" y="13" width="5" height="5" rx="1"/><rect x="16.5" y="7" width="5" height="5" rx="1"/></svg>';
+ toolbar.insertBefore(trigger,document.getElementById('gridToggle'));
+ menu.id='phoneDisplayMenu';menu.className='phone-display-menu';menu.hidden=true;menu.setAttribute('role','menu');menu.setAttribute('aria-label','表示設定');document.body.append(menu);
+ const items=[['gridToggle','グリッドを表示'],['fieldToggle','フィールドを表示'],['clipToggle','フィールド外を表示']].map(([id,label])=>{
+  const source=document.getElementById(id),item=document.createElement('button');item.type='button';item.setAttribute('role','menuitemcheckbox');item.innerHTML='<span>'+label+'</span><span class="phone-display-state" aria-hidden="true"></span>';
+  const sync=()=>{const pressed=source.getAttribute('aria-pressed')==='true',checked=id==='clipToggle'?!pressed:pressed;item.setAttribute('aria-checked',String(checked));item.lastElementChild.textContent=checked?'オン':'オフ';item.disabled=source.disabled};
+  item.onclick=()=>{source.click();sync();item.focus({preventScroll:true})};new MutationObserver(sync).observe(source,{attributes:true,attributeFilter:['aria-pressed','disabled']});sync();menu.append(item);return item;
+ });
+ const separator=document.createElement('div');separator.className='phone-display-menu-separator';separator.setAttribute('role','separator');menu.append(separator);
+ const closeButton=document.createElement('button');closeButton.type='button';closeButton.setAttribute('role','menuitem');closeButton.textContent='閉じる';closeButton.onclick=()=>close(true);menu.append(closeButton);items.push(closeButton);
+ function close(focus=false){menu.hidden=true;trigger.setAttribute('aria-expanded','false');if(focus)trigger.focus({preventScroll:true})}
+ function open(){if(!mobile.matches)return;document.querySelector('#boardZoomMenu:not([hidden])')&&document.getElementById('resetBoardZoom').click();menu.hidden=false;trigger.setAttribute('aria-expanded','true');const rect=trigger.getBoundingClientRect();menu.style.left=Math.max(8,Math.min(rect.left,innerWidth-menu.offsetWidth-8))+'px';menu.style.top=Math.max(8,Math.min(rect.bottom+4,innerHeight-menu.offsetHeight-8))+'px';items[0].focus({preventScroll:true})}
+ trigger.onclick=()=>menu.hidden?open():close();
+ window.addEventListener('keydown',event=>{if(!menu.hidden&&event.key==='Escape'){event.preventDefault();event.stopImmediatePropagation();close(true)}},true);
+ trigger.addEventListener('keydown',event=>{if(event.key==='ArrowDown'){event.preventDefault();open()}});
+ menu.addEventListener('keydown',event=>{const index=items.indexOf(document.activeElement);if(event.key==='Escape'){event.preventDefault();close(true)}else if(event.key==='ArrowDown'||event.key==='ArrowUp'){event.preventDefault();items[(index+(event.key==='ArrowDown'?1:items.length-1))%items.length].focus()}else if(event.key==='Home'||event.key==='End'){event.preventDefault();items[event.key==='Home'?0:items.length-1].focus()}else if(event.key==='Tab')close()});
+ document.addEventListener('pointerdown',event=>{if(!menu.contains(event.target)&&!trigger.contains(event.target))close()},true);
+ window.addEventListener('resize',()=>close());window.addEventListener('scroll',event=>{if(!menu.contains(event.target))close()},true);mobile.addEventListener('change',()=>close());
+})();

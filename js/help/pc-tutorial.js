@@ -6,7 +6,7 @@
  const panel=document.createElement('section');panel.id='pcTutorial';panel.hidden=true;panel.setAttribute('role','region');panel.setAttribute('aria-label','PCチュートリアル');
  panel.innerHTML='<div class="tutorial-progress" id="tutorialProgress"></div><h2 id="tutorialTitle"></h2><p id="tutorialInstruction"></p><p id="tutorialStatus" role="status" aria-live="polite"></p><div class="tutorial-footer"><button type="button" id="tutorialExit">途中で終了</button><button type="button" id="tutorialNext" class="tutorial-primary">次へ</button></div>';document.body.append(panel);
  const highlight=document.createElement('div');highlight.id='tutorialHighlight';highlight.hidden=true;highlight.setAttribute('aria-hidden','true');document.body.append(highlight);
- const get=id=>document.getElementById(id);let session=null,timer=null;
+ const get=id=>document.getElementById(id);let session=null,timer=null,starting=false;
  const practice=()=>session&&data.tutorialPracticeId===session.id;
  const circle=()=>practice()?current().find(item=>item.type==='circle'):null;
  const steps=[
@@ -14,7 +14,7 @@
   {title:'サイズを変える',text:'円範囲をクリックして選び、右側のプロパティで「サイズ」を150px以上にしてください。スライダーでも数値入力でも変更できます。',target:()=>get('widthSpin')||document.querySelector('#objects .obj'),done:()=>!!circle()&&circle().width>=150},
   {title:'矢印キーで移動する',text:'キャンバス上の円範囲をクリックして選び、上下左右キーで動かしてください。数値欄を入力中なら、先に円範囲をクリックします。',target:()=>document.querySelector('#objects .obj'),enter:()=>{const item=circle();session.position=item?{x:item.x,y:item.y}:null},done:()=>{const item=circle();return !!item&&!!session.position&&(Math.abs(item.x-session.position.x)>.001||Math.abs(item.y-session.position.y)>.001)}},
   {title:'フェーズをコピーする',text:'フェーズリスト見出し右側のコピーを押し、「このコンテンツにコピー」を選んでください。配置と設定を引き継いだ次のフェーズを作れます。',target:()=>get('copyPage'),enter:()=>{session.sourcePage=data.page;session.sourceId=circle()?.id},done:()=>data.pages.length>=2&&data.page!==session.sourcePage&&!!circle()&&circle().id!==session.sourceId},
-  {title:'ノートを残す',text:'右側の「フェーズノート」を開き、「ここで集合」など短いメモを入力してください。ノートはフェーズごとに保存されます。',target:()=>get('phaseMemo').open?get('phaseMemo').querySelector('textarea'):get('phaseMemo').querySelector('summary'),done:()=>!!data.pageNotes?.[data.page]?.trim()},
+  {title:'ノートを残す',text:'右側の「フェーズ プロパティ / ノート」の＋で欄を開き、切り替えボタンでノートを表示します。「ここで集合」など短いメモを入力してください。ノートはフェーズごとに保存されます。',target:()=>get('phaseMemo').open?get('phaseMemo').querySelector('textarea'):get('desktopPhaseSectionToggle')?.getAttribute('aria-expanded')==='false'?get('desktopPhaseSectionToggle'):get('desktopPhaseSwitch'),done:()=>!!data.pageNotes?.[data.page]?.trim()},
   {title:'元に戻す・やり直す',text:'ノート欄の外をクリックし、左上の「元に戻す」、続けて「やり直す」を押してください。入力したノートが戻れば完了です。',target:()=>get(session.sawUndo?'redo':'undo'),enter:()=>{session.note=data.pageNotes[data.page];session.notePage=data.page;session.sawUndo=false},done:()=>{const note=data.pageNotes?.[session.notePage]||'';if(note!==session.note)session.sawUndo=true;return session.sawUndo&&note===session.note}}
  ];
  const mobileSteps=[
@@ -23,7 +23,7 @@
   {...steps[2],title:'指で移動する',text:'円範囲を指でドラッグして、別の場所へ動かしてください。',target:()=>document.querySelector('#objects .obj')},
   {...steps[3],text:'キャンバス左側の矢印からコンテンツを開き、フェーズリスト見出しのコピーから「このコンテンツにコピー」をタップしてください。',target:()=>document.querySelector('.layout').classList.contains('phone-content-open')?get('copyPage'):document.querySelector('.phone-content-icon')},
   {...steps[4],text:'コンテンツ内の「プロパティ／ノート」を切り替えてノートを開き、「ここで集合」など短いメモを入力してください。「＋」で欄を開けます。',target:()=>get('phaseMemo').getClientRects().length?get('phaseMemo').querySelector('textarea'):get('phonePhaseSwitch-toggle')},
-  {...steps[5],text:'キーボードとコンテンツを閉じ、「元に戻す」、続けて「やり直す」をタップしてください。ノートが元どおりになれば完了です。',target:()=>document.querySelector('.layout').classList.contains('phone-content-open')?document.querySelector('.phone-content-close'):get(session.sawUndo?'redo':'undo')}
+  {...steps[5],text:'キーボードを閉じ、コンテンツを開いたまま画面上部の「元に戻す」、続けて「やり直す」をタップしてください。ノートが元どおりになれば完了です。',target:()=>get(session.sawUndo?'redo':'undo')}
  ];
  let activeSteps=steps;
  function animateHighlight(){
@@ -33,7 +33,7 @@
  function focusStep(){get('tutorialTitle').focus({preventScroll:true})}
  function showStep(){
   if(!session)return;const step=activeSteps[session.step];highlight.hidden=true;
-  document.body.classList.toggle('tutorial-content-step',!desktop.matches&&(session.step===3||session.step===4));
+  document.body.classList.toggle('tutorial-content-step',!desktop.matches&&(session.step===3||session.step===4||session.step===5));
   get('tutorialTitle').tabIndex=-1;
   get('tutorialProgress').textContent=step?'ステップ '+(session.step+1)+' / '+activeSteps.length:'練習完了';
   get('tutorialTitle').textContent=step?step.title:'ひと通り操作できました';
@@ -50,8 +50,11 @@
   const target=step.target(),rect=target?.getBoundingClientRect();highlight.hidden=!rect||!rect.width||!rect.height;
   if(!highlight.hidden)Object.assign(highlight.style,{left:(rect.left-3)+'px',top:(rect.top-3)+'px',width:(rect.width+6)+'px',height:(rect.height+6)+'px'});
  }
- function start(){
-  if(session)return;activeSteps=desktop.matches?steps:mobileSteps;panel.setAttribute('aria-label',desktop.matches?'PCチュートリアル':'スマホチュートリアル');intro.close();document.querySelector('.top').classList.remove('phone-menu-open');flushScheduledBoardSave();storeContentHistory();
+ async function start(){
+  if(session||starting)return;
+  starting=true;
+  try{flushScheduledBoardSave();await window.boardStorage.flush()}finally{starting=false}
+  activeSteps=desktop.matches?steps:mobileSteps;panel.setAttribute('aria-label',desktop.matches?'PCチュートリアル':'スマホチュートリアル');intro.close();document.querySelector('.top').classList.remove('phone-menu-open');storeContentHistory();boardSaveSuspended=true;
   const id='tutorial-'+Date.now()+'-'+Math.random().toString(36).slice(2);
   session={id,home:data,homeIndex:activeContent,selected,selectedIds:selectedIds.slice(),phases:selectedPhaseIndexes.slice(),wasReadOnly:boardReadOnly,pinned:document.querySelector('.left').classList.contains('pinned'),collapsed:document.querySelector('.layout').classList.contains('content-collapsed'),step:0};
   if(boardReadOnly)get('editModeToggle').click();
@@ -64,11 +67,11 @@
  }
  function finish(){
   if(!session)return;const previous=session;cancelAnimationFrame(timer);timer=null;session=null;panel.hidden=true;highlight.hidden=true;document.body.classList.remove('tutorial-active','tutorial-content-step');if(!desktop.matches){if(document.querySelector('.layout').classList.contains('phone-materials-open'))document.querySelector('.phone-content-icon').click();if(document.querySelector('.layout').classList.contains('phone-content-open'))document.querySelector('.phone-content-close').click()}
-  flushScheduledBoardSave();contentBoards[activeContent]=data;storeContentHistory();contentBoards=contentBoards.filter(board=>board.tutorialPracticeId!==previous.id);
+  cancelScheduledBoardSave();contentBoards[activeContent]=data;storeContentHistory();contentBoards=contentBoards.filter(board=>board.tutorialPracticeId!==previous.id);
   const at=contentBoards.indexOf(previous.home);activeContent=at>=0?at:Math.max(0,Math.min(previous.homeIndex,contentBoards.length-1));data=contentBoards[activeContent];restoreContentHistory();
   selected=previous.selected;selectedIds=previous.selectedIds.filter(id=>current().some(item=>item.id===id));selectedPhaseIndexes=previous.phases.filter(i=>i<data.pages.length);phaseSelectionOwner=data;drag=null;selectPlacementTool('select');
   const layout=document.querySelector('.layout');if(document.querySelector('.left').classList.contains('pinned')!==previous.pinned)get('leftRailToggle').click();if(layout.classList.contains('content-collapsed')!==previous.collapsed)get('contentObjectPin').click();if(boardReadOnly!==previous.wasReadOnly)get('editModeToggle').click();
-  renderAndSave();flushScheduledBoardSave();get('operationGuideBtn').focus({preventScroll:true});
+  boardSaveSuspended=false;renderAndSave();flushScheduledBoardSave();get('operationGuideBtn').focus({preventScroll:true});
   for(const section of previous.sections)if((get(section.id).getAttribute('aria-expanded')==='true')!==section.open)get(section.id).click();
  }
  helpMenu.addEventListener('click',event=>{if(!event.target.closest('[data-help-action="tutorial"]'))return;event.preventDefault();event.stopImmediatePropagation();closeHelpMenu();if(!session)intro.showModal()},true);

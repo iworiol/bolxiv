@@ -253,16 +253,14 @@
   else [...list.querySelectorAll('.phase-group-heading')].find(heading=>heading.dataset.groupId===data.pageGroupIds[data.page])?.querySelector('.phase-group-name')?.focus({preventScroll:true});
  },true);
  function updateGroupFrames(){
-  const rows=[...list.querySelectorAll('.page-tab')];
-  const sample=rows.find(row=>!row.hidden&&row.getBoundingClientRect().width>0);
-  const heading=list.querySelector('.phase-group-heading');
-  if(sample&&heading){const label=sample.querySelector('.page-tab-name'),style=getComputedStyle(heading);const offset=label.getBoundingClientRect().left-sample.getBoundingClientRect().left-parseFloat(style.paddingLeft)-parseFloat(style.borderLeftWidth);list.style.setProperty('--group-name-offset',Math.max(0,offset)+'px')}
-  list.querySelectorAll('.phase-group-heading.group-expanded').forEach(heading=>{
-   const last=rows[data.pageGroupIds.lastIndexOf(heading.dataset.groupId)];if(!last)return;
-   const height=last.getBoundingClientRect().bottom-heading.getBoundingClientRect().top;
-   heading.style.setProperty('--group-frame-height',Math.max(34,height)+'px');
-  });
+  const rows=[...list.querySelectorAll('.page-tab')],updates=[];
+  const sample=rows.find(row=>!row.hidden&&row.getBoundingClientRect().width>0),heading=list.querySelector('.phase-group-heading');
+  if(sample&&heading){const label=sample.querySelector('.page-tab-name'),style=getComputedStyle(heading),offset=label.getBoundingClientRect().left-sample.getBoundingClientRect().left-parseFloat(style.paddingLeft)-parseFloat(style.borderLeftWidth);updates.push([list,'--group-name-offset',Math.max(0,offset)+'px'])}
+  // Read all bounds before writing styles, so one group cannot force layout for the next.
+  for(const heading of list.querySelectorAll('.phase-group-heading.group-expanded')){const last=rows[data.pageGroupIds.lastIndexOf(heading.dataset.groupId)];if(last)updates.push([heading,'--group-frame-height',Math.max(34,last.getBoundingClientRect().bottom-heading.getBoundingClientRect().top)+'px'])}
+  for(const [node,key,value] of updates)if(node.style.getPropertyValue(key)!==value)node.style.setProperty(key,value);
  }
+
  const frameObserver=new ResizeObserver(updateGroupFrames);
  const beforeRender=render;render=function(){
   arrangeGroups();

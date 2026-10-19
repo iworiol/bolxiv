@@ -33,6 +33,28 @@
  let groupWasSelected=false,toolBeforeGroup='',listBeforeGroup=null;
  let currentTool=['object','phase','memo',''].includes(viewSettings.desktopPhaseTool)?viewSettings.desktopPhaseTool:'object';
  let readingMode=false,editingTool=currentTool,editingListOpen=true;
+ let selectedPhaseTool=['phase','memo'].includes(currentTool)?currentTool:viewSettings.desktopPhasePanelTab==='memo'?'memo':'phase';
+ const phaseHeading=document.createElement('div');phaseHeading.className='desktop-phase-shared-heading';phaseHeading.hidden=true;
+ const phaseTitle=document.createElement('button');phaseTitle.type='button';phaseTitle.id='desktopPhasePanelTitle';phaseTitle.className='desktop-phase-panel-title';
+ const phaseSwitch=document.createElement('button');phaseSwitch.type='button';phaseSwitch.id='desktopPhaseSwitch';phaseSwitch.className='desktop-phase-switch';phaseSwitch.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h16l-4-4M20 16H4l4 4"/></svg>';
+ const phaseCollapse=document.createElement('button');phaseCollapse.type='button';phaseCollapse.id='desktopPhaseSectionToggle';phaseCollapse.className='desktop-phase-collapse';
+ for(const button of [phaseTitle,phaseSwitch,phaseCollapse])button.setAttribute('aria-controls',phaseBody.id+' '+memo.id);
+ phaseHeading.append(phaseTitle,phaseSwitch,phaseCollapse);
+ function syncPhaseHeading(){
+  const group=!!data.activePhaseGroup;rail.classList.toggle('desktop-group-tools',group);phaseHeading.hidden=!active||group;
+  const open=currentTool==='phase'||currentTool==='memo';phaseHeading.dataset.expanded=String(open);
+  const markup=selectedPhaseTool==='phase'?'<strong>フェーズ プロパティ</strong> / ノート':'<strong>フェーズ</strong> プロパティ / <strong>ノート</strong>';
+  if(phaseTitle.innerHTML!==markup)phaseTitle.innerHTML=markup;
+  phaseTitle.setAttribute('aria-expanded',String(open));phaseTitle.setAttribute('aria-label',(selectedPhaseTool==='phase'?'フェーズプロパティ':'フェーズノート')+'を選択中。設定・ノート欄を'+(open?'閉じる':'開く'));
+  phaseSwitch.title=selectedPhaseTool==='phase'?'フェーズノートを表示':'フェーズプロパティを表示';phaseSwitch.setAttribute('aria-label',phaseSwitch.title);
+  phaseCollapse.textContent=open?'−':'＋';phaseCollapse.title=open?'設定・ノートを閉じる':'設定・ノートを開く';phaseCollapse.setAttribute('aria-label',phaseCollapse.title);phaseCollapse.setAttribute('aria-expanded',String(open));
+  for(const button of [phaseTitle,phaseSwitch,phaseCollapse])button.disabled=readingMode;
+ }
+ function togglePhasePanel(){if(active&&!readingMode)showTool(currentTool==='phase'||currentTool==='memo'?'':selectedPhaseTool)}
+ phaseTitle.onclick=togglePhasePanel;phaseCollapse.onclick=togglePhasePanel;
+ phaseHeading.addEventListener('click',event=>{if(!event.target.closest('button'))togglePhasePanel()});
+ phaseSwitch.onclick=()=>{if(!active||readingMode)return;selectedPhaseTool=selectedPhaseTool==='phase'?'memo':'phase';rememberViewSetting('desktopPhasePanelTab',selectedPhaseTool);if(currentTool==='phase'||currentTool==='memo')showTool(selectedPhaseTool);else syncPhaseHeading()};
+
  let twoColumns=viewSettings.desktopToolsTwoColumns===true;
  const columnsButton=document.createElement('button');columnsButton.type='button';columnsButton.className='desktop-columns-toggle';columnsButton.setAttribute('aria-controls',rail.id='desktopPhaseSidebar');list.append(columnsButton);
  columnsButton.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>';
@@ -45,7 +67,7 @@
   columnsButton.title=twoColumns?'オブジェクトリストを元の配置に戻す':'オブジェクトリストを独立表示する';
   columnsButton.setAttribute('aria-label',columnsButton.title);columnsButton.setAttribute('aria-pressed',String(twoColumns));
   if(active&&twoColumns&&!readingMode)setDisclosure(listButton,document.getElementById('layerListPanel'),true);
-  syncResizeHandle();
+  syncResizeHandle();syncPhaseHeading();
  }
  function syncResizeHandle(){
   rail.classList.toggle('desktop-resize-enabled',active&&!twoColumns&&!readingMode&&listButton.getAttribute('aria-expanded')==='true'&&!!currentTool);
@@ -92,15 +114,17 @@
  }
  function showTool(key,remember=true){
   currentTool=key;
+  if(!data.activePhaseGroup&&(key==='phase'||key==='memo')){selectedPhaseTool=key;if(remember)rememberViewSetting('desktopPhasePanelTab',key)}
   if(active&&twoColumns&&key&&!readingMode)setDisclosure(listButton,document.getElementById('layerListPanel'),true);
   object.classList.toggle('is-open',key==='object');phase.classList.toggle('is-open',key==='phase');memo.classList.toggle('is-open',key==='memo');
   setDisclosure(objectButton,objectBody,key==='object');setDisclosure(phaseButton,phaseBody,key==='phase');memo.open=key==='memo';
   if(remember)rememberViewSetting('desktopPhaseTool',key);
+  syncPhaseHeading();
  }
  function selectionChanged(){
   const groupSelected=!!data.activePhaseGroup;
   if(active&&groupSelected&&!groupWasSelected){toolBeforeGroup=readingMode?editingTool:currentTool;listBeforeGroup={twoColumns,open:listButton.getAttribute('aria-expanded')==='true'};twoColumns=false}
-  if(active&&!groupSelected&&groupWasSelected){if(listBeforeGroup){twoColumns=listBeforeGroup.twoColumns;setDisclosure(listButton,document.getElementById('layerListPanel'),listBeforeGroup.open);listBeforeGroup=null}if(!boardReadOnly&&!phaseComparisonActive())showTool(toolBeforeGroup)}
+  if(active&&!groupSelected&&groupWasSelected){if(listBeforeGroup){twoColumns=listBeforeGroup.twoColumns;setDisclosure(listButton,document.getElementById('layerListPanel'),listBeforeGroup.open);listBeforeGroup=null}if(boardReadOnly||phaseComparisonActive())showTool('memo',false);else showTool(toolBeforeGroup)}
   if(active&&groupSelected){twoColumns=false;setDisclosure(listButton,document.getElementById('layerListPanel'),false);showTool('phase',false);memo.open=true;memo.classList.add('is-open')}
   listButton.disabled=readingMode||groupSelected;objectButton.disabled=readingMode||groupSelected;phaseButton.disabled=readingMode||groupSelected;
   groupWasSelected=groupSelected;
@@ -114,7 +138,7 @@
    mobileState={object:objectButton.getAttribute('aria-expanded')==='true',phase:phaseButton.getAttribute('aria-expanded')==='true',memo:memo.open,phaseList:phaseListButton.getAttribute('aria-expanded')==='true'};
    active=true;layout.classList.add('desktop-phase-tools');rail.hidden=false;
    setPhaseList(true);phaseListButton.disabled=true;phaseListButton.title='フェーズリスト';phaseListButton.setAttribute('role','heading');phaseListButton.setAttribute('aria-level','2');
-   rail.append(list,resizeHandle,object,phase,memo);
+   rail.append(list,resizeHandle,object,phaseHeading,phase,memo);
    if(typeof viewSettings.desktopObjectListExpanded==='boolean')setDisclosure(listButton,document.getElementById('layerListPanel'),viewSettings.desktopObjectListExpanded);
    showTool(currentTool,false);syncReadingMode();selectionChanged();syncPropertyHeadings();syncColumns();
   }else{

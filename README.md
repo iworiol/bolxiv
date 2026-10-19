@@ -14,7 +14,7 @@
 
 `Bolxiv.ready === true` かつ `boardStorageStarting === false` が操作可能な状態です。初期レイアウトとスマホの自動フィットも完了してから公開します。
 
-JS・CSSの変更後は、プロジェクトのルートで `node __develop__/scripts/generate-integrity.cjs` を実行して照合表とHTMLを更新し、その一式をテストします。`--check`を付けると書き換えずに更新漏れを検出します。結合・圧縮は行いません。
+JS・CSSの変更後は、プロジェクトのルートで `node __develop__/scripts/generate-integrity.cjs` を実行して照合表とHTMLを更新し、その一式をテストします。`--check`を付けると書き換えずに更新漏れを検出します。生成時にJS・CSSの改行をLFへ統一してから照合表を作成します。スマホのファイル配信機能でCRLFがLFへ変換されても照合結果が変わらないようにするためです。結合・圧縮は行いません。
 
 ## JavaScript
 
