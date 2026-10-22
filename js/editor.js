@@ -144,7 +144,7 @@ changeLog.className='operation-guide';
 
 changeLog.setAttribute('aria-labelledby','changeLogTitle');
 
-changeLog.innerHTML='<div class="operation-guide-heading"><h2 id="changeLogTitle">更新履歴</h2><button type="button" class="btn" autofocus>閉じる</button></div><div class="operation-guide-body"><p><span class="change-log-version">2026/10/22　Ver.0.5.1</span><span class="change-log-description">UI調整</span></p><p><span class="change-log-version">2026/10/19　Ver.0.5.0</span><span class="change-log-description">コンテンツを履歴操作に追加、PNG生成モード追加、レイアウト少し見直し、その他修正</span></p><p><span class="change-log-version">2026/10/18　Ver.0.4.1</span><span class="change-log-description">ツールの内部構成変更、その他修正</span></p><p><span class="change-log-version">2026/10/18　Ver.0.4.0</span><span class="change-log-description">チュートリアル追加、フェーズグループ化機能追加、メモリ使用量削減、JSONファイルサイズ削減</span></p><p><span class="change-log-version">2026/10/17　Ver.0.3.0</span><span class="change-log-description">コンテンツ間フェーズコピー機能追加、右クリック・長押し操作メニュー各種追加、文字サイズ変更、処理負荷改善</span></p><p><span class="change-log-version">2026/10/15　Ver.0.2.0</span><span class="change-log-description">フェーズノート追加、構成見直し、その他修正&amp;見直し</span></p><p><span class="change-log-version">2026/10/14　Ver.0.1.1</span><span class="change-log-description">見た目見直し</span></p><p><span class="change-log-version">2026/10/12　Ver.0.1.0</span><span class="change-log-description">初版</span></p></div>';
+changeLog.innerHTML='<div class="operation-guide-heading"><h2 id="changeLogTitle">更新履歴</h2><button type="button" class="btn" autofocus>閉じる</button></div><div class="operation-guide-body"><p><span class="change-log-version">2026/10/23　Ver.0.5.2</span><span class="change-log-description">UI調整</span></p><p><span class="change-log-version">2026/10/22　Ver.0.5.1</span><span class="change-log-description">UI調整</span></p><p><span class="change-log-version">2026/10/19　Ver.0.5.0</span><span class="change-log-description">コンテンツを履歴操作に追加、PNG生成モード追加、レイアウト少し見直し、その他修正</span></p><p><span class="change-log-version">2026/10/18　Ver.0.4.1</span><span class="change-log-description">ツールの内部構成変更、その他修正</span></p><p><span class="change-log-version">2026/10/18　Ver.0.4.0</span><span class="change-log-description">チュートリアル追加、フェーズグループ化機能追加、メモリ使用量削減、JSONファイルサイズ削減</span></p><p><span class="change-log-version">2026/10/17　Ver.0.3.0</span><span class="change-log-description">コンテンツ間フェーズコピー機能追加、右クリック・長押し操作メニュー各種追加、文字サイズ変更、処理負荷改善</span></p><p><span class="change-log-version">2026/10/15　Ver.0.2.0</span><span class="change-log-description">フェーズノート追加、構成見直し、その他修正&amp;見直し</span></p><p><span class="change-log-version">2026/10/14　Ver.0.1.1</span><span class="change-log-description">見た目見直し</span></p><p><span class="change-log-version">2026/10/12　Ver.0.1.0</span><span class="change-log-description">初版</span></p></div>';
 
 document.body.append(changeLog);
 
@@ -531,14 +531,14 @@ $('#fileInput').onchange=e=>{
  const reader=new FileReader();
  reader.onload=async()=>{
   let imported;
-  try{imported=parseImportedBoards(reader.result)}catch(error){notify('JSON読み込みに失敗：'+(error?.message||String(error)));e.target.value='';return}
+  try{imported=parseImportedBoards(reader.result)}catch(error){notify('JSONを読み込めませんでした：'+(error?.message||String(error)));e.target.value='';return}
   if(mode==='replace'&&!await confirmReplaceImport(imported)){e.target.value='';return}
   const previous={data,contentBoards,activeContent,listHistory:contentListHistory.slice(),listFuture:contentListFuture.slice(),history:history.slice(),future:future.slice(),selected,selectedIds:selectedIds.slice(),selectedPhaseIndexes:selectedPhaseIndexes.slice(),phaseSelectionOwner};
   try{applyImportedBoards(imported,mode);notify(mode==='append'?imported.length+' 件のコンテンツを末尾に追加しました':'全コンテンツを読み込みデータに置き換えました')}
   catch(error){
    contentListHistory.splice(0,contentListHistory.length,...previous.listHistory);contentListFuture.splice(0,contentListFuture.length,...previous.listFuture);contentSelectorCache=null;data=previous.data;contentBoards=previous.contentBoards;activeContent=previous.activeContent;history=previous.history;future=previous.future;selected=previous.selected;selectedIds=previous.selectedIds;selectedPhaseIndexes=previous.selectedPhaseIndexes;phaseSelectionOwner=previous.phaseSelectionOwner;
    try{renderAndSave()}catch(recoveryError){console.error('Import recovery failed',recoveryError)}
-   console.error('Board import failed',error);notify('JSON読み込みに失敗：'+(error?.message||String(error)));clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').classList.remove('show'),15000);
+   console.error('Board import failed',error);notify('JSONを読み込めませんでした：'+(error?.message||String(error)));clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').classList.remove('show'),15000);
   }
   e.target.value='';
  };

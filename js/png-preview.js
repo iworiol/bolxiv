@@ -6,14 +6,14 @@
  host.append(dialog);
  const surface=dialog.querySelector('.png-preview-surface'),status=document.getElementById('pngPreviewStatus'),scaleInput=document.getElementById('pngPreviewScale'),save=document.getElementById('pngPreviewSave'),back=document.getElementById('editModeToggle');
  const toolbar=document.querySelector('.board-display-toolbar').cloneNode(true);toolbar.classList.add('png-preview-toolbar');toolbar.setAttribute('aria-label','PNGプレビューの表示');
- toolbar.querySelector('.phone-content-icon')?.remove();
+ toolbar.querySelector('.phone-content-icon')?.remove();toolbar.querySelector('.phone-icon-help-toggle')?.remove();toolbar.querySelector('.phone-help-separator')?.remove();
  for(const node of toolbar.querySelectorAll('[id]')){node.dataset.sourceId=node.id;node.id='png-'+node.id}
  for(const button of toolbar.querySelectorAll('button')){
   const action=button.dataset.sourceId,zoom=['fitBoardZoom','zoomOut','resetBoardZoom','zoomIn'].includes(action);button.disabled=!zoom;
   if(zoom)button.onclick=()=>{if(!session)return;session.zoom=action==='zoomIn'?Math.min(3,session.zoom+.05):action==='zoomOut'?Math.max(.05,session.zoom-.05):action==='fitBoardZoom'?Math.max(.05,Math.min((surface.clientWidth-40)/outputDimensions().width,(surface.clientHeight-40)/outputDimensions().height)):1;fit();surface.scrollLeft=Math.max(0,(surface.scrollWidth-surface.clientWidth)/2);surface.scrollTop=Math.max(0,(surface.scrollHeight-surface.clientHeight)/2)};
  }
  dialog.querySelector('.png-preview-heading').append(toolbar);
- const helpButton=document.createElement('button');helpButton.type='button';helpButton.className='phone-icon-help-toggle png-icon-help';helpButton.textContent='？';helpButton.setAttribute('aria-label','PNG生成のアイコン説明');helpButton.setAttribute('aria-controls','phoneIconHelp');helpButton.setAttribute('aria-haspopup','dialog');helpButton.setAttribute('aria-expanded','false');helpButton.onclick=()=>window.Bolxiv.iconHelp.open(helpButton);dialog.querySelector('.png-preview-heading').append(helpButton);
+ const helpButton=document.createElement('button');helpButton.type='button';helpButton.className='phone-icon-help-toggle png-icon-help';helpButton.textContent='？';helpButton.setAttribute('aria-label','PNG生成のアイコン説明');helpButton.setAttribute('aria-controls','phoneIconHelp');helpButton.setAttribute('aria-haspopup','dialog');helpButton.setAttribute('aria-expanded','false');helpButton.onclick=()=>window.Bolxiv.iconHelp.open(helpButton);const helpSeparator=document.createElement('span');helpSeparator.className='phone-help-separator';helpSeparator.setAttribute('aria-hidden','true');toolbar.append(helpSeparator,helpButton);
  const liveSpace=document.getElementById('boardZoomSpace'),liveAnchor=document.createComment('PNG canvas home');liveSpace.before(liveAnchor);
  const zoomTrigger=toolbar.querySelector('[data-source-id=resetBoardZoom]'),zoomMenu=document.getElementById('boardZoomMenu').cloneNode(true);zoomMenu.id='pngPreviewZoomMenu';document.body.append(zoomMenu);zoomTrigger.setAttribute('aria-controls',zoomMenu.id);
  const zoomItems=[...zoomMenu.querySelectorAll('[data-zoom]')];

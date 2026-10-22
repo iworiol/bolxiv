@@ -1151,7 +1151,7 @@
 }
 /* Disclosure controls use independent desktop and phone metrics. */
 @media(min-width:851px){
- .app{--disclosure-size:24px;--disclosure-font:14px;--disclosure-weight:600;--disclosure-inset:6px}
+ .app{--disclosure-size:26px;--disclosure-font:14px;--disclosure-weight:600;--disclosure-inset:6px}
 }
 @media(max-width:850px){
  .app{--disclosure-size:28px;--disclosure-font:16px;--disclosure-weight:700;--disclosure-inset:6px}
@@ -1264,3 +1264,67 @@ body .app .layout #contentSelect::after{
  body .app .layout .phone-reader-tabs:has(:is(.phone-reader-title,.phone-reader-collapse):is(:active,.phone-control-pressed)) :is(.phone-reader-title,.phone-reader-collapse,.phone-reader-title *, .phone-reader-collapse *){background:transparent!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
  body .app .layout .phone-reader-tabs:has(:is(.phone-reader-title,.phone-reader-collapse):is(:active,.phone-control-pressed)) .phone-reader-switch{background:#eef2f7!important;color:#33445f!important;-webkit-text-fill-color:#33445f!important;border-color:#d0d4da!important}
 }
+/* Distinguish the selected tab with text weight and color, without adding a fill. */
+@media(max-width:850px){
+ body .app .layout :is(.phone-object-tabs,.phone-phase-tabs,.phone-reader-tabs):not(:has(:is(.phone-object-tabs-title,.phone-object-collapse,.phone-phase-switch-title,#phonePhaseSectionToggle,.phone-reader-title,.phone-reader-collapse):is(:active,.phone-control-pressed))) :is(.phone-object-tabs-title,.phone-phase-switch-title,.phone-reader-title){color:#626c7c!important;-webkit-text-fill-color:#626c7c!important;font-weight:400}
+ body .app .layout :is(.phone-object-tabs,.phone-phase-tabs,.phone-reader-tabs):not(:has(:is(.phone-object-tabs-title,.phone-object-collapse,.phone-phase-switch-title,#phonePhaseSectionToggle,.phone-reader-title,.phone-reader-collapse):is(:active,.phone-control-pressed))) :is(.phone-object-tabs-title,.phone-phase-switch-title,.phone-reader-title) strong{color:#33445f!important;-webkit-text-fill-color:#33445f!important;font-weight:700}
+}
+/* Let the current phase lead, while keeping its content name as context. */
+:is(#selectionTitle,#pngPreviewTitle){display:flex;align-items:center;min-width:0}
+:is(#selectionTitle,#pngPreviewTitle)>.selection-content-name{flex:0 1 auto;min-width:0;max-width:40%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;font-weight:400;color:#d0d9ea;-webkit-text-fill-color:#d0d9ea}
+:is(#selectionTitle,#pngPreviewTitle)>.selection-name-separator{flex:none;white-space:pre;font-weight:400;color:#d0d9ea;-webkit-text-fill-color:#d0d9ea}
+:is(#selectionTitle,#pngPreviewTitle)>.selection-phase-name{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px;font-weight:700;color:#fff;-webkit-text-fill-color:#fff}
+@media(max-width:850px){
+ :is(#selectionTitle,#pngPreviewTitle)>.selection-content-name{max-width:35%;font-size:11px}
+ :is(#selectionTitle,#pngPreviewTitle)>.selection-name-separator{font-size:12px}
+}
+/* Phase first; the parenthesized content name is secondary context. */
+:is(#selectionTitle,#pngPreviewTitle)>.phase-label-prefix{display:inline!important;flex:none;font-size:12px;font-weight:400;color:#d0d9ea;-webkit-text-fill-color:#d0d9ea}
+:is(#selectionTitle,#pngPreviewTitle)>.selection-phase-name{flex:0 .25 auto}
+:is(#selectionTitle,#pngPreviewTitle)>.selection-content-context{display:flex;flex:0 1 auto;align-items:center;min-width:0;max-width:40%;font-size:12px;font-weight:400;color:#d0d9ea;-webkit-text-fill-color:#d0d9ea}
+.selection-content-context>.selection-content-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.selection-content-context>span:not(.selection-content-name){flex:none}
+@media(max-width:850px){
+ :is(#selectionTitle,#pngPreviewTitle)>.phase-label-prefix{font-size:11px}
+ :is(#selectionTitle,#pngPreviewTitle)>.selection-content-context{max-width:35%;font-size:11px}
+}
+/* The phase prefix remains part of the main heading. */
+:is(#selectionTitle,#pngPreviewTitle)>.phase-label-prefix{font-size:14px;font-weight:700;color:#fff;-webkit-text-fill-color:#fff}
+
+/* Phone heading actions share 28px targets; content help uses 24px. */
+@media(max-width:850px){
+ .app .layout .phone-object-tabs button:not(.phone-object-collapse),
+ .app .layout .phone-phase-tabs>#phonePhaseSwitch-toggle{box-sizing:border-box;flex:0 0 28px;width:28px;min-width:28px;height:28px;min-height:28px}
+ .app .layout .phase-heading-actions>:is(#addPage,#copyPage,#copyPageToContent,#addPhaseGroup){flex:0 0 28px;width:28px!important;min-width:28px!important;height:28px!important;min-height:28px!important}
+ .app .layout .phase-heading-actions{height:28px;top:4px}
+ .app .layout.phone-content-open .battle .phone-content-help{box-sizing:border-box;flex:0 0 24px;width:24px;min-width:24px;height:24px;min-height:24px}
+}
+/* Property spacing trial: remove this block to restore the previous density. */
+.app .layout #propertyPanel,
+.app .layout #layoutPropertiesPanel:not([hidden]):not(.hidden){padding-top:8px!important;padding-bottom:8px!important;padding-left:8px!important}
+.app .layout #inspector,
+.app .layout #layoutPropertiesPanel:not([hidden]):not(.hidden){gap:8px!important}
+.app .layout :is(#inspector,#layoutPropertiesPanel) .field{margin:0!important}
+.app .layout :is(#inspector,#layoutPropertiesPanel) .field>label:not(.property-icon-toggle),
+.app .layout #inspector .coordinate-fields>div>label{margin-top:0!important;margin-bottom:4px!important}
+.app .layout :is(#inspector,#layoutPropertiesPanel) :is(.coordinate-fields,.property-color-fill-row,.layout-background-colors){row-gap:8px!important;column-gap:8px!important}
+.app .layout #inspector>.inspector-section-start,
+.app .layout #layoutPropertiesPanel>.layout-background-colors{border-top:0!important;padding-top:0!important;margin-top:4px!important}
+/* Balance long phone phase and content names instead of squeezing context away. */
+@media(max-width:850px){
+ :is(#selectionTitle,#pngPreviewTitle)>.selection-content-context{max-width:45%;flex-shrink:1}
+ :is(#selectionTitle,#pngPreviewTitle)>.selection-phase-name{flex-shrink:1}
+}
+/* Move canvas help onto the mode row so phase headings use the full width. */
+@media(max-width:850px){
+ .app .layout .right .board-title-row>.phone-icon-help-toggle{left:80px;right:auto;top:34px}
+ .app .layout .right .board-title-row>#toggleObjectList{padding-right:0!important;max-width:100%!important}
+ .app .layout .right .png-preview-heading>.png-icon-help{left:108px;right:auto;top:34px}
+ .png-preview-heading #pngPreviewTitle{padding-right:0}
+}
+@media(max-width:850px){
+ .app .layout .right :is(.board-display-toolbar,.png-preview-toolbar)>.phone-icon-help-toggle{display:grid!important;position:static!important;place-items:center;box-sizing:border-box;flex:0 0 24px;width:24px;min-width:24px;height:24px;min-height:24px;padding:0;border:1px solid #fff!important;border-radius:50%;background:var(--accent)!important;color:#fff!important;-webkit-text-fill-color:#fff!important;font-size:14px;line-height:1}
+ :is(#selectionTitle,#pngPreviewTitle)>.selection-content-context{max-width:50%;flex-shrink:.75}
+}
+.phone-help-separator{display:none}
+@media(max-width:850px){.phone-help-separator{display:block;flex:0 0 1px;width:1px;height:18px;margin:0 8px;background:#999}}
