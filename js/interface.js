@@ -317,29 +317,29 @@ phoneLayerDeleteDialog.addEventListener('close',()=>{pendingPhoneLayerDeletion=n
  ['.phone-content-close','コンテンツペイン外側の矢印：ペインを閉じてキャンバスへ戻る'],
  ['.phone-material-pin','配置するオブジェクトの一覧を開閉'],
  ['#addPage','空のフェーズを末尾に追加して名称を入力。入力中の戻るボタン（↶）で追加を取り消す'],
- ['#addPhaseGroup','フォルダー＋：フェーズグループを追加する。フェーズの番号をグループへドラッグして所属させる。グループ名のタップで選択し、右側の＋／−で所属フェーズを開閉する'],
- ['#copyPage','コピーメニュー：このコンテンツにコピー／別のコンテンツへコピーを選ぶ。グループ選択中は別コンテンツへのコピーを表示し、名前・概要・所属フェーズをまとめてコピーする'],
- ['#copyPageToContent','別コンテンツへコピー：一覧から選ぶと、フェーズ全体をコピー先の末尾に追加する。元の画面には留まり、閲覧・並列表示中は使えない'],
- ['#phonePhaseSwitch-toggle','コンテンツペイン：フェーズプロパティとフェーズノートを切り替える。見出しの「プロパティ／ノート」は選択中の側を太字で表示。開閉状態は変えない'],
- ['#phonePhaseSectionToggle','コンテンツペイン：設定／ノート欄を開閉する。タイトルや見出しの余白をタップしても開閉できる'],
+ ['#addPhaseGroup','フェーズをまとめるグループを追加します。'],
+ ['#copyPage','現在のフェーズのコピー先を選びます。グループを選択中は、所属フェーズもまとめてコピーします。'],
+ ['#copyPageToContent','現在のフェーズ全体を、別コンテンツの末尾にコピーします。元のフェーズは残ります。'],
+ ['#phonePhaseSwitch-toggle','フェーズプロパティとフェーズノートを切り替えます。'],
+ ['#phonePhaseSectionToggle','フェーズ設定・ノートの共通枠を開閉します。'],
  ['#phasePropertyResize','コンテンツペイン：押したまま上下へ動かしてリストと設定／ノートの高さを調整。両方展開中だけ表示し、押している間は青くなる'],
  ['#toggleBattlePages','フェーズリストを開閉する。フェーズ名をタップして切り替え、項目を長押しして名前変更・コピー・別コンテンツへのコピー・前後移動・削除のメニューを開く'],
  ['.phase-select-check','フェーズの並列表示用チェック。2個以上で並べて閲覧し、編集不可になる。1個に戻すと元のモードに戻る'],
  ['.phone-phase-navigation>button:first-child','キャンバス下の左矢印：前のフェーズへ。グループ選択中はグループ直前のフェーズへ移動する。コンテンツペイン内でも使え、ペインは開いたまま。移動先がない場合は非表示'],
  ['.phone-phase-navigation>button:last-child','キャンバス下の右矢印：次のフェーズへ。グループ選択中はグループ内の最初のフェーズへ移動する。フェーズリストを閉じたままでも使える。移動先がない場合は非表示'],
- ['help-name-edit','名前の横の鉛筆：コンテンツ名・フェーズ名を変更する。画面上部の編集／閲覧切り替えとは別の操作'],
- ['help-item-delete','項目の×：そのコンテンツ・フェーズ・オブジェクトを削除する。確認画面が出た場合は対象を確認して実行する'],
- ['help-name-confirm','名称入力の✓：入力した名前を確定する。入力欄からフォーカスを外しても確定できる'],
- ['help-add-cancel','追加直後の名称入力中の戻る矢印（↶）：追加を取り消し、追加前の状態へ戻る。「元に戻す」とは別の操作'],
+ ['help-name-edit','コンテンツ名・フェーズ名を変更します。'],
+ ['help-item-delete','その項目を削除します。コンテンツ・フェーズを削除すると、中のオブジェクトも削除されます。'],
+ ['help-name-confirm','入力した名前を確定します。'],
+ ['help-add-cancel','追加を取り消し、追加前の状態に戻します。'],
  ['help-object-selection','オブジェクトリストのチェック：複数選択・解除。名前をタップすると単独選択、長押しすると操作メニュー。左端の番号をドラッグすると並べ替え。フェーズリストも名前の長押しでメニュー、番号のドラッグで並べ替えができる'],
- ['help-object-visibility','オブジェクトの表示設定の目：選択したオブジェクトを表示／非表示にする。表示設定メニューの「フィールドを表示」はフィールド全体の表示切り替え'],
- ['help-object-lock','オブジェクトのロック：選択したオブジェクトの編集可否を切り替える。ロック中は移動・削除できない。画面上部の鍵はツール全体の閲覧モード'],
- ['help-number-step','数値欄の−／＋：その項目の値を減らす／増やす。表示倍率の−／＋とは別の操作'],
+ ['help-object-visibility','選択したオブジェクトの表示・非表示を切り替えます。'],
+ ['help-object-lock','選択したオブジェクトをロック・解除します。ロック中は移動・削除できません。'],
+ ['help-number-step','対象のプロパティの数値を減らす・増やす操作です。'],
  ['help-disclosure','見出しの＋／−：一覧や欄を開閉する。閲覧中のフェーズノート、PNG生成のPNGプロパティも見出しをタップして開閉できる'],
- ['#undo','画面上部の編集／閲覧ボタンの左側。このコンテンツの操作を1回分元に戻す。コンテンツペインは開いたまま操作できる。履歴はコンテンツごとに独立しており、別のコンテンツには影響しない。スマホの閲覧中・PNG生成は履歴ボタンを表示しない'],
- ['#redo','画面上部の編集／閲覧ボタンの左側。このコンテンツで元に戻した操作を1回分やり直す。コンテンツペインは開いたまま操作できる。別のコンテンツには影響しない。スマホの閲覧中・PNG生成は履歴ボタンを表示しない'],
- ['#clearBtn','現在のフェーズのオブジェクトをすべて削除（確認あり）。閲覧中・PNG生成は表示しない'],
- ['.phone-display-menu-toggle','表示設定：スライダー型のアイコン。グリッド・フィールド・フィールド外の表示を切り替える。青・丸が右でオン（表示）、灰色・丸が左でオフ（非表示）。行全体をタップでき、複数の設定を続けて変更できる。下の「閉じる」、入口の再タップ、メニュー外のタップで閉じる'],
+ ['#undo','このコンテンツの操作を1回分元に戻します。別のコンテンツには影響しません。'],
+ ['#redo','このコンテンツで元に戻した操作を1回分やり直します。'],
+ ['#clearBtn','現在のフェーズのオブジェクトをすべて削除します。確認画面で対象を確認してください。'],
+ ['.phone-display-menu-toggle','グリッド・フィールド・フィールド外の表示設定を開きます。保存するPNG画像の設定とは別です。'],
  ['#fitBoardZoom','キャンバス全体、または並べて表示中の全フェーズが収まる倍率にする。キャンバスの空白部分の長押しでも、全体表示・中央表示・貼り付け・全選択のメニューを開ける（閲覧・並列表示中は貼り付けと全選択が無効）'],
  ['#zoomOut','倍率を5ポイント下げる（例：100% → 95%）'],
  ['#resetBoardZoom','200%、150%、100%、75%、50%、25%から表示倍率を選ぶ'],
@@ -432,7 +432,16 @@ phoneLayerDeleteDialog.addEventListener('close',()=>{pendingPhoneLayerDeletion=n
    '.phone-reader-collapse':png?'フェーズリスト・PNGプロパティ欄を開閉':'フェーズリスト・ノート欄を開閉',
    '.phone-object-tabs button:not(.phone-object-collapse)':'オブジェクトリスト・プロパティの切り替え','.phone-object-collapse':'オブジェクト欄を開閉'
   };
-  for(const {selector,description,node} of contextual){
+  // Follow the same top-to-bottom, left-to-right order as the current screen.
+  const anchorFor=entry=>entry.node||find(entry.selector==='help-object-visibility'?'#visibleInput':entry.selector==='help-object-lock'?'#editableInput':entry.selector==='help-number-step'?'.phone-number-step-buttons':'.page-tab-input,.content-option-input');
+  const ordered=contextual.map((entry,index)=>{
+   const anchor=anchorFor(entry),rect=anchor?.getBoundingClientRect();
+   const group=anchor?.closest('.top')?0:anchor?.closest('.board-title-row,.png-preview-heading,.phone-phase-navigation,.phone-content-preview,.phone-material-pin')?1:2;
+   return {...entry,group,top:rect?.top??Infinity,left:rect?.left??Infinity,index};
+  }).sort((a,b)=>a.group-b.group||a.top-b.top||a.left-b.left||a.index-b.index);
+  let previousGroup=-1;
+  for(const {selector,description,node,group} of ordered){
+   if(group!==previousGroup){const section=document.createElement('h3');section.className='phone-icon-help-section';section.textContent=['上部の操作',content?'プレビューの操作':'キャンバスの操作',content?'コンテンツの操作':'下段の操作'][group];list.append(section);previousGroup=group}
    const row=document.createElement('div');row.className='phone-icon-help-row';row.dataset.helpFor=selector;
    const symbol=document.createElement('span');symbol.className='phone-icon-help-symbol';symbol.setAttribute('aria-hidden','true');
    const fallback=defaultSymbols[selector],svg=node?.querySelector('svg');
@@ -446,6 +455,9 @@ phoneLayerDeleteDialog.addEventListener('close',()=>{pendingPhoneLayerDeletion=n
   const guide=document.createElement('button');guide.type='button';guide.className='btn phone-icon-help-guide';guide.textContent='詳しい操作ガイドを開く';guide.onclick=()=>{close();operationGuide.querySelector('.operation-guide-body').scrollTop=0;operationGuide.showModal()};list.append(guide);
   panel.style.top='max(12px, 8dvh)';panel.style.maxHeight='calc(84dvh - 12px)';panel.showModal();list.scrollTop=0;source.setAttribute('aria-expanded','true');
  }
+ const helpSeparator=document.createElement('span');helpSeparator.className='phone-help-separator';helpSeparator.setAttribute('aria-hidden','true');
+ function placeCanvasHelp(){if(mobile.matches)toolbar.append(helpSeparator,button);else{helpSeparator.remove();toolbar.parentElement.append(button)}}
+ mobile.addEventListener('change',placeCanvasHelp);placeCanvasHelp();
  button.onclick=()=>openHelp(button);contentButton.onclick=()=>openHelp(contentButton);
  window.Bolxiv.iconHelp={open:openHelp,close};
  panel.querySelector('button').onclick=()=>{close();opener?.focus({preventScroll:true})};panel.addEventListener('cancel',close);panel.addEventListener('close',close);
