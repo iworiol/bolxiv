@@ -1,3 +1,4 @@
+/* ===== css/png-preview.css ===== */
 .png-preview-panel:not([open]){display:none!important}
 .app .layout>.right>.png-preview-panel[open]{position:absolute;inset:0;z-index:30;display:flex;flex-direction:column;box-sizing:border-box;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;margin:0!important;padding:0!important;border:1px solid #d0d4da;border-radius:7px;background:#fff;color:#17212c;overflow:hidden;font:inherit}
 .png-preview-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;flex:none;min-height:44px;padding:6px 10px;background:#293c66;color:#fff}
@@ -17,6 +18,7 @@
 .png-preview-panel button:disabled{opacity:.5;cursor:default}
 .png-preview-panel button:focus-visible,.png-preview-panel select:focus-visible{outline:2px solid #4769b3;outline-offset:2px}
 .png-preview-active>.phone-phase-navigation{z-index:10036}
+@media(max-width:850px){.png-preview-active:has(.png-reader-controls #toggleBattlePages[aria-expanded="false"]):has(.png-reader-controls .content-options:not([hidden]))>.phone-phase-navigation{visibility:hidden;pointer-events:none}}
 @media(max-width:850px){
  .app .layout>.right>.png-preview-panel[open]{border-radius:0;border:0}
  .png-preview-heading{min-height:44px;padding:6px 8px}
@@ -170,7 +172,7 @@
  .png-preview-active .app>.top>.header-mode-status>.header-history-actions{display:none!important}
  .png-preview-active .app .top #editModeToggle{width:36px!important;min-width:36px!important;height:36px!important;padding:0!important}
  .png-preview-active .app .top #editModeToggle .mode-label{display:none!important}
- .phone-canvas-mode-status{display:block;position:absolute;left:8px;top:36px;max-width:calc(100% - 160px);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:#fff;font-size:12px;line-height:20px;pointer-events:none}
+ .phone-canvas-mode-status{display:block;position:absolute;left:44px;top:36px;max-width:calc(100% - 196px);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:#fff;font-size:12px;line-height:20px;pointer-events:none}
  .png-preview-heading{position:relative}
  .phone-canvas-mode-status:empty{display:none}
 }
@@ -196,6 +198,37 @@
 
 @media(max-width:850px){.png-preview-active .app .layout .right #pngPreview .png-reader-controls>.page-controls:has(#toggleBattlePages[aria-expanded="false"]){box-sizing:border-box!important;border:1px solid #d0d4da!important;border-radius:7px!important;flex:0 0 38px!important;height:38px!important;min-height:38px!important;overflow:hidden!important}}
 
-@media(max-width:850px){.png-preview-content{box-sizing:border-box;padding-bottom:6px}}
+/* Match the reader canvas inset and available height on phones. */
+@media(max-width:850px){.png-preview-content{box-sizing:border-box;padding:6px}.png-preview-content>.png-reader-controls{padding:0}}
 
 @media(max-width:850px){.app .layout>.right>.png-preview-panel[open]{border-radius:7px 7px 0 0}.app .layout>.right>.png-preview-panel .png-preview-heading{border-radius:7px 7px 0 0}}
+
+
+/* Match the phone reader's top-aligned board inside the preview viewport. */
+@media(max-width:850px){
+ .png-preview-surface>.board-zoom-space>:is(.stage,.phase-comparison-grid,.phase-group-overview){
+  top:20px!important;
+  transform:translateX(-50%) scale(var(--board-display-scale,1))!important;
+  transform-origin:top center!important;
+ }
+}
+/* A shared phase-list / PNG-settings frame, matching the phone reader. */
+@media(max-width:850px){
+ .png-reader-controls>.phone-reader-tabs{display:flex;align-items:center;flex:0 0 38px;height:38px;margin-top:8px;padding:0 5px 0 11px;gap:6px;border:1px solid #d0d4da;border-radius:7px 7px 0 0;background:#eef2f7;color:#33445f}
+ .png-reader-controls[data-reader-expanded="false"]>.phone-reader-tabs{border-radius:7px}
+ .app .layout .right #pngPreview .png-reader-controls>.page-controls{margin-top:0!important;border-top:0!important;border-radius:0 0 7px 7px!important}
+ .png-reader-controls>.page-controls>.phase-heading-row,.png-reader-controls>.png-preview-settings>h3{display:none!important}
+ .app .layout .right #pngPreview .png-reader-controls[data-reader-tab="properties"]>.page-controls,
+ .app .layout .right #pngPreview .png-reader-controls[data-reader-tab="list"]>.png-preview-settings,
+ .app .layout .right #pngPreview .png-reader-controls[data-reader-expanded="false"]>:is(.page-controls,.png-preview-settings){display:none!important}
+ .png-reader-controls[data-reader-tab="properties"][data-reader-expanded="true"]>.png-preview-settings{display:flex;flex:1 1 0;min-height:0;margin:0!important;border-top:0;border-radius:0 0 7px 7px}
+ .png-reader-controls>.png-preview-settings>.png-preview-settings-body{flex:1;min-height:0;overflow:auto;align-content:start}
+}
+.png-settings-fields{display:contents}
+@media(max-width:850px){
+ .png-reader-controls>.png-preview-settings>.png-preview-settings-body{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto;gap:8px;overflow:hidden;padding:8px;align-content:stretch;align-items:stretch}
+ .png-preview-settings-body>.png-settings-fields{display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-rows:auto auto;align-content:start;align-items:center;gap:8px;min-width:0;min-height:0;overflow:auto}
+ .png-settings-fields>label{font-size:12px;color:#000}
+ .png-settings-fields>p{grid-column:1/-1;grid-row:2}
+ .png-reader-controls .png-preview-settings-body>#pngPreviewSave{grid-column:1;grid-row:2;align-self:end;width:100%;min-height:40px;margin:0}
+}

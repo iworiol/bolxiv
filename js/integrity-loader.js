@@ -31,21 +31,14 @@
   configure(node,file,hash,attempt);
   node.onload=()=>{original.remove();resolve()};
   node.onerror=()=>{node.remove();if(attempt<2)setTimeout(()=>style(original,file,hash,attempt+1).then(resolve,reject),300*(attempt+1));else reject(new Error('読み込みまたは整合性検査に失敗しました: '+file))};
-  document.head.append(node);
+  original.before(node);
  })}
  const domReady=document.readyState==='loading'?new Promise(resolve=>document.addEventListener('DOMContentLoaded',resolve,{once:true})):Promise.resolve();
- domReady.then(()=>script('js/integrity-manifest.js',entry.dataset.manifestIntegrity)).then(()=>{
+ domReady.then(()=>{
   const manifest=window.BolxivIntegrity;
   if(manifest?.schema!==1||!manifest.files)throw new Error('照合表の形式が不正です');
   let styles=Array.from(document.querySelectorAll('link[rel="bolxiv-stylesheet"]')).filter(node=>{if(node.hasAttribute('data-startup-style')&&document.getElementById('startupInline')){node.remove();return false}return true});
-  if(manifest.bundles?.style){
-   const original=styles[0];
-   for(const node of styles.slice(1))node.remove();
-   original.href=new URL(manifest.bundles.style,base).href;
-   styles=[original];
-  }
-  // Small local servers may reject a burst of dozens of stylesheet requests.
-  // Links remain in document order, preserving the CSS cascade.
+  // Preserve source order while limiting stylesheet transfers on small local servers.
   let styleIndex=0;
   window.BolxivIntegrityStyles=Promise.all(Array.from({length:Math.min(2,styles.length)},async()=>{
    while(styleIndex<styles.length){

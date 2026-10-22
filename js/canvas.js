@@ -1,3 +1,5 @@
+// ===== Definitions =====
+// ===== js/canvas.js =====
 // canvas: shared function declarations; initialized by bolxiv.js in the documented order.
 function blockReadOnlyEvent(event){event.preventDefault();event.stopImmediatePropagation()}
 
@@ -38,8 +40,8 @@ function render(){if(phaseComparisonRendering){renderSingle();return}document.qu
 
 function updateModeStatus(){
  const button=document.getElementById('editModeToggle');if(!button)return;
- const preview=!!window.Bolxiv?.pngPreview?.active,parallel=phaseComparisonActive(),view=preview||boardReadOnly||parallel,label=preview?'PNG生成中':parallel?'閲覧中（並列表示）':view?'閲覧中':'編集中';
- let modeLine=document.getElementById('phoneCanvasModeStatus');if(!modeLine){modeLine=document.createElement('span');modeLine.id='phoneCanvasModeStatus';modeLine.className='phone-canvas-mode-status';modeLine.setAttribute('aria-live','polite');document.querySelector('.board-title-row').append(modeLine)}modeLine.textContent=preview?'PNG生成中':view?'閲覧中':'';
+ const preview=!!window.Bolxiv?.pngPreview?.active,parallel=phaseComparisonActive(),view=preview||boardReadOnly||parallel,label=preview?'PNG生成':parallel?'閲覧（並列表示）':view?'閲覧':'編集';
+ let modeLine=document.getElementById('phoneCanvasModeStatus');if(!modeLine){modeLine=document.createElement('span');modeLine.id='phoneCanvasModeStatus';modeLine.className='phone-canvas-mode-status';modeLine.setAttribute('aria-live','polite');document.querySelector('.board-title-row').append(modeLine)}modeLine.textContent=preview?'PNG生成':view?'閲覧':'編集';
  button.querySelector('.mode-label').textContent=label;
  button.querySelector('.mode-icon').innerHTML='<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(preview?'<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8" cy="8" r="1.5"/><path d="m3 17 5-5 4 4 3-3 6 6"/>':view?'<rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>':'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L8 18l-4 1 1-4Z"/>')+'</svg>';
  button.classList.toggle('view-state',view);button.setAttribute('aria-pressed',String(view));
@@ -129,7 +131,7 @@ function objectTitle(o){if(o.type==='segment')return ['start','end','both'].incl
 
 function objectCategory(o){if(o.type==='targetcircle')return 'エネミー';if(o.type==='text'||o.type==='segment')return 'ツール';if(['circle','donut','aoe','line','gaze','stack','linestack','knockback','lineknockback'].includes(o.type))return 'AoE';if(o.type==='icon'){let src=String(o.src||'');if(src.includes('assets/aoe/'))return 'AoE';if(src.includes('assets/enemies/'))return 'エネミー';if(src.includes('target-marker'))return 'ターゲットマーカー';if(src.includes('field-marker'))return 'フィールドマーカー';return 'ロール/ジョブ'}if(o.type==='marker')return 'ロール/ジョブ';return objectTitle(o)}
 
-function openObjectContextMenu(id,x,y){let menu=$('#objectContextMenu'),item=current().find(o=>o.id===id);if(!item)return;if(!selectedIds.includes(id)){selected=id;selectedIds=[id]}menu.dataset.id=id;menu.dataset.ids=JSON.stringify(selectedIds);let items=current().filter(o=>selectedIds.includes(o.id)),sameType=items.every(o=>o.type===item.type);for(let [id,key,on,labelOn,labelOff] of [['contextVisibility','visible',items.every(o=>o.visible!==false),'表示にする','非表示にする'],['contextEditable','locked',items.every(o=>!o.locked),'編集可にする','編集不可にする']]){let button=$('#'+id);button.disabled=!sameType;button.textContent=on?labelOff:labelOn;button.dataset.key=key;button.dataset.value=String(key==='locked'?on:!on)}$('#contextDelete').disabled=!selectedIds.some(selectedId=>!current().find(o=>o.id===selectedId)?.locked);$("#contextSwapPosition").disabled=selectedIds.length!==2;menu.hidden=false;let width=menu.offsetWidth,height=menu.offsetHeight;menu.style.left=Math.max(4,Math.min(x,innerWidth-width-4))+'px';menu.style.top=Math.max(4,Math.min(y,innerHeight-height-4))+'px'}
+function openObjectContextMenu(id,x,y){let menu=$('#objectContextMenu'),item=current().find(o=>o.id===id);if(!item)return;if(!selectedIds.includes(id)){selected=id;selectedIds=[id]}menu.dataset.id=id;menu.dataset.ids=JSON.stringify(selectedIds);let items=current().filter(o=>selectedIds.includes(o.id)),sameType=items.every(o=>o.type===item.type);for(let [id,key,on,labelOn,labelOff] of [['contextVisibility','visible',items.every(o=>o.visible!==false),'表示にする','非表示にする'],['contextEditable','locked',items.every(o=>!o.locked),'編集可にする','編集不可にする']]){let button=$('#'+id);button.disabled=!sameType;button.textContent=on?labelOff:labelOn;button.dataset.key=key;button.dataset.value=String(key==='locked'?on:!on)}$('#contextDelete').disabled=!selectedIds.some(selectedId=>!current().find(o=>o.id===selectedId)?.locked);$("#contextSwapPosition").disabled=selectedIds.length!==2;addPhoneMenuClose(menu,closeObjectContextMenu);menu.hidden=false;let width=menu.offsetWidth,height=menu.offsetHeight;menu.style.left=Math.max(4,Math.min(x,innerWidth-width-4))+'px';menu.style.top=Math.max(4,Math.min(y,innerHeight-height-4))+'px'}
 
 function closeObjectContextMenu(){let menu=$('#objectContextMenu');if(menu)menu.hidden=true;let layerMenu=$('#layerContextMenu');if(layerMenu)layerMenu.hidden=true}
 
@@ -513,3 +515,16 @@ function setFieldDimension(axis,value){let size=data.pageFieldSizes[data.page]||
 function fitBoardDisplayZoom(remember=true){const space=document.getElementById('boardZoomSpace'),viewport=space.parentElement,comparison=document.querySelector('.phase-comparison-grid');const width=comparison?comparison.offsetWidth:640,height=comparison?comparison.offsetHeight:640;const preview=matchMedia('(max-width:850px)').matches&&document.querySelector('.layout').classList.contains('phone-content-open'),margin=preview?8:40;const availableWidth=Math.max(0,viewport.clientWidth-margin),availableHeight=Math.max(0,viewport.clientHeight-margin);const step=preview?1:5,zoom=Math.floor(Math.min(availableWidth/width,availableHeight/height)*100/step)*step;setBoardDisplayZoom(Math.max(5,Math.min(200,zoom)),remember!==false);if(preview){viewport.scrollTop=0;viewport.scrollLeft=0}}
 
 function setBoardDisplayZoom(value,remember=true,recenter=true){const preview=matchMedia('(max-width:850px)').matches&&document.querySelector('.layout').classList.contains('phone-content-open'),step=preview?1:5;boardDisplayZoom=Math.max(5,Math.min(200,Math.round((Number(value)||0)/step)*step));stage.style.setProperty('--board-display-scale',String(boardDisplayZoom/100));document.getElementById('boardZoomSpace').style.setProperty('--board-display-scale',String(boardDisplayZoom/100));const comparison=document.querySelector('.phase-comparison-grid');if(comparison)comparison.style.transform='translate(-50%,-50%) scale('+boardDisplayZoom/100+')';let space=document.getElementById('boardZoomSpace'),viewport=space.parentElement;const width=((comparison?comparison.offsetWidth:640)*boardDisplayZoom/100+40)+'px',height=((comparison?comparison.offsetHeight:640)*boardDisplayZoom/100+40)+'px',sizeChanged=space.style.width!==width||space.style.height!==height;space.style.width=width;space.style.height=height;if(recenter||sizeChanged){viewport.scrollLeft=Math.max(0,(viewport.scrollWidth-viewport.clientWidth)/2);viewport.scrollTop=Math.max(0,(viewport.scrollHeight-viewport.clientHeight)/2);}document.getElementById('boardZoomValue').textContent=boardDisplayZoom;document.getElementById('zoomOut').disabled=boardDisplayZoom===5;document.getElementById('zoomIn').disabled=boardDisplayZoom===200;if(remember)rememberViewSetting('boardDisplayZoom',boardDisplayZoom)}
+
+;
+// Add before measuring a popup so the mobile close row fits its placement.
+function addPhoneMenuClose(menu,close){
+ if(!matchMedia('(max-width:850px)').matches)return;
+ let button=menu.querySelector('[data-phone-menu-close]');
+ if(!button){
+  const separator=document.createElement('div');separator.className='phone-menu-close-separator';separator.setAttribute('role','separator');
+  button=document.createElement('button');button.type='button';button.className='phone-menu-close';button.dataset.phoneMenuClose='true';button.setAttribute('role','menuitem');button.textContent='閉じる';menu.append(separator,button);
+ }
+ button.onclick=event=>{event.preventDefault();event.stopPropagation();close()};
+}
+
