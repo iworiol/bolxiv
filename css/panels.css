@@ -991,7 +991,7 @@ body,.app,.layout,.center,.stagewrap,.footer,.top,.battle,.left,.right,.boardbar
   border-color:#42b8ff;
 }
 .handle.rotate {
-  top:calc(0px - var(--rotation-handle-distance,25px));
+  top:calc(0px - var(--rotation-handle-distance,40px));
   left:calc(50% - var(--rotation-handle-size,12px)/2);
   cursor:grab;
 }
@@ -1000,7 +1000,7 @@ body,.app,.layout,.center,.stagewrap,.footer,.top,.battle,.left,.right,.boardbar
   position:absolute;
   left:50%;
   top:100%;
-  height:calc(var(--rotation-handle-distance,25px) - var(--rotation-handle-size,12px));
+  height:calc(var(--rotation-handle-distance,40px) - var(--rotation-handle-size,12px));
   border-left:1px solid #42b8ff;
   pointer-events:none;
 }
@@ -2923,19 +2923,19 @@ dialog.confirm-dialog {
   border:1px solid #999!important;
   color-scheme:light;
 }
-:is(#deletePageDialog,#deleteContentDialog,#clearDialog,#clearUserDataDialog,#phoneLayerDeleteDialog).confirm-dialog .btn {
+:is(#deletePageDialog,#deleteContentDialog,#clearDialog,#clearUserDataDialog,#phoneLayerDeleteDialog,#userPresetDialog).confirm-dialog .btn {
   background:#fff!important;
   color:#000!important;
   -webkit-text-fill-color:#000!important;
   border:1px solid #999!important;
 }
-:is(#deletePageDialog,#deleteContentDialog,#clearDialog,#clearUserDataDialog,#phoneLayerDeleteDialog).confirm-dialog .btn.primary {
+:is(#deletePageDialog,#deleteContentDialog,#clearDialog,#clearUserDataDialog,#phoneLayerDeleteDialog,#userPresetDialog).confirm-dialog .btn.primary {
   background:var(--accent)!important;
   color:#fff!important;
   -webkit-text-fill-color:#fff!important;
   border-color:var(--accent)!important;
 }
-:is(#deletePageDialog,#deleteContentDialog,#clearDialog,#clearUserDataDialog,#phoneLayerDeleteDialog).confirm-dialog .btn:hover:not(:where(.phone-touch-mode *)):not(:disabled) {
+:is(#deletePageDialog,#deleteContentDialog,#clearDialog,#clearUserDataDialog,#phoneLayerDeleteDialog,#userPresetDialog).confirm-dialog .btn:hover:not(:where(.phone-touch-mode *)):not(:disabled) {
   background:var(--blue)!important;
   color:#fff!important;
   -webkit-text-fill-color:#fff!important;

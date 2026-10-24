@@ -11,7 +11,7 @@
   if(spin.min!=='')value=Math.max(Number(spin.min),value);
   if(spin.max!=='')value=Math.min(Number(spin.max),value);
   spin.value=String(value);current.dirty=false;
-  if(spin.closest('#inspector')&&spin.value!==current.saved&&!spin.dataset.historyPushed){recordHistory();spin.dataset.historyPushed='true'}
+  if(!['groupScaleNumber','groupSpacingNumber'].includes(spin.id)&&spin.closest('#inspector')&&spin.value!==current.saved&&!spin.dataset.historyPushed){recordHistory();spin.dataset.historyPushed='true'}
   applying=true;
   try{spin.dispatchEvent(new Event('input',{bubbles:true}));spin.dispatchEvent(new Event('change',{bubbles:true}))}
   finally{applying=false;current.saved=spin.value}
@@ -105,7 +105,7 @@
  const selectionKey=()=>JSON.stringify([activeContent,data.page,selectedIds]);
  let previousSelection=selectionKey();
  renderInspector=function(){
-  const key=selectionKey(),preserve=matchMedia('(max-width:850px)').matches&&key===previousSelection,positions=[];
+  const key=selectionKey(),preserve=key===previousSelection,positions=[];
   if(preserve){for(let node=document.getElementById('inspector');node;node=node.parentElement)positions.push({node,top:node.scrollTop,left:node.scrollLeft})}
   const result=originalRenderInspector.apply(this,arguments);
   sync();
@@ -157,6 +157,8 @@ function phoneReaderLayoutMetrics(panel,footerHeight,rowHeight,zoom=boardDisplay
   const phaseChanged=lastNoteContent!==activeContent||lastNotePage!==data.page||lastNoteGroup!==data.activePhaseGroup;
   lastNoteContent=activeContent;lastNotePage=data.page;lastNoteGroup=data.activePhaseGroup;
   const groupSelected=!!data.activePhaseGroup,enteringGroup=groupSelected&&groupMemoState===null;
+  memo.classList.toggle('group-note-static',groupSelected&&desktop.matches);
+  const noteHeading=memo.querySelector('summary');if(groupSelected&&desktop.matches){noteHeading.setAttribute('role','heading');noteHeading.setAttribute('aria-level','3');noteHeading.tabIndex=-1}else{noteHeading.removeAttribute('role');noteHeading.removeAttribute('aria-level');noteHeading.removeAttribute('tabindex')}
   memo.querySelector('.phase-memo-caption').textContent=groupSelected?'グループノート':'フェーズノート';
   if(enteringGroup)groupMemoState={open:memo.open,phoneNoteOpen};
   const value=groupSelected?'そう、証明よ。':data.pageNotes?.[data.page]||'';
@@ -191,12 +193,13 @@ function phoneReaderLayoutMetrics(panel,footerHeight,rowHeight,zoom=boardDisplay
   input.readOnly=groupSelected||boardReadOnly||phaseComparisonActive();
   input.setAttribute('aria-label','フェーズ'+String(data.page+1).padStart(2,'0')+'のノート');
   phase.textContent=groupSelected?'グループ：'+(data.phaseGroups?.find(group=>group.id===data.activePhaseGroup)?.name||''):String(data.page+1).padStart(2,'0')+' '+(data.pageNames[data.page]||'');phase.title=phase.textContent;
-  preview.textContent=value.trim().replace(/\s+/g,' ')||'未記入';const summary=memo.querySelector('summary');summary.title=phase.textContent+'\nフェーズノートを開閉'+(value?'\n'+value:'\nノートは未記入です');preview.title=summary.title;
+  preview.textContent=value.trim().replace(/\s+/g,' ')||'未記入';const summary=memo.querySelector('summary');summary.title=phase.textContent+(groupSelected&&desktop.matches?'\nグループノート':'\nフェーズノートを開閉')+(value?'\n'+value:'\nノートは未記入です');preview.title=summary.title;
   if(enteringGroup)memo.open=true;
   else if(!groupSelected&&groupMemoState!==null){memo.open=groupMemoState.open;phoneNoteOpen=groupMemoState.phoneNoteOpen;groupMemoState=null}
   if(session&&(session.board!==data||session.page!==data.page))session=null;
  }
  function closeProperties(){if(memo.dataset.sidebarManaged==='true')return;if(desktop.matches&&memo.open&&properties.getAttribute('aria-expanded')==='true'){restorePropertiesAfterMemo=true;properties.onclick({currentTarget:properties})}}
+ memo.querySelector('summary').addEventListener('click',event=>{if(!data.activePhaseGroup||!desktop.matches)return;event.preventDefault();event.stopImmediatePropagation();memo.open=true},true);
  memo.open=desktop.matches&&viewSettings.phaseMemoExpanded===true;
  memo.addEventListener('toggle',()=>{
   if(phoneReading){phoneNoteOpen=memo.open;return}

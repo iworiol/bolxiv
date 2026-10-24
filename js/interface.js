@@ -1,4 +1,106 @@
 // ===== Features =====
+// Object groups are stored on each member so JSON, history and phase copies retain them.
+(function setupObjectGroups(){
+ const beforeGroupInspector=renderInspector;renderInspector=function(){beforeGroupInspector();renderIndividualGroupHint(document.getElementById('inspector'))};
+ const menu=document.getElementById('objectContextMenu');
+ // Capture member-row selection before individual child handlers or reused rows.
+ document.getElementById('objectList').addEventListener('click',event=>{
+  const row=event.target.closest('.object-group-member');
+  if(!row||event.target.closest('input,button:not(.object-name),textarea')||phaseComparisonActive())return;
+  event.preventDefault();event.stopImmediatePropagation();selectIndividualGroupMember(row.dataset.id,event.shiftKey);
+ },true);
+ const membershipList=document.getElementById('objectList');for(const type of ['dragover','drop'])membershipList.addEventListener(type,handleObjectMembershipDrop,true);
+ const clearMembershipGuide=()=>membershipList.querySelectorAll('.drag-over,.drop-before,.drop-after').forEach(n=>n.classList.remove('drag-over','drop-before','drop-after'));membershipList.addEventListener('dragleave',event=>{if(!membershipList.contains(event.relatedTarget))clearMembershipGuide()});document.addEventListener('dragend',clearMembershipGuide);
+ const groupStart=document.createElement('div');groupStart.className='context-separator';groupStart.setAttribute('role','separator');menu.insertBefore(groupStart,document.getElementById('contextCopy'));
+ for(const [id,label] of [['contextGroup','グループ化'],['contextUngroup','グループ解除'],['contextRenameObjectGroup','グループ名を変更']]){
+  const button=document.createElement('button');button.id=id;button.type='button';button.setAttribute('role','menuitem');button.textContent=label;
+  menu.insertBefore(button,document.getElementById('contextCopy'));
+  button.onclick=()=>{
+   const ids=expandObjectGroups(JSON.parse(menu.dataset.ids||'[]')),items=current().filter(o=>ids.includes(o.id));closeObjectContextMenu();
+   if(id==='contextRenameObjectGroup'){if(selectedObjectGroup().length)beginObjectGroupRename(items[0].objectGroupId);return}
+   if(boardReadOnly||phaseComparisonActive()||id==='contextGroup'&&items.length<2)return;
+   recordHistory();const groupId=createObjectId();for(const item of items){if(id==='contextGroup'){item.objectGroupId=groupId;item.objectGroupName='グループ'}else{delete item.objectGroupId;delete item.objectGroupName}}
+   selectedIds=ids;selected=ids[ids.length-1]||null;renderAndSave();
+  };
+ }
+ const groupEnd=document.createElement('div');groupEnd.className='context-separator';groupEnd.setAttribute('role','separator');menu.insertBefore(groupEnd,document.getElementById('contextCopy'));
+ document.addEventListener('pointermove',e=>{
+  if(!['group-scale','group-rotate'].includes(drag?.mode)||drag.pointerId!==e.pointerId)return;e.preventDefault();e.stopImmediatePropagation();
+  if(drag.mode==='group-rotate'){
+   if(drag.board!==data||drag.page!==current()){finish(null);return}
+   const r=layer.getBoundingClientRect(),angle=Math.atan2(e.clientY-(r.top+drag.cy/100*r.height),e.clientX-(r.left+drag.cx/100*r.width));let delta=angle-drag.lastAngle;while(delta>Math.PI)delta-=2*Math.PI;while(delta<-Math.PI)delta+=2*Math.PI;drag.degrees+=delta*180/Math.PI;drag.lastAngle=angle;const degrees=Math.round(drag.degrees);drag.rotateContents=e.shiftKey;drag.orientationOnly=e.shiftKey;applyObjectGroupRotation(drag.items,drag.cx,drag.cy,degrees,drag.rotateContents,drag.orientationOnly);drag.moved=normalizedObjectRotation(degrees)!==0;for(const item of current().filter(o=>drag.items.some(original=>original.id===o.id)))updateShapeFromData(item,false);renderObjectGroupControls();const amount=objectGroupRotationValue(current().filter(o=>drag.items.some(original=>original.id===o.id)),drag.orientationOnly);for(const id of (drag.orientationOnly?['groupOrientationRange','groupOrientationNumber']:['groupRotationRange','groupRotationNumber'])){const input=document.getElementById(id);if(input)input.value=amount}const value=document.getElementById(drag.orientationOnly?'groupOrientationValue':'groupRotationValue');if(value)value.textContent=amount;const section=document.getElementById('objectGroupProperties');if(section)refreshObjectGroupDimensions(section,current().filter(o=>drag.items.some(original=>original.id===o.id)));return;
+  }
+  const denominator=drag.vx*drag.vx+drag.vy*drag.vy;if(!denominator)return;
+  let factor=1+((e.clientX-drag.startX)*drag.vx+(e.clientY-drag.startY)*drag.vy)/denominator;
+  drag.spacing=e.shiftKey;
+  factor=applyObjectGroupScale(drag.items,drag.cx,drag.cy,factor,drag.spacing,drag.geometry);drag.moved=drag.moved||Math.abs(factor-1)>.0001;
+  render();
+ },true);
+ function finish(e,cancel=false){
+  if(!['group-scale','group-rotate'].includes(drag?.mode)||e&&drag.pointerId!==e.pointerId)return;e?.preventDefault();e?.stopImmediatePropagation();
+  const gesture=drag;drag=null;if(stage.hasPointerCapture(gesture.pointerId))stage.releasePointerCapture(gesture.pointerId);
+  if(gesture.board&&(gesture.board!==data||gesture.page!==current()))return;
+  if(cancel){Object.assign(data,JSON.parse(gesture.beforeData));renderAndSave()}else if(gesture.moved){recordHistory(gesture.beforeData);renderAndSave()}
+ }
+ document.addEventListener('pointerup',e=>finish(e),true);document.addEventListener('pointercancel',e=>finish(e,true),true);
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&['group-scale','group-rotate'].includes(drag?.mode)){e.preventDefault();e.stopImmediatePropagation();finish(null,true)}},true);
+ window.addEventListener('blur',()=>finish(null,true));
+ // The canvas and phone list both expose the same menu on a stationary long press.
+ let press=null,suppressClick=false;
+ function cancelPress(){if(press)clearTimeout(press.timer);press=null}
+ document.addEventListener('pointerdown',e=>{
+  cancelPress();suppressClick=false;if(e.pointerType!=='touch'||boardReadOnly||phaseComparisonActive())return;
+  const node=e.target.closest('#objects .obj,#objectList .object-row');if(!node||e.target.closest('input,.object-index')||e.target.closest('button')&&!e.target.closest('.object-name'))return;
+  const p={id:e.pointerId,x:e.clientX,y:e.clientY,objectId:node.dataset.id};press=p;
+  p.timer=setTimeout(()=>{if(press!==p)return;drag=null;suppressClick=true;if(!individualGroupSelectionActive()||!selectedIds.includes(p.objectId))selectedIds=selectedIds.includes(p.objectId)?expandObjectGroups(selectedIds):objectGroupIds(p.objectId);selected=p.objectId;renderSelectionOnly();openObjectContextMenu(p.objectId,p.x,p.y);cancelPress()},350);
+ },true);
+ document.addEventListener('pointermove',e=>{if(press&&press.id===e.pointerId&&Math.hypot(e.clientX-press.x,e.clientY-press.y)>8)cancelPress()},true);
+ for(const type of ['pointerup','pointercancel'])document.addEventListener(type,cancelPress,true);
+ document.addEventListener('click',e=>{if(suppressClick){suppressClick=false;if(e.isTrusted||e.target.closest('#objects .obj,#objectList .object-row')){e.preventDefault();e.stopImmediatePropagation()}}},true);
+ // Keep the membership frame in sync with individual position/size edits.
+ let groupContextFrame=0;
+ new MutationObserver(()=>{if(groupContextFrame||!individualGroupSelectionActive())return;groupContextFrame=requestAnimationFrame(()=>{groupContextFrame=0;renderObjectGroupControls()})}).observe(layer,{subtree:true,childList:true,attributes:true,attributeFilter:['style','class']});
+ // A second stationary press enters a member; dragging still moves the whole group.
+ let memberPick=null;
+ document.addEventListener('pointerdown',event=>{
+  memberPick=null;if(event.button!==0||event.shiftKey||event.ctrlKey||event.metaKey||event.altKey||boardReadOnly||phaseComparisonActive()||tapPlacementArmed)return;
+  const node=event.target.closest('#objects .obj');if(!node||node.isContentEditable)return;
+  const item=current().find(o=>o.id===node.dataset.id),group=selectedObjectGroup();
+  if(!item?.objectGroupId||!group.some(o=>o.id===item.id))return;
+  memberPick={pointerId:event.pointerId,id:item.id,board:data,page:current(),x:event.clientX,y:event.clientY};
+ },true);
+ document.addEventListener('pointermove',event=>{if(memberPick?.pointerId===event.pointerId&&Math.hypot(event.clientX-memberPick.x,event.clientY-memberPick.y)>8)memberPick=null},true);
+ document.addEventListener('pointerup',event=>{
+  const pick=memberPick;memberPick=null;if(!pick||pick.pointerId!==event.pointerId||pick.board!==data||pick.page!==current()||suppressClick||drag?.moved||boardReadOnly||phaseComparisonActive())return;
+  selectIndividualGroupMember(pick.id,false,true);
+ },true);
+ document.addEventListener('pointercancel',()=>{memberPick=null},true);
+ window.addEventListener('blur',()=>{memberPick=null});
+
+})();
+
+// Built-in presets use field-relative positions; each insertion is one undo step.
+(function setupBuiltinPresets(){
+ const button=document.getElementById('builtinFieldMarkers');
+ const preview=button.querySelector('.preset-thumbnail');
+ for(const [name,x,y] of [['A',50,12],['B',88,50],['C',50,88],['D',12,50],['1',22,22],['2',78,22],['3',78,78],['4',22,78]]){const img=document.createElement('img');img.src=objectImageSource({src:iconPath(name.toLowerCase(),'field-marker-transparent')});img.alt='';img.style.left=x+'%';img.style.top=y+'%';preview.append(img)}
+ const icon={name:button.title,presetId:'field-markers',src:objectImageSource({src:iconPath('a','field-marker-transparent')})};button.draggable=true;
+ button.onclick=()=>{if(boardReadOnly||phaseComparisonActive())return;selectPlacementIcon(icon)};
+ button.ondragstart=event=>{if(boardReadOnly||phaseComparisonActive()){event.preventDefault();return}selectPlacementIcon(icon,false);event.dataTransfer.setData('application/x-tactica',JSON.stringify({type:'icon',...icon}));event.dataTransfer.effectAllowed='copy'};
+
+})();
+
+function placeBuiltinFieldMarkers(cx,cy){
+  if(boardReadOnly||phaseComparisonActive()||window.Bolxiv?.pngPreview?.active)return;
+  const size=data.pageFieldSizes[data.page]||{width:538,height:538};
+  const positions=[['A',0,-.285],['B',.285,0],['C',0,.275],['D',-.285,0],['1',-.17,-.17],['2',.175,-.17],['3',.175,.16],['4',-.17,.16]];
+  const items=positions.map(([name,x,y])=>createPlacementObject({type:'icon',name:'フィールド'+name,src:iconPath(name.toLowerCase(),'field-marker-transparent')},cx+x*size.width/640*100,cy+y*size.height/640*100));
+  const groupId=createObjectId();for(const item of items){item.objectGroupId=groupId;item.objectGroupName='フィールドマーカー'}
+  snapshot();current().push(...items);selected=items[0].id;selectedIds=items.map(item=>item.id);
+  tapPlacementArmed=false;selectPlacementTool('select');hideTouchPlacementPreview();
+  renderAndSave();closePaletteAfterPlacement();notify('フィールドマーカー8個を配置しました');
+}
+
 // ===== js/canvas/edit-mode-setup.js =====
 (function setupEditMode(){
  const button=document.getElementById('editModeToggle'),disabledForView=new Set();
@@ -29,7 +131,7 @@
  const pane=document.querySelector('.left');let gesture=null,suppressButton=null,lastTouch=0;
  function finish(){if(!gesture)return;clearTimeout(gesture.timer);const g=gesture;gesture=null;hideTouchPlacementPreview();if(g.button.hasPointerCapture(g.id))g.button.releasePointerCapture(g.id);g.button.draggable=g.draggable;return g}
  pane.addEventListener('pointerdown',e=>{
-  if(e.pointerType!=='touch')return;const button=e.target.closest('.tool[data-tool],.icon-choice');if(!button)return;
+  if(e.pointerType!=='touch')return;const button=e.target.closest('.tool[data-tool],.icon-choice');if(!button||button.classList.contains('user-preset'))return;
   finish();lastTouch=Date.now();const g={id:e.pointerId,x:e.clientX,y:e.clientY,button,draggable:button.draggable,wasSelected:button.classList.contains('active'),active:false,moved:false};gesture=g;button.draggable=false;
   g.timer=setTimeout(()=>{if(gesture!==g||!button.isConnected)return;g.active=true;button.focus({preventScroll:true});button.click();suppressButton=button;tapPlacementArmed=true;g.payload=tool==='icon'&&activeIcon?{type:'icon',...activeIcon}:{type:tool};showTouchPlacementPreview(g.payload,g.x,g.y);button.setPointerCapture(g.id);button.classList.add('palette-dragging')},450);
  });
@@ -52,9 +154,10 @@
  function clear(){pane.querySelectorAll('.palette-dragging').forEach(button=>button.classList.remove('palette-dragging'))}
  pane.addEventListener('dragstart',e=>{
  clear();const button=e.target.closest('.tool[data-tool],.icon-choice');if(!button)return;button.classList.add('palette-dragging');
- const artwork=button.querySelector('img,.glyph');if(!artwork||!e.dataTransfer)return;
+ const artwork=button.querySelector('.preset-thumbnail')||button.querySelector('img,.glyph');if(!artwork||!e.dataTransfer)return;
  const preview=document.createElement('div');preview.style.cssText='position:fixed;left:-10000px;top:0;width:48px;height:48px;display:grid;place-items:center;background:transparent;border:0;box-shadow:none;pointer-events:none;';
  const clone=artwork.cloneNode(true);clone.style.cssText='display:grid;place-items:center;width:48px;height:48px;max-width:none;max-height:none;background:transparent;border:0;box-shadow:none;color:#f39c12;font-size:32px;';
+ if(artwork.classList.contains('preset-thumbnail')&&!artwork.querySelector('.user-preset-scene')){clone.style.display='block';clone.style.position='relative';for(const img of clone.querySelectorAll('img')){img.style.position='absolute';img.style.width=img.style.height=(48*8/26)+'px';img.style.maxWidth=img.style.maxHeight='none';img.style.transform='translate(-50%,-50%)'}}
  const svg=clone.querySelector('svg');if(svg){svg.style.width='48px';svg.style.height='48px'}preview.append(clone);document.body.append(preview);e.dataTransfer.setDragImage(preview,24,24);setTimeout(()=>preview.remove(),0);
 });
  document.addEventListener('dragend',clear);document.addEventListener('drop',clear);window.addEventListener('blur',clear);
@@ -194,16 +297,16 @@ const phoneLayerDeleteDialog=document.createElement('dialog');
 phoneLayerDeleteDialog.className='confirm-dialog';phoneLayerDeleteDialog.id='phoneLayerDeleteDialog';phoneLayerDeleteDialog.setAttribute('aria-labelledby','phoneLayerDeleteMessage');
 phoneLayerDeleteDialog.innerHTML='<p id="phoneLayerDeleteMessage"></p><div class="confirm-actions"><button type="button" class="btn" id="phoneLayerDeleteCancel" autofocus>キャンセル</button><button type="button" class="btn primary" id="phoneLayerDeleteConfirm">削除</button></div>';
 document.body.append(phoneLayerDeleteDialog);
-function confirmPhoneLayerDeletion(id){
+function confirmPhoneLayerDeletion(id,individual=false){
  const object=current().find(item=>item.id===id);if(!object||object.locked)return;
- pendingPhoneLayerDeletion={id,board:data,page:current()};
- phoneLayerDeleteDialog.querySelector('p').textContent='「'+objectTitle(object)+'」を削除しますか？';
+ pendingPhoneLayerDeletion={id,individual,board:data,page:current()};
+ phoneLayerDeleteDialog.querySelector('p').textContent='「'+(object.objectGroupId&&!individual?objectGroupName(current().filter(o=>o.objectGroupId===object.objectGroupId))+'（'+objectGroupIds(id).length+'個）':objectTitle(object))+'」を削除しますか？';
  if(!phoneLayerDeleteDialog.open)phoneLayerDeleteDialog.showModal();
 }
 document.getElementById('phoneLayerDeleteCancel').onclick=()=>{pendingPhoneLayerDeletion=null;phoneLayerDeleteDialog.close()};
 document.getElementById('phoneLayerDeleteConfirm').onclick=()=>{
  const pending=pendingPhoneLayerDeletion;pendingPhoneLayerDeletion=null;phoneLayerDeleteDialog.close();
- if(pending&&data===pending.board&&current()===pending.page)removeObject(pending.id);
+ if(pending&&data===pending.board&&current()===pending.page)removeObject(pending.id,pending.individual);
 };
 phoneLayerDeleteDialog.addEventListener('close',()=>{pendingPhoneLayerDeletion=null});
 
@@ -309,11 +412,11 @@ phoneLayerDeleteDialog.addEventListener('close',()=>{pendingPhoneLayerDeletion=n
  const mobile=matchMedia('(max-width:850px)'),toolbar=document.querySelector('.board-display-toolbar'),button=document.createElement('button');button.type='button';button.className='phone-icon-help-toggle';button.textContent='？';button.setAttribute('aria-label','アイコンの説明');button.setAttribute('aria-haspopup','dialog');button.setAttribute('aria-controls','phoneIconHelp');button.setAttribute('aria-expanded','false');toolbar.parentElement.append(button);
  const panel=document.createElement('dialog');panel.id='phoneIconHelp';panel.className='phone-icon-help';panel.setAttribute('aria-labelledby','phoneIconHelpTitle');panel.innerHTML='<div class="phone-icon-help-heading"><h2 id="phoneIconHelpTitle">アイコンの説明</h2><button type="button" class="btn">閉じる</button></div><div class="phone-icon-help-list"></div>';document.body.append(panel);
  const entries=[
- ['#editModeToggle','編集／閲覧を切り替える（鉛筆・薄い青背景＝編集中、鍵・白背景＝閲覧中）。並列表示中に押すと、並列表示を解除して編集に戻る。PNG生成は画像マークになり、押すと入る前の編集／閲覧モードに戻る'],
- ['help-png-mode','山と太陽の画像マーク：PNG生成。押すと入る前の編集／閲覧モードに戻る。見出しの下にも「PNG生成」と表示する'],
- ['#pngPropertiesToggle','PNGプロパティ見出しの＋／−：PNG保存用の設定欄を開閉する。「出力倍率」の1倍／2倍は保存画像の解像度。上部の表示倍率とは別で、画像サイズを確認して「PNGを保存」を押す'],
+ ['#editModeToggle','編集／閲覧を切り替える（鉛筆・薄い青背景＝編集中、鍵・白背景＝閲覧中）。並列表示中に押すと、並列表示を解除して編集に戻る。画像生成・印刷は画像マークになり、押すと入る前の編集／閲覧モードに戻る'],
+ ['help-png-mode','山と太陽の画像マーク：画像生成・印刷。押すと入る前の編集／閲覧モードに戻る。見出しの下にも「画像生成・印刷」と表示する'],
+ ['#pngPropertiesToggle','画像生成・印刷プロパティ見出しの＋／−：PNG保存と印刷の設定欄を開閉する。「出力倍率」の1倍／2倍は保存画像の解像度。上部の表示倍率とは別で、画像サイズを確認して「PNGを保存」を押す'],
  ['.phone-menu-toggle','インポート・エクスポート・ヘルプなどのメニューを開閉'],
- ['.phone-content-icon','コンテンツペインを開く。プレビュー下の左右の矢印で、ペインを開いたままフェーズを切り替えられる。フェーズリストを閉じても使える。コンテンツのタイトル自体は開閉ボタンではない。プレビュー・フェーズリスト・設定／ノートを使う。コンテンツ一覧の名前を長押しすると、名前変更・前へ移動・後ろへ移動・削除のメニューを開く。左端の番号をドラッグすると並べ替え。閲覧中とPNG生成は開閉ボタンを表示せず、キャンバス下のコンテンツ・フェーズリストを使う。PNG生成はさらにPNGプロパティを表示する'],
+ ['.phone-content-icon','コンテンツペインを開く。プレビュー下の左右の矢印で、ペインを開いたままフェーズを切り替えられる。フェーズリストを閉じても使える。コンテンツのタイトル自体は開閉ボタンではない。プレビュー・フェーズリスト・設定／ノートを使う。コンテンツ一覧の名前を長押しすると、名前変更・前へ移動・後ろへ移動・削除のメニューを開く。左端の番号をドラッグすると並べ替え。閲覧中と画像生成・印刷は開閉ボタンを表示せず、キャンバス下のコンテンツ・フェーズリストを使う。画像生成・印刷では共通の画像生成・印刷プロパティを表示する'],
  ['.phone-content-close','コンテンツペイン外側の矢印：ペインを閉じてキャンバスへ戻る'],
  ['.phone-material-pin','配置するオブジェクトの一覧を開閉'],
  ['#addPage','空のフェーズを末尾に追加して名称を入力。入力中の戻るボタン（↶）で追加を取り消す'],
@@ -335,7 +438,10 @@ phoneLayerDeleteDialog.addEventListener('close',()=>{pendingPhoneLayerDeletion=n
  ['help-object-visibility','選択したオブジェクトの表示・非表示を切り替えます。'],
  ['help-object-lock','選択したオブジェクトをロック・解除します。ロック中は移動・削除できません。'],
  ['help-number-step','対象のプロパティの数値を減らす・増やす操作です。'],
- ['help-disclosure','見出しの＋／−：一覧や欄を開閉する。閲覧中のフェーズノート、PNG生成のPNGプロパティも見出しをタップして開閉できる'],
+ ['help-disclosure','見出しの＋／−：一覧や欄を開閉する。閲覧中のフェーズノート、画像生成・印刷の画像生成・印刷プロパティも見出しをタップして開閉できる'],
+ ['#pngPreviewSave','表示中の攻略図をPNG画像で保存します。出力倍率は1倍／2倍から選べます。画面のズームとは別で、ノート・編集UI・選択枠は含みません。'],
+ ['#outputPrintButton','表示中の攻略図をA4縦1ページに収め、ブラウザーの印刷画面を開きます。並列表示も対象です。ノートは含みません。準備中は待機カーソル、印刷中はグレーの背景を表示します。印刷先でPDF保存も選べます。'],
+ ['#swapSelectedPositions','選択中の2個の中心位置を交換します。サイズ・向き・重なり順・所属は維持します。編集不可を含む場合は使えません。'],
  ['#undo','このコンテンツの操作を1回分元に戻します。別のコンテンツには影響しません。'],
  ['#redo','このコンテンツで元に戻した操作を1回分やり直します。'],
  ['#clearBtn','現在のフェーズのオブジェクトをすべて削除します。確認画面で対象を確認してください。'],
@@ -378,7 +484,7 @@ phoneLayerDeleteDialog.addEventListener('close',()=>{pendingPhoneLayerDeletion=n
  function close(){if(panel.open)panel.close();for(const node of document.querySelectorAll('.phone-icon-help-toggle'))if(node.getAttribute('aria-expanded')!=='false')node.setAttribute('aria-expanded','false')}
  function openHelp(source=button){
   if(panel.open){close();return}opener=source;
-  const png=!!window.Bolxiv?.pngPreview?.active,content=source===contentButton,mode=png?'PNG生成':boardReadOnly?'閲覧':'編集';
+  const png=!!window.Bolxiv?.pngPreview?.active,content=source===contentButton,mode=png?'画像生成・印刷':boardReadOnly?'閲覧':'編集';
   panel.querySelector('h2').textContent='アイコン説明 · '+mode+' · '+(content?'コンテンツ':'キャンバス');
   const list=panel.querySelector('.phone-icon-help-list');list.replaceChildren();
   const intro=document.createElement('p');intro.className='phone-icon-help-intro';intro.textContent='現在のモード・表示中の画面で使えるボタンを表示しています。モードや画面によって、アイコンの数や説明が変わります。';list.append(intro);
@@ -389,7 +495,7 @@ phoneLayerDeleteDialog.addEventListener('close',()=>{pendingPhoneLayerDeletion=n
    if(['#resetBoardZoom','#phasePropertyResize','.phase-select-check','help-object-selection'].includes(selector))continue;
    let description=original,node=null;
    if(selector.startsWith('help-')){
-    if(selector==='help-png-mode'){if(!png||content)continue;node=document.getElementById('editModeToggle');description='画像マーク：PNG生成を終了し、入る前の編集／閲覧モードに戻ります。'}
+    if(selector==='help-png-mode'){if(!png||content)continue;node=document.getElementById('editModeToggle');description='画像マーク：画像生成・印刷'+'を終了し、入る前の編集／閲覧モードに戻ります。'}
     else if(selector==='help-disclosure'){continue}
     else if(selector==='help-number-step'){if(!content||!visible(document.querySelector('.battle .phone-number-step-buttons')))continue}
     else if(selector.startsWith('help-object-')){if(content||png||boardReadOnly||!visible(document.getElementById('objectList')))continue}
@@ -413,13 +519,13 @@ phoneLayerDeleteDialog.addEventListener('close',()=>{pendingPhoneLayerDeletion=n
    contextual.push({selector,description,node});
   }
   for(const [selector,description] of [
-   ['.phone-reader-switch',png?'フェーズリストとPNGプロパティを切り替えます。出力倍率や表示中のフェーズは維持します。':'フェーズリストとフェーズノートを切り替えます。表示中のフェーズは維持します。'],
-   ['.phone-reader-collapse','フェーズリスト／'+(png?'PNGプロパティ':'ノート')+'の共通枠を開閉します。'],
+   ['.phone-reader-switch',png?'フェーズリストと画像生成・印刷プロパティを切り替えます。出力倍率や表示中のフェーズは維持します。':'フェーズリストとフェーズノートを切り替えます。表示中のフェーズは維持します。'],
+   ['.phone-reader-collapse','フェーズリスト／'+(png?'画像生成・印刷プロパティ':'ノート')+'の共通枠を開閉します。'],
    ['.phone-object-tabs button:not(.phone-object-collapse)','オブジェクトリストとオブジェクトプロパティを切り替えます。'],
    ['.phone-object-collapse','オブジェクトリスト／プロパティの共通枠を開閉します。'],
   ]){const node=find(selector);if(node)contextual.push({selector,description,node})}
   const helpTitles={
-   '#editModeToggle':'編集・閲覧の切り替え','help-png-mode':'PNG生成を終了',
+   '#editModeToggle':'編集・閲覧の切り替え','help-png-mode':'出力を終了',
    '.phone-menu-toggle':'操作メニュー','.phone-content-icon':'コンテンツペインを開く','.phone-content-close':'コンテンツペインを閉じる','.phone-material-pin':'マテリアルを開閉',
    '#addPage':'フェーズを追加','#addPhaseGroup':'フェーズグループを追加','#copyPage':'フェーズをコピー','#copyPageToContent':'別コンテンツへコピー',
    '#phonePhaseSwitch-toggle':'フェーズプロパティ・ノートの切り替え','#phonePhaseSectionToggle':'フェーズ設定・ノート欄を開閉','#toggleBattlePages':'フェーズリストを開閉',
@@ -428,8 +534,8 @@ phoneLayerDeleteDialog.addEventListener('close',()=>{pendingPhoneLayerDeletion=n
    'help-object-visibility':'オブジェクトの表示・非表示','help-object-lock':'オブジェクトをロック','help-number-step':'プロパティの数値を調整',
    '#undo':'元に戻す','#redo':'やり直す','#clearBtn':'フェーズ内のオブジェクトを全削除',
    '.phone-display-menu-toggle':'キャンバスの表示設定','#fitBoardZoom':'キャンバス全体を表示','#zoomOut':'キャンバスを縮小','#zoomIn':'キャンバスを拡大',
-   '.phone-reader-switch':png?'フェーズリスト・PNGプロパティの切り替え':'フェーズリスト・ノートの切り替え',
-   '.phone-reader-collapse':png?'フェーズリスト・PNGプロパティ欄を開閉':'フェーズリスト・ノート欄を開閉',
+   '.phone-reader-switch':png?'フェーズリスト・画像生成・印刷プロパティの切り替え':'フェーズリスト・ノートの切り替え',
+   '.phone-reader-collapse':png?'フェーズリスト・画像生成・印刷プロパティ欄を開閉':'フェーズリスト・ノート欄を開閉',
    '.phone-object-tabs button:not(.phone-object-collapse)':'オブジェクトリスト・プロパティの切り替え','.phone-object-collapse':'オブジェクト欄を開閉'
   };
   // Follow the same top-to-bottom, left-to-right order as the current screen.
@@ -601,3 +707,44 @@ phoneLayerDeleteDialog.addEventListener('close',()=>{pendingPhoneLayerDeletion=n
 })();
 
 ;
+
+// User presets are an independent library, never part of content JSON.
+const userPresetLibrary=(()=>{
+ const key='bolxiv-user-presets-v1';let presets=[];
+ // Discard the withdrawn experimental library before loading; content storage is separate.
+ try{localStorage.removeItem(key)}catch{} 
+ try{const stored=JSON.parse(localStorage.getItem(key)||'[]');if(Array.isArray(stored))presets=stored.filter(p=>p&&typeof p.id==='string'&&typeof p.name==='string'&&Array.isArray(p.items)&&p.items.length)}catch{}
+ const grid=document.getElementById('userPresetGrid'),empty=document.getElementById('userPresetEmpty'),panel=document.getElementById('presetPanel'),heading=document.querySelector('[aria-controls="presetPanel"]');
+ const manage=document.createElement('button');manage.type='button';manage.className='preset-manage';manage.innerHTML='<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>';manage.title='プリセットの管理';manage.setAttribute('aria-label','プリセットの管理');manage.setAttribute('aria-haspopup','menu');manage.setAttribute('aria-expanded','false');heading.parentElement.insertBefore(manage,panel);
+ const menu=document.createElement('div');menu.className='object-context-menu';menu.hidden=true;menu.setAttribute('role','menu');document.body.append(menu);
+ function close(){menu.hidden=true;manage.setAttribute('aria-expanded','false')}
+ function blocked(){return boardReadOnly||phaseComparisonActive()||window.Bolxiv?.pngPreview?.active}
+ function save(next){try{localStorage.setItem(key,JSON.stringify(next));presets=next;render();return true}catch{notify('プリセットを保存できませんでした。保存領域の空きを確認してください');return false}}
+ function show(anchor,actions){close();menu.replaceChildren();for(const [label,action,disabled=false] of actions){const b=document.createElement('button');b.type='button';b.textContent=label;b.setAttribute('role','menuitem');b.disabled=disabled;b.onclick=()=>{close();action()};menu.append(b)}const r=anchor.getBoundingClientRect();menu.hidden=false;menu.style.left=Math.max(4,Math.min(r.left,innerWidth-menu.offsetWidth-4))+'px';menu.style.top=Math.max(4,Math.min(r.bottom+4,innerHeight-menu.offsetHeight-4))+'px';menu.querySelector('button:not(:disabled)')?.focus()}
+ document.addEventListener('pointerdown',e=>{if(!menu.contains(e.target)&&!manage.contains(e.target))close()});document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});window.addEventListener('resize',close);
+ const dialog=document.createElement('dialog');dialog.id='userPresetDialog';dialog.className='confirm-dialog preset-name-dialog';dialog.innerHTML='<form><label for="userPresetName">プリセット名</label><input id="userPresetName" maxlength="80" required autocomplete="off"><p class="hint preset-registration-note" hidden></p><div class="preset-dialog-actions"><button type="button" class="btn">キャンセル</button><button type="submit" class="btn primary">保存</button></div></form>';document.body.append(dialog);let commit=null;
+ dialog.querySelector('[type=button]').onclick=()=>dialog.close();dialog.querySelector('form').onsubmit=e=>{e.preventDefault();const value=dialog.querySelector('input').value.trim();if(!value){dialog.querySelector('input').focus();return}if(commit(value)!==false)dialog.close()};
+ function nameDialog(name,callback,note=''){const hint=dialog.querySelector('.preset-registration-note');hint.textContent=note;hint.hidden=!note;commit=callback;dialog.querySelector('input').value=name;dialog.showModal();dialog.querySelector('input').focus();dialog.querySelector('input').select()}
+ function thumbnail(items){const thumb=document.createElement('span');thumb.className='preset-thumbnail';thumb.setAttribute('aria-hidden','true');const scene=document.createElement('span');scene.className='user-preset-scene';
+  const xs=items.map(o=>o.x/100*640),ys=items.map(o=>o.y/100*640),left=Math.min(...items.map((o,i)=>xs[i]-(o.width||32)/2)),top=Math.min(...items.map((o,i)=>ys[i]-(o.height||32)/2)),right=Math.max(...items.map((o,i)=>xs[i]+(o.width||32)/2)),bottom=Math.max(...items.map((o,i)=>ys[i]+(o.height||32)/2)),extent=Math.max(right-left,bottom-top,32),scale=18/extent;
+  scene.style.cssText='position:absolute;width:640px;height:640px;transform-origin:0 0;transform:scale('+scale+');left:'+((26-(right-left)*scale)/2-left*scale)+'px;top:'+((26-(bottom-top)*scale)/2-top*scale)+'px;';
+  for(const [i,item] of items.entries()){const visual={...item,visible:true};if(visual.type==='icon'){const factor=Math.max(1,8/(scale*Math.min(visual.width||32,visual.height||32)));visual.width=(visual.width||32)*factor;visual.height=(visual.height||32)*factor}const node=createCanvasObjectVisual(visual,i,[]);node.style.pointerEvents='none';for(const img of node.querySelectorAll('img')){img.style.setProperty('width','100%','important');img.style.setProperty('height','100%','important');img.style.setProperty('max-width','none','important');img.style.setProperty('max-height','none','important')}scene.append(node)}thumb.append(scene);return thumb;
+ }
+ function render(){grid.replaceChildren();empty.hidden=presets.length>0;for(const preset of presets){const button=document.createElement('button');button.type='button';button.className='icon-choice user-preset';button.dataset.presetId=preset.id;button.title=preset.name;button.setAttribute('aria-label',preset.name);button.draggable=true;button.disabled=blocked();button.append(thumbnail(preset.items));const icon={name:preset.name,userPresetId:preset.id};button.onclick=()=>{if(!blocked())selectPlacementIcon(icon)};button.ondragstart=e=>{if(blocked()){e.preventDefault();return}selectPlacementIcon(icon,false);e.dataTransfer.setData('application/x-tactica',JSON.stringify({type:'icon',...icon}));e.dataTransfer.effectAllowed='copy'};
+  function actions(){show(button,[['名前を変更',()=>nameDialog(preset.name,name=>{if(blocked())return false;return save(presets.map(p=>p.id===preset.id?{...p,name}:p))}),blocked()],['削除',()=>{if(blocked())return;if(activeIcon?.userPresetId===preset.id){tapPlacementArmed=false;selectPlacementTool('select')}save(presets.filter(p=>p.id!==preset.id))},blocked()]])}
+  button.oncontextmenu=e=>{e.preventDefault();e.stopPropagation();actions()};let timer=null,suppress=false,point=null;button.addEventListener('pointerdown',e=>{if(e.pointerType!=='touch')return;point={x:e.clientX,y:e.clientY};timer=setTimeout(()=>{timer=null;suppress=true;actions()},450)});button.addEventListener('pointermove',e=>{if(point&&Math.hypot(e.clientX-point.x,e.clientY-point.y)>8){clearTimeout(timer);timer=null}});for(const type of ['pointerup','pointercancel','dragstart'])button.addEventListener(type,()=>{clearTimeout(timer);timer=null});button.addEventListener('click',e=>{if(suppress){suppress=false;e.preventDefault();e.stopImmediatePropagation()}},true);grid.append(button)}}
+ manage.onclick=e=>{e.stopPropagation();if(!menu.hidden){close();return}manage.setAttribute('aria-expanded','true');show(manage,[['選択中のオブジェクトを登録',()=>{
+  if(blocked())return;const originals=current().filter(o=>selectedIds.includes(o.id));if(originals.length<2)return;const items=JSON.parse(JSON.stringify(originals));for(const item of items){if(item.imageId){item.src=objectImageSource(item);delete item.imageId}delete item.id}
+  nameDialog(selectedObjectGroup().length?objectGroupName(originals):'新しいプリセット',name=>{if(blocked())return false;const id=createObjectId();for(const item of items){item.locked=false;item.objectGroupId=id;item.objectGroupName=name;delete item.objectGroupRotationOwner;delete item.objectGroupPlacementRotation;delete item.objectGroupOrientationRotation}return save([...presets,{id,name,items}])},items.some(o=>o.visible===false)?'非表示のオブジェクトを'+items.filter(o=>o.visible===false).length+'個含みます。非表示の状態も保持して登録します。':'');
+ },blocked()||current().filter(o=>selectedIds.includes(o.id)).length<2]]);manage.setAttribute('aria-expanded','true')};
+ function place(id,x,y){if(blocked())return;const preset=presets.find(p=>p.id===id);if(!preset)return;const items=JSON.parse(JSON.stringify(preset.items)),cx=(Math.min(...items.map(o=>o.x))+Math.max(...items.map(o=>o.x)))/2,cy=(Math.min(...items.map(o=>o.y))+Math.max(...items.map(o=>o.y)))/2;
+  for(const item of items){item.id=createObjectId();item.x+=x-cx;item.y+=y-cy;if(item.type==='icon'&&item.src?.startsWith('data:image/')){item.imageId=boardImageLibrary.register(item.src);delete item.src}}remapCopiedObjectGroups(items);snapshot();current().push(...items);individualGroupSelection=null;selectedIds=items.map(o=>o.id);selected=selectedIds[0];tapPlacementArmed=false;selectPlacementTool('select');hideTouchPlacementPreview();renderAndSave();closePaletteAfterPlacement();
+ }
+ document.addEventListener('board-view-mode-changed',render);render();return {place,thumbnail:id=>{const p=presets.find(p=>p.id===id);return p?thumbnail(p.items):null}};
+})();
+// Desktop keeps history/save status together and the mode next to the menu.
+(function placeDesktopModeBesideMenu(){
+ const desktop=matchMedia('(min-width:851px)'),header=document.querySelector('.top'),home=header.querySelector('.header-mode-status'),mode=document.getElementById('editModeToggle'),menu=header.querySelector('.phone-menu-toggle'),group=document.createElement('div');group.className='header-mode-menu';header.insertBefore(group,menu);
+ function update(){if(desktop.matches)group.append(mode);else home.querySelector('.header-history-actions').after(mode)}
+ desktop.addEventListener('change',update);update();
+})();

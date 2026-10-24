@@ -286,7 +286,7 @@
     min-height:20px;
   }
   .controlbox {
-    --rotation-handle-distance:50px;
+    --rotation-handle-distance:70px;
     --rotation-handle-size:20px;
   }
   .app {
@@ -1057,7 +1057,7 @@
   }
 }
 @media(max-width:850px) {
-  .app>.top.phone-menu-open>.actions>#operationGuideBtn {
+  .app>.top.phone-menu-open>.actions>:is(#operationGuideBtn,#printCurrentPhase) {
     text-align:center!important;
   }
 }
@@ -2121,14 +2121,14 @@ body:not(.board-read-only) .page-list-box>.page-tab-actions {
 
 /* ===== css/palette-opening-neutral.css ===== */
 .app .layout .left.palette-opening-neutral :is(#toggleBattlePages,#toggleLayoutProperties,#toggleLayers,#toggleInspector,.accordion-toggle)[aria-controls][aria-expanded] {
-  background:var(--accent)!important;
-  color:#fff!important;
-  -webkit-text-fill-color:#fff!important;
+  background:#eef2f7!important;
+  color:#33445f!important;
+  -webkit-text-fill-color:#33445f!important;
   filter:none!important;
 }
 .app .layout .left.palette-opening-neutral :is(#toggleBattlePages,#toggleLayoutProperties,#toggleLayers,#toggleInspector,.accordion-toggle)[aria-controls][aria-expanded] * {
-  color:#fff!important;
-  -webkit-text-fill-color:#fff!important;
+  color:#33445f!important;
+  -webkit-text-fill-color:#33445f!important;
 }
 
 /* ===== css/collapsed-palette-background.css ===== */

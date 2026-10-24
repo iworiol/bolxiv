@@ -2,9 +2,9 @@
 (()=>{
  const host=document.querySelector('.layout>.right'),layout=document.querySelector('.layout');
  const dialog=document.createElement('dialog');dialog.id='pngPreview';dialog.className='png-preview-panel';dialog.setAttribute('aria-labelledby','pngPreviewTitle');
- dialog.innerHTML='<header class="png-preview-heading"><h2 id="pngPreviewTitle">PNG生成</h2><span class="phone-canvas-mode-status" id="pngCanvasModeStatus">PNG生成</span></header><div class="png-preview-content"><div class="png-preview-surface" aria-label="出力画像"><p class="png-preview-status" id="pngPreviewStatus" role="status" aria-live="polite"></p></div><aside class="png-preview-settings"><h3><button type="button" id="pngPropertiesToggle" aria-controls="pngPropertiesBody" aria-expanded="true"><span>PNGプロパティ</span><span class="png-properties-mark" aria-hidden="true">−</span></button></h3><div class="png-preview-settings-body" id="pngPropertiesBody"><div class="png-settings-fields"><label for="pngPreviewScale">出力倍率</label><select id="pngPreviewScale"><option value="1">1倍</option><option value="2">2倍</option></select></div><button type="button" class="btn primary" id="pngPreviewSave" disabled>PNGを保存</button></div></aside></div>';
+ dialog.innerHTML='<header class="png-preview-heading"><h2 id="pngPreviewTitle">画像生成・印刷</h2><span class="phone-canvas-mode-status" id="pngCanvasModeStatus">画像生成・印刷</span></header><div class="png-preview-content"><div class="png-preview-surface" aria-label="出力画像"><p class="png-preview-status" id="pngPreviewStatus" role="status" aria-live="polite"></p></div><aside class="png-preview-settings"><h3><button type="button" id="pngPropertiesToggle" aria-controls="pngPropertiesBody" aria-expanded="true"><span>画像生成・印刷プロパティ</span><span class="png-properties-mark" aria-hidden="true">−</span></button></h3><div class="png-preview-settings-body" id="pngPropertiesBody"><section class="output-section output-png-section"><h4>PNG</h4><div class="png-settings-fields"><label for="pngPreviewScale">出力倍率</label><select id="pngPreviewScale"><option value="1">1倍</option><option value="2">2倍</option></select></div><button type="button" class="btn primary" id="pngPreviewSave" disabled>PNGを保存</button></section><div class="output-section-separator" role="separator"></div><section class="output-section output-print-section"><h4>印刷</h4><button type="button" class="btn primary" id="outputPrintButton">印刷</button></section></div></aside></div>';
  host.append(dialog);
- const surface=dialog.querySelector('.png-preview-surface'),status=document.getElementById('pngPreviewStatus'),scaleInput=document.getElementById('pngPreviewScale'),save=document.getElementById('pngPreviewSave'),back=document.getElementById('editModeToggle');
+ const surface=dialog.querySelector('.png-preview-surface'),status=document.getElementById('pngPreviewStatus'),scaleInput=document.getElementById('pngPreviewScale'),save=document.getElementById('pngPreviewSave'),back=document.getElementById('editModeToggle'),printButton=document.getElementById('outputPrintButton');
  const toolbar=document.querySelector('.board-display-toolbar').cloneNode(true);toolbar.classList.add('png-preview-toolbar');toolbar.setAttribute('aria-label','PNGプレビューの表示');
  toolbar.querySelector('.phone-content-icon')?.remove();toolbar.querySelector('.phone-icon-help-toggle')?.remove();toolbar.querySelector('.phone-help-separator')?.remove();
  for(const node of toolbar.querySelectorAll('[id]')){node.dataset.sourceId=node.id;node.id='png-'+node.id}
@@ -13,7 +13,7 @@
   if(zoom)button.onclick=()=>{if(!session)return;session.zoom=action==='zoomIn'?Math.min(3,session.zoom+.05):action==='zoomOut'?Math.max(.05,session.zoom-.05):action==='fitBoardZoom'?Math.max(.05,Math.min((surface.clientWidth-40)/outputDimensions().width,(surface.clientHeight-40)/outputDimensions().height)):1;fit();surface.scrollLeft=Math.max(0,(surface.scrollWidth-surface.clientWidth)/2);surface.scrollTop=Math.max(0,(surface.scrollHeight-surface.clientHeight)/2)};
  }
  dialog.querySelector('.png-preview-heading').append(toolbar);
- const helpButton=document.createElement('button');helpButton.type='button';helpButton.className='phone-icon-help-toggle png-icon-help';helpButton.textContent='？';helpButton.setAttribute('aria-label','PNG生成のアイコン説明');helpButton.setAttribute('aria-controls','phoneIconHelp');helpButton.setAttribute('aria-haspopup','dialog');helpButton.setAttribute('aria-expanded','false');helpButton.onclick=()=>window.Bolxiv.iconHelp.open(helpButton);const helpSeparator=document.createElement('span');helpSeparator.className='phone-help-separator';helpSeparator.setAttribute('aria-hidden','true');toolbar.append(helpSeparator,helpButton);
+ const helpButton=document.createElement('button');helpButton.type='button';helpButton.className='phone-icon-help-toggle png-icon-help';helpButton.textContent='？';helpButton.setAttribute('aria-label','画像生成・印刷のアイコン説明');helpButton.setAttribute('aria-controls','phoneIconHelp');helpButton.setAttribute('aria-haspopup','dialog');helpButton.setAttribute('aria-expanded','false');helpButton.onclick=()=>window.Bolxiv.iconHelp.open(helpButton);const helpSeparator=document.createElement('span');helpSeparator.className='phone-help-separator';helpSeparator.setAttribute('aria-hidden','true');toolbar.append(helpSeparator,helpButton);
  const liveSpace=document.getElementById('boardZoomSpace'),liveAnchor=document.createComment('PNG canvas home');liveSpace.before(liveAnchor);
  const zoomTrigger=toolbar.querySelector('[data-source-id=resetBoardZoom]'),zoomMenu=document.getElementById('boardZoomMenu').cloneNode(true);zoomMenu.id='pngPreviewZoomMenu';document.body.append(zoomMenu);zoomTrigger.setAttribute('aria-controls',zoomMenu.id);
  const zoomItems=[...zoomMenu.querySelectorAll('[data-zoom]')];
@@ -41,11 +41,11 @@
   if(reader.dataset.readerTab!==tab)reader.dataset.readerTab=tab;
   if(reader.dataset.readerExpanded!==String(expanded))reader.dataset.readerExpanded=String(expanded);
   const title=reader.querySelector('.phone-reader-title'),change=reader.querySelector('.phone-reader-switch'),collapse=reader.querySelector('.phone-reader-collapse');
-  const markup=tab==='list'?'<strong>フェーズリスト</strong> / PNGプロパティ':'フェーズリスト / <strong>PNGプロパティ</strong>';
+  const propertiesName='画像生成・印刷プロパティ';const markup=tab==='list'?'<strong>フェーズリスト</strong> / '+propertiesName:'フェーズリスト / <strong>'+propertiesName+'</strong>';
   if(title&&title.innerHTML!==markup)title.innerHTML=markup;
   const attr=(node,key,value)=>{if(node&&node.getAttribute(key)!==value)node.setAttribute(key,value)};
-  attr(title,'aria-expanded',String(expanded));attr(title,'aria-label',(tab==='list'?'フェーズリスト':'PNGプロパティ')+'を'+(expanded?'閉じる':'開く'));
-  attr(change,'aria-label',tab==='list'?'PNGプロパティを表示':'フェーズリストを表示');
+  attr(title,'aria-expanded',String(expanded));attr(title,'aria-label',(tab==='list'?'フェーズリスト':propertiesName)+'を'+(expanded?'閉じる':'開く'));
+  attr(change,'aria-label',tab==='list'?propertiesName+'を表示':'フェーズリストを表示');
   const mark=expanded?'−':'＋';if(collapse&&collapse.textContent!==mark)collapse.textContent=mark;attr(collapse,'aria-expanded',String(expanded));attr(collapse,'aria-label',title?.getAttribute('aria-label'));
   const rowHeight=reader.querySelector('.content-select-row').getBoundingClientRect().height,metrics=phoneReaderLayoutMetrics(content,0,rowHeight,session.zoom*100);
   content.classList.toggle('png-phases-collapsed',!expanded);
@@ -78,7 +78,7 @@
   const nodes=[...host.children].filter(node=>node&&node!==dialog);
   const states=[...new Set(nodes)].map(node=>({node,inert:node.inert}));for(const {node} of states)node.inert=true;return states;
  }
- function refresh(){if(!session)return;const sourceTitle=document.getElementById('selectionTitle'),previewTitle=document.getElementById('pngPreviewTitle');previewTitle.replaceChildren(...[...sourceTitle.childNodes].map(node=>node.cloneNode(true)));const prefix=previewTitle.querySelector('.phase-label-prefix');if(prefix)prefix.textContent='フェーズ：';previewTitle.title=previewTitle.textContent;session.scale=Number(scaleInput.value);const dimensions=outputDimensions();for(const option of scaleInput.options){const scale=Number(option.value);option.textContent=scale+'倍（'+dimensions.width*scale+' × '+dimensions.height*scale+' px）'}status.hidden=true;fit();save.disabled=!!session.saving;if(session.initialScroll){surface.scrollLeft=session.initialScroll.left;surface.scrollTop=session.initialScroll.top;session.initialScroll=null}}
+ function refresh(){if(!session)return;const sourceTitle=document.getElementById('selectionTitle'),previewTitle=document.getElementById('pngPreviewTitle');previewTitle.replaceChildren(...[...sourceTitle.childNodes].map(node=>node.cloneNode(true)));const prefix=previewTitle.querySelector('.phase-label-prefix');if(prefix)prefix.textContent='フェーズ：';previewTitle.title=previewTitle.textContent;session.scale=Number(scaleInput.value);const dimensions=outputDimensions();for(const option of scaleInput.options){const scale=Number(option.value);option.textContent=scale+'倍（'+dimensions.width*scale+' × '+dimensions.height*scale+' px）'}status.hidden=true;fit();save.disabled=printButton.disabled=!!session.saving;if(session.initialScroll){surface.scrollLeft=session.initialScroll.left;surface.scrollTop=session.initialScroll.top;session.initialScroll=null}}
  async function open(scale=1){
   if(session||opening)return;opening=true;const focus=document.activeElement;focus?.blur();
   try{
@@ -94,27 +94,28 @@
     collapse.onclick=()=>{if(session?.saving)return;document.getElementById('toggleBattlePages').click();syncPhoneLayout()};title.onclick=()=>collapse.click();
     change.onclick=()=>{if(!session||session.saving)return;session.phoneTab=session.phoneTab==='list'?'properties':'list';const toggle=document.getElementById('toggleBattlePages');if(toggle.getAttribute('aria-expanded')!=='true')toggle.click();syncPhoneLayout()};
     propertiesExpanded=true;syncProperties();reader.append(dialog.querySelector('.png-preview-settings'));dialog.querySelector('.png-preview-content').append(reader)}
-   session={phoneTab:'properties',returnMode:boardReadOnly||phaseComparisonActive()?'閲覧':'編集',displayBefore:{gridVisible,fieldVisible,fieldClipEnabled},readerHomes,placementControls,zoom:boardDisplayZoom/100,initialScroll:{left:viewport.scrollLeft,top:viewport.scrollTop},originalZoom:boardDisplayZoom,spaceInert:liveSpace.inert,scale:scale===2?2:1,inert:freeze(),focus,scrolls:[document.scrollingElement,...document.querySelectorAll('.layout,.right,#objectLayerPanel,.object-layout-rect,#objectList,#inspector,#layoutPropertiesPanel,#phaseMemo textarea')].filter(Boolean).map(node=>({node,left:node.scrollLeft,top:node.scrollTop}))};
+   session={kind:'output',phoneTab:'properties',returnMode:boardReadOnly||phaseComparisonActive()?'閲覧':'編集',displayBefore:{gridVisible,fieldVisible,fieldClipEnabled},readerHomes,placementControls,zoom:boardDisplayZoom/100,initialScroll:{left:viewport.scrollLeft,top:viewport.scrollTop},originalZoom:boardDisplayZoom,spaceInert:liveSpace.inert,scale:scale===2?2:1,inert:freeze(),focus,scrolls:[document.scrollingElement,...document.querySelectorAll('.layout,.right,#objectLayerPanel,.object-layout-rect,#objectList,#inspector,#layoutPropertiesPanel,#phaseMemo textarea')].filter(Boolean).map(node=>({node,left:node.scrollLeft,top:node.scrollTop}))};
    document.querySelector('.top').classList.remove('phone-menu-open');const headerMenu=document.querySelector('.phone-menu-toggle');headerMenu?.setAttribute('aria-expanded','false');
    for(const [menu,trigger] of [['#boardZoomMenu','#resetBoardZoom'],['#phoneDisplayMenu','.phone-display-menu-toggle']])if(document.querySelector(menu)?.hidden===false)document.querySelector(trigger)?.click();
    closeObjectContextMenu();closeColorPopovers();closeJsonImportMenu();closeJsonExportMenu();closeHelpMenu();
    gridVisible=false;fieldVisible=true;fieldClipEnabled=false;updateGridToggle();updateFieldToggle();updateClipToggle();for(const id of ['gridToggle','fieldToggle','clipToggle']){const source=document.getElementById(id),button=toolbar.querySelector('[data-source-id='+id+']');if(button){button.innerHTML=source.innerHTML;button.setAttribute('aria-pressed',source.getAttribute('aria-pressed'));button.title=source.title}}render();
-   scaleInput.value=String(session.scale);scaleInput.disabled=false;back.disabled=false;dialog.style.setProperty('--png-heading-height',document.querySelector('.board-title-row').getBoundingClientRect().height+'px');document.body.classList.add('png-preview-active');updateModeStatus();updateHistoryButtons();alignFrame();surface.append(liveSpace);liveSpace.inert=true;dialog.show();syncPhoneCanvas();back.focus({preventScroll:true});await refresh();
+   dialog.dataset.outputMode='output';propertiesToggle.firstElementChild.textContent='画像生成・印刷プロパティ';document.getElementById('pngCanvasModeStatus').textContent='画像生成・印刷';helpButton.setAttribute('aria-label','画像生成・印刷のアイコン説明');scaleInput.value=String(session.scale);scaleInput.disabled=false;back.disabled=false;dialog.style.setProperty('--png-heading-height',document.querySelector('.board-title-row').getBoundingClientRect().height+'px');document.body.classList.add('png-preview-active');updateModeStatus();updateHistoryButtons();alignFrame();surface.append(liveSpace);liveSpace.inert=true;dialog.show();syncPhoneCanvas();back.focus({preventScroll:true});await refresh();
   }catch(error){if(session)close();throw error}finally{opening=false}
  }
  function close(){
-  if(!session||session.saving)return;const previous=session;pinch=null;closeZoomMenu();session=null;revision++;dialog.close();document.body.classList.remove('png-preview-active');dialog.removeAttribute('aria-busy');const reader=dialog.querySelector('.png-reader-controls');if(reader){dialog.querySelector('.png-preview-content').append(dialog.querySelector('.png-preview-settings'));reader.remove()}for(const {node,anchor} of previous.readerHomes){anchor.after(node);anchor.remove()}liveAnchor.after(liveSpace);liveSpace.inert=previous.spaceInert;({gridVisible,fieldVisible,fieldClipEnabled}=previous.displayBefore);updateGridToggle();updateFieldToggle();updateClipToggle();setBoardDisplayZoom(previous.originalZoom,false,false);originalRender();updateModeStatus();updateHistoryButtons();
+  if(!session||session.saving)return;const previous=session;clearPhasePrintFrame();pinch=null;closeZoomMenu();session=null;revision++;dialog.close();document.body.classList.remove('png-preview-active');dialog.removeAttribute('aria-busy');const reader=dialog.querySelector('.png-reader-controls');if(reader){dialog.querySelector('.png-preview-content').append(dialog.querySelector('.png-preview-settings'));reader.remove()}for(const {node,anchor} of previous.readerHomes){anchor.after(node);anchor.remove()}liveAnchor.after(liveSpace);liveSpace.inert=previous.spaceInert;({gridVisible,fieldVisible,fieldClipEnabled}=previous.displayBefore);updateGridToggle();updateFieldToggle();updateClipToggle();setBoardDisplayZoom(previous.originalZoom,false,false);originalRender();updateModeStatus();updateHistoryButtons();
   for(const {node,inert} of previous.inert)node.inert=inert;for(const {node,disabled} of previous.placementControls)node.disabled=disabled;
   const restore=()=>{for(const {node,left,top} of previous.scrolls){node.scrollLeft=left;node.scrollTop=top}};restore();requestAnimationFrame(restore);
   const focus=[previous.focus,document.getElementById('exportBtn'),document.querySelector('.phone-menu-toggle')].find(node=>node?.isConnected&&node.getClientRects().length);focus?.focus({preventScroll:true});
  }
  scaleInput.onchange=refresh;
- save.onclick=async()=>{
-  if(!session||session.saving)return;const current=session;current.saving=true;save.disabled=true;scaleInput.disabled=true;back.disabled=true;
-  try{const target=window.showSaveFilePicker?await window.showSaveFilePicker(exportPickerOptions(safeExportName('.png'),'image/png','PNG画像')):null;await exportPng(target,current.scale)}
-  catch(error){if(error?.name!=='AbortError')notify('PNGを書き出せませんでした：'+(error?.message||String(error)))}
-  finally{if(session===current){current.saving=false;save.disabled=false;scaleInput.disabled=false;back.disabled=false}}
- };
+ async function runOutput(printing){
+  if(!session||session.saving)return;const current=session;current.saving=true;save.disabled=printButton.disabled=true;scaleInput.disabled=true;back.disabled=true;
+  try{if(printing)await printOutputCanvas();else{const target=window.showSaveFilePicker?await window.showSaveFilePicker(exportPickerOptions(safeExportName('.png'),'image/png','PNG画像')):null;await exportPng(target,current.scale)}}
+  catch(error){if(error?.name!=='AbortError')notify((printing?'印刷画面を開けませんでした：':'PNGを書き出せませんでした：')+(error?.message||String(error)))}
+  finally{if(session===current){current.saving=false;save.disabled=printButton.disabled=false;scaleInput.disabled=false;back.disabled=false}}
+ }
+ save.onclick=()=>runOutput(false);printButton.onclick=()=>runOutput(true);
  dialog.addEventListener('close',()=>{if(session&&!dialog.open&&!session.saving)close()});
  window.addEventListener('keydown',event=>{
   if(!session||event.target.closest?.('#changeLogDialog,#operationGuideDialog,#aboutToolDialog,#phoneIconHelp'))return;
@@ -129,7 +130,22 @@
  for(const type of ['click','dblclick','pointerdown','contextmenu','dragstart','drop','change'])window.addEventListener(type,event=>{if(!session||event.target.closest?.('#changeLogDialog,#operationGuideDialog,#aboutToolDialog,#phoneIconHelp')||session.saving&&event.target.matches('a[download]'))return;if(readOnlyTarget(event.target)){event.preventDefault();event.stopImmediatePropagation();return}if(event.target===back&&type==='pointerdown'){event.stopImmediatePropagation();return}if(session.saving&&event.target!==back&&!dialog.contains(event.target)||!allowed(event.target)||['dblclick','contextmenu','dragstart','drop'].includes(type)&&!dialog.contains(event.target)){event.preventDefault();event.stopImmediatePropagation()}},true);
  const originalRender=render;let refreshFrame;
  render=function(){originalRender();if(session){cancelAnimationFrame(refreshFrame);refreshFrame=requestAnimationFrame(()=>{if(session)refresh()})}};
- window.Bolxiv.pngPreview={open,close,get active(){return !!session},get saving(){return !!session?.saving},get returnMode(){return session?.returnMode||'編集'}};
+ window.Bolxiv.pngPreview={open,close,get kind(){return 'output'},get active(){return !!session},get saving(){return !!session?.saving},get returnMode(){return session?.returnMode||'編集'}};
 })();
 
 ;
+
+// The shared output mode owns the preview; only the browser print document is separate.
+let phasePrintFrame=null,phasePrintOverlay=null;
+function clearPhasePrintFrame(){phasePrintFrame?.remove();phasePrintFrame=null;phasePrintOverlay?.remove();phasePrintOverlay=null;document.body.classList.remove('phase-print-preparing','phase-print-open')}
+async function printOutputCanvas(){
+ clearPhasePrintFrame();phasePrintOverlay=document.createElement('div');phasePrintOverlay.className='phase-print-overlay';phasePrintOverlay.setAttribute('role','status');phasePrintOverlay.setAttribute('aria-label','印刷画面を準備しています');document.body.append(phasePrintOverlay);document.body.classList.add('phase-print-preparing','phase-print-open');
+ let src;try{await new Promise(resolve=>requestAnimationFrame(()=>setTimeout(resolve,0)));const canvas=await drawPngCanvas(2);src=canvas.toDataURL('image/png')}catch(error){clearPhasePrintFrame();throw error}
+ await new Promise((resolve,reject)=>{
+  const frame=document.createElement('iframe');phasePrintFrame=frame;frame.title='表示中の攻略図の印刷';frame.className='phase-print-frame';
+  frame.onload=async()=>{try{const win=frame.contentWindow;await frame.contentDocument.querySelector('img').decode();if(phasePrintFrame!==frame){resolve();return}win.addEventListener('afterprint',clearPhasePrintFrame,{once:true});document.body.classList.remove('phase-print-preparing');phasePrintOverlay?.setAttribute('aria-label','印刷画面を開いています');win.focus();win.print();resolve()}catch(error){clearPhasePrintFrame();reject(error)}};
+  frame.srcdoc='<!doctype html><html lang="ja"><head><meta charset="utf-8"><title>攻略図</title><style>@page{size:A4 portrait;margin:10mm}html,body{margin:0;padding:0;background:white}body{width:190mm;height:276mm;display:flex;align-items:center;justify-content:center}img{display:block;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;print-color-adjust:exact;-webkit-print-color-adjust:exact}</style></head><body><img alt="攻略図" src="'+src+'"></body></html>';document.body.append(frame);
+ });
+}
+document.getElementById('printCurrentPhase').onclick=()=>window.Bolxiv.pngPreview.open(1).catch(error=>notify('画像生成・印刷モードを開けませんでした：'+(error?.message||String(error))));
+window.Bolxiv.phasePrint={open:()=>window.Bolxiv.pngPreview.open(2,'print')};
