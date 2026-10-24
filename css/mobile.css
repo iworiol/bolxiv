@@ -1057,7 +1057,7 @@
   }
 }
 @media(max-width:850px) {
-  .app>.top.phone-menu-open>.actions>#operationGuideBtn {
+  .app>.top.phone-menu-open>.actions>:is(#operationGuideBtn,#printCurrentPhase) {
     text-align:center!important;
   }
 }

@@ -143,7 +143,7 @@
  .app>.top>.actions{display:none!important}
  .app>.top.phone-menu-open>.actions{display:flex!important;position:absolute;left:auto;right:var(--header-menu-right,22px);top:calc(100% + 4px);width:260px;max-height:calc(100dvh - 80px);overflow:auto;flex-direction:column;gap:6px;margin:0;padding:8px;background:#fff;border:1px solid #999;border-radius:8px;box-shadow:0 6px 20px #0003}
  .app>.top.phone-menu-open>.actions>.btn{display:block!important;width:100%!important;min-width:0!important;min-height:40px!important;flex:none!important;text-align:left}
- .app>.top.phone-menu-open>.actions>#operationGuideBtn{text-align:center!important}
+ .app>.top.phone-menu-open>.actions>:is(#operationGuideBtn,#printCurrentPhase){text-align:center!important}
  #jsonExportMenu,#jsonImportMenu,#helpMenu{z-index:10060}
 }
 @media(max-width:850px){
@@ -1338,7 +1338,7 @@ body .app .layout #contentSelect::after{
 body .app .layout #phaseMemo.group-note-static>summary,body .app .layout #objectLayerPanel #phaseMemo.group-note-static>summary{background:#eef2f7!important;color:#33445f!important;-webkit-text-fill-color:#33445f!important;cursor:default;outline:none}
 body .app .layout #phaseMemo.group-note-static>summary *,body .app .layout #objectLayerPanel #phaseMemo.group-note-static>summary *{color:inherit!important;-webkit-text-fill-color:inherit!important}
 #phaseMemo.group-note-static>summary::after{display:none!important}
-.left .builtin-preset{width:100%;min-height:44px;margin-bottom:8px;white-space:normal}
+.left .preset-grid{margin-bottom:0}.left .builtin-preset .preset-thumbnail{display:block;position:relative;width:26px;height:26px}.left .builtin-preset .preset-thumbnail img{position:absolute;width:8px;height:8px;max-width:8px;max-height:8px;transform:translate(-50%,-50%);object-fit:contain}
 .object-group-control{border:3px solid #ffaa33}
 .object-group-control.group-only-selection{border-style:dashed}
 .object-group-control.object-group-context{border-width:2px;pointer-events:none}
@@ -1420,3 +1420,8 @@ body .app .layout #objectList>.object-group-row>.object-delete{grid-column:5;gri
 .right #inspector>.object-group-properties{flex:0 0 auto;padding-bottom:8px}
 .object-group-properties>.object-group-rotation{flex-shrink:0}
 .right #inspector .property-swap-button{box-sizing:border-box;display:grid;place-items:center;flex:0 0 26px;width:26px;height:26px;min-width:26px;padding:3px;border:1px solid #d5dce6;border-radius:4px;background:#fff;color:#000}.property-swap-button svg{width:18px;height:18px}.property-swap-button:disabled{opacity:.4}
+.left .accordion-group:has(#presetPanel){position:relative}.left .preset-manage{position:absolute;right:38px;top:5px;display:grid;place-items:center;box-sizing:border-box;width:26px;min-width:26px;height:26px;min-height:26px;margin:0;padding:3px;border:1px solid #d0d4da;border-radius:5px;background:#eef2f7;color:#33445f;-webkit-text-fill-color:#33445f;filter:none;transition:none;-webkit-tap-highlight-color:transparent}.left .preset-manage svg{width:18px;height:18px}.left .preset-manage:enabled:is(:hover:not(:where(.phone-touch-mode *)),:active,:focus-visible,.phone-control-pressed){background:var(--blue);color:#fff;-webkit-text-fill-color:#fff;filter:none}@media(max-width:850px){.left .preset-manage{top:4px;width:28px;min-width:28px;height:28px;min-height:28px}}.left .preset-section-separator{border-top:1px solid #e5e9ef;margin:8px 0}.left #userPresetGrid:empty{display:none}.left .preset-empty{font-size:11px;color:#64748b;padding:4px 0 8px}.left .user-preset .preset-thumbnail,.touch-placement-preview>.preset-thumbnail{position:relative;display:block;width:26px;height:26px;overflow:hidden}.user-preset-scene{pointer-events:none}.preset-name-dialog{border:1px solid #d5dce6;border-radius:8px;padding:16px;max-width:calc(100vw - 32px)}.preset-name-dialog form{display:flex;flex-direction:column;gap:10px}.preset-name-dialog input{width:260px;max-width:100%;box-sizing:border-box}.preset-dialog-actions{display:flex;justify-content:flex-end;gap:8px}
+.left:not(.palette-hover-open):not(:focus-within):not(.pinned) .preset-manage{display:none}
+.app .layout .left .preset-manage{background:#eef2f7!important;color:#33445f!important;-webkit-text-fill-color:#33445f!important;border:1px solid #d0d4da!important}.app .layout .left .preset-manage:enabled:is(:hover:not(:where(.phone-touch-mode *)),:active,:focus-visible,.phone-control-pressed){background:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important;filter:none!important}
+/* User preset UI is temporarily hidden; implementation and saved library remain intact. */ .app .layout .left .preset-manage,.app .layout .left #presetPanel>.preset-section-separator,.app .layout .left #userPresetGrid,.app .layout .left #userPresetEmpty{display:none!important}
+.header-mode-menu{display:none}@media(min-width:851px){.app>.top{grid-template-columns:minmax(max-content,var(--phase-pane-header-left,336px)) auto minmax(0,1fr) auto}.app>.top>.header-mode-menu{display:flex;align-items:center;grid-column:3;grid-row:1;justify-self:end;margin-left:12px}.app>.top>.phone-menu-toggle{grid-column:4}.app>.top>.header-mode-status{gap:8px}}

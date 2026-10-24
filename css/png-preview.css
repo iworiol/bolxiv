@@ -231,4 +231,8 @@
  .png-settings-fields>label{font-size:12px;color:#000}
  .png-settings-fields>p{grid-column:1/-1;grid-row:2}
  .png-reader-controls .png-preview-settings-body>#pngPreviewSave{grid-column:1;grid-row:2;align-self:end;width:100%;min-height:40px;margin:0}
-}
+}.phase-print-frame{position:fixed;left:-10000px;top:0;width:800px;height:1100px;border:0;pointer-events:none}
+
+.png-preview-panel[data-output-mode=print] .png-settings-fields[hidden]{display:none!important}.png-preview-panel .print-settings-info[hidden]{display:none!important}
+.app .layout .png-preview-panel .png-preview-settings-body{display:flex;flex-direction:column;gap:12px;overflow:auto;align-items:stretch;justify-content:flex-start}.output-section{display:flex;flex-direction:column;flex:0 0 auto;gap:8px;min-width:0}.output-section h4{font-size:12px;font-weight:700;margin:0;color:#33445f}.output-section .png-settings-fields{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px;align-items:center}.output-section>.btn{box-sizing:border-box;align-self:flex-end;width:50%;min-width:min(120px,100%);max-width:100%;min-height:36px;margin:0;padding:6px 12px}.output-section-separator{flex:0 0 auto;border-top:1px solid #e5e9ef}.app .layout .png-preview-panel .output-section>.btn{background:#293c66!important;color:#fff!important;-webkit-text-fill-color:#fff!important;border:1px solid #293c66!important;border-radius:5px}.app .layout .png-preview-panel .output-section>.btn:enabled:hover:not(:where(.phone-touch-mode *)){background:var(--blue)!important;border-color:var(--blue)!important}
+/* Optional print feedback: remove this block and overlay lifecycle to revert. */ .phase-print-overlay{position:fixed;inset:0;z-index:2147483646;background:#0006;pointer-events:auto}.phase-print-preparing,.phase-print-preparing *{cursor:wait!important}

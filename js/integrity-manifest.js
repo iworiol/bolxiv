@@ -5,20 +5,20 @@ window.BolxivIntegrity = {
   "files": {
     "bolxiv.js": "sha384-uXd54ZCTqUeYmCjEYuBhk71z79h8JYUG67ginJ9ucxQr3kadhpfNYYMMcd8q5zhL",
     "css/base.css": "sha384-OE3HWs8tk4HB14pHKeLHMDSCCb8oHqMuH/lQlSi334257o+whtmdDjYhOfo5UntR",
-    "css/interface.css": "sha384-tNC5PW5auKtKEmuezfA2Mn2E8Rhn84+QK43JuK7vRCtc54tm/sxtUfRLeIQnK7MD",
-    "css/mobile.css": "sha384-N2z6nJKmlVvOlneDidwFX3hugAG1veBts6vmLP3lqxfjPDo3BW8CZrjrRO+ti/oe",
-    "css/panels.css": "sha384-CoT96AqnoTdOap0cIJxrIrG13g5Uy6l7xNto9Wrb7oy8Q9+vpUXHC3j/ygYt2+H4",
-    "css/png-preview.css": "sha384-65Evgap0ppl0FfQ2B2TaXVJEUNgF7YzXWDbDYZYghHZ0MOEmTYXv9Cxd/+NnLh5+",
+    "css/interface.css": "sha384-tr4rSyISANzN/L5vVvixKnOE0+O5p+3SHBuB2O9RrZXv9JqHZDLlbYp4rWyKXL+8",
+    "css/mobile.css": "sha384-bJJIsczDJaYtn7Mk7A5mJ6kXDbwYZik1+oW6/MmnaWV0T5LF+TP8gmtbqlohFF/c",
+    "css/panels.css": "sha384-LNwgiNsYoTLkb39K3lO3LcXFPwnUJ/EIZyB62oXizSoraVY+QIADJ37UG7kG4/7F",
+    "css/png-preview.css": "sha384-bpPWoOHFbMkW7TmbH/t6GoXaKpLO3xzVLJ3itsYzUlTHK50jl+dD8/NVsynlA4kn",
     "css/startup.css": "sha384-/nNfx3swtHwFX/4OXex8cMEPh5oSyfVwyRxyB0zH2D0hJrvZIqUTbTr0+cTPRtRN",
     "js/application.js": "sha384-C1RM79UkZF9MrEytzzEgTQMH1ydv8S+VQltRNYZ6drA54d9yr64Llpl4vjbTp10A",
-    "js/canvas.js": "sha384-1fq10GbMUByTDXHpv3FG71IkmALo+1IGMoGXAWfxsi/7dUedkLNbfBekA4ULyKXk",
+    "js/canvas.js": "sha384-i0CpEhiad7rXxRXoMYLMJDfnvtZf6CwPeCGjUwTN2k+Bx9A9JZvK2kd2WR2McAxc",
     "js/data-io.js": "sha384-9JguRG/IFLihdd/qbaQMX2Wt1UoW1EorpqsSbxFa4xVfmrUuRADDZ7oxrmBhwcFA",
-    "js/editor.js": "sha384-2HyY6ItlliFtR3ZTOYr3vb6tcYEZs0/TJGTrD0WyzXlb46iozAKis4ojMr49T03J",
+    "js/editor.js": "sha384-K9eatno7vm+J7JEXJ4dXzmT+eBjlb/kGFmRUC9ReUkM7fiWDk6xgl6N6MAmXysfj",
     "js/embedded-images.js": "sha384-ScfwJ67FH2csTOK+9W83PtVehWg4UcA//YJJ9ElOSX4VCq94x77zSwUvnC22tj9t",
     "js/integrity-loader.js": "sha384-nBDJSwTnuFOHq6HsBwIYs2fv+IdGdSA4SWKe9YuwN2/e9Gdzn/fi+ozte3eSnKsi",
-    "js/interface.js": "sha384-WVZaEMfYIQ/0wvjKvdRIO5x5wQvsrZhrsRwuHrwmFP64jsG75e9DCRT5juxCsT2z",
+    "js/interface.js": "sha384-VJwmkIawwCvHlFTq4kMMc1CgZA5LpjzRiU/y242gDk2NBn/1Q0XwMXSliYIk8ESg",
     "js/panels.js": "sha384-wQ77qn75NQ5YetrjtL3xd932oXSM8kI+OrE47QOpE56n52Xtfh7xpYrF4P7L7zEc",
     "js/phase-tools.js": "sha384-TJ5NX2HO6QRUu5rfwOu1jeAIKotEPQWD3UKld4QGjc3AZULKs+J/YO9ktCUfk11A",
-    "js/png-preview.js": "sha384-9zpKdUXAk+8uAnKNVYwaeeF2kKuntt+tmZghlcxCj7kMdfoR57+e8mKxM5IzZ9Vo"
+    "js/png-preview.js": "sha384-8TYxmQ7Xp40D22zap2lekJzuumS9RVBcOHc3MIUotM+Tc3Os2d2RboPGkJ4fkZVL"
   }
 };

@@ -2923,19 +2923,19 @@ dialog.confirm-dialog {
   border:1px solid #999!important;
   color-scheme:light;
 }
-:is(#deletePageDialog,#deleteContentDialog,#clearDialog,#clearUserDataDialog,#phoneLayerDeleteDialog).confirm-dialog .btn {
+:is(#deletePageDialog,#deleteContentDialog,#clearDialog,#clearUserDataDialog,#phoneLayerDeleteDialog,#userPresetDialog).confirm-dialog .btn {
   background:#fff!important;
   color:#000!important;
   -webkit-text-fill-color:#000!important;
   border:1px solid #999!important;
 }
-:is(#deletePageDialog,#deleteContentDialog,#clearDialog,#clearUserDataDialog,#phoneLayerDeleteDialog).confirm-dialog .btn.primary {
+:is(#deletePageDialog,#deleteContentDialog,#clearDialog,#clearUserDataDialog,#phoneLayerDeleteDialog,#userPresetDialog).confirm-dialog .btn.primary {
   background:var(--accent)!important;
   color:#fff!important;
   -webkit-text-fill-color:#fff!important;
   border-color:var(--accent)!important;
 }
-:is(#deletePageDialog,#deleteContentDialog,#clearDialog,#clearUserDataDialog,#phoneLayerDeleteDialog).confirm-dialog .btn:hover:not(:where(.phone-touch-mode *)):not(:disabled) {
+:is(#deletePageDialog,#deleteContentDialog,#clearDialog,#clearUserDataDialog,#phoneLayerDeleteDialog,#userPresetDialog).confirm-dialog .btn:hover:not(:where(.phone-touch-mode *)):not(:disabled) {
   background:var(--blue)!important;
   color:#fff!important;
   -webkit-text-fill-color:#fff!important;
