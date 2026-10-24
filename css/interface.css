@@ -1052,6 +1052,9 @@
 .phase-group-heading.active.group-expanded{border-top-left-radius:6px;border-bottom-left-radius:6px}
 .app .layout :is(.battle,.phone-view-content) #pages .page-tab.group-member{width:100%;box-sizing:border-box;padding-left:4px!important}
 .phase-group-heading.group-expanded::before{content:"";position:absolute;left:-1px;right:-1px;top:-1px;height:var(--group-frame-height,34px);box-sizing:border-box;border:1px solid #d0d4da;border-radius:6px;pointer-events:none;z-index:2}
+.phase-group-heading.active:not(.drop-before):not(.drop-after)::after{content:'';position:absolute;inset:-1px;box-sizing:border-box;border:1px solid transparent;border-left-color:var(--blue);box-shadow:inset 2px 0 0 var(--blue);border-radius:6px;pointer-events:none;z-index:3}
+.phase-group-heading.active.group-expanded:not(.drop-before):not(.drop-after)::after{border-radius:6px 6px 0 6px}
+.phase-group-heading.group-expanded::before{background:linear-gradient(#d0d4da,#d0d4da) left calc(var(--group-header-height,34px) - 1px)/100% 1px no-repeat;background-origin:border-box}
 #pages .page-tab[hidden]{display:none!important}
 #pages:has(.phase-group-heading){padding-bottom:32px!important}
 #pages.phase-drop-at-end{box-shadow:inset 0 -2px #416da9}
@@ -1309,6 +1312,7 @@ body .app .layout #contentSelect::after{
 .app .layout #inspector .coordinate-fields>div>label{margin-top:0!important;margin-bottom:4px!important}
 .app .layout :is(#inspector,#layoutPropertiesPanel) :is(.coordinate-fields,.property-color-fill-row,.layout-background-colors){row-gap:8px!important;column-gap:8px!important}
 .app .layout #inspector>.inspector-section-start,
+.app .layout #inspector>.object-common-properties>.inspector-section-start,
 .app .layout #layoutPropertiesPanel>.layout-background-colors{border-top:0!important;padding-top:0!important;margin-top:4px!important}
 /* Balance long phone phase and content names instead of squeezing context away. */
 @media(max-width:850px){
@@ -1328,3 +1332,91 @@ body .app .layout #contentSelect::after{
 }
 .phone-help-separator{display:none}
 @media(max-width:850px){.phone-help-separator{display:block;flex:0 0 1px;width:1px;height:18px;margin:0 8px;background:#999}}
+
+/* Preset actions are visual placeholders until registration is implemented. */
+.left .preset-actions{display:flex;gap:8px}
+body .app .layout #phaseMemo.group-note-static>summary,body .app .layout #objectLayerPanel #phaseMemo.group-note-static>summary{background:#eef2f7!important;color:#33445f!important;-webkit-text-fill-color:#33445f!important;cursor:default;outline:none}
+body .app .layout #phaseMemo.group-note-static>summary *,body .app .layout #objectLayerPanel #phaseMemo.group-note-static>summary *{color:inherit!important;-webkit-text-fill-color:inherit!important}
+#phaseMemo.group-note-static>summary::after{display:none!important}
+.left .builtin-preset{width:100%;min-height:44px;margin-bottom:8px;white-space:normal}
+.object-group-control{border:3px solid #ffaa33}
+.object-group-control.group-only-selection{border-style:dashed}
+.object-group-control.object-group-context{border-width:2px;pointer-events:none}
+.obj.group-member-selected.selected-many{outline-width:1px;outline-color:#ffc477}
+.obj.group-member-selected.selected-many::after{border-width:1px;border-color:#ffc477}
+.group-member-selection.targetcircle-multi-control>.targetcircle-selection-frame{border:1px solid #ffc477}
+.controlbox.locked-selection-control.group-member-selection{border-width:1px;border-color:#ffc477}
+.controlbox.group-member-selection :is(.stack-control-frame,.targetcircle-control-frame,.aoe-control-frame){border-width:1px;border-color:#ffc477}
+#objectList>.object-group-row{display:grid!important;align-items:center}
+.app .layout #objectList>.object-row.object-group-row{position:relative;overflow:visible!important}
+#objectList>.object-group-expanded{border-radius:6px 6px 0 0}
+#objectList>.object-group-row::before{content:'';position:absolute;left:-1px;right:-1px;top:-1px;height:calc(100% + 2px);box-sizing:border-box;border:1px solid #d0d4da;border-radius:6px;pointer-events:none;z-index:2}
+#objectList>.object-group-expanded::before{height:var(--object-group-frame-height,100%)}
+.app>.layout #objectList>.object-row.object-group-row{background:#f0f4fa!important}
+.app>.layout #objectList>.object-row.object-group-row:hover:not(:where(.phone-touch-mode *)){background:#e1e9f4!important}
+.app>.layout #objectList>.object-row.object-group-row.selected{background:#eaf3ff!important;border-radius:6px}
+.app>.layout #objectList>.object-row.object-group-row.selected:hover:not(:where(.phone-touch-mode *)){background:#dceaff!important}
+.app>.layout #objectList>.object-group-row>:is(.object-name,.object-group-disclosure){background:transparent!important}
+#objectList>.object-group-expanded::after{content:'';position:absolute;left:2px;right:0;bottom:-1px;border-bottom:1px solid #d0d4da;pointer-events:none;z-index:2}
+.app>.layout #objectList>.object-row.object-group-row.selected.object-group-expanded{border-bottom-left-radius:6px;border-bottom-right-radius:0}
+#objectList>.object-group-row.selected::after{content:'';position:absolute;inset:-1px;box-sizing:border-box;border:1px solid transparent;border-left-color:var(--blue);box-shadow:inset 2px 0 0 var(--blue);border-radius:6px;pointer-events:none;z-index:3}
+#objectList>.object-group-row.selected.object-group-expanded::after{border-radius:6px 6px 0 6px}
+#objectList>.object-group-expanded::before{background:linear-gradient(#d0d4da,#d0d4da) left calc(var(--object-group-header-height,34px) - 1px)/100% 1px no-repeat;background-origin:border-box}
+#objectList>.object-group-row>.object-name{grid-column:4;grid-row:1;min-width:0;padding-left:24px!important}
+.app .layout #objectList>.object-row.object-group-row>.object-name{padding-left:24px!important}
+#objectList .object-group-symbol{grid-column:4;grid-row:1;justify-self:start;align-self:start;margin-left:4px;transform:translateY(0);align-self:center;width:16px;height:14px;color:#293c66;pointer-events:none;z-index:1}
+#objectList .object-group-symbol svg{display:block;width:16px;height:14px}
+#objectList .object-group-disclosure{grid-column:1;grid-row:1;justify-self:stretch;align-self:stretch;z-index:4;margin:0;width:100%;min-width:0;height:100%;min-height:24px;line-height:normal;padding:0;background:transparent;border:0;color:#293c66;font-size:18px;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;cursor:grab}
+#objectList .object-group-member[hidden]{display:none!important}
+#objectList>.object-group-member:not([hidden]){display:grid!important;align-items:center;margin-left:0;cursor:default;overflow:visible!important}
+#objectList>.object-group-member::before{content:'';grid-column:4;grid-row:1;justify-self:start;margin-left:12px;pointer-events:none;border-color:#c1c7ce;z-index:1}
+#objectList>.object-group-member::before{align-self:stretch;margin-top:-12px;margin-bottom:-12px;border-left:1px solid #c1c7ce}
+#objectList>.object-group-member::before{position:static;left:auto;right:auto;top:auto;bottom:auto;height:auto;background:transparent}
+#objectList>.object-group-member:is(.drop-before,.drop-after)::after{content:'';display:block;position:absolute;left:4px;right:4px;height:3px;background:var(--accent);z-index:20;pointer-events:none}
+#objectList>.object-group-member.drop-before::after{top:0;bottom:auto}
+#objectList>.object-group-member.drop-after::after{top:auto;bottom:0}
+#objectList>.object-group-member-last::before{align-self:start;height:calc(50% + 12px);margin-bottom:0}
+@media(max-width:850px){#objectList>.object-group-member::before{grid-column:5}}
+#objectList>.object-group-member>.object-name{position:relative;z-index:2;grid-column:4;grid-row:1;width:100%!important;opacity:1;cursor:pointer}
+#objectList .object-group-member :is(.object-select-check){display:none!important}
+#objectList .object-group-name-input{box-sizing:border-box;min-width:0;width:100%;min-height:32px;padding:5px;border:1px solid #4769b3;border-radius:4px;font:inherit;background:#fff;color:#111}
+body .layout #objectList .object-row.object-group-member :is(.object-select-check){display:none!important}
+body .app .layout #objectList>.object-row.object-group-member>.object-delete{display:grid!important;place-items:center;grid-column:5;grid-row:1}
+@media(max-width:850px){body .app .layout #objectList>.object-row.object-group-member>.object-delete{display:none!important}}
+body .app .layout #objectList>.object-row.object-group-member>.object-visibility-toggle{display:grid!important;grid-column:2;grid-row:1}
+body .app .layout #objectList>.object-row.object-group-member>.object-lock-toggle{display:grid!important;grid-column:3;grid-row:1}
+@media(max-width:850px){body .app .layout #objectList>.object-row.object-group-member>.object-visibility-toggle{grid-column:3}body .app .layout #objectList>.object-row.object-group-member>.object-lock-toggle{grid-column:4}}
+#objectList .object-toggle.mixed-state{position:relative;border-style:dashed!important}
+#objectList .object-toggle.mixed-state::after{content:'−';position:absolute;right:-3px;top:-5px;width:10px;height:10px;line-height:10px;text-align:center;background:#fff3d6;color:#8a5800;border:1px solid #d7ad50;border-radius:50%;font-size:10px;pointer-events:none}
+body .layout #objectList .object-row.object-group-row>.object-name[hidden]{display:none!important}
+@media(max-width:850px){#objectList .object-group-symbol,#objectList .object-group-name-input{grid-column:5}}
+.app>.layout #objectList>.object-row.object-group-row.renaming{flex-shrink:0;min-height:68px!important;height:auto!important;max-height:none!important;grid-template-rows:24px minmax(32px,auto);row-gap:4px;padding-bottom:4px!important}
+.app>.layout #objectList>.object-row.object-group-row.renaming>.object-group-name-input{grid-column:1/-1;grid-row:2}
+.app>.layout #objectList>.object-row.object-group-row.renaming>.phone-row-actions{display:none!important}
+@media(max-width:850px){.group-resize-handle{width:22px;height:22px}}
+.left .preset-actions>.btn{flex:1;min-width:0;min-height:34px;padding:6px 8px}
+
+/* The disclosure occupies the former number cell; fix all header controls to their columns. */
+body .app .layout #objectList>.object-group-row>.object-index{display:none!important}
+body .app .layout #objectList>.object-group-row>.object-visibility-toggle{grid-column:2;grid-row:1}
+body .app .layout #objectList>.object-group-row>.object-lock-toggle{grid-column:3;grid-row:1}
+body .app .layout #objectList>.object-group-row>.object-delete{grid-column:5;grid-row:1}
+@media(max-width:850px){body .app .layout #objectList>.object-group-row>.object-visibility-toggle{grid-column:3}body .app .layout #objectList>.object-group-row>.object-lock-toggle{grid-column:4}body .app .layout #objectList>.object-group-row>.object-delete{grid-column:6}}
+
+
+.object-group-properties,.object-common-properties{display:flex;flex-direction:column;gap:inherit}
+.object-group-properties{padding:0;margin:0;border:0;border-radius:0;background:transparent}.object-group-properties h3,.object-common-heading{font-size:13px;margin:0 0 8px;color:#33445f}.object-group-properties .hint{margin:6px 0 0}.object-group-properties select{width:100%;margin-bottom:8px}
+
+
+.right #inspector>.object-common-properties>.hint{margin:0}
+
+.object-group-rotation{display:flex;flex-direction:column;gap:inherit}
+.group-rotation-option{display:flex!important;align-items:center;gap:6px}.group-rotation-option input{width:auto;flex:none}
+@media(max-width:850px){body .app .layout #objectList>.object-row.object-group-member>.object-select-check{display:block!important;grid-column:2;grid-row:1}}
+
+.object-group-properties>.field:not(.group-width-property)+.group-width-property,.object-group-properties>.group-width-property+.object-group-rotation{border-top:1px solid #e5e9ef;padding-top:8px;margin-top:4px}
+
+/* Keep the full group form inside the inspector scroll range. */
+.right #inspector>.object-group-properties{flex:0 0 auto;padding-bottom:8px}
+.object-group-properties>.object-group-rotation{flex-shrink:0}
+.right #inspector .property-swap-button{box-sizing:border-box;display:grid;place-items:center;flex:0 0 26px;width:26px;height:26px;min-width:26px;padding:3px;border:1px solid #d5dce6;border-radius:4px;background:#fff;color:#000}.property-swap-button svg{width:18px;height:18px}.property-swap-button:disabled{opacity:.4}
