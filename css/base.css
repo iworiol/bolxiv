@@ -3399,3 +3399,4 @@ input[type=file] {
     visibility:visible!important;
   }
 }
+@media(min-width:851px){html.phase-display-busy,html.phase-display-busy *{cursor:wait!important}}
