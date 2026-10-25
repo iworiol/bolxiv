@@ -2249,3 +2249,5 @@ body:not(.board-read-only) .page-list-box>.page-tab-actions {
 #objectControls .handle:not(.rotate):not(.move-handle):is(:active,.phone-control-pressed){background:var(--blue)!important}
 #objectControls .handle:is(.rotate,.move-handle):is(:active,.phone-control-pressed){background:transparent!important;box-shadow:none!important}
 #objectControls .handle:is(.rotate,.move-handle):is(:active,.phone-control-pressed) svg path:last-child{stroke:var(--blue)!important}
+
+@media(max-width:850px){.app>.layout.phone-materials-open>.left #enemyPanel:not([hidden]):not(.hidden){display:grid!important}}

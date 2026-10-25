@@ -1427,7 +1427,7 @@ body .app .layout #objectList>.object-group-row>.object-delete{grid-column:5;gri
 .header-mode-menu{display:none}@media(min-width:851px){.app>.top{grid-template-columns:minmax(max-content,var(--phase-pane-header-left,336px)) auto minmax(0,1fr) auto}.app>.top>.header-mode-menu{display:flex;align-items:center;grid-column:3;grid-row:1;justify-self:end;margin-left:12px}.app>.top>.phone-menu-toggle{grid-column:4}.app>.top>.header-mode-status{gap:8px}}
 
 /* Current mode and direct selection of the three work modes. */
-.mode-switch-menu{position:fixed;z-index:20100;min-width:220px;max-width:calc(100vw - 16px);max-height:calc(100dvh - 16px);overflow:auto;padding:4px;background:#fff;border:1px solid #999;border-radius:6px;box-shadow:0 5px 14px #0003}
+.mode-switch-menu{position:fixed;z-index:20100;width:max-content;min-width:0;max-width:calc(100vw - 16px);max-height:calc(100dvh - 16px);overflow:auto;padding:4px;background:#fff;border:1px solid #999;border-radius:6px;box-shadow:0 5px 14px #0003}
 .mode-switch-menu[hidden]{display:none}
 .mode-switch-menu>button{display:flex;align-items:center;width:100%;min-height:40px;padding:8px;color:#111;background:#fff;border:0;border-radius:4px;text-align:left}
 .mode-switch-menu>[data-mode]::before{content:'';width:22px;flex:none}
@@ -1528,3 +1528,7 @@ body .app .layout #objectList>.object-group-row>.object-delete{grid-column:5;gri
  button[aria-haspopup="menu"][aria-expanded="true"].menu-open-trigger:not(:disabled){transition:none!important;background:var(--blue)!important;border-color:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important;filter:none!important}
  button[aria-haspopup="menu"][aria-expanded="true"].menu-open-trigger:not(:disabled) *{color:#fff!important;-webkit-text-fill-color:#fff!important}
 }
+
+@media(min-width:851px){.app>.top #editModeToggle{flex-basis:var(--mode-button-width,180px);width:var(--mode-button-width,180px);min-width:var(--mode-button-width,180px);max-width:var(--mode-button-width,180px);padding-left:8px;padding-right:4px;gap:4px}.app>.top #editModeToggle .mode-label{white-space:nowrap}}
+
+@media(min-width:851px){.app>.top #editModeToggle .mode-icon{margin-right:4px}.app>.top>.phone-menu-toggle{margin-left:6px}}

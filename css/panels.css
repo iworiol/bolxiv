@@ -3115,3 +3115,12 @@ dialog.confirm-dialog {
 #objectControls .handle.rotate,#objectControls .handle.rotate:is(:hover,:focus,:active,.phone-control-pressed){background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important}
 
 .object-context-menu>button[hidden]{display:none!important}
+
+/* Keep the target circle and three enemy icons in one palette row. */
+#enemyPanel:not([hidden]){display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:2px}
+#enemyPanel>#enemyTools,#enemyPanel>#enemyGrid{display:contents}
+
+/* Category expansion mode uses the same selected feedback as other toggles. */
+.app .layout>.left #categoryModeToggle{background:#fff!important;color:#000!important;-webkit-text-fill-color:#000!important;border-color:#999!important}
+.app .layout>.left #categoryModeToggle:is(:hover:not(:where(.phone-touch-mode *)),:focus-visible):not(:disabled){background:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important;border-color:var(--blue)!important}
+.app .layout>.left #categoryModeToggle svg{stroke:currentColor}

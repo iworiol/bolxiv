@@ -81,7 +81,7 @@
 ;
 // ===== js/mobile/phone-number-step.js =====
 (()=>{
- const selector='.coordinate-control input[type="number"]';
+ const selector='.coordinate-control input[type="number"],.output-phase-gap';
  function sync(){
   document.querySelectorAll(selector).forEach(spin=>{
    let group=spin.parentElement.querySelector('.phone-number-step-buttons');
@@ -92,11 +92,12 @@
      const button=document.createElement('button');button.type='button';button.className='btn';button.textContent=symbol;
      button.setAttribute('aria-label',label+'を'+description);button.title=label+'を'+description;
      button.onpointerdown=event=>event.preventDefault();
-     button.onclick=()=>{if(spin.disabled)return;spin.dispatchEvent(new KeyboardEvent('keydown',{key,bubbles:true,cancelable:true}))};
+     button.onclick=()=>{if(spin.disabled)return;if(spin.matches('.output-phase-gap')){if(key==='ArrowUp')spin.stepUp();else spin.stepDown();spin.dispatchEvent(new Event('input',{bubbles:true}));spin.dispatchEvent(new Event('change',{bubbles:true}));sync()}else spin.dispatchEvent(new KeyboardEvent('keydown',{key,bubbles:true,cancelable:true}))};
      group.appendChild(button);
     }
-    spin.after(group);
+    if(spin.matches('.output-phase-gap'))spin.parentElement.append(group);else spin.after(group);
    }
+   if(spin.matches('.output-phase-gap')){let value=spin.parentElement.querySelector('.output-phase-gap-value');if(!value){value=document.createElement('output');value.className='output-phase-gap-value';value.htmlFor=spin.id;spin.before(value)}if(value.textContent!==spin.value)value.textContent=spin.value}
    group.querySelectorAll('button').forEach(button=>{if(button.disabled!==spin.disabled)button.disabled=spin.disabled});
   });
  }

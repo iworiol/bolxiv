@@ -234,7 +234,37 @@
 }.phase-print-frame{position:fixed;left:-10000px;top:0;width:800px;height:1100px;border:0;pointer-events:none}
 
 .png-preview-panel[data-output-mode=print] .png-settings-fields[hidden]{display:none!important}.png-preview-panel .print-settings-info[hidden]{display:none!important}
-.app .layout .png-preview-panel .png-preview-settings-body{display:flex;flex-direction:column;gap:12px;overflow:auto;align-items:stretch;justify-content:flex-start}.output-section{display:flex;flex-direction:column;flex:0 0 auto;gap:8px;min-width:0}.output-section h4{font-size:12px;font-weight:700;margin:0;color:#33445f}.output-section .png-settings-fields{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px;align-items:center}.output-section>.btn{box-sizing:border-box;align-self:flex-end;width:50%;min-width:min(120px,100%);max-width:100%;min-height:36px;margin:0;padding:6px 12px}.output-section-separator{flex:0 0 auto;border-top:1px solid #e5e9ef}.app .layout .png-preview-panel .output-section>.btn{background:#293c66!important;color:#fff!important;-webkit-text-fill-color:#fff!important;border:1px solid #293c66!important;border-radius:5px}.app .layout .png-preview-panel .output-section>.btn:enabled:hover:not(:where(.phone-touch-mode *)){background:var(--blue)!important;border-color:var(--blue)!important}
+.app .layout .png-preview-panel .png-preview-settings-body{display:flex;flex-direction:column;gap:12px;overflow:auto;align-items:stretch;justify-content:flex-start}.output-section{display:flex;flex-direction:column;flex:0 0 auto;gap:8px;min-width:0}.output-section h4{font-size:12px;font-weight:700;margin:0;color:#33445f}.output-section .png-settings-fields{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px;align-items:center}.output-section>.btn{box-sizing:border-box;align-self:stretch;width:100%;min-width:0;max-width:100%;min-height:36px;margin:0;padding:6px 12px}.output-section-separator{flex:0 0 auto;border-top:1px solid #e5e9ef}.app .layout .png-preview-panel .output-section>.btn{background:#293c66!important;color:#fff!important;-webkit-text-fill-color:#fff!important;border:1px solid #293c66!important;border-radius:5px}.app .layout .png-preview-panel .output-section>.btn:enabled:hover:not(:where(.phone-touch-mode *)){background:var(--blue)!important;border-color:var(--blue)!important}
 /* Optional print feedback: remove this block and overlay lifecycle to revert. */ .phase-print-overlay{position:fixed;inset:0;z-index:2147483646;background:#0006;pointer-events:auto}.phase-print-preparing,.phase-print-preparing *{cursor:wait!important}
 
 @media(max-width:850px){.png-reader-controls .phone-reader-title{line-height:16px}.png-reader-controls .phone-reader-label-part{display:inline-block;white-space:nowrap}}
+
+.output-note-toggle{display:flex;align-items:center;gap:6px;font-size:13px}.output-note-toggle input{accent-color:var(--blue)}#outputNoteError{font-size:12px;color:#b42318;white-space:normal}.output-note-preview{position:absolute;left:50%;transform-origin:top center;pointer-events:none}.png-preview-surface>.board-zoom-space.has-output-note>:is(.stage,.phase-comparison-grid,.phase-group-overview){top:20px!important;transform:translateX(-50%) scale(var(--board-display-scale,1))!important;transform-origin:top center!important}
+
+/* Output preview matches the shadow-free printed canvas. */
+.png-preview-surface :is(.stage,.phase-preview-stage,.phase-comparison-grid,.phase-comparison-cell,.phase-group-overview,.phase-group-artwork),.png-preview-surface>canvas{box-shadow:none!important}
+
+#outputPhaseGapField:not([hidden]){display:grid;grid-template-columns:auto 1fr;align-items:center;gap:6px 10px;margin-top:10px;font-size:13px}#outputPhaseGapField>span{grid-column:1/-1}#outputPhaseGapField>label{grid-column:1/-1;display:flex;align-items:center;gap:6px}.output-phase-gap{width:64px;min-width:0;padding:4px}#outputPhaseGapField[hidden]{display:none}
+
+.output-phase-gap{box-sizing:border-box;height:28px;border:1px solid #999;border-radius:6px;background:#fff;color:#17212c;font-size:14px;outline:0}.output-phase-gap:focus-visible{outline:2px solid #4769b3;outline-offset:2px}
+
+.output-phase-gap-value{display:none}
+@media(max-width:850px){#outputPhaseGapField .output-phase-gap{display:none!important}#outputPhaseGapField .output-phase-gap-value{display:inline;min-width:2ch;text-align:right}#outputPhaseGapField .phone-number-step-buttons{display:flex;flex:none;gap:4px;margin-left:auto}}
+
+.png-preview-settings .png-scale-field{display:flex;flex-direction:column;align-items:stretch;gap:6px}.png-scale-control{display:flex;align-items:center;gap:8px;min-width:0}.png-preview-settings .png-scale-control select{width:64px;min-width:64px;flex:none;padding:4px}.png-scale-control output{font-size:14px;line-height:1.4;min-width:0;overflow-wrap:anywhere}
+
+.output-section[hidden]{display:none!important}.output-action-heading{display:flex;align-items:center;gap:8px;color:#33445f;font-size:12px}.output-action-switch{display:grid;place-items:center;box-sizing:border-box;width:26px;min-width:26px;height:26px;padding:3px;border:1px solid #d0d4da;border-radius:6px;background:#eef2f7;color:#33445f}.output-action-switch svg{display:block;width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+.png-preview-settings>h3{display:flex;align-items:center;gap:6px}.app .layout .right #pngPreview .png-preview-settings>h3>#pngPropertiesToggle{flex:0 1 auto;width:auto;min-width:0}.output-action-switch{flex:none}.output-action-switch[hidden]{display:none!important}
+
+.png-preview-settings .png-scale-field>label{font-size:12px;line-height:1.2;font-weight:400}
+
+/* Property item labels match the existing 12px regular titles. */
+.png-preview-settings #outputPhaseGapField>span,.png-preview-settings #outputPhaseGapField>label{font-size:12px;font-weight:400}
+
+.output-border-preview{position:absolute;left:50%;top:20px;transform-origin:top center;pointer-events:none;z-index:5}.output-border-preview[hidden]{display:none}
+.png-preview-settings .output-note-toggle{font-size:12px;line-height:1.2;font-weight:400}
+
+
+/* Include the existing right gutter without shrinking the property frame. */
+@media(min-width:851px){.png-preview-content{grid-template-columns:minmax(0,1fr) calc(var(--png-settings-width,252px) + 8px)}}
