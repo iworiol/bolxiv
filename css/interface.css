@@ -1513,4 +1513,18 @@ body .app .layout #objectList>.object-group-row>.object-delete{grid-column:5;gri
  .app .layout #pages .phase-group-leading>.phase-group-toggle{flex:0 0 4ch;width:4ch!important;min-width:4ch!important;font:12px 'DM Mono'!important}
 }
 
-@media(min-width:851px){.phase-group-disclosure-text{transform:translateX(-2px)}}
+@media(min-width:851px){.phase-group-disclosure-text{transform:translateX(2px)}}
+
+.app .layout #pages .phase-group-heading>.phase-group-ungroup{flex:0 0 22px;width:22px;height:23px;min-height:23px;padding:0;display:grid;place-items:center;color:#8894a4;border-radius:4px;font:14px sans-serif}
+.app .layout #pages .phase-group-heading>.phase-group-ungroup:hover:not(:disabled):not(:where(.phone-touch-mode *)){background:#feecec!important;color:#b42318!important;-webkit-text-fill-color:#b42318!important;border-color:transparent!important}
+.app .layout #pages .phase-group-heading>.phase-group-ungroup:disabled{opacity:.45;cursor:not-allowed}
+.app .layout #pages .phase-group-heading.renaming>.phase-group-ungroup{display:none}
+@media(max-width:850px){.app .layout #pages .phase-group-heading>.phase-group-ungroup{display:none}}
+
+@media(min-width:851px){.app .layout #pages .page-tab{column-gap:4px}}
+
+/* Popup-open feedback overrides per-button themes without affecting disclosures. */
+@layer menu-open-state{
+ button[aria-haspopup="menu"][aria-expanded="true"].menu-open-trigger:not(:disabled){transition:none!important;background:var(--blue)!important;border-color:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important;filter:none!important}
+ button[aria-haspopup="menu"][aria-expanded="true"].menu-open-trigger:not(:disabled) *{color:#fff!important;-webkit-text-fill-color:#fff!important}
+}

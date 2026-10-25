@@ -3113,3 +3113,5 @@ dialog.confirm-dialog {
 }
 /* Rotation artwork must remain visible over the shared button theme. */
 #objectControls .handle.rotate,#objectControls .handle.rotate:is(:hover,:focus,:active,.phone-control-pressed){background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important}
+
+.object-context-menu>button[hidden]{display:none!important}

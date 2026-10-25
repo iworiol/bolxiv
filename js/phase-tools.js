@@ -38,7 +38,7 @@
   const hint=document.createElement('p');hint.className='phase-content-copy-hint';hint.textContent=groupId?'グループ名・共通メモ・配下の全フェーズを、コピー先の末尾に新しいグループとして追加します。':'選ぶと末尾にコピーします。オブジェクト・フィールド設定・背景・ノートを含みます。';menu.append(heading,separator,hint);
   contentBoards.forEach((board,index)=>{if(board===data)return;const item=document.createElement('button');item.type='button';item.setAttribute('role','menuitem');item.textContent=board.title||'コンテンツ'+(index+1);item.onclick=()=>copyTo(board);menu.append(item)});
   if(!menu.querySelector('button')){const empty=document.createElement('p');empty.className='phase-content-copy-hint';empty.textContent='コピー先のコンテンツがありません';menu.append(empty)}
-  addPhoneMenuClose(menu,()=>close(true));menu.hidden=false;button.setAttribute('aria-expanded','true');
+  addPhoneMenuClose(menu,()=>close(true));menu._opener=anchor;menu.hidden=false;button.setAttribute('aria-expanded','true');
   const rect=anchor.getBoundingClientRect(),below=innerHeight-rect.bottom-8,above=rect.top-8;
   menu.style.maxHeight=Math.max(60,Math.min(360,Math.max(below,above)))+'px';
   menu.style.left=Math.max(8,Math.min(rect.left,innerWidth-menu.offsetWidth-8))+'px';
@@ -399,16 +399,17 @@
   input.addEventListener('blur',()=>finish(true));input.focus();input.select();
  }
  function groupUnits(){return [...list.children].filter(row=>row.classList.contains('phase-group-heading')||(row.classList.contains('page-tab')&&!row.classList.contains('group-member')))}
+ function ungroupPhaseGroup(id){if(boardReadOnly||phaseComparisonActive()||!data.phaseGroups.some(g=>g.id===id))return;recordHistory();data.pageGroupIds=data.pageGroupIds.map(groupId=>groupId===id?null:groupId);data.phaseGroups=data.phaseGroups.filter(g=>g.id!==id);if(data.activePhaseGroup===id)data.activePhaseGroup=null;renderAndSave();notify('グループを解除しました。フェーズは残しています')}
  function openGroupMenu(id,x,y){
   const item=data.phaseGroups.find(g=>g.id===id);if(!item)return;
   for(const menuId of ['phaseItemMenu','contentItemMenu','phaseContentCopyMenu']){const menu=document.getElementById(menuId);if(menu)menu.hidden=true}
   closeHelpMenu();groupMenu.replaceChildren();const owner=data,units=groupUnits(),at=units.findIndex(row=>row.dataset.groupId===id);
-  for(const [action,label] of [['rename','名前変更'],['previous','前へ移動'],['next','後ろへ移動'],['delete','削除']]){
+  for(const [action,label] of [['rename','名前変更'],['previous','前へ移動'],['next','後ろへ移動'],['delete','グループ解除']]){
    if(action==='previous'||action==='delete'){const separator=document.createElement('div');separator.className='context-separator';separator.setAttribute('role','separator');groupMenu.append(separator)}
    const entry=button(label,()=>{
     if(boardReadOnly||phaseComparisonActive()||data!==owner)return;closeGroupMenu();
     if(action==='rename'){renameGroupInList(item);return}
-    if(action==='delete'){recordHistory();data.pageGroupIds=data.pageGroupIds.map(groupId=>groupId===id?null:groupId);data.phaseGroups=data.phaseGroups.filter(g=>g.id!==id);if(data.activePhaseGroup===id)data.activePhaseGroup=null;renderAndSave();notify('グループを削除しました。フェーズは残しています');return}
+    if(action==='delete'){ungroupPhaseGroup(id);return}
     const next=units[at+(action==='previous'?-1:1)];if(!next)return;
     const transfer=new DataTransfer();transfer.setData('application/x-tactica-phase-group',id);const rect=next.getBoundingClientRect();
     next.dispatchEvent(new DragEvent('drop',{bubbles:true,cancelable:true,dataTransfer:transfer,clientX:rect.left+Math.max(40,rect.width/2),clientY:action==='previous'?rect.top+2:rect.bottom-2}));
@@ -519,7 +520,7 @@
   for(const item of data.phaseGroups){
    const row=document.createElement('div');row.className='phase-group-heading'+(item.id===data.activePhaseGroup?' active':'');row.dataset.groupId=item.id;
    row.classList.toggle('contains-active-phase',!data.activePhaseGroup&&data.pageGroupIds[data.page]===item.id);
-   row.draggable=!boardReadOnly&&!phaseComparisonActive();row.onpointerdown=event=>{row.draggable=!boardReadOnly&&!phaseComparisonActive()&&!event.target.closest('.phase-group-toggle,.phase-group-menu-trigger')};
+   row.draggable=!boardReadOnly&&!phaseComparisonActive();row.onpointerdown=event=>{row.draggable=!boardReadOnly&&!phaseComparisonActive()&&!event.target.closest('.phase-group-toggle,.phase-group-menu-trigger,.phase-group-ungroup')};
    row.ondragstart=event=>{if(!row.draggable){event.preventDefault();return}event.dataTransfer.setData('application/x-tactica-phase-group',item.id);event.dataTransfer.effectAllowed='move';row.classList.add('dragging')};row.ondragend=()=>{row.classList.remove('dragging');clearDropGuide()};
    const toggle=button('',()=>{item.collapsed=!item.collapsed;renderAndSave()});toggle.innerHTML='<span class="phase-group-disclosure-text" aria-hidden="true">'+(item.collapsed?'▸':'▾')+'</span><svg class="phase-group-disclosure-arrow" viewBox="0 0 18 18" aria-hidden="true"><path d="'+(item.collapsed?'M6 3v12l7-6Z':'M3 6h12l-6 7Z')+'"/></svg>';toggle.setAttribute('aria-label',item.name+(item.collapsed?'を開く':'を閉じる'));toggle.setAttribute('aria-expanded',String(!item.collapsed));
    toggle.classList.add('phase-group-toggle');
@@ -529,7 +530,8 @@
    row.oncontextmenu=event=>{if(event.target.closest('input,textarea'))return;event.preventDefault();event.stopPropagation();openGroupMenu(item.id,event.clientX,event.clientY)};
    const leading=document.createElement('span');leading.className='phase-group-leading';const grip=document.createElement('button');grip.type='button';grip.className='phase-group-range phase-group-drag';grip.title='ドラッグでグループ全体を並べ替え';grip.setAttribute('aria-label',item.name+'全体を並べ替え');leading.append(grip,toggle);row.append(leading);const title=document.createElement('span');title.className='phase-group-title';title.textContent=item.name;name.append(title);
    if(!data.activePhaseGroup&&data.pageGroupIds[data.page]===item.id){const current=document.createElement('span');current.className='phase-group-current';current.textContent=String(data.page+1).padStart(2,'0');current.setAttribute('aria-label','表示中のフェーズ '+(data.page+1));name.append(current)}row.append(name);
-   if(item.id===data.activePhaseGroup){const menuButton=button('…',()=>{const bounds=menuButton.getBoundingClientRect();openGroupMenu(item.id,bounds.left,bounds.bottom)});menuButton.className='phase-group-menu-trigger';menuButton.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>';menuButton.title='グループの操作';menuButton.setAttribute('aria-label',item.name+'の操作メニュー');menuButton.setAttribute('aria-haspopup','menu');menuButton.addEventListener('pointerdown',event=>event.stopPropagation());row.append(menuButton)}
+   if(item.id===data.activePhaseGroup){const menuButton=button('…',()=>{const bounds=menuButton.getBoundingClientRect();openGroupMenu(item.id,bounds.left,bounds.bottom)});menuButton.className='phase-group-menu-trigger';menuButton.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>';menuButton.title='グループの操作';menuButton.setAttribute('aria-label',item.name+'の操作メニュー');menuButton.setAttribute('aria-haspopup','menu');menuButton.setAttribute('aria-controls','phaseGroupMenu');menuButton.setAttribute('aria-expanded','false');menuButton.addEventListener('pointerdown',event=>event.stopPropagation());row.append(menuButton)}
+   const ungroup=button('×',()=>ungroupPhaseGroup(item.id));ungroup.className='phase-group-ungroup';ungroup.title='グループ解除（フェーズは残します）';ungroup.setAttribute('aria-label',item.name+'のグループ解除（フェーズは残します）');ungroup.disabled=boardReadOnly||phaseComparisonActive();ungroup.addEventListener('pointerdown',event=>event.stopPropagation());row.append(ungroup);
    row.onclick=event=>{if(event.target.closest('button'))return;showGroup(item.id,true)};
    row.classList.toggle('group-expanded',!item.collapsed&&count>0);
    const first=data.pageGroupIds.indexOf(item.id),anchor=first>=0?first:item.position;
@@ -632,7 +634,7 @@
    const host=document.getElementById(id);
    for(const row of host.querySelectorAll(selector)){
     let button=row.querySelector('.phone-row-actions');
-    if(!button){button=document.createElement('button');button.type='button';button.className='phone-row-actions';button.innerHTML=icon;button.setAttribute('aria-label','操作メニュー');button.setAttribute('aria-haspopup','menu');button.addEventListener('pointerdown',event=>event.stopPropagation());button.onclick=event=>{event.preventDefault();event.stopPropagation();const rect=button.getBoundingClientRect();if(id==='objectList'){const objectId=row.dataset.id;if(row.classList.contains('object-group-member')){if(!individualGroupSelectionActive()||!selectedIds.includes(objectId))selectIndividualGroupMember(objectId)}else if(!selectedIds.includes(objectId)){selected=objectId;selectedIds=[objectId];renderSelectionOnly()}closeColorPopovers();openObjectContextMenu(objectId,rect.left,rect.bottom)}else host.dispatchEvent(new CustomEvent('open-row-actions',{detail:{row,x:rect.left,y:rect.bottom}}))};row.append(button)}
+    if(!button){button=document.createElement('button');button.type='button';button.className='phone-row-actions';button.innerHTML=icon;button.setAttribute('aria-label','操作メニュー');button.setAttribute('aria-haspopup','menu');button.setAttribute('aria-controls',id==='objectList'?'objectContextMenu':id==='pages'?'phaseItemMenu':'contentItemMenu');button.setAttribute('aria-expanded','false');button.addEventListener('pointerdown',event=>event.stopPropagation());button.onclick=event=>{event.preventDefault();event.stopPropagation();const rect=button.getBoundingClientRect();if(id==='objectList'){const objectId=row.dataset.id;if(row.classList.contains('object-group-member')){if(!individualGroupSelectionActive()||!selectedIds.includes(objectId))selectIndividualGroupMember(objectId)}else if(!selectedIds.includes(objectId)){selected=objectId;selectedIds=[objectId];renderSelectionOnly()}closeColorPopovers();openObjectContextMenu(objectId,rect.left,rect.bottom)}else host.dispatchEvent(new CustomEvent('open-row-actions',{detail:{row,x:rect.left,y:rect.bottom}}))};row.append(button)}
     const hidden=id==='pages'?!row.classList.contains('active')||row.classList.contains('renaming'):id==='objectList'?!row.classList.contains('selected'):!!row.querySelector('input');
     if(id==='objectList')button.disabled=boardReadOnly||phaseComparisonActive();if(button.hidden!==hidden)button.hidden=hidden;
    }
