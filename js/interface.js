@@ -7,7 +7,7 @@
  document.getElementById('objectList').addEventListener('click',event=>{
   const row=event.target.closest('.object-group-member');
   if(!row||event.target.closest('input,button:not(.object-name),textarea')||phaseComparisonActive())return;
-  event.preventDefault();event.stopImmediatePropagation();selectIndividualGroupMember(row.dataset.id,event.shiftKey);
+  event.preventDefault();event.stopImmediatePropagation();selectObjectListItem(row.dataset.id,event,true);
  },true);
  const membershipList=document.getElementById('objectList');for(const type of ['dragover','drop'])membershipList.addEventListener(type,handleObjectMembershipDrop,true);
  const clearMembershipGuide=()=>membershipList.querySelectorAll('.drag-over,.drop-before,.drop-after').forEach(n=>n.classList.remove('drag-over','drop-before','drop-after'));membershipList.addEventListener('dragleave',event=>{if(!membershipList.contains(event.relatedTarget))clearMembershipGuide()});document.addEventListener('dragend',clearMembershipGuide);
@@ -52,7 +52,7 @@
   cancelPress();suppressClick=false;if(e.pointerType!=='touch'||boardReadOnly||phaseComparisonActive())return;
   const node=e.target.closest('#objects .obj,#objectList .object-row');if(!node||e.target.closest('input,.object-index')||e.target.closest('button')&&!e.target.closest('.object-name'))return;
   const p={id:e.pointerId,x:e.clientX,y:e.clientY,objectId:node.dataset.id};press=p;
-  p.timer=setTimeout(()=>{if(press!==p)return;drag=null;suppressClick=true;if(!individualGroupSelectionActive()||!selectedIds.includes(p.objectId))selectedIds=selectedIds.includes(p.objectId)?expandObjectGroups(selectedIds):objectGroupIds(p.objectId);selected=p.objectId;renderSelectionOnly();openObjectContextMenu(p.objectId,p.x,p.y);cancelPress()},350);
+  p.timer=setTimeout(()=>{if(press!==p)return;drag=null;suppressClick=true;if(!individualGroupSelectionActive()||!selectedIds.includes(p.objectId))selectedIds=selectedIds.includes(p.objectId)?expandObjectGroups(selectedIds):objectGroupIds(p.objectId);selected=p.objectId;renderSelectionOnly();openObjectContextMenu(p.objectId,p.x,p.y);cancelPress()},500);
  },true);
  document.addEventListener('pointermove',e=>{if(press&&press.id===e.pointerId&&Math.hypot(e.clientX-press.x,e.clientY-press.y)>8)cancelPress()},true);
  for(const type of ['pointerup','pointercancel'])document.addEventListener(type,cancelPress,true);
@@ -115,13 +115,33 @@ function placeBuiltinFieldMarkers(cx,cy){
  const observer=new MutationObserver(syncControls);observer.observe(document.querySelector('.app'),{subtree:true,childList:true,attributes:true,attributeFilter:['disabled']});
  function update(){document.body.classList.toggle('board-read-only',boardReadOnly);updateModeStatus();syncControls()}
  document.addEventListener('board-view-mode-changed',update);
- button.onclick=event=>{
-  if(window.Bolxiv?.pngPreview?.active){event?.stopPropagation();window.Bolxiv.pngPreview.close();return}
-  document.activeElement?.blur();if(phaseComparisonActive()){selectedPhaseIndexes=[];boardReadOnly=false}else boardReadOnly=!boardReadOnly;
+
+ const menu=document.createElement('div');menu.id='modeSwitchMenu';menu.className='mode-switch-menu';menu.hidden=true;menu.setAttribute('role','menu');menu.setAttribute('aria-label','モード切替');document.body.append(menu);
+ button.removeAttribute('aria-pressed');button.setAttribute('aria-haspopup','menu');button.setAttribute('aria-controls',menu.id);button.setAttribute('aria-expanded','false');
+ const modes=[['edit','編集モード'],['view','閲覧モード'],['output','画像生成・印刷モード']];
+ function currentMode(){return window.Bolxiv?.pngPreview?.active?'output':boardReadOnly||phaseComparisonActive()?'view':'edit'}
+ function closeMenu(focus=false){menu.hidden=true;button.setAttribute('aria-expanded','false');if(focus)button.focus({preventScroll:true})}
+ async function selectMode(mode){
+  if(window.Bolxiv?.pngPreview?.saving||!modes.some(([key])=>key===mode))return;
+  closeMenu();if(currentMode()===mode)return;
+  if(mode==='output'){await window.Bolxiv.pngPreview.open(1);return}
+  if(window.Bolxiv?.pngPreview?.active)window.Bolxiv.pngPreview.close();
+  document.activeElement?.blur();if(mode==='edit')selectedPhaseIndexes=[];boardReadOnly=mode==='view';
   try{localStorage.setItem('bolxiv-read-only',String(boardReadOnly))}catch{}
   selected=null;selectedIds=[];drag=null;tapPlacementArmed=false;selectPlacementTool('select');hideTouchPlacementPreview();clearAlignmentGuides();closeObjectContextMenu();closeColorPopovers();closeJsonImportMenu();
   update();render();
- };
+ }
+ window.Bolxiv.setMode=selectMode;
+ for(const [mode,label] of modes){const item=document.createElement('button');item.type='button';item.dataset.mode=mode;item.textContent=label;item.setAttribute('role','menuitemradio');item.onclick=()=>selectMode(mode).catch(error=>notify('モードを切り替えられませんでした：'+(error?.message||String(error))));menu.append(item)}
+ function openMenu(){if(button.disabled)return;closeObjectContextMenu();closeColorPopovers();closeJsonImportMenu();closeJsonExportMenu();closeHelpMenu();document.querySelector('.top').classList.remove('phone-menu-open');document.querySelector('.phone-menu-toggle')?.setAttribute('aria-expanded','false');for(const item of menu.querySelectorAll('[data-mode]'))item.setAttribute('aria-checked',String(item.dataset.mode===currentMode()));addPhoneMenuClose(menu,()=>closeMenu(true));menu.hidden=false;button.setAttribute('aria-expanded','true');const rect=button.getBoundingClientRect();menu.style.left=Math.max(8,Math.min(rect.left,innerWidth-menu.offsetWidth-8))+'px';menu.style.top=Math.max(8,Math.min(rect.bottom+4,innerHeight-menu.offsetHeight-8))+'px';menu.querySelector('[aria-checked="true"]')?.focus({preventScroll:true})}
+ button.onclick=()=>menu.hidden?openMenu():closeMenu();
+ button.addEventListener('keydown',e=>{if(['ArrowDown','ArrowUp'].includes(e.key)){e.preventDefault();openMenu()}});
+ window.addEventListener('pointerdown',e=>{if(!menu.hidden&&!menu.contains(e.target)&&!button.contains(e.target))closeMenu()},true);
+ window.addEventListener('keydown',e=>{if(menu.hidden)return;if(e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();closeMenu(true);return}if(!menu.contains(e.target))return;if(e.key==='Tab'){closeMenu();return}if(!['ArrowDown','ArrowUp','Home','End'].includes(e.key))return;e.preventDefault();e.stopImmediatePropagation();const items=[...menu.querySelectorAll('button:not(:disabled)')],at=items.indexOf(document.activeElement);items[e.key==='Home'?0:e.key==='End'?items.length-1:(at+(e.key==='ArrowDown'?1:items.length-1))%items.length]?.focus()},true);
+ for(const name of ['resize','blur'])window.addEventListener(name,()=>closeMenu());
+ window.addEventListener('scroll',e=>{if(!menu.hidden&&!menu.contains(e.target))closeMenu()},true);
+ button.insertAdjacentHTML('beforeend','<span class="mode-chevron" aria-hidden="true">▾</span>');
+
  update();
 })();
 
@@ -412,45 +432,187 @@ phoneLayerDeleteDialog.addEventListener('close',()=>{pendingPhoneLayerDeletion=n
  const mobile=matchMedia('(max-width:850px)'),toolbar=document.querySelector('.board-display-toolbar'),button=document.createElement('button');button.type='button';button.className='phone-icon-help-toggle';button.textContent='？';button.setAttribute('aria-label','アイコンの説明');button.setAttribute('aria-haspopup','dialog');button.setAttribute('aria-controls','phoneIconHelp');button.setAttribute('aria-expanded','false');toolbar.parentElement.append(button);
  const panel=document.createElement('dialog');panel.id='phoneIconHelp';panel.className='phone-icon-help';panel.setAttribute('aria-labelledby','phoneIconHelpTitle');panel.innerHTML='<div class="phone-icon-help-heading"><h2 id="phoneIconHelpTitle">アイコンの説明</h2><button type="button" class="btn">閉じる</button></div><div class="phone-icon-help-list"></div>';document.body.append(panel);
  const entries=[
- ['#editModeToggle','編集／閲覧を切り替える（鉛筆・薄い青背景＝編集中、鍵・白背景＝閲覧中）。並列表示中に押すと、並列表示を解除して編集に戻る。画像生成・印刷は画像マークになり、押すと入る前の編集／閲覧モードに戻る'],
- ['help-png-mode','山と太陽の画像マーク：画像生成・印刷。押すと入る前の編集／閲覧モードに戻る。見出しの下にも「画像生成・印刷」と表示する'],
- ['#pngPropertiesToggle','画像生成・印刷プロパティ見出しの＋／−：PNG保存と印刷の設定欄を開閉する。「出力倍率」の1倍／2倍は保存画像の解像度。上部の表示倍率とは別で、画像サイズを確認して「PNGを保存」を押す'],
- ['.phone-menu-toggle','インポート・エクスポート・ヘルプなどのメニューを開閉'],
- ['.phone-content-icon','コンテンツペインを開く。プレビュー下の左右の矢印で、ペインを開いたままフェーズを切り替えられる。フェーズリストを閉じても使える。コンテンツのタイトル自体は開閉ボタンではない。プレビュー・フェーズリスト・設定／ノートを使う。コンテンツ一覧の名前を長押しすると、名前変更・前へ移動・後ろへ移動・削除のメニューを開く。左端の番号をドラッグすると並べ替え。閲覧中と画像生成・印刷は開閉ボタンを表示せず、キャンバス下のコンテンツ・フェーズリストを使う。画像生成・印刷では共通の画像生成・印刷プロパティを表示する'],
- ['.phone-content-close','コンテンツペイン外側の矢印：ペインを閉じてキャンバスへ戻る'],
- ['.phone-material-pin','配置するオブジェクトの一覧を開閉'],
- ['#addPage','空のフェーズを末尾に追加して名称を入力。入力中の戻るボタン（↶）で追加を取り消す'],
- ['#addPhaseGroup','フェーズをまとめるグループを追加します。'],
- ['#copyPage','現在のフェーズのコピー先を選びます。グループを選択中は、所属フェーズもまとめてコピーします。'],
- ['#copyPageToContent','現在のフェーズ全体を、別コンテンツの末尾にコピーします。元のフェーズは残ります。'],
- ['#phonePhaseSwitch-toggle','フェーズプロパティとフェーズノートを切り替えます。'],
- ['#phonePhaseSectionToggle','フェーズ設定・ノートの共通枠を開閉します。'],
- ['#phasePropertyResize','コンテンツペイン：押したまま上下へ動かしてリストと設定／ノートの高さを調整。両方展開中だけ表示し、押している間は青くなる'],
- ['#toggleBattlePages','フェーズリストを開閉する。フェーズ名をタップして切り替え、項目を長押しして名前変更・コピー・別コンテンツへのコピー・前後移動・削除のメニューを開く'],
- ['.phase-select-check','フェーズの並列表示用チェック。2個以上で並べて閲覧し、編集不可になる。1個に戻すと元のモードに戻る'],
- ['.phone-phase-navigation>button:first-child','キャンバス下の左矢印：前のフェーズへ。グループ選択中はグループ直前のフェーズへ移動する。コンテンツペイン内でも使え、ペインは開いたまま。移動先がない場合は非表示'],
- ['.phone-phase-navigation>button:last-child','キャンバス下の右矢印：次のフェーズへ。グループ選択中はグループ内の最初のフェーズへ移動する。フェーズリストを閉じたままでも使える。移動先がない場合は非表示'],
- ['help-name-edit','コンテンツ名・フェーズ名を変更します。'],
- ['help-item-delete','その項目を削除します。コンテンツ・フェーズを削除すると、中のオブジェクトも削除されます。'],
- ['help-name-confirm','入力した名前を確定します。'],
- ['help-add-cancel','追加を取り消し、追加前の状態に戻します。'],
- ['help-object-selection','オブジェクトリストのチェック：複数選択・解除。名前をタップすると単独選択、長押しすると操作メニュー。左端の番号をドラッグすると並べ替え。フェーズリストも名前の長押しでメニュー、番号のドラッグで並べ替えができる'],
- ['help-object-visibility','選択したオブジェクトの表示・非表示を切り替えます。'],
- ['help-object-lock','選択したオブジェクトをロック・解除します。ロック中は移動・削除できません。'],
- ['help-number-step','対象のプロパティの数値を減らす・増やす操作です。'],
- ['help-disclosure','見出しの＋／−：一覧や欄を開閉する。閲覧中のフェーズノート、画像生成・印刷の画像生成・印刷プロパティも見出しをタップして開閉できる'],
- ['#pngPreviewSave','表示中の攻略図をPNG画像で保存します。出力倍率は1倍／2倍から選べます。画面のズームとは別で、ノート・編集UI・選択枠は含みません。'],
- ['#outputPrintButton','表示中の攻略図をA4縦1ページに収め、ブラウザーの印刷画面を開きます。並列表示も対象です。ノートは含みません。準備中は待機カーソル、印刷中はグレーの背景を表示します。印刷先でPDF保存も選べます。'],
- ['#swapSelectedPositions','選択中の2個の中心位置を交換します。サイズ・向き・重なり順・所属は維持します。編集不可を含む場合は使えません。'],
- ['#undo','このコンテンツの操作を1回分元に戻します。別のコンテンツには影響しません。'],
- ['#redo','このコンテンツで元に戻した操作を1回分やり直します。'],
- ['#clearBtn','現在のフェーズのオブジェクトをすべて削除します。確認画面で対象を確認してください。'],
- ['.phone-display-menu-toggle','グリッド・フィールド・フィールド外の表示設定を開きます。保存するPNG画像の設定とは別です。'],
- ['#fitBoardZoom','キャンバス全体、または並べて表示中の全フェーズが収まる倍率にする。キャンバスの空白部分の長押しでも、全体表示・中央表示・貼り付け・全選択のメニューを開ける（閲覧・並列表示中は貼り付けと全選択が無効）'],
- ['#zoomOut','倍率を5ポイント下げる（例：100% → 95%）'],
- ['#resetBoardZoom','200%、150%、100%、75%、50%、25%から表示倍率を選ぶ'],
- ['#zoomIn','倍率を5ポイント上げる（例：100% → 105%）']
- ];
+ [
+  "#editModeToggle",
+  "編集・閲覧・画像生成・印刷モードを選びます。戻るときも同じメニューを使います。"
+ ],
+ [
+  "help-png-mode",
+  "編集・閲覧・画像生成・印刷モードを選びます。戻るときも同じメニューを使います。"
+ ],
+ [
+  "#pngPropertiesToggle",
+  "PNG保存・印刷の設定欄を開閉します。出力倍率は保存画像の解像度です。"
+ ],
+ [
+  ".phone-menu-toggle",
+  "インポート・エクスポート・全データ消去・ヘルプを開きます。"
+ ],
+ [
+  ".phone-content-icon",
+  "コンテンツ・フェーズ・設定・ノートのペインを開きます。"
+ ],
+ [
+  ".phone-content-close",
+  "コンテンツペインを閉じてキャンバスへ戻ります。"
+ ],
+ [
+  ".phone-material-pin",
+  "配置する素材の一覧を開閉します。"
+ ],
+ [
+  "#addPage",
+  "空のフェーズを追加します。入力中の↶で追加を取り消せます。"
+ ],
+ [
+  "#addPhaseGroup",
+  "フェーズをまとめるグループを追加します。"
+ ],
+ [
+  "#copyPage",
+  "フェーズのコピー先を選びます。グループ選択中は所属フェーズもまとめてコピーします。"
+ ],
+ [
+  "#copyPageToContent",
+  "現在のフェーズを別コンテンツへコピーします。元のフェーズは残ります。"
+ ],
+ [
+  "#phonePhaseSwitch-toggle",
+  "フェーズプロパティとフェーズノートを切り替えます。"
+ ],
+ [
+  "#phonePhaseSectionToggle",
+  "フェーズ設定・ノートの共通枠を開閉します。"
+ ],
+ [
+  "#phasePropertyResize",
+  "リストと設定欄の間を上下に動かし、高さを調整します。"
+ ],
+ [
+  "#toggleBattlePages",
+  "フェーズリストを開閉します。名前のタップでフェーズを切り替えます。"
+ ],
+ [
+  ".phase-select-check",
+  "並べて表示するフェーズを選びます。最大12個、2個以上で編集不可になります。"
+ ],
+ [
+  ".phone-phase-navigation>button:first-child",
+  "前のフェーズへ移動します。"
+ ],
+ [
+  ".phone-phase-navigation>button:last-child",
+  "次のフェーズへ移動します。"
+ ],
+ [
+  "help-name-edit",
+  "コンテンツ名・フェーズ名を変更します。"
+ ],
+ [
+  "help-item-delete",
+  "単体項目は削除します。グループの×は解除のみで、中身を残します。"
+ ],
+ [
+  "help-name-confirm",
+  "入力した名前を確定します。"
+ ],
+ [
+  "help-add-cancel",
+  "追加を取り消し、追加前の状態に戻します。"
+ ],
+ [
+  "help-object-selection",
+  "チェックで複数選択、名前の長押しでメニュー、つかみマーク・番号のドラッグで並べ替えます。"
+ ],
+ [
+  "help-object-visibility",
+  "選択したオブジェクトの表示・非表示を切り替えます。"
+ ],
+ [
+  "help-object-lock",
+  "編集可否を切り替えます。ロック中は移動・サイズ変更・削除ができません。"
+ ],
+ [
+  "help-number-step",
+  "対象のプロパティの数値を減らす・増やす操作です。"
+ ],
+ [
+  "help-disclosure",
+  "タイトル・余白・＋／−で欄を開閉します。⇄は表示内容の切り替えです。"
+ ],
+ [
+  "#pngPreviewSave",
+  "出力倍率1倍／2倍でPNGを保存します。表示倍率やノートは含めません。"
+ ],
+ [
+  "#outputPrintButton",
+  "攻略図をA4縦1ページに印刷します。PDF保存はブラウザー側で選びます。"
+ ],
+ [
+  "#swapSelectedPositions",
+  "選択した2個の位置を交換します。サイズ・向き・所属は変わりません。"
+ ],
+ [
+  "#undo",
+  "このコンテンツの操作を元に戻します。"
+ ],
+ [
+  "#redo",
+  "元に戻した操作をやり直します。"
+ ],
+ [
+  "#clearBtn",
+  "確認後、現在のフェーズのオブジェクトをすべて削除します。"
+ ],
+ [
+  ".phone-display-menu-toggle",
+  "グリッド・フィールド・フィールド外の表示を切り替えます。"
+ ],
+ [
+  "#fitBoardZoom",
+  "キャンバス全体が収まる表示倍率にします。保存画像の解像度とは別です。"
+ ],
+ [
+  "#zoomOut",
+  "表示倍率を5ポイント下げます。"
+ ],
+ [
+  "#resetBoardZoom",
+  "200%、150%、100%、75%、50%、25%から表示倍率を選ぶ"
+ ],
+ [
+  "#zoomIn",
+  "表示倍率を5ポイント上げます。"
+ ],
+ [
+  "#bulkVisibleInput",
+  "選択中の全体を表示・非表示にします。「−」は混在状態で、押すと全体を表示します。"
+ ],
+ [
+  "#bulkEditableInput",
+  "選択中の全体を編集可・ロックにします。「−」は混在状態で、押すと全体を編集可にします。"
+ ],
+ [
+  ".handle.move-handle",
+  "十字矢印をつかんで移動します。グループ選択中は全体を動かします。"
+ ],
+ [
+  ".handle.rotate",
+  "回転矢印をつかんで向きを変えます。グループでは配置を回します。"
+ ],
+ [
+  ".list-drag-grip",
+  "つかんで上下に動かすと、リストを並べ替えます。"
+ ],
+ [
+  ".phase-group-toggle",
+  "▶で展開、▼で折りたたみます。名前を押す操作とは別です。"
+ ],
+ [
+  ".object-group-disclosure",
+  "▶で展開、▼で折りたたみます。"
+ ]
+];
  const defaultSymbols={"#editModeToggle":{"svg":"<svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 20h9\"/><path d=\"M16.5 3.5a2.1 2.1 0 013 3L8 18l-4 1 1-4Z\"/></svg>","text":"編集","color":"#000","background":"#eaf3ff"},".phone-menu-toggle":{"svg":"<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\"><path d=\"M4 6h16M4 12h16M4 18h16\"/></svg>","text":"","color":"#fff","background":"var(--accent)"},".phone-content-icon":{"svg":"<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M9 5l7 7-7 7\"/></svg>","text":"","color":"#fff","background":"var(--accent)"},".phone-material-pin":{"svg":"<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"6.5\" cy=\"6.5\" r=\"3.5\"/><rect x=\"14\" y=\"3\" width=\"7\" height=\"7\" rx=\"1\"/><path d=\"m6.5 13 4.5 8H2z\"/><path d=\"m17.5 13 4.5 4.5-4.5 4.5-4.5-4.5z\"/></svg>","text":"","color":"#fff","background":"var(--accent)"},"#addPage":{"svg":"","text":"＋","color":"#000","background":"#fff"},"#copyPage":{"svg":"","text":"⧉","color":"#000","background":"#fff"},".phone-phase-navigation>button:first-child":{"svg":"<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M15 5l-7 7 7 7\"/></svg>","text":"","color":"#fff","background":"var(--accent)"},".phone-phase-navigation>button:last-child":{"svg":"<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M9 5l7 7-7 7\"/></svg>","text":"","color":"#fff","background":"var(--accent)"},"#undo":{"svg":"<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M9 5L4 10l5 5M4 10h10a6 6 0 0 1 6 6v3\"/></svg>","text":"","color":"#000","background":"#fff"},"#redo":{"svg":"<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M15 5l5 5-5 5M20 10H10a6 6 0 0 0-6 6v3\"/></svg>","text":"","color":"#000","background":"#fff"},"#clearBtn":{"svg":"<svg class=\"clear-icon\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M4 6h16M9 6V3h6v3M6 6l1 15h10l1-15M10 10v7M14 10v7\"/></svg>","text":"","color":"#000","background":"#fff"},"#gridToggle":{"svg":"<svg viewBox=\"0 0 20 20\" aria-hidden=\"true\"><path d=\"M3 3h14v14H3zM8 3v14M13 3v14M3 8h14M3 13h14\"/></svg>","text":"","color":"#fff","background":"var(--accent)"},"#fieldToggle":{"svg":"<svg viewBox=\"0 0 20 20\" aria-hidden=\"true\"><path d=\"M2 10s3-5 8-5 8 5 8 5-3 5-8 5-8-5-8-5Z\"/><circle cx=\"10\" cy=\"10\" r=\"2.2\"/></svg>","text":"","color":"#fff","background":"var(--accent)"},"#clipToggle":{"svg":"<svg viewBox=\"0 0 20 20\" aria-hidden=\"true\"><rect x=\"2\" y=\"2\" width=\"12\" height=\"12\" rx=\"1\"/><path d=\"M9 8h8v9H8v-3M8 8v6M8 8h6\"/><path d=\"M14 8h3v9H8v-3\" stroke-dasharray=\"2 2\"/></svg>","text":"","color":"#fff","background":"var(--accent)"},"#fitBoardZoom":{"svg":"<svg viewBox=\"0 0 20 20\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M7 3H3v4M13 3h4v4M17 13v4h-4M7 17H3v-4\"/></svg>","text":"","color":"#fff","background":"var(--accent)"},"#zoomOut":{"svg":"","text":"−","color":"#fff","background":"var(--accent)"},"#resetBoardZoom":{"svg":"","text":"100%","color":"#fff","background":"var(--accent)"},"#zoomIn":{"svg":"","text":"＋","color":"#fff","background":"var(--accent)"}};
 
  Object.assign(defaultSymbols,{
@@ -478,16 +640,17 @@ phoneLayerDeleteDialog.addEventListener('close',()=>{pendingPhoneLayerDeletion=n
  for(const key of ['.phone-phase-navigation>button:first-child','.phone-phase-navigation>button:last-child'])Object.assign(defaultSymbols[key],{color:'#000',background:'#fff'});
  for(const key of ['#phonePhaseSectionToggle','#toggleBattlePages','help-disclosure'])defaultSymbols[key].svg='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 7h6M5 4v6M14 3l-4 18M16 17h6"/></svg>';
  defaultSymbols['help-number-step'].svg='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 7h6M14 3l-4 18M16 17h6M19 14v6"/></svg>';
+ defaultSymbols['#editModeToggle'].background='#fff';defaultSymbols['#bulkVisibleInput']=defaultSymbols['help-object-visibility'];defaultSymbols['#bulkEditableInput']=defaultSymbols['help-object-lock'];
  const contentButton=button.cloneNode(true);contentButton.classList.add('phone-content-help');contentButton.setAttribute('aria-label','コンテンツのアイコン説明');document.querySelector('.content-heading-row').append(contentButton);
  let opener=button;
- const visible=node=>!!node&&node.getClientRects().length>0&&getComputedStyle(node).visibility!=='hidden';
+ const visible=node=>!!node&&!node.closest('[inert]')&&node.getClientRects().length>0&&getComputedStyle(node).visibility!=='hidden';
  function close(){if(panel.open)panel.close();for(const node of document.querySelectorAll('.phone-icon-help-toggle'))if(node.getAttribute('aria-expanded')!=='false')node.setAttribute('aria-expanded','false')}
  function openHelp(source=button){
   if(panel.open){close();return}opener=source;
   const png=!!window.Bolxiv?.pngPreview?.active,content=source===contentButton,mode=png?'画像生成・印刷':boardReadOnly?'閲覧':'編集';
   panel.querySelector('h2').textContent='アイコン説明 · '+mode+' · '+(content?'コンテンツ':'キャンバス');
   const list=panel.querySelector('.phone-icon-help-list');list.replaceChildren();
-  const intro=document.createElement('p');intro.className='phone-icon-help-intro';intro.textContent='現在のモード・表示中の画面で使えるボタンを表示しています。モードや画面によって、アイコンの数や説明が変わります。';list.append(intro);
+  const intro=document.createElement('p');intro.className='phone-icon-help-intro';intro.textContent='現在の画面で使える操作です。モードや画面によって表示内容が変わります。';list.append(intro);
   const scope=content?document.querySelector('.battle'):png?document.getElementById('pngPreview'):document.querySelector('.right');
   const find=selector=>{try{return [...scope.querySelectorAll(selector),...document.querySelectorAll(selector)].find(node=>visible(node)&&!node.disabled&&(content?node.closest('.battle,.phone-content-close,.phone-phase-navigation,.header-mode-status'):!node.closest('.battle')))}catch{return null}};
   const contextual=[];
@@ -495,13 +658,13 @@ phoneLayerDeleteDialog.addEventListener('close',()=>{pendingPhoneLayerDeletion=n
    if(['#resetBoardZoom','#phasePropertyResize','.phase-select-check','help-object-selection'].includes(selector))continue;
    let description=original,node=null;
    if(selector.startsWith('help-')){
-    if(selector==='help-png-mode'){if(!png||content)continue;node=document.getElementById('editModeToggle');description='画像マーク：画像生成・印刷'+'を終了し、入る前の編集／閲覧モードに戻ります。'}
+    if(selector==='help-png-mode'){if(!png||content)continue;node=document.getElementById('editModeToggle');description='編集・閲覧・画像生成・印刷モードを選びます。戻るときも同じメニューを使います。'}
     else if(selector==='help-disclosure'){continue}
     else if(selector==='help-number-step'){if(!content||!visible(document.querySelector('.battle .phone-number-step-buttons')))continue}
     else if(selector.startsWith('help-object-')){if(content||png||boardReadOnly||!visible(document.getElementById('objectList')))continue}
     else{if(!content||png||boardReadOnly||!visible(document.querySelector('.battle .page-tab-input,.battle .content-option-input')))continue}
    }else{
-    if(selector==='#editModeToggle'){if(content||png)continue;description=boardReadOnly?'鍵マーク：閲覧中です。押すと編集モードに切り替えます。':'鉛筆マーク：編集中です。押すと閲覧モードに切り替えます。'}
+    if(selector==='#editModeToggle'){if(content||png)continue;description='編集・閲覧・画像生成・印刷モードを選びます。戻るときも同じメニューを使います。'}
     if(selector==='#pngPropertiesToggle')continue;
     if(selector==='.phone-content-icon'&&content)continue;
     if(selector==='.phone-content-close'&&!content)continue;
@@ -510,7 +673,7 @@ phoneLayerDeleteDialog.addEventListener('close',()=>{pendingPhoneLayerDeletion=n
     const mapped=png&&['#fitBoardZoom','#zoomOut','#resetBoardZoom','#zoomIn'].includes(selector)?'#png-'+selector.slice(1):selector;
     node=find(mapped);if(!node)continue;
     if(content&&!node.closest('.battle,.phone-content-close,.phone-phase-navigation,.header-mode-status'))continue;
-    if(selector==='.phone-content-icon')description='コンテンツペインを開きます。フェーズリスト、フェーズプロパティ、ノートを確認・編集できます。';
+    if(selector==='.phone-content-icon')description='コンテンツ・フェーズ・設定・ノートのペインを開きます。';
     if(selector==='#toggleBattlePages')description='フェーズリストを開閉します。フェーズ名をタップすると表示するフェーズを切り替えます。';
     if(selector==='.phase-select-check'&&(png||boardReadOnly))description='フェーズをチェックして並べて表示します。';
     if(selector==='#fitBoardZoom')description='キャンバス全体が収まる表示倍率にします。保存画像の出力倍率とは別です。';
@@ -519,19 +682,19 @@ phoneLayerDeleteDialog.addEventListener('close',()=>{pendingPhoneLayerDeletion=n
    contextual.push({selector,description,node});
   }
   for(const [selector,description] of [
-   ['.phone-reader-switch',png?'フェーズリストと画像生成・印刷プロパティを切り替えます。出力倍率や表示中のフェーズは維持します。':'フェーズリストとフェーズノートを切り替えます。表示中のフェーズは維持します。'],
+   ['.phone-reader-switch',png?'タイトル隣の⇄で、フェーズリストと画像生成・印刷プロパティを切り替えます。':'タイトル隣の⇄で、フェーズリストとノートを切り替えます。'],
    ['.phone-reader-collapse','フェーズリスト／'+(png?'画像生成・印刷プロパティ':'ノート')+'の共通枠を開閉します。'],
    ['.phone-object-tabs button:not(.phone-object-collapse)','オブジェクトリストとオブジェクトプロパティを切り替えます。'],
    ['.phone-object-collapse','オブジェクトリスト／プロパティの共通枠を開閉します。'],
   ]){const node=find(selector);if(node)contextual.push({selector,description,node})}
   const helpTitles={
-   '#editModeToggle':'編集・閲覧の切り替え','help-png-mode':'出力を終了',
+   '#editModeToggle':'モード切替','help-png-mode':'モード切替',
    '.phone-menu-toggle':'操作メニュー','.phone-content-icon':'コンテンツペインを開く','.phone-content-close':'コンテンツペインを閉じる','.phone-material-pin':'マテリアルを開閉',
    '#addPage':'フェーズを追加','#addPhaseGroup':'フェーズグループを追加','#copyPage':'フェーズをコピー','#copyPageToContent':'別コンテンツへコピー',
    '#phonePhaseSwitch-toggle':'フェーズプロパティ・ノートの切り替え','#phonePhaseSectionToggle':'フェーズ設定・ノート欄を開閉','#toggleBattlePages':'フェーズリストを開閉',
    '.phone-phase-navigation>button:first-child':'前のフェーズへ','.phone-phase-navigation>button:last-child':'次のフェーズへ',
    'help-name-edit':'名前を変更','help-item-delete':'項目を削除','help-name-confirm':'名前を確定','help-add-cancel':'追加を取り消す',
-   'help-object-visibility':'オブジェクトの表示・非表示','help-object-lock':'オブジェクトをロック','help-number-step':'プロパティの数値を調整',
+   '#bulkVisibleInput':'全体の表示・非表示','#bulkEditableInput':'全体の編集可否','.handle.move-handle':'移動ハンドル','.handle.rotate':'回転ハンドル','.list-drag-grip':'並べ替え','.phase-group-toggle':'フェーズグループを開閉','.object-group-disclosure':'オブジェクトグループを開閉','help-object-visibility':'オブジェクトの表示・非表示','help-object-lock':'オブジェクトをロック','help-number-step':'プロパティの数値を調整',
    '#undo':'元に戻す','#redo':'やり直す','#clearBtn':'フェーズ内のオブジェクトを全削除',
    '.phone-display-menu-toggle':'キャンバスの表示設定','#fitBoardZoom':'キャンバス全体を表示','#zoomOut':'キャンバスを縮小','#zoomIn':'キャンバスを拡大',
    '.phone-reader-switch':png?'フェーズリスト・画像生成・印刷プロパティの切り替え':'フェーズリスト・ノートの切り替え',
@@ -574,7 +737,7 @@ phoneLayerDeleteDialog.addEventListener('close',()=>{pendingPhoneLayerDeletion=n
 // ===== js/mobile/mobile-menu.js =====
 (function setupPhoneMenu(){
  const mobile=matchMedia('(max-width:850px)'),header=document.querySelector('.top'),actions=header.querySelector('.actions');
- actions.id='headerActions';const button=document.createElement('button');button.type='button';button.className='phone-menu-toggle';button.title='操作メニューを開閉';button.setAttribute('aria-label','操作メニュー');button.setAttribute('aria-controls',actions.id);button.setAttribute('aria-expanded','false');
+ actions.id='headerActions';const button=document.createElement('button');button.type='button';button.className='phone-menu-toggle';button.title='操作メニューを開閉';button.setAttribute('aria-label','操作メニュー');button.setAttribute('aria-controls',actions.id);button.setAttribute('aria-haspopup','menu');button.setAttribute('aria-expanded','false');
  button.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg><span class="header-menu-label">メニュー</span>';header.insertBefore(button,actions);
  function close(){header.classList.remove('phone-menu-open');button.setAttribute('aria-expanded','false')}
  button.onclick=()=>{const open=header.classList.toggle('phone-menu-open');button.setAttribute('aria-expanded',String(open))};
@@ -648,7 +811,7 @@ phoneLayerDeleteDialog.addEventListener('close',()=>{pendingPhoneLayerDeletion=n
  const title=document.createElement('button');title.type='button';title.className='phone-reader-title';
  const change=document.createElement('button');change.type='button';change.className='phone-reader-switch';change.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h16l-4-4M20 16H4l4 4"/></svg>';
  const collapse=document.createElement('button');collapse.type='button';collapse.className='phone-reader-collapse';
- tabs.append(title,change,collapse);host.append(tabs);
+ tabs.append(title,change,collapse);tabs.addEventListener('click',event=>{if(event.target.closest('button'))return;collapse.click()});host.append(tabs);
  let readerTab=viewSettings.phoneReaderTab==='memo'?'memo':'list';
  function syncReaderTabs(){
   const open=phaseToggle.getAttribute('aria-expanded')==='true';
@@ -732,7 +895,7 @@ const userPresetLibrary=(()=>{
  }
  function render(){grid.replaceChildren();empty.hidden=presets.length>0;for(const preset of presets){const button=document.createElement('button');button.type='button';button.className='icon-choice user-preset';button.dataset.presetId=preset.id;button.title=preset.name;button.setAttribute('aria-label',preset.name);button.draggable=true;button.disabled=blocked();button.append(thumbnail(preset.items));const icon={name:preset.name,userPresetId:preset.id};button.onclick=()=>{if(!blocked())selectPlacementIcon(icon)};button.ondragstart=e=>{if(blocked()){e.preventDefault();return}selectPlacementIcon(icon,false);e.dataTransfer.setData('application/x-tactica',JSON.stringify({type:'icon',...icon}));e.dataTransfer.effectAllowed='copy'};
   function actions(){show(button,[['名前を変更',()=>nameDialog(preset.name,name=>{if(blocked())return false;return save(presets.map(p=>p.id===preset.id?{...p,name}:p))}),blocked()],['削除',()=>{if(blocked())return;if(activeIcon?.userPresetId===preset.id){tapPlacementArmed=false;selectPlacementTool('select')}save(presets.filter(p=>p.id!==preset.id))},blocked()]])}
-  button.oncontextmenu=e=>{e.preventDefault();e.stopPropagation();actions()};let timer=null,suppress=false,point=null;button.addEventListener('pointerdown',e=>{if(e.pointerType!=='touch')return;point={x:e.clientX,y:e.clientY};timer=setTimeout(()=>{timer=null;suppress=true;actions()},450)});button.addEventListener('pointermove',e=>{if(point&&Math.hypot(e.clientX-point.x,e.clientY-point.y)>8){clearTimeout(timer);timer=null}});for(const type of ['pointerup','pointercancel','dragstart'])button.addEventListener(type,()=>{clearTimeout(timer);timer=null});button.addEventListener('click',e=>{if(suppress){suppress=false;e.preventDefault();e.stopImmediatePropagation()}},true);grid.append(button)}}
+  button.oncontextmenu=e=>{e.preventDefault();e.stopPropagation();actions()};let timer=null,suppress=false,point=null;button.addEventListener('pointerdown',e=>{if(e.pointerType!=='touch')return;point={x:e.clientX,y:e.clientY};timer=setTimeout(()=>{timer=null;suppress=true;actions()},500)});button.addEventListener('pointermove',e=>{if(point&&Math.hypot(e.clientX-point.x,e.clientY-point.y)>8){clearTimeout(timer);timer=null}});for(const type of ['pointerup','pointercancel','dragstart'])button.addEventListener(type,()=>{clearTimeout(timer);timer=null});button.addEventListener('click',e=>{if(suppress){suppress=false;e.preventDefault();e.stopImmediatePropagation()}},true);grid.append(button)}}
  manage.onclick=e=>{e.stopPropagation();if(!menu.hidden){close();return}manage.setAttribute('aria-expanded','true');show(manage,[['選択中のオブジェクトを登録',()=>{
   if(blocked())return;const originals=current().filter(o=>selectedIds.includes(o.id));if(originals.length<2)return;const items=JSON.parse(JSON.stringify(originals));for(const item of items){if(item.imageId){item.src=objectImageSource(item);delete item.imageId}delete item.id}
   nameDialog(selectedObjectGroup().length?objectGroupName(originals):'新しいプリセット',name=>{if(blocked())return false;const id=createObjectId();for(const item of items){item.locked=false;item.objectGroupId=id;item.objectGroupName=name;delete item.objectGroupRotationOwner;delete item.objectGroupPlacementRotation;delete item.objectGroupOrientationRotation}return save([...presets,{id,name,items}])},items.some(o=>o.visible===false)?'非表示のオブジェクトを'+items.filter(o=>o.visible===false).length+'個含みます。非表示の状態も保持して登録します。':'');
@@ -747,4 +910,13 @@ const userPresetLibrary=(()=>{
  const desktop=matchMedia('(min-width:851px)'),header=document.querySelector('.top'),home=header.querySelector('.header-mode-status'),mode=document.getElementById('editModeToggle'),menu=header.querySelector('.phone-menu-toggle'),group=document.createElement('div');group.className='header-mode-menu';header.insertBefore(group,menu);
  function update(){if(desktop.matches)group.append(mode);else home.querySelector('.header-history-actions').after(mode)}
  desktop.addEventListener('change',update);update();
+})();
+
+// Reflect the actual popup state on its opener, including indirect dismissal.
+(()=>{
+ const watched=new WeakSet();let pending=false;
+ function sync(){pending=false;const popups=[...document.querySelectorAll('[role="menu"]')].filter(menu=>!menu.hidden&&menu.getClientRects().length>0);for(const button of document.querySelectorAll('button[aria-haspopup="menu"][aria-controls]')){const menu=document.getElementById(button.getAttribute('aria-controls')),open=!!menu&&(menu.id==='headerActions'?document.querySelector('.top').classList.contains('phone-menu-open'):!menu.hidden&&menu.getClientRects().length>0)||popups.some(menu=>menu._opener===button);button.classList.toggle('menu-open-trigger',open);const value=String(open);if(button.getAttribute('aria-expanded')!==value)button.setAttribute('aria-expanded',value)}}
+ function schedule(){if(pending)return;pending=true;queueMicrotask(sync)}
+ function watch(){for(const menu of document.querySelectorAll('[role="menu"],#headerActions')){if(watched.has(menu))continue;watched.add(menu);new MutationObserver(schedule).observe(menu,{attributes:true,attributeFilter:['hidden','style']})}schedule()}
+ new MutationObserver(watch).observe(document.body,{childList:true});new MutationObserver(schedule).observe(document.querySelector('.top'),{attributes:true,attributeFilter:['class']});watch();
 })();

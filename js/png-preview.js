@@ -23,7 +23,7 @@
  for(const item of zoomItems)item.onclick=()=>{if(!session)return;session.zoom=Number(item.dataset.zoom)/100;fit();surface.scrollLeft=Math.max(0,(surface.scrollWidth-surface.clientWidth)/2);surface.scrollTop=Math.max(0,(surface.scrollHeight-surface.clientHeight)/2);closeZoomMenu(true)};
  zoomTrigger.onkeydown=event=>{if(['ArrowDown','ArrowUp'].includes(event.key)){event.preventDefault();openZoomMenu()}};
  zoomMenu.onkeydown=event=>{const index=zoomItems.indexOf(document.activeElement);if(event.key==='Escape'){event.preventDefault();closeZoomMenu(true)}else if(['ArrowDown','ArrowUp'].includes(event.key)){event.preventDefault();zoomItems[(index+(event.key==='ArrowDown'?1:zoomItems.length-1))%zoomItems.length].focus()}else if(['Home','End'].includes(event.key)){event.preventDefault();zoomItems[event.key==='Home'?0:zoomItems.length-1].focus()}else if(event.key==='Tab')closeZoomMenu()};
- document.addEventListener('pointerdown',event=>{if(!zoomMenu.contains(event.target)&&!zoomTrigger.contains(event.target))closeZoomMenu()},true);window.addEventListener('resize',()=>closeZoomMenu());
+ window.addEventListener('pointerdown',event=>{if(!zoomMenu.hidden&&!zoomMenu.contains(event.target)&&!zoomTrigger.contains(event.target))closeZoomMenu()},true);window.addEventListener('resize',()=>closeZoomMenu());
  const propertiesToggle=document.getElementById('pngPropertiesToggle'),propertiesPanel=dialog.querySelector('.png-preview-settings');
  let propertiesExpanded=true;
  function syncProperties(){const mobile=matchMedia('(max-width:850px)').matches;propertiesPanel.classList.toggle('png-properties-collapsed',mobile&&!propertiesExpanded);propertiesToggle.setAttribute('aria-expanded',String(!mobile||propertiesExpanded));propertiesToggle.querySelector('.png-properties-mark').textContent=propertiesExpanded?'−':'＋';propertiesToggle.tabIndex=mobile?0:-1}
@@ -41,7 +41,7 @@
   if(reader.dataset.readerTab!==tab)reader.dataset.readerTab=tab;
   if(reader.dataset.readerExpanded!==String(expanded))reader.dataset.readerExpanded=String(expanded);
   const title=reader.querySelector('.phone-reader-title'),change=reader.querySelector('.phone-reader-switch'),collapse=reader.querySelector('.phone-reader-collapse');
-  const propertiesName='画像生成・印刷プロパティ';const markup=tab==='list'?'<strong>フェーズリスト</strong> / '+propertiesName:'フェーズリスト / <strong>'+propertiesName+'</strong>';
+  const propertiesName='画像生成・印刷プロパティ';const markup=tab==='list'?'<span class="phone-reader-label-part"><strong>フェーズリスト</strong> / </span><span class="phone-reader-label-part">'+propertiesName+'</span>':'<span class="phone-reader-label-part">フェーズリスト / </span><span class="phone-reader-label-part"><strong>'+propertiesName+'</strong></span>';
   if(title&&title.innerHTML!==markup)title.innerHTML=markup;
   const attr=(node,key,value)=>{if(node&&node.getAttribute(key)!==value)node.setAttribute(key,value)};
   attr(title,'aria-expanded',String(expanded));attr(title,'aria-label',(tab==='list'?'フェーズリスト':propertiesName)+'を'+(expanded?'閉じる':'開く'));
@@ -60,7 +60,7 @@
  function syncToolbarAppearance(){
   const properties=['display','box-sizing','width','min-width','max-width','height','min-height','max-height','padding','margin','border','border-radius','background','color','-webkit-text-fill-color','font','line-height','letter-spacing','text-align','align-items','justify-content','gap','fill','stroke','stroke-width'];
   function copy(source,target,dimensions=true){if(!source||!target)return;const style=getComputedStyle(source);for(const key of properties){if(!dimensions&&['width','min-width','max-width'].includes(key))continue;target.style.setProperty(key,style.getPropertyValue(key),'important')}}
-  for(const target of toolbar.querySelectorAll('[data-source-id]')){const source=document.getElementById(target.dataset.sourceId);copy(source,target);if(target.matches('button')){const children=source?.querySelectorAll('svg,path');target.querySelectorAll('svg,path').forEach((child,index)=>copy(children?.[index],child))}}
+  for(const target of toolbar.querySelectorAll('[data-source-id]')){const source=document.getElementById(target.dataset.sourceId);copy(source,target);if(target===zoomTrigger)for(const key of ['background','color','-webkit-text-fill-color'])target.style.removeProperty(key);if(target.matches('button')){const children=source?.querySelectorAll('svg,path');target.querySelectorAll('svg,path').forEach((child,index)=>copy(children?.[index],child))}}
   copy(document.querySelector('.board-display-toolbar .board-zoom-group'),toolbar.querySelector('.board-zoom-group'),false);
   for(const className of ['board-toolbar-separator','board-zoom-separator'])copy(document.querySelector('.board-display-toolbar .'+className),toolbar.querySelector('.'+className));
   if(matchMedia('(max-width:850px)').matches){for(const button of toolbar.querySelectorAll('button:disabled'))button.style.setProperty('display','none','important');toolbar.querySelector('.board-toolbar-separator')?.style.setProperty('display','none','important')}
@@ -89,7 +89,7 @@
    if(phone){const reader=document.createElement('div');reader.className='phone-view-content png-reader-controls';for(const node of [document.querySelector('.content-select-row'),document.querySelector('.page-controls')]){const anchor=document.createComment('PNG control home');node.before(anchor);readerHomes.push({node,anchor});reader.append(node)}const tabs=document.createElement('div');tabs.className='phone-reader-tabs';
     const title=document.createElement('button');title.type='button';title.className='phone-reader-title';
     const change=document.createElement('button');change.type='button';change.className='phone-reader-switch';change.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h16l-4-4M20 16H4l4 4"/></svg>';
-    const collapse=document.createElement('button');collapse.type='button';collapse.className='phone-reader-collapse';tabs.append(title,change,collapse);
+    const collapse=document.createElement('button');collapse.type='button';collapse.className='phone-reader-collapse';tabs.append(title,change,collapse);tabs.addEventListener('click',event=>{if(event.target.closest('button'))return;collapse.click()});
     reader.querySelector('.page-controls').before(tabs);
     collapse.onclick=()=>{if(session?.saving)return;document.getElementById('toggleBattlePages').click();syncPhoneLayout()};title.onclick=()=>collapse.click();
     change.onclick=()=>{if(!session||session.saving)return;session.phoneTab=session.phoneTab==='list'?'properties':'list';const toggle=document.getElementById('toggleBattlePages');if(toggle.getAttribute('aria-expanded')!=='true')toggle.click();syncPhoneLayout()};
@@ -119,13 +119,14 @@
  dialog.addEventListener('close',()=>{if(session&&!dialog.open&&!session.saving)close()});
  window.addEventListener('keydown',event=>{
   if(!session||event.target.closest?.('#changeLogDialog,#operationGuideDialog,#aboutToolDialog,#phoneIconHelp'))return;
+  if(event.target.closest?.('#modeSwitchMenu'))return;
   if(zoomMenu.contains(event.target)||event.target===zoomTrigger&&['ArrowDown','ArrowUp'].includes(event.key))return;
   if(!dialog.contains(event.target)&&['Enter',' ','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Home'].includes(event.key)&&allowed(event.target))return;
   if(event.key==='Escape'){event.preventDefault();event.stopImmediatePropagation();close();return}
   if((event.ctrlKey||event.metaKey)&&['z','y','v','x'].includes(event.key.toLowerCase())||['Delete','Backspace'].includes(event.key))event.preventDefault();
   event.stopImmediatePropagation();
  },true);
- const navigation='#editModeToggle,.top .phone-menu-toggle,#headerActions,#jsonExportMenu,#helpMenu,#phasePropertyResize,.phone-phase-navigation,.phone-phase-tabs,#contentPaneResize,.phone-content-icon,.phone-content-close,.phone-content-backdrop,#contentObjectPin,#toggleContent,#toggleBattlePages,#contentSelect,#contentOptions,#exitPhaseComparison';
+ const navigation='#modeSwitchMenu,#editModeToggle,.top .phone-menu-toggle,#headerActions,#jsonExportMenu,#helpMenu,#phasePropertyResize,.phone-phase-navigation,.phone-phase-tabs,#contentPaneResize,.phone-content-icon,.phone-content-close,.phone-content-backdrop,#contentObjectPin,#toggleContent,#toggleBattlePages,#contentSelect,#contentOptions,#exitPhaseComparison';
  function allowed(target){return zoomMenu.contains(target)||target===back||dialog.contains(target)||target.closest(navigation)||target.closest('.left')&&!target.closest('.tool,.icon-choice')||target.closest('#pages .page-tab')&&!target.closest('.page-tab-x')}
  for(const type of ['click','dblclick','pointerdown','contextmenu','dragstart','drop','change'])window.addEventListener(type,event=>{if(!session||event.target.closest?.('#changeLogDialog,#operationGuideDialog,#aboutToolDialog,#phoneIconHelp')||session.saving&&event.target.matches('a[download]'))return;if(readOnlyTarget(event.target)){event.preventDefault();event.stopImmediatePropagation();return}if(event.target===back&&type==='pointerdown'){event.stopImmediatePropagation();return}if(session.saving&&event.target!==back&&!dialog.contains(event.target)||!allowed(event.target)||['dblclick','contextmenu','dragstart','drop'].includes(type)&&!dialog.contains(event.target)){event.preventDefault();event.stopImmediatePropagation()}},true);
  const originalRender=render;let refreshFrame;
@@ -147,5 +148,5 @@ async function printOutputCanvas(){
   frame.srcdoc='<!doctype html><html lang="ja"><head><meta charset="utf-8"><title>攻略図</title><style>@page{size:A4 portrait;margin:10mm}html,body{margin:0;padding:0;background:white}body{width:190mm;height:276mm;display:flex;align-items:center;justify-content:center}img{display:block;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;print-color-adjust:exact;-webkit-print-color-adjust:exact}</style></head><body><img alt="攻略図" src="'+src+'"></body></html>';document.body.append(frame);
  });
 }
-document.getElementById('printCurrentPhase').onclick=()=>window.Bolxiv.pngPreview.open(1).catch(error=>notify('画像生成・印刷モードを開けませんでした：'+(error?.message||String(error))));
+
 window.Bolxiv.phasePrint={open:()=>window.Bolxiv.pngPreview.open(2,'print')};

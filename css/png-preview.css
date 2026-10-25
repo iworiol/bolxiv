@@ -106,7 +106,7 @@
 
 @media(max-width:850px){
  .png-preview-active .app .top #editModeToggle{width:auto!important;min-width:0!important;padding:0 8px!important;gap:4px}
- .png-preview-active .app .top #editModeToggle .mode-label{display:inline!important;font-size:12px;white-space:nowrap}
+ .png-preview-active .app .top #editModeToggle .mode-label{display:none!important;font-size:12px;white-space:nowrap}
  .png-preview-active .app :is(#undo,#redo),.board-read-only .app .top :is(#undo,#redo){display:none!important}
  .png-preview-settings{margin:8px;border:1px solid #d0d4da;border-radius:7px;padding:0;gap:0;display:flex;flex-direction:column;overflow:hidden}
  .png-preview-settings h3{display:flex;align-items:center;box-sizing:border-box;width:100%;height:36px!important;min-height:36px!important;padding:0 11px!important;background:#eef2f7;color:#33445f;margin:0;font-size:14px;font-weight:400}
@@ -170,8 +170,8 @@
 @media(max-width:850px){
  .png-preview-active .app>.top>.header-mode-status{display:flex!important}
  .png-preview-active .app>.top>.header-mode-status>.header-history-actions{display:none!important}
- .png-preview-active .app .top #editModeToggle{width:36px!important;min-width:36px!important;height:36px!important;padding:0!important}
- .png-preview-active .app .top #editModeToggle .mode-label{display:none!important}
+ .png-preview-active .app .top #editModeToggle{width:auto!important;min-width:40px!important;height:36px!important;padding:0 7px!important}
+ .png-preview-active .app .top #editModeToggle .mode-label{display:none!important;font-size:11px}
  .phone-canvas-mode-status{display:block;position:absolute;left:44px;top:36px;max-width:calc(100% - 196px);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:#fff;font-size:12px;line-height:20px;pointer-events:none}
  .png-preview-heading{position:relative}
  .phone-canvas-mode-status:empty{display:none}
@@ -236,3 +236,5 @@
 .png-preview-panel[data-output-mode=print] .png-settings-fields[hidden]{display:none!important}.png-preview-panel .print-settings-info[hidden]{display:none!important}
 .app .layout .png-preview-panel .png-preview-settings-body{display:flex;flex-direction:column;gap:12px;overflow:auto;align-items:stretch;justify-content:flex-start}.output-section{display:flex;flex-direction:column;flex:0 0 auto;gap:8px;min-width:0}.output-section h4{font-size:12px;font-weight:700;margin:0;color:#33445f}.output-section .png-settings-fields{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px;align-items:center}.output-section>.btn{box-sizing:border-box;align-self:flex-end;width:50%;min-width:min(120px,100%);max-width:100%;min-height:36px;margin:0;padding:6px 12px}.output-section-separator{flex:0 0 auto;border-top:1px solid #e5e9ef}.app .layout .png-preview-panel .output-section>.btn{background:#293c66!important;color:#fff!important;-webkit-text-fill-color:#fff!important;border:1px solid #293c66!important;border-radius:5px}.app .layout .png-preview-panel .output-section>.btn:enabled:hover:not(:where(.phone-touch-mode *)){background:var(--blue)!important;border-color:var(--blue)!important}
 /* Optional print feedback: remove this block and overlay lifecycle to revert. */ .phase-print-overlay{position:fixed;inset:0;z-index:2147483646;background:#0006;pointer-events:auto}.phase-print-preparing,.phase-print-preparing *{cursor:wait!important}
+
+@media(max-width:850px){.png-reader-controls .phone-reader-title{line-height:16px}.png-reader-controls .phone-reader-label-part{display:inline-block;white-space:nowrap}}

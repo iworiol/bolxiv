@@ -38,7 +38,7 @@
   const hint=document.createElement('p');hint.className='phase-content-copy-hint';hint.textContent=groupId?'グループ名・共通メモ・配下の全フェーズを、コピー先の末尾に新しいグループとして追加します。':'選ぶと末尾にコピーします。オブジェクト・フィールド設定・背景・ノートを含みます。';menu.append(heading,separator,hint);
   contentBoards.forEach((board,index)=>{if(board===data)return;const item=document.createElement('button');item.type='button';item.setAttribute('role','menuitem');item.textContent=board.title||'コンテンツ'+(index+1);item.onclick=()=>copyTo(board);menu.append(item)});
   if(!menu.querySelector('button')){const empty=document.createElement('p');empty.className='phase-content-copy-hint';empty.textContent='コピー先のコンテンツがありません';menu.append(empty)}
-  addPhoneMenuClose(menu,()=>close(true));menu.hidden=false;button.setAttribute('aria-expanded','true');
+  addPhoneMenuClose(menu,()=>close(true));menu._opener=anchor;menu.hidden=false;button.setAttribute('aria-expanded','true');
   const rect=anchor.getBoundingClientRect(),below=innerHeight-rect.bottom-8,above=rect.top-8;
   menu.style.maxHeight=Math.max(60,Math.min(360,Math.max(below,above)))+'px';
   menu.style.left=Math.max(8,Math.min(rect.left,innerWidth-menu.offsetWidth-8))+'px';
@@ -113,10 +113,10 @@
  list.addEventListener('open-row-actions',event=>{cancelGesture();const index=[...list.querySelectorAll('.page-tab')].indexOf(event.detail.row);if(index<0)return;selectPhase(index);open(list.querySelectorAll('.page-tab')[index],event.detail.x,event.detail.y)});
  list.addEventListener('contextmenu',event=>{const row=event.target.closest('.page-tab');if(!row||event.target.closest('input,textarea,button'))return;event.preventDefault();event.stopPropagation();if(gesture){clearTimeout(gesture.timer);consumeClick=true;list.setPointerCapture(gesture.id);if(menu.hidden)open(row,gesture.x,gesture.y);return}open(row,event.clientX,event.clientY)});
  list.addEventListener('pointerdown',event=>{
-  if(matchMedia('(max-width:850px)').matches||event.pointerType!=='touch'||event.target.closest('input,textarea,button'))return;
+  if(event.pointerType!=='touch'||event.target.closest('input,textarea,button'))return;
   const row=event.target.closest('.page-tab');if(!row)return;cancelGesture();
   const next={id:event.pointerId,row,x:event.clientX,y:event.clientY,board:data,phase:data.pages[[...list.querySelectorAll('.page-tab')].indexOf(row)],draggable:row.draggable};row.draggable=false;
-  next.timer=setTimeout(()=>{if(gesture!==next||data!==next.board||!row.isConnected)return;consumeClick=true;list.setPointerCapture(next.id);open(row,next.x,next.y)},350);gesture=next;
+  next.timer=setTimeout(()=>{if(gesture!==next||data!==next.board||!row.isConnected)return;consumeClick=true;list.setPointerCapture(next.id);open(row,next.x,next.y)},500);gesture=next;
  });
  document.addEventListener('pointerdown',event=>{consumeClick=false;if(!menu.hidden&&!menu.contains(event.target))close()},true);
  list.addEventListener('dragstart',()=>{cancelGesture();close()},true);
@@ -188,7 +188,7 @@
    if(event.pointerType!=='touch'||!event.target.closest(handleSelector)||boardReadOnly||phaseComparisonActive()||(id==='contentOptions'&&editingContentIndex>=0))return;
    clear();const row=event.target.closest(rowSelector);if(!row||event.target.closest('[data-cancel-group-addition]'))return;event.preventDefault();event.stopImmediatePropagation();
    const transfer=new DataTransfer();if(id==='pages'&&row.classList.contains('phase-group-heading'))transfer.setData('application/x-tactica-phase-group',row.dataset.groupId);else transfer.setData(id==='objectList'&&row.classList.contains('object-group-member')?'application/x-tactica-group-member':mime,id==='objectList'?row.dataset.id:String(id==='pages'?[...list.querySelectorAll('.page-tab')].indexOf(row):rows().indexOf(row)));transfer.effectAllowed='move';
-   gesture={id:event.pointerId,row,menuButton:event.target.closest('.phone-row-actions,.phase-group-menu-trigger,.object-group-disclosure'),armed:false,draggable:row.draggable,transfer,x:event.clientX,y:event.clientY,sourceLeft:row.getBoundingClientRect().left,sourceTop:row.getBoundingClientRect().top,sourceHeight:row.getBoundingClientRect().height,moved:false,target:null,board:data,phase:current()};row.draggable=false;list.setPointerCapture(event.pointerId);
+   gesture={id:event.pointerId,row,menuButton:event.target.closest('.list-drag-grip')?null:event.target.closest('.phone-row-actions,.phase-group-menu-trigger,.object-group-disclosure'),armed:false,draggable:row.draggable,transfer,x:event.clientX,y:event.clientY,sourceLeft:row.getBoundingClientRect().left,sourceTop:row.getBoundingClientRect().top,sourceHeight:row.getBoundingClientRect().height,moved:false,target:null,board:data,phase:current()};row.draggable=false;list.setPointerCapture(event.pointerId);
    const next=gesture;next.timer=setTimeout(()=>{
     if(gesture!==next||!row.isConnected||next.board!==data||next.phase!==current()||boardReadOnly||phaseComparisonActive())return;
     next.armed=true;consumeClick=true;moveGhost(next,next.x,next.y);row.classList.add('dragging');
@@ -246,9 +246,9 @@
  list.addEventListener('open-row-actions',event=>{cancel();open(event.detail.row,event.detail.x,event.detail.y)});
  list.addEventListener('contextmenu',event=>{const row=rowAt(event.target);if(!row)return;event.preventDefault();event.stopImmediatePropagation();if(gesture){clearTimeout(gesture.timer);consumeClick=true;list.setPointerCapture(gesture.id);if(menu.hidden)open(row,gesture.x,gesture.y)}else open(row,event.clientX,event.clientY)},true);
  list.addEventListener('pointerdown',event=>{
-  if(matchMedia('(max-width:850px)').matches||event.pointerType!=='touch'||event.target.closest('.content-option-index'))return;const row=rowAt(event.target);if(!row||editingContentIndex>=0)return;cancel();
+  if(event.pointerType!=='touch'||event.target.closest('.content-option-index'))return;const row=rowAt(event.target);if(!row||editingContentIndex>=0)return;cancel();
   const next={id:event.pointerId,row,x:event.clientX,y:event.clientY,board:contentBoards[rows().indexOf(row)],draggable:row.draggable};gesture=next;row.draggable=false;
-  next.timer=setTimeout(()=>{if(gesture!==next||!row.isConnected||!contentBoards.includes(next.board))return;consumeClick=true;list.setPointerCapture(next.id);open(row,next.x,next.y)},350);
+  next.timer=setTimeout(()=>{if(gesture!==next||!row.isConnected||!contentBoards.includes(next.board))return;consumeClick=true;list.setPointerCapture(next.id);open(row,next.x,next.y)},500);
  });
  document.addEventListener('pointerdown',event=>{consumeClick=false;if(!menu.hidden&&!menu.contains(event.target))close()},true);
  document.addEventListener('pointermove',event=>{if(gesture&&event.pointerId===gesture.id&&Math.hypot(event.clientX-gesture.x,event.clientY-gesture.y)>10)cancel()},true);
@@ -399,16 +399,17 @@
   input.addEventListener('blur',()=>finish(true));input.focus();input.select();
  }
  function groupUnits(){return [...list.children].filter(row=>row.classList.contains('phase-group-heading')||(row.classList.contains('page-tab')&&!row.classList.contains('group-member')))}
+ function ungroupPhaseGroup(id){if(boardReadOnly||phaseComparisonActive()||!data.phaseGroups.some(g=>g.id===id))return;recordHistory();data.pageGroupIds=data.pageGroupIds.map(groupId=>groupId===id?null:groupId);data.phaseGroups=data.phaseGroups.filter(g=>g.id!==id);if(data.activePhaseGroup===id)data.activePhaseGroup=null;renderAndSave();notify('グループを解除しました。フェーズは残しています')}
  function openGroupMenu(id,x,y){
   const item=data.phaseGroups.find(g=>g.id===id);if(!item)return;
   for(const menuId of ['phaseItemMenu','contentItemMenu','phaseContentCopyMenu']){const menu=document.getElementById(menuId);if(menu)menu.hidden=true}
   closeHelpMenu();groupMenu.replaceChildren();const owner=data,units=groupUnits(),at=units.findIndex(row=>row.dataset.groupId===id);
-  for(const [action,label] of [['rename','名前変更'],['previous','前へ移動'],['next','後ろへ移動'],['delete','削除']]){
+  for(const [action,label] of [['rename','名前変更'],['previous','前へ移動'],['next','後ろへ移動'],['delete','グループ解除']]){
    if(action==='previous'||action==='delete'){const separator=document.createElement('div');separator.className='context-separator';separator.setAttribute('role','separator');groupMenu.append(separator)}
    const entry=button(label,()=>{
     if(boardReadOnly||phaseComparisonActive()||data!==owner)return;closeGroupMenu();
     if(action==='rename'){renameGroupInList(item);return}
-    if(action==='delete'){recordHistory();data.pageGroupIds=data.pageGroupIds.map(groupId=>groupId===id?null:groupId);data.phaseGroups=data.phaseGroups.filter(g=>g.id!==id);if(data.activePhaseGroup===id)data.activePhaseGroup=null;renderAndSave();notify('グループを削除しました。フェーズは残しています');return}
+    if(action==='delete'){ungroupPhaseGroup(id);return}
     const next=units[at+(action==='previous'?-1:1)];if(!next)return;
     const transfer=new DataTransfer();transfer.setData('application/x-tactica-phase-group',id);const rect=next.getBoundingClientRect();
     next.dispatchEvent(new DragEvent('drop',{bubbles:true,cancelable:true,dataTransfer:transfer,clientX:rect.left+Math.max(40,rect.width/2),clientY:action==='previous'?rect.top+2:rect.bottom-2}));
@@ -421,9 +422,9 @@
  let groupHold=null,suppressGroupClick=false;
  function clearGroupHold(){if(groupHold)clearTimeout(groupHold.timer);groupHold=null}
  list.addEventListener('pointerdown',event=>{
-  if(matchMedia('(max-width:850px)').matches||event.pointerType!=='touch'||event.target.closest('.phase-group-toggle,.phase-group-menu-trigger,.phase-group-range,input,textarea'))return;const row=event.target.closest('.phase-group-heading');if(!row)return;
+  if(event.pointerType!=='touch'||event.target.closest('.phase-group-toggle,.phase-group-menu-trigger,.phase-group-range,input,textarea'))return;const row=event.target.closest('.phase-group-heading');if(!row)return;
   clearGroupHold();suppressGroupClick=false;const next={id:event.pointerId,x:event.clientX,y:event.clientY};groupHold=next;
-  next.timer=setTimeout(()=>{if(groupHold!==next)return;suppressGroupClick=true;openGroupMenu(row.dataset.groupId,next.x,next.y)},450);
+  next.timer=setTimeout(()=>{if(groupHold!==next)return;suppressGroupClick=true;openGroupMenu(row.dataset.groupId,next.x,next.y)},500);
  },true);
  document.addEventListener('pointermove',event=>{if(groupHold&&Math.hypot(event.clientX-groupHold.x,event.clientY-groupHold.y)>10)clearGroupHold()},true);
  for(const event of ['pointerup','pointercancel'])document.addEventListener(event,clearGroupHold,true);
@@ -519,20 +520,18 @@
   for(const item of data.phaseGroups){
    const row=document.createElement('div');row.className='phase-group-heading'+(item.id===data.activePhaseGroup?' active':'');row.dataset.groupId=item.id;
    row.classList.toggle('contains-active-phase',!data.activePhaseGroup&&data.pageGroupIds[data.page]===item.id);
-   row.draggable=!boardReadOnly&&!phaseComparisonActive();row.onpointerdown=event=>{row.draggable=!boardReadOnly&&!phaseComparisonActive()&&!event.target.closest('.phase-group-toggle,.phase-group-menu-trigger')};
+   row.draggable=!boardReadOnly&&!phaseComparisonActive();row.onpointerdown=event=>{row.draggable=!boardReadOnly&&!phaseComparisonActive()&&!event.target.closest('.phase-group-toggle,.phase-group-menu-trigger,.phase-group-ungroup')};
    row.ondragstart=event=>{if(!row.draggable){event.preventDefault();return}event.dataTransfer.setData('application/x-tactica-phase-group',item.id);event.dataTransfer.effectAllowed='move';row.classList.add('dragging')};row.ondragend=()=>{row.classList.remove('dragging');clearDropGuide()};
-   const toggle=button(item.collapsed?'＋':'−',()=>{item.collapsed=!item.collapsed;renderAndSave()});toggle.setAttribute('aria-label',item.name+(item.collapsed?'を開く':'を閉じる'));toggle.setAttribute('aria-expanded',String(!item.collapsed));
-   toggle.classList.add('phase-group-toggle');const spacer=document.createElement('span');spacer.className='phase-select-check';spacer.setAttribute('aria-hidden','true');
+   const toggle=button('',()=>{item.collapsed=!item.collapsed;renderAndSave()});toggle.innerHTML='<span class="phase-group-disclosure-text" aria-hidden="true">'+(item.collapsed?'▸':'▾')+'</span><svg class="phase-group-disclosure-arrow" viewBox="0 0 18 18" aria-hidden="true"><path d="'+(item.collapsed?'M6 3v12l7-6Z':'M3 6h12l-6 7Z')+'"/></svg>';toggle.setAttribute('aria-label',item.name+(item.collapsed?'を開く':'を閉じる'));toggle.setAttribute('aria-expanded',String(!item.collapsed));
+   toggle.classList.add('phase-group-toggle');
    const count=data.pageGroupIds.filter(id=>id===item.id).length;
-   const start=data.pageGroupIds.indexOf(item.id),end=data.pageGroupIds.lastIndexOf(item.id);
-   const range=start<0?'0':String(start+1).padStart(2,'0')+'‐'+String(end+1).padStart(2,'0')+' ';
    const name=button('',()=>showGroup(item.id,true));name.className='phase-group-name';
    name.title=item.name+'：クリックでグループを選択、右クリック／長押しで操作メニュー';
    row.oncontextmenu=event=>{if(event.target.closest('input,textarea'))return;event.preventDefault();event.stopPropagation();openGroupMenu(item.id,event.clientX,event.clientY)};
-   const number=document.createElement('span');number.className='phase-group-range';number.textContent=range.trim();const title=document.createElement('span');title.className='phase-group-title';title.textContent=item.name;name.append(number,title);
+   const leading=document.createElement('span');leading.className='phase-group-leading';const grip=document.createElement('button');grip.type='button';grip.className='phase-group-range phase-group-drag';grip.title='ドラッグでグループ全体を並べ替え';grip.setAttribute('aria-label',item.name+'全体を並べ替え');leading.append(grip,toggle);row.append(leading);const title=document.createElement('span');title.className='phase-group-title';title.textContent=item.name;name.append(title);
    if(!data.activePhaseGroup&&data.pageGroupIds[data.page]===item.id){const current=document.createElement('span');current.className='phase-group-current';current.textContent=String(data.page+1).padStart(2,'0');current.setAttribute('aria-label','表示中のフェーズ '+(data.page+1));name.append(current)}row.append(name);
-   if(item.id===data.activePhaseGroup){const menuButton=button('…',()=>{const bounds=menuButton.getBoundingClientRect();openGroupMenu(item.id,bounds.left,bounds.bottom)});menuButton.className='phase-group-menu-trigger';menuButton.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>';menuButton.title='グループの操作';menuButton.setAttribute('aria-label',item.name+'の操作メニュー');menuButton.setAttribute('aria-haspopup','menu');menuButton.addEventListener('pointerdown',event=>event.stopPropagation());row.append(menuButton)}
-   row.append(toggle);
+   if(item.id===data.activePhaseGroup){const menuButton=button('…',()=>{const bounds=menuButton.getBoundingClientRect();openGroupMenu(item.id,bounds.left,bounds.bottom)});menuButton.className='phase-group-menu-trigger';menuButton.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>';menuButton.title='グループの操作';menuButton.setAttribute('aria-label',item.name+'の操作メニュー');menuButton.setAttribute('aria-haspopup','menu');menuButton.setAttribute('aria-controls','phaseGroupMenu');menuButton.setAttribute('aria-expanded','false');menuButton.addEventListener('pointerdown',event=>event.stopPropagation());row.append(menuButton)}
+   const ungroup=button('×',()=>ungroupPhaseGroup(item.id));ungroup.className='phase-group-ungroup';ungroup.title='グループ解除（フェーズは残します）';ungroup.setAttribute('aria-label',item.name+'のグループ解除（フェーズは残します）');ungroup.disabled=boardReadOnly||phaseComparisonActive();ungroup.addEventListener('pointerdown',event=>event.stopPropagation());row.append(ungroup);
    row.onclick=event=>{if(event.target.closest('button'))return;showGroup(item.id,true)};
    row.classList.toggle('group-expanded',!item.collapsed&&count>0);
    const first=data.pageGroupIds.indexOf(item.id),anchor=first>=0?first:item.position;
@@ -635,7 +634,7 @@
    const host=document.getElementById(id);
    for(const row of host.querySelectorAll(selector)){
     let button=row.querySelector('.phone-row-actions');
-    if(!button){button=document.createElement('button');button.type='button';button.className='phone-row-actions';button.innerHTML=icon;button.setAttribute('aria-label','操作メニュー');button.setAttribute('aria-haspopup','menu');button.addEventListener('pointerdown',event=>event.stopPropagation());button.onclick=event=>{event.preventDefault();event.stopPropagation();const rect=button.getBoundingClientRect();if(id==='objectList'){const objectId=row.dataset.id;if(row.classList.contains('object-group-member')){if(!individualGroupSelectionActive()||!selectedIds.includes(objectId))selectIndividualGroupMember(objectId)}else if(!selectedIds.includes(objectId)){selected=objectId;selectedIds=[objectId];renderSelectionOnly()}closeColorPopovers();openObjectContextMenu(objectId,rect.left,rect.bottom)}else host.dispatchEvent(new CustomEvent('open-row-actions',{detail:{row,x:rect.left,y:rect.bottom}}))};row.append(button)}
+    if(!button){button=document.createElement('button');button.type='button';button.className='phone-row-actions';button.innerHTML=icon;button.setAttribute('aria-label','操作メニュー');button.setAttribute('aria-haspopup','menu');button.setAttribute('aria-controls',id==='objectList'?'objectContextMenu':id==='pages'?'phaseItemMenu':'contentItemMenu');button.setAttribute('aria-expanded','false');button.addEventListener('pointerdown',event=>event.stopPropagation());button.onclick=event=>{event.preventDefault();event.stopPropagation();const rect=button.getBoundingClientRect();if(id==='objectList'){const objectId=row.dataset.id;if(row.classList.contains('object-group-member')){if(!individualGroupSelectionActive()||!selectedIds.includes(objectId))selectIndividualGroupMember(objectId)}else if(!selectedIds.includes(objectId)){selected=objectId;selectedIds=[objectId];renderSelectionOnly()}closeColorPopovers();openObjectContextMenu(objectId,rect.left,rect.bottom)}else host.dispatchEvent(new CustomEvent('open-row-actions',{detail:{row,x:rect.left,y:rect.bottom}}))};row.append(button)}
     const hidden=id==='pages'?!row.classList.contains('active')||row.classList.contains('renaming'):id==='objectList'?!row.classList.contains('selected'):!!row.querySelector('input');
     if(id==='objectList')button.disabled=boardReadOnly||phaseComparisonActive();if(button.hidden!==hidden)button.hidden=hidden;
    }
@@ -666,3 +665,11 @@ if(matchMedia('(max-width:850px)').matches&&!Number.isFinite(viewSettings.boardD
   if(matchMedia('(max-width:850px)').matches&&!Number.isFinite(viewSettings.boardDisplayZoom))fitBoardDisplayZoom(false);
  }));
 }
+
+// A visible grip shares the existing number/disclosure drag target on phones.
+(()=>{
+ const targets='#pages .page-index,#pages .phase-group-range,#objectList .object-row:not(.object-group-row)>.object-index,#objectList .object-group-disclosure,#contentOptions .content-option-index';
+ const artwork='<svg viewBox="0 0 10 16" aria-hidden="true" fill="currentColor"><circle cx="3" cy="3" r="1.2"/><circle cx="7" cy="3" r="1.2"/><circle cx="3" cy="8" r="1.2"/><circle cx="7" cy="8" r="1.2"/><circle cx="3" cy="13" r="1.2"/><circle cx="7" cy="13" r="1.2"/></svg>';
+ function sync(){for(const target of document.querySelectorAll(targets)){if(target.querySelector('.list-drag-grip'))continue;const grip=document.createElement('span');grip.className='list-drag-grip';grip.setAttribute('aria-hidden','true');grip.innerHTML=artwork;target.prepend(grip)}}
+ const observer=new MutationObserver(sync);for(const id of ['pages','objectList','contentOptions'])observer.observe(document.getElementById(id),{childList:true,subtree:true});sync();
+})();
