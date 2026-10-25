@@ -283,7 +283,8 @@ function phoneReaderLayoutMetrics(panel,footerHeight,rowHeight,zoom=boardDisplay
  function syncPhaseHeading(){
   const group=!!data.activePhaseGroup;rail.classList.toggle('desktop-group-tools',group);phaseHeading.hidden=!active||group;
   const open=currentTool==='phase'||currentTool==='memo';phaseHeading.dataset.expanded=String(open);
-  const markup=selectedPhaseTool==='phase'?'<strong>フェーズ プロパティ</strong> / ノート':'<strong>フェーズ</strong> プロパティ / <strong>ノート</strong>';
+  const phaseLabel='<strong>フェーズ プロパティ</strong> / ノート',memoLabel='<strong>フェーズ</strong> プロパティ / <strong>ノート</strong>';
+  const markup='<span class="desktop-phase-label">'+(selectedPhaseTool==='phase'?phaseLabel:memoLabel)+'</span><span class="desktop-phase-label-measure" aria-hidden="true">'+phaseLabel+'</span><span class="desktop-phase-label-measure" aria-hidden="true">'+memoLabel+'</span>';
   if(phaseTitle.innerHTML!==markup)phaseTitle.innerHTML=markup;
   phaseTitle.setAttribute('aria-expanded',String(open));phaseTitle.setAttribute('aria-label',(selectedPhaseTool==='phase'?'フェーズプロパティ':'フェーズノート')+'を選択中。設定・ノート欄を'+(open?'閉じる':'開く'));
   phaseSwitch.title=selectedPhaseTool==='phase'?'フェーズノートを表示':'フェーズプロパティを表示';phaseSwitch.setAttribute('aria-label',phaseSwitch.title);
@@ -609,7 +610,7 @@ function phoneReaderLayoutMetrics(panel,footerHeight,rowHeight,zoom=boardDisplay
   activeSteps=desktop.matches?steps:mobileSteps;panel.setAttribute('aria-label',desktop.matches?'PCチュートリアル':'スマホチュートリアル');intro.close();document.querySelector('.top').classList.remove('phone-menu-open');storeContentHistory();boardSaveSuspended=true;
   const id='tutorial-'+Date.now()+'-'+Math.random().toString(36).slice(2);
   session={id,home:data,homeIndex:activeContent,selected,selectedIds:selectedIds.slice(),phases:selectedPhaseIndexes.slice(),wasReadOnly:boardReadOnly,pinned:document.querySelector('.left').classList.contains('pinned'),collapsed:document.querySelector('.layout').classList.contains('content-collapsed'),step:0};
-  if(boardReadOnly)get('editModeToggle').click();
+  if(boardReadOnly)window.Bolxiv.setMode('edit');
   if(desktop.matches&&!session.pinned)get('leftRailToggle').click();
   if(desktop.matches&&session.collapsed)get('contentObjectPin').click();
   session.sections=['toggleBattlePages','toggleInspector'].map(id=>({id,open:get(id).getAttribute('aria-expanded')==='true'}));for(const section of session.sections)if(!section.open)get(section.id).click();
@@ -622,7 +623,7 @@ function phoneReaderLayoutMetrics(panel,footerHeight,rowHeight,zoom=boardDisplay
   cancelScheduledBoardSave();contentBoards[activeContent]=data;storeContentHistory();contentBoards=contentBoards.filter(board=>board.tutorialPracticeId!==previous.id);
   const at=contentBoards.indexOf(previous.home);activeContent=at>=0?at:Math.max(0,Math.min(previous.homeIndex,contentBoards.length-1));data=contentBoards[activeContent];restoreContentHistory();
   selected=previous.selected;selectedIds=previous.selectedIds.filter(id=>current().some(item=>item.id===id));selectedPhaseIndexes=previous.phases.filter(i=>i<data.pages.length);phaseSelectionOwner=data;drag=null;selectPlacementTool('select');
-  const layout=document.querySelector('.layout');if(document.querySelector('.left').classList.contains('pinned')!==previous.pinned)get('leftRailToggle').click();if(layout.classList.contains('content-collapsed')!==previous.collapsed)get('contentObjectPin').click();if(boardReadOnly!==previous.wasReadOnly)get('editModeToggle').click();
+  const layout=document.querySelector('.layout');if(document.querySelector('.left').classList.contains('pinned')!==previous.pinned)get('leftRailToggle').click();if(layout.classList.contains('content-collapsed')!==previous.collapsed)get('contentObjectPin').click();if(boardReadOnly!==previous.wasReadOnly)window.Bolxiv.setMode(previous.wasReadOnly?'view':'edit');
   boardSaveSuspended=false;renderAndSave();flushScheduledBoardSave();get('operationGuideBtn').focus({preventScroll:true});
   for(const section of previous.sections)if((get(section.id).getAttribute('aria-expanded')==='true')!==section.open)get(section.id).click();
  }
@@ -636,7 +637,7 @@ function phoneReaderLayoutMetrics(panel,footerHeight,rowHeight,zoom=boardDisplay
 // ===== js/mobile/phone-pressed-controls.js =====
 (()=>{
  const mobile=matchMedia('(max-width:850px)');let pressed=null;
- const selector='.phone-object-tabs-title,.accordion-toggle:not(#toggleObjectList):not(#toggleContent),.phase-memo>summary,#contentSelect,.content-object-pin,.content-history-button,.board-grid-toggle,.phone-content-close,.phone-material-toggle,#phonePhaseSectionToggle,.phone-phase-switch-title,button:not(.color-swatch):not([data-color-value]):not(#toggleObjectList):not(#toggleContent):not(.phone-content-backdrop):not(:where(.page-tab,.page-tab *,.object-row,.object-row *,.content-option-row:not(.content-option-add-row),.content-option-row:not(.content-option-add-row) *,.phase-group-heading,.phase-group-heading *))';
+ const selector='.phone-object-tabs,.phone-phase-tabs,.phone-reader-tabs,.phone-object-tabs-title,.accordion-toggle:not(#toggleObjectList):not(#toggleContent),.phase-memo>summary,#contentSelect,.content-object-pin,.content-history-button,.board-grid-toggle,.phone-content-close,.phone-material-toggle,#phonePhaseSectionToggle,.phone-phase-switch-title,button:not(.color-swatch):not([data-color-value]):not(#toggleObjectList):not(#toggleContent):not(.phone-content-backdrop):not(:where(.page-tab,.page-tab *,.object-row,.object-row *,.content-option-row:not(.content-option-add-row),.content-option-row:not(.content-option-add-row) *,.phase-group-heading,.phase-group-heading *))';
  const deferredSelector='.color-trigger,.color-custom-trigger,.phone-number-step-buttons button';
  let flashed=null,flashTimer=null;
  function clearFlash(){clearTimeout(flashTimer);flashed?.classList.remove('phone-control-pressed');flashed=null}
@@ -646,7 +647,7 @@ function phoneReaderLayoutMetrics(panel,footerHeight,rowHeight,zoom=boardDisplay
   clear();clearFlash();const node=event.target.closest(selector);if(!node||node.disabled)return;
   pressed={node,id:event.pointerId,x:event.clientX,y:event.clientY,deferred:node.matches(deferredSelector)};if(!pressed.deferred)node.classList.add('phone-control-pressed');
  },true);
- document.addEventListener('pointermove',event=>{if(pressed&&event.pointerId===pressed.id&&Math.hypot(event.clientX-pressed.x,event.clientY-pressed.y)>10)clear()},true);
+ document.addEventListener('pointermove',event=>{if(pressed&&event.pointerId===pressed.id&&!pressed.node.matches('#objectControls .handle')&&Math.hypot(event.clientX-pressed.x,event.clientY-pressed.y)>10)clear()},true);
  document.addEventListener('pointerup',event=>{
   const current=pressed;
   if(!current||event.pointerId!==current.id)return;

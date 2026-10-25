@@ -61,7 +61,7 @@
  .app>.top .header-mode-status{flex-shrink:0}
  .app>.top #editModeToggle{box-sizing:border-box;flex:0 0 180px;width:180px;min-width:180px;max-width:180px}
 }
-.app>.top #editModeToggle{background:#eaf3ff!important;border-color:var(--blue)!important;color:#000!important;-webkit-text-fill-color:#000!important}
+.app>.top #editModeToggle{background:#fff!important;border-color:#999!important;color:#000!important;-webkit-text-fill-color:#000!important}
 .app>.top #editModeToggle.view-state{background:#fff!important;border-color:#999!important;color:#000!important;-webkit-text-fill-color:#000!important}
 @media(hover:hover) and (pointer:fine){
  .app>.top #editModeToggle:enabled:hover:not(:where(.phone-touch-mode *)){background:var(--blue)!important;border-color:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important;filter:none!important}
@@ -1108,9 +1108,9 @@
 /* ===== css/phone-button-feedback.css ===== */
 @media(max-width:850px){
 
- body button:not(.color-swatch):not([data-color-value]):not(#toggleObjectList):not(#toggleContent):not(.phone-content-backdrop):not(:where(.page-tab,.page-tab *,.object-row,.object-row *,.content-option-row:not(.content-option-add-row),.content-option-row:not(.content-option-add-row) *,.phase-group-heading,.phase-group-heading *)){-webkit-tap-highlight-color:transparent}
- .app>.top #editModeToggle:enabled:is(:active:not(:where([role="menu"] *,.color-trigger,.color-custom-trigger,.phone-number-step-buttons *)),.phone-control-pressed),body button:not(.color-swatch):not([data-color-value]):not(#toggleObjectList):not(#toggleContent):not(.phone-content-backdrop):not(:where(.page-tab,.page-tab *,.object-row,.object-row *,.content-option-row:not(.content-option-add-row),.content-option-row:not(.content-option-add-row) *,.phase-group-heading,.phase-group-heading *)):enabled:is(:active:not(:where([role="menu"] *,.color-trigger,.color-custom-trigger,.phone-number-step-buttons *)),.phone-control-pressed){background:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important;filter:none!important;transition:none!important}
- body button:not(.color-swatch):not([data-color-value]):not(#toggleObjectList):not(#toggleContent):not(.phone-content-backdrop):not(:where(.page-tab,.page-tab *,.object-row,.object-row *,.content-option-row:not(.content-option-add-row),.content-option-row:not(.content-option-add-row) *,.phase-group-heading,.phase-group-heading *)):enabled:is(:active:not(:where([role="menu"] *,.color-trigger,.color-custom-trigger,.phone-number-step-buttons *)),.phone-control-pressed) :not(.color-preview):not(img){color:#fff!important;-webkit-text-fill-color:#fff!important}
+ body button:not(.handle):not(.color-swatch):not([data-color-value]):not(#toggleObjectList):not(#toggleContent):not(.phone-content-backdrop):not(:where(.page-tab,.page-tab *,.object-row,.object-row *,.content-option-row:not(.content-option-add-row),.content-option-row:not(.content-option-add-row) *,.phase-group-heading,.phase-group-heading *)){-webkit-tap-highlight-color:transparent}
+ .app>.top #editModeToggle:enabled:is(:active:not(:where([role="menu"] *,.color-trigger,.color-custom-trigger,.phone-number-step-buttons *)),.phone-control-pressed),body button:not(.handle):not(.color-swatch):not([data-color-value]):not(#toggleObjectList):not(#toggleContent):not(.phone-content-backdrop):not(:where(.page-tab,.page-tab *,.object-row,.object-row *,.content-option-row:not(.content-option-add-row),.content-option-row:not(.content-option-add-row) *,.phase-group-heading,.phase-group-heading *)):enabled:is(:active:not(:where([role="menu"] *,.color-trigger,.color-custom-trigger,.phone-number-step-buttons *)),.phone-control-pressed){background:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important;filter:none!important;transition:none!important}
+ body button:not(.handle):not(.color-swatch):not([data-color-value]):not(#toggleObjectList):not(#toggleContent):not(.phone-content-backdrop):not(:where(.page-tab,.page-tab *,.object-row,.object-row *,.content-option-row:not(.content-option-add-row),.content-option-row:not(.content-option-add-row) *,.phase-group-heading,.phase-group-heading *)):enabled:is(:active:not(:where([role="menu"] *,.color-trigger,.color-custom-trigger,.phone-number-step-buttons *)),.phone-control-pressed) :not(.color-preview):not(img){color:#fff!important;-webkit-text-fill-color:#fff!important}
 }
 
 /* ===== css/phone-row-actions.css ===== */
@@ -1140,7 +1140,7 @@
  .app .layout #pages .page-tab:not(.renaming) :is(.page-tab-edit,.page-tab-x),.app .layout #objectList .object-row .object-delete,.app .layout #contentOptions .content-option-row:not(:has(input))>.content-row-action{display:none!important}
  .app .layout #pages .page-tab.renaming>.phone-row-actions,.app .layout #pages .page-tab.renaming>.page-tab-edit{display:none!important}
  .app .layout #pages .page-tab>.phone-row-actions{grid-column:-2/-1;grid-row:1;margin-left:auto}
- .app .layout #objectList>.object-row{grid-template-columns:18px 18px 26px 26px minmax(0,1fr) 28px!important}
+ .app .layout #objectList>.object-row{grid-template-columns:36px 18px 26px 26px minmax(0,1fr) 28px!important}
  .app .layout #objectList>.object-row>.object-visibility-toggle{display:grid!important;grid-column:3;grid-row:1}
  .app .layout #objectList>.object-row>.object-lock-toggle{display:grid!important;place-items:center;grid-column:4;grid-row:1}
  .app .layout #objectList>.object-row>.object-name{grid-column:5;grid-row:1}
@@ -1269,8 +1269,8 @@ body .app .layout #contentSelect::after{
 }
 /* Distinguish the selected tab with text weight and color, without adding a fill. */
 @media(max-width:850px){
- body .app .layout :is(.phone-object-tabs,.phone-phase-tabs,.phone-reader-tabs):not(:has(:is(.phone-object-tabs-title,.phone-object-collapse,.phone-phase-switch-title,#phonePhaseSectionToggle,.phone-reader-title,.phone-reader-collapse):is(:active,.phone-control-pressed))) :is(.phone-object-tabs-title,.phone-phase-switch-title,.phone-reader-title){color:#626c7c!important;-webkit-text-fill-color:#626c7c!important;font-weight:400}
- body .app .layout :is(.phone-object-tabs,.phone-phase-tabs,.phone-reader-tabs):not(:has(:is(.phone-object-tabs-title,.phone-object-collapse,.phone-phase-switch-title,#phonePhaseSectionToggle,.phone-reader-title,.phone-reader-collapse):is(:active,.phone-control-pressed))) :is(.phone-object-tabs-title,.phone-phase-switch-title,.phone-reader-title) strong{color:#33445f!important;-webkit-text-fill-color:#33445f!important;font-weight:700}
+ body .app .layout :is(.phone-object-tabs,.phone-phase-tabs,.phone-reader-tabs):not(.phone-control-pressed):not(:has(:is(.phone-object-tabs-title,.phone-object-collapse,.phone-phase-switch-title,#phonePhaseSectionToggle,.phone-reader-title,.phone-reader-collapse):is(:active,.phone-control-pressed))) :is(.phone-object-tabs-title,.phone-phase-switch-title,.phone-reader-title){color:#626c7c!important;-webkit-text-fill-color:#626c7c!important;font-weight:400}
+ body .app .layout :is(.phone-object-tabs,.phone-phase-tabs,.phone-reader-tabs):not(.phone-control-pressed):not(:has(:is(.phone-object-tabs-title,.phone-object-collapse,.phone-phase-switch-title,#phonePhaseSectionToggle,.phone-reader-title,.phone-reader-collapse):is(:active,.phone-control-pressed))) :is(.phone-object-tabs-title,.phone-phase-switch-title,.phone-reader-title) strong{color:#33445f!important;-webkit-text-fill-color:#33445f!important;font-weight:700}
 }
 /* Let the current phase lead, while keeping its content name as context. */
 :is(#selectionTitle,#pngPreviewTitle){display:flex;align-items:center;min-width:0}
@@ -1339,7 +1339,7 @@ body .app .layout #phaseMemo.group-note-static>summary,body .app .layout #object
 body .app .layout #phaseMemo.group-note-static>summary *,body .app .layout #objectLayerPanel #phaseMemo.group-note-static>summary *{color:inherit!important;-webkit-text-fill-color:inherit!important}
 #phaseMemo.group-note-static>summary::after{display:none!important}
 .left .preset-grid{margin-bottom:0}.left .builtin-preset .preset-thumbnail{display:block;position:relative;width:26px;height:26px}.left .builtin-preset .preset-thumbnail img{position:absolute;width:8px;height:8px;max-width:8px;max-height:8px;transform:translate(-50%,-50%);object-fit:contain}
-.object-group-control{border:3px solid #ffaa33}
+.object-group-control{--handle-connector-color:#ffaa33;border:3px solid #ffaa33}
 .object-group-control.group-only-selection{border-style:dashed}
 .object-group-control.object-group-context{border-width:2px;pointer-events:none}
 .obj.group-member-selected.selected-many{outline-width:1px;outline-color:#ffc477}
@@ -1425,3 +1425,92 @@ body .app .layout #objectList>.object-group-row>.object-delete{grid-column:5;gri
 .app .layout .left .preset-manage{background:#eef2f7!important;color:#33445f!important;-webkit-text-fill-color:#33445f!important;border:1px solid #d0d4da!important}.app .layout .left .preset-manage:enabled:is(:hover:not(:where(.phone-touch-mode *)),:active,:focus-visible,.phone-control-pressed){background:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important;filter:none!important}
 /* User preset UI is temporarily hidden; implementation and saved library remain intact. */ .app .layout .left .preset-manage,.app .layout .left #presetPanel>.preset-section-separator,.app .layout .left #userPresetGrid,.app .layout .left #userPresetEmpty{display:none!important}
 .header-mode-menu{display:none}@media(min-width:851px){.app>.top{grid-template-columns:minmax(max-content,var(--phase-pane-header-left,336px)) auto minmax(0,1fr) auto}.app>.top>.header-mode-menu{display:flex;align-items:center;grid-column:3;grid-row:1;justify-self:end;margin-left:12px}.app>.top>.phone-menu-toggle{grid-column:4}.app>.top>.header-mode-status{gap:8px}}
+
+/* Current mode and direct selection of the three work modes. */
+.mode-switch-menu{position:fixed;z-index:20100;min-width:220px;max-width:calc(100vw - 16px);max-height:calc(100dvh - 16px);overflow:auto;padding:4px;background:#fff;border:1px solid #999;border-radius:6px;box-shadow:0 5px 14px #0003}
+.mode-switch-menu[hidden]{display:none}
+.mode-switch-menu>button{display:flex;align-items:center;width:100%;min-height:40px;padding:8px;color:#111;background:#fff;border:0;border-radius:4px;text-align:left}
+.mode-switch-menu>[data-mode]::before{content:'';width:22px;flex:none}
+.mode-switch-menu>[aria-checked=true]::before{content:'✓'}
+.mode-switch-menu>button:is(:hover:not(:where(.phone-touch-mode *)),:focus-visible){background:var(--blue);color:#fff;outline:none}
+.edit-mode-toggle .mode-chevron{margin-left:3px}
+@media(max-width:850px){
+ .app>.top #editModeToggle,.png-preview-active .app .top #editModeToggle{width:36px!important;min-width:36px!important;max-width:36px!important;height:36px!important;padding:0 2px!important;gap:1px}
+ .app>.top #editModeToggle .mode-label,.png-preview-active .app .top #editModeToggle .mode-label{display:none!important}
+ .app>.top #editModeToggle .mode-chevron{font-size:14px;line-height:1;margin-left:0}
+}
+
+@media(min-width:851px){
+ .app>.top #editModeToggle{justify-content:flex-start;gap:6px;padding:0 10px}
+ .app>.top #editModeToggle .mode-chevron{margin-left:auto;font-size:16px;line-height:1;flex:none}
+}
+
+.list-drag-grip{display:none}
+@media(max-width:850px){
+ .app .list-drag-grip{display:inline-flex;align-items:center;justify-content:center;flex:0 0 12px;width:12px;height:100%;min-height:28px;color:#7a8492;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+ .list-drag-grip svg{display:block;width:10px;height:16px;pointer-events:none}
+ body .app #pages .page-tab>.page-index,body .app #objectList .object-row:not(.object-group-row)>.object-index,body .app #contentOptions .content-option-index{display:flex;align-items:center;justify-content:flex-start;gap:2px;flex:0 0 36px;width:36px!important;min-width:36px!important;max-width:36px!important;margin-right:0;align-self:stretch}
+ body .app #objectList .object-group-disclosure{display:flex;align-items:center;justify-content:flex-start;gap:2px;font-size:22px;line-height:1}
+ body .app #pages .phase-group-range{display:flex;align-items:center;gap:2px;min-width:48px;align-self:stretch}
+}
+
+.group-disclosure-arrow{display:none}
+@media(max-width:850px){body .app #objectList .object-group-disclosure>.group-disclosure-text{display:none}body .app #objectList .object-group-disclosure>.group-disclosure-arrow{display:block;flex:none;width:18px;height:18px;fill:currentColor;pointer-events:none}}
+
+/* Keep view switches next to their titles; reserve the far edge for disclosure. */
+@media(max-width:850px){
+ .app .phone-object-tabs-title,.app .phone-phase-switch-title,.app .phone-reader-tabs .phone-reader-title{flex:0 1 auto;min-width:0}
+ .app .phone-object-tabs .phone-object-collapse,.app .phone-phase-tabs>#phonePhaseSectionToggle,.app .phone-reader-tabs .phone-reader-collapse{margin-left:auto!important}
+}
+@media(min-width:851px){
+ .app .layout.desktop-phase-tools #objectLayerPanel .desktop-phase-shared-heading>.desktop-phase-panel-title{display:grid;align-items:center;flex:0 1 auto;width:max-content}
+ .app .layout.desktop-phase-tools #objectLayerPanel .desktop-phase-shared-heading>.desktop-phase-collapse{margin-left:auto!important}
+}
+
+@media(min-width:851px){.desktop-phase-panel-title>span{grid-area:1/1;white-space:nowrap}.desktop-phase-panel-title>.desktop-phase-label-measure{visibility:hidden;pointer-events:none}}
+
+@media(max-width:850px){
+ body .app .layout :is(.phone-object-tabs,.phone-phase-tabs,.phone-reader-tabs).phone-control-pressed{background:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+ body .app .layout :is(.phone-object-tabs,.phone-phase-tabs,.phone-reader-tabs).phone-control-pressed :is(.phone-object-tabs-title,.phone-object-tabs-title *,.phone-object-collapse,.phone-phase-switch-title,.phone-phase-switch-title *,#phonePhaseSectionToggle,.phone-reader-title,.phone-reader-title *,.phone-reader-collapse){background:transparent!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+}
+
+/* Desktop phase selection matches object-list row selection. */
+@media(min-width:851px){
+ .app .layout #pages .phase-select-check{display:none!important}
+ .app .layout #pages .page-tab.active:not(.selected){background:#fff!important;border-left-color:transparent!important;box-shadow:none!important}
+ .app .layout #pages .page-tab.active:not(.selected):hover:not(:where(.phone-touch-mode *)){background:#f0f4fa!important}
+ .app .layout #pages .page-tab.selected{background:#eaf3ff!important;border-left-color:var(--blue)!important}
+ .app .layout #pages .page-tab.selected:not(.item-just-moved){box-shadow:inset 2px 0 0 var(--blue)!important}
+ .app .layout #pages .page-tab.selected:hover:not(:where(.phone-touch-mode *)){background:#dceaff!important}
+}
+
+@media(min-width:851px){
+ .app .layout #pages .page-tab>.page-index{flex:0 0 4ch;width:4ch;min-width:4ch;max-width:4ch;margin-right:0;font:12px 'DM Mono';font-variant-numeric:tabular-nums;text-align:left}
+ .app .layout #pages .phase-group-range{white-space:nowrap}
+}
+
+/* Phase groups use the same leading disclosure triangle as object groups. */
+.app .layout #pages .phase-group-heading{gap:0}
+.phase-group-leading{display:flex;align-items:center;align-self:stretch;gap:2px;flex:0 0 var(--group-name-offset,38px);min-width:0}
+.app .layout #pages .phase-group-leading>.phase-group-toggle{display:grid;place-items:center;box-sizing:border-box;flex:0 0 26px;width:26px;min-width:26px;padding:0!important;margin:0!important;background:transparent;border:0}
+.phase-group-disclosure-arrow{display:block;width:18px;height:18px;fill:currentColor;pointer-events:none}
+.app .layout #pages .phase-group-drag{display:none}
+.app .layout #pages .phase-group-heading.renaming{grid-template-columns:var(--group-name-offset,38px) minmax(0,1fr) 26px}
+.app .layout #pages .phase-group-heading.renaming>.phase-group-leading{grid-column:1;grid-row:1}
+.app .layout #pages .phase-group-heading.renaming>.phase-group-name{grid-column:2;grid-row:1}
+@media(max-width:850px){
+ body .app #pages .phase-group-leading>.phase-group-drag{display:flex;align-items:center;flex:0 0 12px;width:12px;min-width:12px;max-width:12px;height:100%}
+}
+
+@media(min-width:851px){
+ .phase-group-disclosure-arrow{display:none}
+ .phase-group-disclosure-text{display:block;font:18px Manrope,'Yu Gothic UI',sans-serif;line-height:normal}
+}
+@media(max-width:850px){.phase-group-disclosure-text{display:none}}
+
+@media(min-width:851px){
+ .app .layout #pages .page-tab>.page-index{display:flex;align-items:center;justify-content:center;text-align:center}
+ .app .layout #pages .phase-group-leading>.phase-group-toggle{flex:0 0 4ch;width:4ch!important;min-width:4ch!important;font:12px 'DM Mono'!important}
+}
+
+@media(min-width:851px){.phase-group-disclosure-text{transform:translateX(-2px)}}

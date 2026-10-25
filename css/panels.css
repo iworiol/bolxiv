@@ -990,18 +990,28 @@ body,.app,.layout,.center,.stagewrap,.footer,.top,.battle,.left,.right,.boardbar
 .controlbox {
   border-color:#42b8ff;
 }
+.controlbox{--rotation-handle-size:24px}
 .handle.rotate {
   top:calc(0px - var(--rotation-handle-distance,40px));
-  left:calc(50% - var(--rotation-handle-size,12px)/2);
+  left:calc(50% - var(--rotation-handle-size,24px)/2);
+  width:var(--rotation-handle-size,24px);
+  height:var(--rotation-handle-size,24px);
+  border:0;
+  border-radius:0;
+  background:transparent;
   cursor:grab;
+  filter:none;
 }
+.handle.rotate svg{display:block;width:100%;height:100%;pointer-events:none;overflow:visible}
+.handle.rotate:active{cursor:grabbing}
+.handle.rotate:before{content:"";position:absolute;inset:-6px;touch-action:none}
 .handle.rotate:after {
   content:"";
   position:absolute;
   left:50%;
   top:100%;
-  height:calc(var(--rotation-handle-distance,40px) - var(--rotation-handle-size,12px));
-  border-left:1px solid #42b8ff;
+  height:calc(var(--rotation-handle-distance,40px) - var(--rotation-handle-size,24px));
+  border-left:1px solid var(--handle-connector-color,#42b8ff);
   pointer-events:none;
 }
 .stage.field-image:before {
@@ -3101,3 +3111,5 @@ dialog.confirm-dialog {
   flex:none;
   padding-left:10px;
 }
+/* Rotation artwork must remain visible over the shared button theme. */
+#objectControls .handle.rotate,#objectControls .handle.rotate:is(:hover,:focus,:active,.phone-control-pressed){background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important}

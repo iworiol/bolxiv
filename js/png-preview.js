@@ -41,7 +41,7 @@
   if(reader.dataset.readerTab!==tab)reader.dataset.readerTab=tab;
   if(reader.dataset.readerExpanded!==String(expanded))reader.dataset.readerExpanded=String(expanded);
   const title=reader.querySelector('.phone-reader-title'),change=reader.querySelector('.phone-reader-switch'),collapse=reader.querySelector('.phone-reader-collapse');
-  const propertiesName='画像生成・印刷プロパティ';const markup=tab==='list'?'<strong>フェーズリスト</strong> / '+propertiesName:'フェーズリスト / <strong>'+propertiesName+'</strong>';
+  const propertiesName='画像生成・印刷プロパティ';const markup=tab==='list'?'<span class="phone-reader-label-part"><strong>フェーズリスト</strong> / </span><span class="phone-reader-label-part">'+propertiesName+'</span>':'<span class="phone-reader-label-part">フェーズリスト / </span><span class="phone-reader-label-part"><strong>'+propertiesName+'</strong></span>';
   if(title&&title.innerHTML!==markup)title.innerHTML=markup;
   const attr=(node,key,value)=>{if(node&&node.getAttribute(key)!==value)node.setAttribute(key,value)};
   attr(title,'aria-expanded',String(expanded));attr(title,'aria-label',(tab==='list'?'フェーズリスト':propertiesName)+'を'+(expanded?'閉じる':'開く'));
@@ -89,7 +89,7 @@
    if(phone){const reader=document.createElement('div');reader.className='phone-view-content png-reader-controls';for(const node of [document.querySelector('.content-select-row'),document.querySelector('.page-controls')]){const anchor=document.createComment('PNG control home');node.before(anchor);readerHomes.push({node,anchor});reader.append(node)}const tabs=document.createElement('div');tabs.className='phone-reader-tabs';
     const title=document.createElement('button');title.type='button';title.className='phone-reader-title';
     const change=document.createElement('button');change.type='button';change.className='phone-reader-switch';change.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h16l-4-4M20 16H4l4 4"/></svg>';
-    const collapse=document.createElement('button');collapse.type='button';collapse.className='phone-reader-collapse';tabs.append(title,change,collapse);
+    const collapse=document.createElement('button');collapse.type='button';collapse.className='phone-reader-collapse';tabs.append(title,change,collapse);tabs.addEventListener('click',event=>{if(event.target.closest('button'))return;collapse.click()});
     reader.querySelector('.page-controls').before(tabs);
     collapse.onclick=()=>{if(session?.saving)return;document.getElementById('toggleBattlePages').click();syncPhoneLayout()};title.onclick=()=>collapse.click();
     change.onclick=()=>{if(!session||session.saving)return;session.phoneTab=session.phoneTab==='list'?'properties':'list';const toggle=document.getElementById('toggleBattlePages');if(toggle.getAttribute('aria-expanded')!=='true')toggle.click();syncPhoneLayout()};
@@ -119,13 +119,14 @@
  dialog.addEventListener('close',()=>{if(session&&!dialog.open&&!session.saving)close()});
  window.addEventListener('keydown',event=>{
   if(!session||event.target.closest?.('#changeLogDialog,#operationGuideDialog,#aboutToolDialog,#phoneIconHelp'))return;
+  if(event.target.closest?.('#modeSwitchMenu'))return;
   if(zoomMenu.contains(event.target)||event.target===zoomTrigger&&['ArrowDown','ArrowUp'].includes(event.key))return;
   if(!dialog.contains(event.target)&&['Enter',' ','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Home'].includes(event.key)&&allowed(event.target))return;
   if(event.key==='Escape'){event.preventDefault();event.stopImmediatePropagation();close();return}
   if((event.ctrlKey||event.metaKey)&&['z','y','v','x'].includes(event.key.toLowerCase())||['Delete','Backspace'].includes(event.key))event.preventDefault();
   event.stopImmediatePropagation();
  },true);
- const navigation='#editModeToggle,.top .phone-menu-toggle,#headerActions,#jsonExportMenu,#helpMenu,#phasePropertyResize,.phone-phase-navigation,.phone-phase-tabs,#contentPaneResize,.phone-content-icon,.phone-content-close,.phone-content-backdrop,#contentObjectPin,#toggleContent,#toggleBattlePages,#contentSelect,#contentOptions,#exitPhaseComparison';
+ const navigation='#modeSwitchMenu,#editModeToggle,.top .phone-menu-toggle,#headerActions,#jsonExportMenu,#helpMenu,#phasePropertyResize,.phone-phase-navigation,.phone-phase-tabs,#contentPaneResize,.phone-content-icon,.phone-content-close,.phone-content-backdrop,#contentObjectPin,#toggleContent,#toggleBattlePages,#contentSelect,#contentOptions,#exitPhaseComparison';
  function allowed(target){return zoomMenu.contains(target)||target===back||dialog.contains(target)||target.closest(navigation)||target.closest('.left')&&!target.closest('.tool,.icon-choice')||target.closest('#pages .page-tab')&&!target.closest('.page-tab-x')}
  for(const type of ['click','dblclick','pointerdown','contextmenu','dragstart','drop','change'])window.addEventListener(type,event=>{if(!session||event.target.closest?.('#changeLogDialog,#operationGuideDialog,#aboutToolDialog,#phoneIconHelp')||session.saving&&event.target.matches('a[download]'))return;if(readOnlyTarget(event.target)){event.preventDefault();event.stopImmediatePropagation();return}if(event.target===back&&type==='pointerdown'){event.stopImmediatePropagation();return}if(session.saving&&event.target!==back&&!dialog.contains(event.target)||!allowed(event.target)||['dblclick','contextmenu','dragstart','drop'].includes(type)&&!dialog.contains(event.target)){event.preventDefault();event.stopImmediatePropagation()}},true);
  const originalRender=render;let refreshFrame;
@@ -147,5 +148,5 @@ async function printOutputCanvas(){
   frame.srcdoc='<!doctype html><html lang="ja"><head><meta charset="utf-8"><title>攻略図</title><style>@page{size:A4 portrait;margin:10mm}html,body{margin:0;padding:0;background:white}body{width:190mm;height:276mm;display:flex;align-items:center;justify-content:center}img{display:block;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;print-color-adjust:exact;-webkit-print-color-adjust:exact}</style></head><body><img alt="攻略図" src="'+src+'"></body></html>';document.body.append(frame);
  });
 }
-document.getElementById('printCurrentPhase').onclick=()=>window.Bolxiv.pngPreview.open(1).catch(error=>notify('画像生成・印刷モードを開けませんでした：'+(error?.message||String(error))));
+
 window.Bolxiv.phasePrint={open:()=>window.Bolxiv.pngPreview.open(2,'print')};

@@ -7,7 +7,7 @@
  document.getElementById('objectList').addEventListener('click',event=>{
   const row=event.target.closest('.object-group-member');
   if(!row||event.target.closest('input,button:not(.object-name),textarea')||phaseComparisonActive())return;
-  event.preventDefault();event.stopImmediatePropagation();selectIndividualGroupMember(row.dataset.id,event.shiftKey);
+  event.preventDefault();event.stopImmediatePropagation();selectObjectListItem(row.dataset.id,event,true);
  },true);
  const membershipList=document.getElementById('objectList');for(const type of ['dragover','drop'])membershipList.addEventListener(type,handleObjectMembershipDrop,true);
  const clearMembershipGuide=()=>membershipList.querySelectorAll('.drag-over,.drop-before,.drop-after').forEach(n=>n.classList.remove('drag-over','drop-before','drop-after'));membershipList.addEventListener('dragleave',event=>{if(!membershipList.contains(event.relatedTarget))clearMembershipGuide()});document.addEventListener('dragend',clearMembershipGuide);
@@ -52,7 +52,7 @@
   cancelPress();suppressClick=false;if(e.pointerType!=='touch'||boardReadOnly||phaseComparisonActive())return;
   const node=e.target.closest('#objects .obj,#objectList .object-row');if(!node||e.target.closest('input,.object-index')||e.target.closest('button')&&!e.target.closest('.object-name'))return;
   const p={id:e.pointerId,x:e.clientX,y:e.clientY,objectId:node.dataset.id};press=p;
-  p.timer=setTimeout(()=>{if(press!==p)return;drag=null;suppressClick=true;if(!individualGroupSelectionActive()||!selectedIds.includes(p.objectId))selectedIds=selectedIds.includes(p.objectId)?expandObjectGroups(selectedIds):objectGroupIds(p.objectId);selected=p.objectId;renderSelectionOnly();openObjectContextMenu(p.objectId,p.x,p.y);cancelPress()},350);
+  p.timer=setTimeout(()=>{if(press!==p)return;drag=null;suppressClick=true;if(!individualGroupSelectionActive()||!selectedIds.includes(p.objectId))selectedIds=selectedIds.includes(p.objectId)?expandObjectGroups(selectedIds):objectGroupIds(p.objectId);selected=p.objectId;renderSelectionOnly();openObjectContextMenu(p.objectId,p.x,p.y);cancelPress()},500);
  },true);
  document.addEventListener('pointermove',e=>{if(press&&press.id===e.pointerId&&Math.hypot(e.clientX-press.x,e.clientY-press.y)>8)cancelPress()},true);
  for(const type of ['pointerup','pointercancel'])document.addEventListener(type,cancelPress,true);
@@ -115,13 +115,33 @@ function placeBuiltinFieldMarkers(cx,cy){
  const observer=new MutationObserver(syncControls);observer.observe(document.querySelector('.app'),{subtree:true,childList:true,attributes:true,attributeFilter:['disabled']});
  function update(){document.body.classList.toggle('board-read-only',boardReadOnly);updateModeStatus();syncControls()}
  document.addEventListener('board-view-mode-changed',update);
- button.onclick=event=>{
-  if(window.Bolxiv?.pngPreview?.active){event?.stopPropagation();window.Bolxiv.pngPreview.close();return}
-  document.activeElement?.blur();if(phaseComparisonActive()){selectedPhaseIndexes=[];boardReadOnly=false}else boardReadOnly=!boardReadOnly;
+
+ const menu=document.createElement('div');menu.id='modeSwitchMenu';menu.className='mode-switch-menu';menu.hidden=true;menu.setAttribute('role','menu');menu.setAttribute('aria-label','モード切替');document.body.append(menu);
+ button.removeAttribute('aria-pressed');button.setAttribute('aria-haspopup','menu');button.setAttribute('aria-controls',menu.id);button.setAttribute('aria-expanded','false');
+ const modes=[['edit','編集モード'],['view','閲覧モード'],['output','画像生成・印刷モード']];
+ function currentMode(){return window.Bolxiv?.pngPreview?.active?'output':boardReadOnly||phaseComparisonActive()?'view':'edit'}
+ function closeMenu(focus=false){menu.hidden=true;button.setAttribute('aria-expanded','false');if(focus)button.focus({preventScroll:true})}
+ async function selectMode(mode){
+  if(window.Bolxiv?.pngPreview?.saving||!modes.some(([key])=>key===mode))return;
+  closeMenu();if(currentMode()===mode)return;
+  if(mode==='output'){await window.Bolxiv.pngPreview.open(1);return}
+  if(window.Bolxiv?.pngPreview?.active)window.Bolxiv.pngPreview.close();
+  document.activeElement?.blur();if(mode==='edit')selectedPhaseIndexes=[];boardReadOnly=mode==='view';
   try{localStorage.setItem('bolxiv-read-only',String(boardReadOnly))}catch{}
   selected=null;selectedIds=[];drag=null;tapPlacementArmed=false;selectPlacementTool('select');hideTouchPlacementPreview();clearAlignmentGuides();closeObjectContextMenu();closeColorPopovers();closeJsonImportMenu();
   update();render();
- };
+ }
+ window.Bolxiv.setMode=selectMode;
+ for(const [mode,label] of modes){const item=document.createElement('button');item.type='button';item.dataset.mode=mode;item.textContent=label;item.setAttribute('role','menuitemradio');item.onclick=()=>selectMode(mode).catch(error=>notify('モードを切り替えられませんでした：'+(error?.message||String(error))));menu.append(item)}
+ function openMenu(){if(button.disabled)return;closeObjectContextMenu();closeColorPopovers();closeJsonImportMenu();closeJsonExportMenu();closeHelpMenu();document.querySelector('.top').classList.remove('phone-menu-open');document.querySelector('.phone-menu-toggle')?.setAttribute('aria-expanded','false');for(const item of menu.querySelectorAll('[data-mode]'))item.setAttribute('aria-checked',String(item.dataset.mode===currentMode()));addPhoneMenuClose(menu,()=>closeMenu(true));menu.hidden=false;button.setAttribute('aria-expanded','true');const rect=button.getBoundingClientRect();menu.style.left=Math.max(8,Math.min(rect.left,innerWidth-menu.offsetWidth-8))+'px';menu.style.top=Math.max(8,Math.min(rect.bottom+4,innerHeight-menu.offsetHeight-8))+'px';menu.querySelector('[aria-checked="true"]')?.focus({preventScroll:true})}
+ button.onclick=()=>menu.hidden?openMenu():closeMenu();
+ button.addEventListener('keydown',e=>{if(['ArrowDown','ArrowUp'].includes(e.key)){e.preventDefault();openMenu()}});
+ window.addEventListener('pointerdown',e=>{if(!menu.hidden&&!menu.contains(e.target)&&!button.contains(e.target))closeMenu()},true);
+ window.addEventListener('keydown',e=>{if(menu.hidden)return;if(e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();closeMenu(true);return}if(!menu.contains(e.target))return;if(e.key==='Tab'){closeMenu();return}if(!['ArrowDown','ArrowUp','Home','End'].includes(e.key))return;e.preventDefault();e.stopImmediatePropagation();const items=[...menu.querySelectorAll('button:not(:disabled)')],at=items.indexOf(document.activeElement);items[e.key==='Home'?0:e.key==='End'?items.length-1:(at+(e.key==='ArrowDown'?1:items.length-1))%items.length]?.focus()},true);
+ for(const name of ['resize','blur'])window.addEventListener(name,()=>closeMenu());
+ window.addEventListener('scroll',e=>{if(!menu.hidden&&!menu.contains(e.target))closeMenu()},true);
+ button.insertAdjacentHTML('beforeend','<span class="mode-chevron" aria-hidden="true">▾</span>');
+
  update();
 })();
 
@@ -495,13 +515,13 @@ phoneLayerDeleteDialog.addEventListener('close',()=>{pendingPhoneLayerDeletion=n
    if(['#resetBoardZoom','#phasePropertyResize','.phase-select-check','help-object-selection'].includes(selector))continue;
    let description=original,node=null;
    if(selector.startsWith('help-')){
-    if(selector==='help-png-mode'){if(!png||content)continue;node=document.getElementById('editModeToggle');description='画像マーク：画像生成・印刷'+'を終了し、入る前の編集／閲覧モードに戻ります。'}
+    if(selector==='help-png-mode'){if(!png||content)continue;node=document.getElementById('editModeToggle');description='現在のモードを表示します。押すと編集・閲覧・画像生成・印刷モードを選べます。'}
     else if(selector==='help-disclosure'){continue}
     else if(selector==='help-number-step'){if(!content||!visible(document.querySelector('.battle .phone-number-step-buttons')))continue}
     else if(selector.startsWith('help-object-')){if(content||png||boardReadOnly||!visible(document.getElementById('objectList')))continue}
     else{if(!content||png||boardReadOnly||!visible(document.querySelector('.battle .page-tab-input,.battle .content-option-input')))continue}
    }else{
-    if(selector==='#editModeToggle'){if(content||png)continue;description=boardReadOnly?'鍵マーク：閲覧中です。押すと編集モードに切り替えます。':'鉛筆マーク：編集中です。押すと閲覧モードに切り替えます。'}
+    if(selector==='#editModeToggle'){if(content||png)continue;description='現在のモードを表示します。押すと編集・閲覧・画像生成・印刷モードを選べます。'}
     if(selector==='#pngPropertiesToggle')continue;
     if(selector==='.phone-content-icon'&&content)continue;
     if(selector==='.phone-content-close'&&!content)continue;
@@ -648,7 +668,7 @@ phoneLayerDeleteDialog.addEventListener('close',()=>{pendingPhoneLayerDeletion=n
  const title=document.createElement('button');title.type='button';title.className='phone-reader-title';
  const change=document.createElement('button');change.type='button';change.className='phone-reader-switch';change.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h16l-4-4M20 16H4l4 4"/></svg>';
  const collapse=document.createElement('button');collapse.type='button';collapse.className='phone-reader-collapse';
- tabs.append(title,change,collapse);host.append(tabs);
+ tabs.append(title,change,collapse);tabs.addEventListener('click',event=>{if(event.target.closest('button'))return;collapse.click()});host.append(tabs);
  let readerTab=viewSettings.phoneReaderTab==='memo'?'memo':'list';
  function syncReaderTabs(){
   const open=phaseToggle.getAttribute('aria-expanded')==='true';
@@ -732,7 +752,7 @@ const userPresetLibrary=(()=>{
  }
  function render(){grid.replaceChildren();empty.hidden=presets.length>0;for(const preset of presets){const button=document.createElement('button');button.type='button';button.className='icon-choice user-preset';button.dataset.presetId=preset.id;button.title=preset.name;button.setAttribute('aria-label',preset.name);button.draggable=true;button.disabled=blocked();button.append(thumbnail(preset.items));const icon={name:preset.name,userPresetId:preset.id};button.onclick=()=>{if(!blocked())selectPlacementIcon(icon)};button.ondragstart=e=>{if(blocked()){e.preventDefault();return}selectPlacementIcon(icon,false);e.dataTransfer.setData('application/x-tactica',JSON.stringify({type:'icon',...icon}));e.dataTransfer.effectAllowed='copy'};
   function actions(){show(button,[['名前を変更',()=>nameDialog(preset.name,name=>{if(blocked())return false;return save(presets.map(p=>p.id===preset.id?{...p,name}:p))}),blocked()],['削除',()=>{if(blocked())return;if(activeIcon?.userPresetId===preset.id){tapPlacementArmed=false;selectPlacementTool('select')}save(presets.filter(p=>p.id!==preset.id))},blocked()]])}
-  button.oncontextmenu=e=>{e.preventDefault();e.stopPropagation();actions()};let timer=null,suppress=false,point=null;button.addEventListener('pointerdown',e=>{if(e.pointerType!=='touch')return;point={x:e.clientX,y:e.clientY};timer=setTimeout(()=>{timer=null;suppress=true;actions()},450)});button.addEventListener('pointermove',e=>{if(point&&Math.hypot(e.clientX-point.x,e.clientY-point.y)>8){clearTimeout(timer);timer=null}});for(const type of ['pointerup','pointercancel','dragstart'])button.addEventListener(type,()=>{clearTimeout(timer);timer=null});button.addEventListener('click',e=>{if(suppress){suppress=false;e.preventDefault();e.stopImmediatePropagation()}},true);grid.append(button)}}
+  button.oncontextmenu=e=>{e.preventDefault();e.stopPropagation();actions()};let timer=null,suppress=false,point=null;button.addEventListener('pointerdown',e=>{if(e.pointerType!=='touch')return;point={x:e.clientX,y:e.clientY};timer=setTimeout(()=>{timer=null;suppress=true;actions()},500)});button.addEventListener('pointermove',e=>{if(point&&Math.hypot(e.clientX-point.x,e.clientY-point.y)>8){clearTimeout(timer);timer=null}});for(const type of ['pointerup','pointercancel','dragstart'])button.addEventListener(type,()=>{clearTimeout(timer);timer=null});button.addEventListener('click',e=>{if(suppress){suppress=false;e.preventDefault();e.stopImmediatePropagation()}},true);grid.append(button)}}
  manage.onclick=e=>{e.stopPropagation();if(!menu.hidden){close();return}manage.setAttribute('aria-expanded','true');show(manage,[['選択中のオブジェクトを登録',()=>{
   if(blocked())return;const originals=current().filter(o=>selectedIds.includes(o.id));if(originals.length<2)return;const items=JSON.parse(JSON.stringify(originals));for(const item of items){if(item.imageId){item.src=objectImageSource(item);delete item.imageId}delete item.id}
   nameDialog(selectedObjectGroup().length?objectGroupName(originals):'新しいプリセット',name=>{if(blocked())return false;const id=createObjectId();for(const item of items){item.locked=false;item.objectGroupId=id;item.objectGroupName=name;delete item.objectGroupRotationOwner;delete item.objectGroupPlacementRotation;delete item.objectGroupOrientationRotation}return save([...presets,{id,name,items}])},items.some(o=>o.visible===false)?'非表示のオブジェクトを'+items.filter(o=>o.visible===false).length+'個含みます。非表示の状態も保持して登録します。':'');

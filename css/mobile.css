@@ -287,7 +287,7 @@
   }
   .controlbox {
     --rotation-handle-distance:70px;
-    --rotation-handle-size:20px;
+    --rotation-handle-size:32px;
   }
   .app {
     display:grid!important;
@@ -2232,3 +2232,20 @@ body:not(.board-read-only) .page-list-box>.page-tab-actions {
  [role="menu"]>.phone-menu-close{display:block!important;width:100%;min-height:40px}
  [role="menu"]>.phone-menu-close-separator{display:block!important;height:1px;margin:4px 0;background:var(--border,#cbd5e1)}
 }
+
+/* Separate touch movement from resizing, with the same artwork style as rotation. */
+@media(max-width:850px){
+ #objectControls .controlbox .move-handle{width:32px;height:32px;left:calc(50% - 16px);top:calc(100% + var(--rotation-handle-distance,70px) - 32px);background:transparent!important;border:0!important;border-radius:0;cursor:grab;z-index:5;box-shadow:none!important;padding:0!important;display:grid;place-items:center;filter:none}
+ #objectControls .controlbox .move-handle:is(:hover,:focus,:focus-visible,:active,.phone-control-pressed){background:transparent!important;border:0!important;box-shadow:none!important}
+ #objectControls .controlbox .move-handle:active{cursor:grabbing}
+ #objectControls .controlbox .move-handle::before{content:"";position:absolute;left:50%;bottom:100%;height:calc(var(--rotation-handle-distance,70px) - 32px);border-left:1px solid var(--handle-connector-color,#42b8ff);pointer-events:none}
+ #objectControls .controlbox .move-handle svg{display:block;width:100%;height:100%;pointer-events:none;overflow:visible}
+}
+
+/* Shared feedback: change only the white artwork while a handle is held. */
+#objectControls .handle{ -webkit-tap-highlight-color:transparent }
+#objectControls .handle:focus:not(:focus-visible){outline:none}
+#objectControls .handle:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+#objectControls .handle:not(.rotate):not(.move-handle):is(:active,.phone-control-pressed){background:var(--blue)!important}
+#objectControls .handle:is(.rotate,.move-handle):is(:active,.phone-control-pressed){background:transparent!important;box-shadow:none!important}
+#objectControls .handle:is(.rotate,.move-handle):is(:active,.phone-control-pressed) svg path:last-child{stroke:var(--blue)!important}
