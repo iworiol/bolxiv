@@ -5,20 +5,20 @@ window.BolxivIntegrity = {
   "files": {
     "bolxiv.js": "sha384-uXd54ZCTqUeYmCjEYuBhk71z79h8JYUG67ginJ9ucxQr3kadhpfNYYMMcd8q5zhL",
     "css/base.css": "sha384-RmvCyrtMoh156ySsmgyyX6egTUZ4Sc23cD41EuAJmeq95wGY1O1iY89BgU+x5puM",
-    "css/interface.css": "sha384-HwXBLJD1AUCl9fz0yeVerTHU1wIvSkHNXwa+CaF4/oIfsoqf11LmkUzJX2qcyboK",
+    "css/interface.css": "sha384-O9ctIcUpalrZNnE9zPe0QmBn8/wGr3CuDbnnVTonR8o8SKIDp7qpMPWR0sew3fOe",
     "css/mobile.css": "sha384-mNNk5uTe/k8+FKoKTs84Q5IgQP4+AIVm6s2JNmLE7VT5Nyf/sXW0u1nJJ5fkh36l",
     "css/panels.css": "sha384-7grkbjfQ0PTkl9LWVVMc3cj5P/SaMhJCzDO40XhhgmSnEbYWps8+zzF1dcI68e6P",
-    "css/png-preview.css": "sha384-Z6xuDtIRQ8ud5b7AEHyngMy7scrENgLvy9nmWt6sdJkphRkSlNWJBNjpqFSCEa7N",
+    "css/png-preview.css": "sha384-nQf1FuL6qHLBUxwB/WpxcMZrwaTUzFgz+sm5d10+AAA4h3Is7edmURGuroZgPfMh",
     "css/startup.css": "sha384-/nNfx3swtHwFX/4OXex8cMEPh5oSyfVwyRxyB0zH2D0hJrvZIqUTbTr0+cTPRtRN",
     "js/application.js": "sha384-C1RM79UkZF9MrEytzzEgTQMH1ydv8S+VQltRNYZ6drA54d9yr64Llpl4vjbTp10A",
-    "js/canvas.js": "sha384-7TcDbAjns6df6orkQP1aoUgBXW1PrDWWinLyvJQIQPsj7ou+qNFUAzD56UPrt5Vy",
-    "js/data-io.js": "sha384-pzRbLRVVgAROCs4BTIjYkE1qTKPWW7HPE2DwyqMuLRI6xzYPTOcDT/xW4T6KXON1",
+    "js/canvas.js": "sha384-Fx6d0WSrjP7orevoIGntSxL61gNlDg/ACL1XeNSOkf1vdS0Z9awVGAW8P0qTGbQO",
+    "js/data-io.js": "sha384-duLPDsRNQUqFqt0p1JeEdWt97HOgqiVxagoX1AACS1e1CTtQxzs3EhlvsrfiWMmA",
     "js/editor.js": "sha384-sjGMrGmzdWwiSYkGLxM6iwjQVTfouCXAj46fztT1P1t2mOzhfHRxQgPnfVdxDoA9",
     "js/embedded-images.js": "sha384-CYs7JKW5eoZAbfRHK9kVvFcuJ26ZbIR+iFkiL4sWAJ8nriY9f7Mhs/VRTIw9wrsc",
     "js/integrity-loader.js": "sha384-nBDJSwTnuFOHq6HsBwIYs2fv+IdGdSA4SWKe9YuwN2/e9Gdzn/fi+ozte3eSnKsi",
-    "js/interface.js": "sha384-T3W+ME1vov88uSARmaf/w+H8bV8snPKrEqjrohinej7ic4IdEUHV/SsbxEQBAsQi",
+    "js/interface.js": "sha384-6cCd9d3oPfA1M+v7xKnoX/kPw7W1/n72L8qKxpDSOiWPL5ikYH10eXaapnRt0Ug3",
     "js/panels.js": "sha384-iyKN+wXSoWwHfTqQkR6FVwq5pYKeW1du6OXR76PVY9yhNbhRqiq3LPNpZVZTG0wV",
     "js/phase-tools.js": "sha384-xsmlpwqcJ72xgb+3R9QZaJcIk6vwHsPhOxWFv2575drZaMy+0amGQWnx6Lp92FN7",
-    "js/png-preview.js": "sha384-bcVMSYTqfXkteH67B54dh7ZCn/oUiMcJ+frvIqPzoabaqFcmHPJnHXief4sGRmmL"
+    "js/png-preview.js": "sha384-F3YFlpyvM80neOVT0Z3aaboNTacy7UivgXuAvtHCtJGsdawJHTUDAaYoDdZjMu+3"
   }
 };

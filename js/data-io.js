@@ -571,9 +571,25 @@ function drawOutputNote(ctx,width,y,note){
 
 const drawDiagramPngCanvas=drawPngCanvas;
 drawPngCanvas=async function(scale=1){return composeOutputPngCanvas(await drawDiagramPngCanvas(scale),scale)};
-function composeOutputPngCanvas(source,scale=1){
- const width=source.width/scale,note=outputNoteLayout(width);if(note.error)throw new Error(note.error);if(!note.height&&!note.notes)return source;
- const canvas=document.createElement('canvas');canvas.width=Math.ceil((note.width||width)*scale);canvas.height=Math.ceil(source.height+note.height*scale);const ctx=canvas.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.scale(scale,scale);
- if(note.notes){const {cellSize,columns}=note.layout,rowHeight=cellSize+note.gapY+note.notes[0].height;note.notes.forEach((entry,i)=>{const column=i%columns,x=column*(cellSize+note.gapX),row=Math.floor(i/columns),y=row*rowHeight;ctx.drawImage(source,column*cellSize*scale,row*cellSize*scale,cellSize*scale,cellSize*scale,x,y,cellSize,cellSize);ctx.save();ctx.translate(x,0);drawOutputNote(ctx,cellSize,y+cellSize,entry);ctx.restore()})}
- else{ctx.drawImage(source,0,0,width,source.height/scale);drawOutputNote(ctx,width,source.height/scale,note)}return canvas;
+// One outer guard pixel, one frame pixel and four clear pixels before the content.
+const outputBorderPadding=6;
+function outputFrameLayout(width,height){
+ const note=outputNoteLayout(width),padding=document.getElementById('outputShowBorder')?.checked?outputBorderPadding:0;
+ if(note.notes){const {cellSize,columns,rows}=note.layout,blockWidth=cellSize,blockHeight=cellSize+note.notes[0].height;return {note,padding,blockWidth,blockHeight,width:columns*blockWidth+(columns-1)*note.gapX+padding*2,height:rows*blockHeight+(rows-1)*note.gapY+padding*2}}
+ return {note,padding,width:width+padding*2,height:height+note.height+padding*2};
+}
+function drawOutputBorder(ctx,width,height){
+ if(!document.getElementById('outputShowBorder')?.checked)return;const frame=outputFrameLayout(width,height),{note}=frame;ctx.save();ctx.fillStyle='#999999';
+ // Filled strips avoid half-pixel strokes at the bitmap edge during print scaling.
+ const pixelScale=ctx.getTransform().a||1,snap=value=>Math.round(value*pixelScale)/pixelScale;
+ function rectangle(x,y,w,h){const left=snap(x+1),top=snap(y+1),right=snap(x+w-2),bottom=snap(y+h-2);ctx.fillRect(left,top,right-left+1,1);ctx.fillRect(left,bottom,right-left+1,1);ctx.fillRect(left,top+1,1,bottom-top-1);ctx.fillRect(right,top+1,1,bottom-top-1)}
+ if(note.notes){const {columns}=note.layout;note.notes.forEach((entry,i)=>{const x=i%columns*(frame.blockWidth+note.gapX),y=Math.floor(i/columns)*(frame.blockHeight+note.gapY);rectangle(x,y,frame.blockWidth+frame.padding*2,frame.blockHeight+frame.padding*2)})}
+ else rectangle(0,0,frame.width,frame.height);ctx.restore();
+}
+
+function composeOutputPngCanvas(source,scale=1,includeBorder=true){
+ const width=source.width/scale,height=source.height/scale,frame=outputFrameLayout(width,height),{note,padding}=frame;if(note.error)throw new Error(note.error);if(!note.height&&!note.notes&&!padding)return source;
+ const canvas=document.createElement('canvas');canvas.width=Math.ceil(frame.width*scale);canvas.height=Math.ceil(frame.height*scale);const ctx=canvas.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.scale(scale,scale);
+ if(note.notes){const {cellSize,columns}=note.layout;note.notes.forEach((entry,i)=>{const column=i%columns,x=column*(frame.blockWidth+note.gapX)+padding,row=Math.floor(i/columns),y=row*(frame.blockHeight+note.gapY)+padding;ctx.drawImage(source,column*cellSize*scale,row*cellSize*scale,cellSize*scale,cellSize*scale,x,y,cellSize,cellSize);ctx.save();ctx.translate(x,0);drawOutputNote(ctx,cellSize,y+cellSize,entry);ctx.restore()})}
+ else{ctx.drawImage(source,padding,padding,width,height);ctx.save();ctx.translate(padding,0);drawOutputNote(ctx,width,height+padding,note);ctx.restore()}if(includeBorder)drawOutputBorder(ctx,width,height);return canvas;
 };
