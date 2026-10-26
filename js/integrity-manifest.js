@@ -6,7 +6,7 @@ window.BolxivIntegrity = {
     "bolxiv.js": "sha384-prtDObC30B0Q+8ZcW/zg+KREaoSEddnfa9RrWGZgDhjIIkqUSx6wZEDfD6awOzdI",
     "css/base.css": "sha384-RmvCyrtMoh156ySsmgyyX6egTUZ4Sc23cD41EuAJmeq95wGY1O1iY89BgU+x5puM",
     "css/interface.css": "sha384-RqweQeGgI1jT/6zaHnUpSGfn0fWNF7rUCPo8e9+FF3t5rwpAg+9jcQB2MYJd/V56",
-    "css/mobile.css": "sha384-nbnPEPiIlI86hsVekv2kmxCFWzKLUGNBSNpzdBKTekbePUZ4fC6GdIzx0VaIFz4g",
+    "css/mobile.css": "sha384-woBudALO4JLTLxulaYjTmX23Ssd4cq8xZYirWH5c0i/WWVh2lQhQnVZz6NbaE2hR",
     "css/panels.css": "sha384-7grkbjfQ0PTkl9LWVVMc3cj5P/SaMhJCzDO40XhhgmSnEbYWps8+zzF1dcI68e6P",
     "css/png-preview.css": "sha384-nQf1FuL6qHLBUxwB/WpxcMZrwaTUzFgz+sm5d10+AAA4h3Is7edmURGuroZgPfMh",
     "css/startup.css": "sha384-u+H/UhBfn8yD5sBibyQI4+WV3mV2/DHnWfE5JehGNAg99mlZgALRo5O9I+/9DsL1",

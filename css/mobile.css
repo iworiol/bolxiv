@@ -1713,7 +1713,7 @@
   .app .layout .right .board-title-row>.phone-icon-help-toggle[aria-expanded="true"] {
     background:var(--blue)!important;
   }
-  .app .layout.phone-materials-open>.left>.phone-material-help {
+  .app .layout.phone-materials-open>.left:not(.preset-managing)>.material-categories-scroll>.phone-material-help {
     display:block;
     flex:none;
     width:100%;
