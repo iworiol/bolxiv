@@ -11,19 +11,26 @@
  },true);
  const membershipList=document.getElementById('objectList');for(const type of ['dragover','drop'])membershipList.addEventListener(type,handleObjectMembershipDrop,true);
  const clearMembershipGuide=()=>membershipList.querySelectorAll('.drag-over,.drop-before,.drop-after').forEach(n=>n.classList.remove('drag-over','drop-before','drop-after'));membershipList.addEventListener('dragleave',event=>{if(!membershipList.contains(event.relatedTarget))clearMembershipGuide()});document.addEventListener('dragend',clearMembershipGuide);
- const groupStart=document.createElement('div');groupStart.className='context-separator';groupStart.setAttribute('role','separator');menu.insertBefore(groupStart,document.getElementById('contextCopy'));
+ const groupToggle=document.createElement('button');groupToggle.id='contextGroupMenuToggle';groupToggle.type='button';groupToggle.textContent='グループ ▸';groupToggle.setAttribute('role','menuitem');groupToggle.setAttribute('aria-haspopup','menu');groupToggle.setAttribute('aria-expanded','false');groupToggle.setAttribute('aria-controls','contextGroupMenu');menu.insertBefore(groupToggle,document.getElementById('contextCopy'));
+ const groupMenu=document.createElement('div');groupMenu.id='contextGroupMenu';groupMenu.className='object-context-menu';groupMenu.hidden=true;groupMenu.setAttribute('role','menu');groupMenu.setAttribute('aria-label','グループ');menu.append(groupMenu);
+ const closeGroupMenu=()=>{groupMenu.hidden=true;groupToggle.setAttribute('aria-expanded','false')};
+ function openGroupMenu(){if(!groupMenu.hidden){closeGroupMenu();return}addPhoneMenuClose(groupMenu,closeGroupMenu);groupMenu.hidden=false;groupToggle.setAttribute('aria-expanded','true');const r=groupToggle.getBoundingClientRect(),width=groupMenu.offsetWidth,height=groupMenu.offsetHeight;groupMenu.style.left=Math.max(4,Math.min(r.right+4+width>innerWidth?r.left-width-4:r.right+4,innerWidth-width-4))+'px';groupMenu.style.top=Math.max(4,Math.min(r.top,innerHeight-height-4))+'px'}
+ groupToggle.onclick=openGroupMenu;groupToggle.onkeydown=event=>{if(event.key==='ArrowRight'){event.preventDefault();if(groupMenu.hidden)openGroupMenu();groupMenu.querySelector('button:not(:disabled)')?.focus()}};
+ groupMenu.addEventListener('keydown',event=>{if(event.key==='Escape'||event.key==='ArrowLeft'){event.preventDefault();event.stopPropagation();closeGroupMenu();groupToggle.focus()}});
+ const groupStart=document.createElement('div');groupStart.className='context-separator';groupStart.setAttribute('role','separator');menu.insertBefore(groupStart,groupToggle);
  for(const [id,label] of [['contextGroup','グループ化'],['contextUngroup','グループ解除'],['contextRenameObjectGroup','グループ名を変更']]){
   const button=document.createElement('button');button.id=id;button.type='button';button.setAttribute('role','menuitem');button.textContent=label;
-  menu.insertBefore(button,document.getElementById('contextCopy'));
+  groupMenu.append(button);
   button.onclick=()=>{
    const ids=expandObjectGroups(JSON.parse(menu.dataset.ids||'[]')),items=current().filter(o=>ids.includes(o.id));closeObjectContextMenu();
    if(id==='contextRenameObjectGroup'){if(selectedObjectGroup().length)beginObjectGroupRename(items[0].objectGroupId);return}
    if(boardReadOnly||phaseComparisonActive()||id==='contextGroup'&&items.length<2)return;
    recordHistory();const groupId=createObjectId();for(const item of items){if(id==='contextGroup'){item.objectGroupId=groupId;item.objectGroupName='グループ'}else{delete item.objectGroupId;delete item.objectGroupName}}
-   selectedIds=ids;selected=ids[ids.length-1]||null;renderAndSave();
+   selectedIds=ids;selected=ids[ids.length-1]||null;renderAndSave();if(id==='contextGroup')revealCreatedObjectGroup(groupId);
   };
  }
  const groupEnd=document.createElement('div');groupEnd.className='context-separator';groupEnd.setAttribute('role','separator');menu.insertBefore(groupEnd,document.getElementById('contextCopy'));
+ const register=document.createElement('button');register.id='contextRegisterPreset';register.type='button';register.textContent='プリセットに登録';register.setAttribute('role','menuitem');menu.insertBefore(register,document.getElementById('contextCopy'));register.onclick=()=>{if(register.disabled)return;selectedIds=JSON.parse(menu.dataset.ids||'[]').filter(id=>current().some(item=>item.id===id));selected=selectedIds.at(-1)||null;closeObjectContextMenu();userPresetLibrary.registerSelection()};
  document.addEventListener('pointermove',e=>{
   if(!['group-scale','group-rotate'].includes(drag?.mode)||drag.pointerId!==e.pointerId)return;e.preventDefault();e.stopImmediatePropagation();
   if(drag.mode==='group-rotate'){
@@ -152,7 +159,7 @@ function placeBuiltinFieldMarkers(cx,cy){
  const pane=document.querySelector('.left');let gesture=null,suppressButton=null,lastTouch=0;
  function finish(){if(!gesture)return;clearTimeout(gesture.timer);const g=gesture;gesture=null;hideTouchPlacementPreview();if(g.button.hasPointerCapture(g.id))g.button.releasePointerCapture(g.id);g.button.draggable=g.draggable;return g}
  pane.addEventListener('pointerdown',e=>{
-  if(e.pointerType!=='touch')return;const button=e.target.closest('.tool[data-tool],.icon-choice');if(!button||button.classList.contains('user-preset'))return;
+  if(e.pointerType!=='touch')return;const button=e.target.closest('.tool[data-tool],.icon-choice');if(!button)return;
   finish();lastTouch=Date.now();const g={id:e.pointerId,x:e.clientX,y:e.clientY,button,draggable:button.draggable,wasSelected:button.classList.contains('active'),active:false,moved:false};gesture=g;button.draggable=false;
   g.timer=setTimeout(()=>{if(gesture!==g||!button.isConnected)return;g.active=true;button.focus({preventScroll:true});button.click();suppressButton=button;tapPlacementArmed=true;g.payload=tool==='icon'&&activeIcon?{type:'icon',...activeIcon}:{type:tool};showTouchPlacementPreview(g.payload,g.x,g.y);button.setPointerCapture(g.id);button.classList.add('palette-dragging')},450);
  });
@@ -196,6 +203,7 @@ function placeBuiltinFieldMarkers(cx,cy){
   if(e.pointerType!=='mouse'||!desktopHover.matches||pane.classList.contains('pinned'))return;
   hoverTimer=setTimeout(()=>{hoverTimer=null;if(desktopHover.matches)pane.classList.add('palette-hover-open')},300);
  });
+ pane.addEventListener('reset-material-hover',clearDelayedHover);
  pane.addEventListener('pointerleave',clearDelayedHover);
  pane.addEventListener('pointercancel',clearDelayedHover);
  window.addEventListener('blur',clearDelayedHover);
@@ -250,6 +258,7 @@ function placeBuiltinFieldMarkers(cx,cy){
  function closeMaterials(){if(layout.classList.contains('phone-materials-open'))materialPane.classList.toggle('pinned',desktopMaterialPinned);layout.classList.remove('phone-materials-open');pin.setAttribute('aria-expanded','false');pin.setAttribute('aria-label','マテリアルを開く');pin.title='マテリアルを開く'}
  pin.onclick=()=>{materialOpenObjectCount=current().length;if(!layout.classList.contains('phone-materials-open'))desktopMaterialPinned=materialPane.classList.contains('pinned');materialPane.classList.add('pinned');let firstOpen=null;for(const category of materialPane.querySelectorAll('.accordion-toggle[aria-controls]')){if(category.getAttribute('aria-expanded')!=='true')continue;if(!firstOpen){firstOpen=category;continue}category.setAttribute('aria-expanded','false');document.getElementById(category.getAttribute('aria-controls')).hidden=true}const rect=document.querySelector('.board-title-row').getBoundingClientRect();layout.style.setProperty('--phone-material-top',(rect.bottom-layout.getBoundingClientRect().top)+'px');layout.classList.add('phone-materials-open');pin.setAttribute('aria-expanded','true');pin.setAttribute('aria-label','マテリアルを展開');pin.title='マテリアルを展開'};
  
+ document.addEventListener('close-material-pane',closeMaterials);
  mobile.addEventListener('change',closeMaterials);
  // Reveal the canvas after a tap selection. Long-press uses a synthetic click
  // and must keep the palette in place while its pointer is captured.
@@ -259,8 +268,8 @@ function placeBuiltinFieldMarkers(cx,cy){
  let materialDismissClick=false;
  document.addEventListener('pointerdown',event=>{
   materialDismissClick=false;
-  if(!mobile.matches||!layout.classList.contains('phone-materials-open')||operationGuide.open)return;
-  if(event.target.closest('#pcTutorial')||materialPane.contains(event.target)||pin.contains(event.target)||contentIcon.contains(event.target))return;
+  if(!mobile.matches||!layout.classList.contains('phone-materials-open')||operationGuide.open||materialPane.classList.contains('preset-registering')||document.querySelector('#userPresetDialog[open]'))return;
+  if(event.target.closest('#pcTutorial,#userPresetMenu,#objectContextMenu,#layerContextMenu')||materialPane.contains(event.target)||pin.contains(event.target)||contentIcon.contains(event.target))return;
   materialDismissClick=true;
   event.preventDefault();event.stopImmediatePropagation();
   closeMaterials();
@@ -463,11 +472,11 @@ phoneLayerDeleteDialog.addEventListener('close',()=>{pendingPhoneLayerDeletion=n
  ],
  [
   "#addPage",
-  "空のフェーズを追加します。入力中の↶で追加を取り消せます。"
+  "空のフェーズを追加します。Enter・✓で確定、Esc・↶で取り消します。"
  ],
  [
   "#addPhaseGroup",
-  "フェーズをまとめるグループを追加します。"
+  "フェーズをまとめるグループを追加します。Enter・✓で確定、Esc・↶で取り消します。"
  ],
  [
   "#copyPage",
@@ -523,7 +532,7 @@ phoneLayerDeleteDialog.addEventListener('close',()=>{pendingPhoneLayerDeletion=n
  ],
  [
   "help-object-selection",
-  "チェックで複数選択、名前の長押しでメニュー、つかみマーク・番号のドラッグで並べ替えます。"
+  "チェックで複数選択、「…」のタップでメニュー。つかみマーク・番号、または「…」の長押しから並べ替えます。"
  ],
  [
   "help-object-visibility",
@@ -552,6 +561,26 @@ phoneLayerDeleteDialog.addEventListener('close',()=>{pendingPhoneLayerDeletion=n
  [
   "#swapSelectedPositions",
   "選択した2個の位置を交換します。サイズ・向き・所属は変わりません。"
+ ],
+ [
+  "#presetUndo",
+  "プリセットの登録・名前変更・削除・並べ替え・読み込みを元に戻します。履歴は最大50件、再読み込みで消えます。"
+ ],
+ [
+  "#presetRedo",
+  "元に戻したプリセット操作をやり直します。"
+ ],
+ [
+  "#registerUserPreset",
+  "選択中の2個以上のオブジェクトを登録します。名前を入力し、Enter・✓で確定、Esc・↶で取消。"
+ ],
+ [
+  "#contentListUndo",
+  "コンテンツリストの追加・削除・読み込みなどを元に戻します。"
+ ],
+ [
+  "#contentListRedo",
+  "元に戻したコンテンツリストの操作をやり直します。"
  ],
  [
   "#undo",
@@ -628,6 +657,10 @@ phoneLayerDeleteDialog.addEventListener('close',()=>{pendingPhoneLayerDeletion=n
  [
   "#pngPreviewScale",
   "PNGの出力サイズを1倍／2倍から選びます。右側に画像サイズを表示します。"
+ ],
+ [
+  ".preset-manage",
+  "配置とプリセット管理を切り替えます。閉じたペインでは現在の表示を開きます。"
  ]
 ];
  const defaultSymbols={"#editModeToggle":{"svg":"<svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 20h9\"/><path d=\"M16.5 3.5a2.1 2.1 0 013 3L8 18l-4 1 1-4Z\"/></svg>","text":"編集","color":"#000","background":"#eaf3ff"},".phone-menu-toggle":{"svg":"<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\"><path d=\"M4 6h16M4 12h16M4 18h16\"/></svg>","text":"","color":"#fff","background":"var(--accent)"},".phone-content-icon":{"svg":"<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M9 5l7 7-7 7\"/></svg>","text":"","color":"#fff","background":"var(--accent)"},".phone-material-pin":{"svg":"<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"6.5\" cy=\"6.5\" r=\"3.5\"/><rect x=\"14\" y=\"3\" width=\"7\" height=\"7\" rx=\"1\"/><path d=\"m6.5 13 4.5 8H2z\"/><path d=\"m17.5 13 4.5 4.5-4.5 4.5-4.5-4.5z\"/></svg>","text":"","color":"#fff","background":"var(--accent)"},"#addPage":{"svg":"","text":"＋","color":"#000","background":"#fff"},"#copyPage":{"svg":"","text":"⧉","color":"#000","background":"#fff"},".phone-phase-navigation>button:first-child":{"svg":"<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M15 5l-7 7 7 7\"/></svg>","text":"","color":"#fff","background":"var(--accent)"},".phone-phase-navigation>button:last-child":{"svg":"<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M9 5l7 7-7 7\"/></svg>","text":"","color":"#fff","background":"var(--accent)"},"#undo":{"svg":"<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M9 5L4 10l5 5M4 10h10a6 6 0 0 1 6 6v3\"/></svg>","text":"","color":"#000","background":"#fff"},"#redo":{"svg":"<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M15 5l5 5-5 5M20 10H10a6 6 0 0 0-6 6v3\"/></svg>","text":"","color":"#000","background":"#fff"},"#clearBtn":{"svg":"<svg class=\"clear-icon\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M4 6h16M9 6V3h6v3M6 6l1 15h10l1-15M10 10v7M14 10v7\"/></svg>","text":"","color":"#000","background":"#fff"},"#gridToggle":{"svg":"<svg viewBox=\"0 0 20 20\" aria-hidden=\"true\"><path d=\"M3 3h14v14H3zM8 3v14M13 3v14M3 8h14M3 13h14\"/></svg>","text":"","color":"#fff","background":"var(--accent)"},"#fieldToggle":{"svg":"<svg viewBox=\"0 0 20 20\" aria-hidden=\"true\"><path d=\"M2 10s3-5 8-5 8 5 8 5-3 5-8 5-8-5-8-5Z\"/><circle cx=\"10\" cy=\"10\" r=\"2.2\"/></svg>","text":"","color":"#fff","background":"var(--accent)"},"#clipToggle":{"svg":"<svg viewBox=\"0 0 20 20\" aria-hidden=\"true\"><rect x=\"2\" y=\"2\" width=\"12\" height=\"12\" rx=\"1\"/><path d=\"M9 8h8v9H8v-3M8 8v6M8 8h6\"/><path d=\"M14 8h3v9H8v-3\" stroke-dasharray=\"2 2\"/></svg>","text":"","color":"#fff","background":"var(--accent)"},"#fitBoardZoom":{"svg":"<svg viewBox=\"0 0 20 20\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M7 3H3v4M13 3h4v4M17 13v4h-4M7 17H3v-4\"/></svg>","text":"","color":"#fff","background":"var(--accent)"},"#zoomOut":{"svg":"","text":"−","color":"#fff","background":"var(--accent)"},"#resetBoardZoom":{"svg":"","text":"100%","color":"#fff","background":"var(--accent)"},"#zoomIn":{"svg":"","text":"＋","color":"#fff","background":"var(--accent)"}};
@@ -709,13 +742,13 @@ phoneLayerDeleteDialog.addEventListener('close',()=>{pendingPhoneLayerDeletion=n
   const helpTitles={
    '#editModeToggle':'モード切替','help-png-mode':'モード切替',
    '.phone-menu-toggle':'操作メニュー','.phone-content-icon':'コンテンツペインを開く','.phone-content-close':'コンテンツペインを閉じる','.phone-material-pin':'マテリアルを開閉',
-   '#addPage':'フェーズを追加','#addPhaseGroup':'フェーズグループを追加','#copyPage':'フェーズをコピー','#copyPageToContent':'別コンテンツへコピー',
+   '.preset-manage':'ユーザープリセットの管理','#addPage':'フェーズを追加','#addPhaseGroup':'フェーズグループを追加','#copyPage':'フェーズをコピー','#copyPageToContent':'別コンテンツへコピー',
    '#phonePhaseSwitch-toggle':'フェーズプロパティ・ノートの切り替え','#phonePhaseSectionToggle':'フェーズ設定・ノート欄を開閉','#toggleBattlePages':'フェーズリストを開閉',
    '.phone-phase-navigation>button:first-child':'前のフェーズへ','.phone-phase-navigation>button:last-child':'次のフェーズへ',
    'help-name-edit':'名前を変更','help-item-delete':'項目を削除','help-name-confirm':'名前を確定','help-add-cancel':'追加を取り消す',
    '#bulkVisibleInput':'全体の表示・非表示','#bulkEditableInput':'全体の編集可否','.handle.move-handle':'移動ハンドル','.handle.rotate':'回転ハンドル','.list-drag-grip':'並べ替え','.phase-group-toggle':'フェーズグループを開閉','.object-group-disclosure':'オブジェクトグループを開閉','help-object-visibility':'オブジェクトの表示・非表示','help-object-lock':'オブジェクトをロック','help-number-step':'プロパティの数値を調整',
    '#outputIncludeNote':'ノートを含める','#outputShowBorder':'外枠を表示','#outputPhaseGapField':'フェーズ間隔','#pngPreviewScale':'出力倍率','#pngPreviewSave':'PNGを保存','#outputPrintButton':'印刷',
-   '#undo':'元に戻す','#redo':'やり直す','#clearBtn':'フェーズ内のオブジェクトを全削除',
+   '#presetUndo':'プリセット操作を元に戻す','#presetRedo':'プリセット操作をやり直す','#registerUserPreset':'プリセットを登録','#contentListUndo':'コンテンツリストの操作を元に戻す','#contentListRedo':'コンテンツリストの操作をやり直す','#undo':'元に戻す','#redo':'やり直す','#clearBtn':'フェーズ内のオブジェクトを全削除',
    '.phone-display-menu-toggle':'キャンバスの表示設定','#fitBoardZoom':'キャンバス全体を表示','#zoomOut':'キャンバスを縮小','#zoomIn':'キャンバスを拡大',
    '.phone-reader-switch':png?'フェーズリスト・'+outputProperties+'の切り替え':'フェーズリスト・ノートの切り替え',
    '.phone-reader-collapse':png?'フェーズリスト・'+outputProperties+'欄を開閉':'フェーズリスト・ノート欄を開閉',
@@ -730,7 +763,7 @@ phoneLayerDeleteDialog.addEventListener('close',()=>{pendingPhoneLayerDeletion=n
   }).sort((a,b)=>a.group-b.group||a.top-b.top||a.left-b.left||a.index-b.index);
   let previousGroup=-1;
   for(const {selector,description,node,group} of ordered){
-   if(group!==previousGroup){const section=document.createElement('h3');section.className='phone-icon-help-section';section.textContent=['上部の操作',content?'プレビューの操作':'キャンバスの操作',content?'コンテンツの操作':'下段の操作'][group];list.append(section);previousGroup=group}
+   if(group!==previousGroup){const section=document.createElement('h3');section.className='phone-icon-help-section';section.textContent=['上部の操作',content?'プレビューの操作':'キャンバスの操作',content?'コンテンツの操作':'リスト・マテリアルの操作'][group];list.append(section);previousGroup=group}
    const row=document.createElement('div');row.className='phone-icon-help-row';row.dataset.helpFor=selector;
    const symbol=document.createElement('span');symbol.className='phone-icon-help-symbol';symbol.setAttribute('aria-hidden','true');
    const fallback=defaultSymbols[selector],svg=node?.querySelector('svg');
@@ -781,7 +814,7 @@ phoneLayerDeleteDialog.addEventListener('close',()=>{pendingPhoneLayerDeletion=n
   if(text==='保存済み'&&remaining>0)timer=setTimeout(update,remaining);
  }
  new MutationObserver(update).observe(status,{childList:true,characterData:true,subtree:true});
- mobile.addEventListener('change',update);update();
+ document.addEventListener('bolxiv-save-status',event=>{if(event.detail.text==='保存済み')savedUntil=Date.now()+3000;update()});mobile.addEventListener('change',update);update();
 })();
 
 ;
@@ -893,37 +926,124 @@ phoneLayerDeleteDialog.addEventListener('close',()=>{pendingPhoneLayerDeletion=n
 
 // User presets are an independent library, never part of content JSON.
 const userPresetLibrary=(()=>{
- const key='bolxiv-user-presets-v1';let presets=[];
- // Discard the withdrawn experimental library before loading; content storage is separate.
- try{localStorage.removeItem(key)}catch{} 
+ const key='bolxiv-user-presets-v1';let presets=[];const presetHistory=[],presetFuture=[];
  try{const stored=JSON.parse(localStorage.getItem(key)||'[]');if(Array.isArray(stored))presets=stored.filter(p=>p&&typeof p.id==='string'&&typeof p.name==='string'&&Array.isArray(p.items)&&p.items.length)}catch{}
  const grid=document.getElementById('userPresetGrid'),empty=document.getElementById('userPresetEmpty'),panel=document.getElementById('presetPanel'),heading=document.querySelector('[aria-controls="presetPanel"]');
- const manage=document.createElement('button');manage.type='button';manage.className='preset-manage';manage.innerHTML='<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>';manage.title='プリセットの管理';manage.setAttribute('aria-label','プリセットの管理');manage.setAttribute('aria-haspopup','menu');manage.setAttribute('aria-expanded','false');heading.parentElement.insertBefore(manage,panel);
- const menu=document.createElement('div');menu.className='object-context-menu';menu.hidden=true;menu.setAttribute('role','menu');document.body.append(menu);
- function close(){menu.hidden=true;manage.setAttribute('aria-expanded','false')}
+ const manage=document.createElement('button');manage.type='button';manage.className='btn preset-manage';manage.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2" stroke-dasharray="2 3"/><circle cx="8.5" cy="8.5" r="2.5"/><path d="M13 6h5v5h-5zM8.5 13l3 5h-6zM14 16h4M16 14v4"/></svg>';manage.title='プリセットの管理';manage.setAttribute('aria-label','プリセットの管理');manage.setAttribute('aria-haspopup','menu');manage.setAttribute('aria-expanded','false');manage.setAttribute('aria-pressed','false');document.querySelector('.left .object-pane-actions').prepend(manage);document.querySelector('.left .object-pane-actions').append(document.getElementById('leftRailToggle'));
+ const presetManagementIcon=manage.innerHTML,objectPlacementIcon='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 3v14l4-4 3 6 3-1-3-6 6-1Z"/><circle cx="18" cy="5" r="2.5"/><path d="M17 15h4v5h-4z"/></svg>';
+ function syncMaterialViewIcon(managing){manage.innerHTML=managing?presetManagementIcon:objectPlacementIcon;manage.dataset.materialView=managing?'presets':'placement';manage.title=managing?'プリセット管理（クリックでオブジェクト配置へ）':'オブジェクト配置（クリックでプリセット管理へ）';manage.setAttribute('aria-label',manage.title)}
+ syncMaterialViewIcon(false);
+ const menu=document.createElement('div');menu.id='userPresetMenu';manage.setAttribute('aria-controls',menu.id);menu.className='object-context-menu';menu.hidden=true;menu.setAttribute('role','menu');document.body.append(menu);
+ function close(){menu.hidden=true}
  function blocked(){return boardReadOnly||phaseComparisonActive()||window.Bolxiv?.pngPreview?.active}
- function save(next){try{localStorage.setItem(key,JSON.stringify(next));presets=next;render();return true}catch{notify('プリセットを保存できませんでした。保存領域の空きを確認してください');return false}}
- function show(anchor,actions){close();menu.replaceChildren();for(const [label,action,disabled=false] of actions){const b=document.createElement('button');b.type='button';b.textContent=label;b.setAttribute('role','menuitem');b.disabled=disabled;b.onclick=()=>{close();action()};menu.append(b)}const r=anchor.getBoundingClientRect();menu.hidden=false;menu.style.left=Math.max(4,Math.min(r.left,innerWidth-menu.offsetWidth-4))+'px';menu.style.top=Math.max(4,Math.min(r.bottom+4,innerHeight-menu.offsetHeight-4))+'px';menu.querySelector('button:not(:disabled)')?.focus()}
- document.addEventListener('pointerdown',e=>{if(!menu.contains(e.target)&&!manage.contains(e.target))close()});document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});window.addEventListener('resize',close);
- const dialog=document.createElement('dialog');dialog.id='userPresetDialog';dialog.className='confirm-dialog preset-name-dialog';dialog.innerHTML='<form><label for="userPresetName">プリセット名</label><input id="userPresetName" maxlength="80" required autocomplete="off"><p class="hint preset-registration-note" hidden></p><div class="preset-dialog-actions"><button type="button" class="btn">キャンセル</button><button type="submit" class="btn primary">保存</button></div></form>';document.body.append(dialog);let commit=null;
- dialog.querySelector('[type=button]').onclick=()=>dialog.close();dialog.querySelector('form').onsubmit=e=>{e.preventDefault();const value=dialog.querySelector('input').value.trim();if(!value){dialog.querySelector('input').focus();return}if(commit(value)!==false)dialog.close()};
- function nameDialog(name,callback,note=''){const hint=dialog.querySelector('.preset-registration-note');hint.textContent=note;hint.hidden=!note;commit=callback;dialog.querySelector('input').value=name;dialog.showModal();dialog.querySelector('input').focus();dialog.querySelector('input').select()}
+ function recordPresetChange(before,after,customLabel=null){if(before===after)return;const a=JSON.parse(before),b=JSON.parse(after),label=customLabel||(b.length>a.length?'登録':b.length<a.length?'削除':a.some((item,index)=>item.id!==b[index]?.id)?'並べ替え':'名前変更');presetHistory.push({before,after,label});if(presetHistory.length>50)presetHistory.shift();presetFuture.length=0}
+ function save(next,{record=true,label=null}={}){const before=JSON.stringify(presets),after=JSON.stringify(next);window.BolxivSaveStatus.set('presets','保存中…');try{localStorage.setItem(key,after);presets=next;if(record)recordPresetChange(before,after,label);window.BolxivSaveStatus.set('presets','保存済み');render();renderManager();syncPresetHistory();return true}catch{window.BolxivSaveStatus.set('presets','未保存');notify('プリセットを保存できませんでした。保存領域の空きを確認してください');return false}}
+ const historyButtons=[];for(const [id,redo] of [['presetUndo',false],['presetRedo',true]]){const button=document.createElement('button');button.id=id;button.type='button';button.className='btn preset-history content-history-button';button.innerHTML=document.getElementById(redo?'redo':'undo').innerHTML;button.onclick=()=>restorePresetHistory(redo);manage.parentElement.insertBefore(button,document.getElementById('leftRailToggle'));historyButtons.push(button)}
+ function syncPresetHistory(){for(const [index,button] of historyButtons.entries()){const entries=index?presetFuture:presetHistory,action=index?'やり直す':'元に戻す';button.disabled=blocked()||!!editingPreset||!entries.length;button.title=entries.length?'プリセット：'+entries.at(-1).label+'を'+action:'プリセットに'+(index?'やり直せる':'元に戻せる')+'操作はありません';button.setAttribute('aria-label',button.title)}}
+ function restorePresetHistory(redo=false){if(blocked()||editingPreset)return;const source=redo?presetFuture:presetHistory,target=redo?presetHistory:presetFuture,entry=source.at(-1);if(!entry)return;if(save(JSON.parse(redo?entry.after:entry.before),{record:false})){source.pop();target.push(entry);if(activeIcon?.userPresetId&&!presets.some(item=>item.id===activeIcon.userPresetId)){tapPlacementArmed=false;selectPlacementTool('select')}syncPresetHistory();notify('プリセットの'+entry.label+'を'+(redo?'やり直しました':'元に戻しました'))}}
+
+ function show(anchor,actions,point=null){close();menu._opener=anchor;menu.replaceChildren();for(const [label,action,disabled=false] of actions){const b=document.createElement('button');b.type='button';b.textContent=label;b.setAttribute('role','menuitem');b.disabled=disabled;b.onclick=()=>{close();action()};menu.append(b)}addPhoneMenuClose(menu,close);const r=point||anchor.getBoundingClientRect();menu.hidden=false;menu.style.left=Math.max(4,Math.min(r.left,innerWidth-menu.offsetWidth-4))+'px';menu.style.top=Math.max(4,Math.min(r.bottom+4,innerHeight-menu.offsetHeight-4))+'px';menu.querySelector('button:not(:disabled)')?.focus()}
+ window.addEventListener('pointerdown',e=>{if(!menu.contains(e.target)&&!manage.contains(e.target))close()},true);document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});window.addEventListener('resize',close);
  function thumbnail(items){const thumb=document.createElement('span');thumb.className='preset-thumbnail';thumb.setAttribute('aria-hidden','true');const scene=document.createElement('span');scene.className='user-preset-scene';
   const xs=items.map(o=>o.x/100*640),ys=items.map(o=>o.y/100*640),left=Math.min(...items.map((o,i)=>xs[i]-(o.width||32)/2)),top=Math.min(...items.map((o,i)=>ys[i]-(o.height||32)/2)),right=Math.max(...items.map((o,i)=>xs[i]+(o.width||32)/2)),bottom=Math.max(...items.map((o,i)=>ys[i]+(o.height||32)/2)),extent=Math.max(right-left,bottom-top,32),scale=18/extent;
   scene.style.cssText='position:absolute;width:640px;height:640px;transform-origin:0 0;transform:scale('+scale+');left:'+((26-(right-left)*scale)/2-left*scale)+'px;top:'+((26-(bottom-top)*scale)/2-top*scale)+'px;';
   for(const [i,item] of items.entries()){const visual={...item,visible:true};if(visual.type==='icon'){const factor=Math.max(1,8/(scale*Math.min(visual.width||32,visual.height||32)));visual.width=(visual.width||32)*factor;visual.height=(visual.height||32)*factor}const node=createCanvasObjectVisual(visual,i,[]);node.style.pointerEvents='none';for(const img of node.querySelectorAll('img')){img.style.setProperty('width','100%','important');img.style.setProperty('height','100%','important');img.style.setProperty('max-width','none','important');img.style.setProperty('max-height','none','important')}scene.append(node)}thumb.append(scene);return thumb;
  }
  function render(){grid.replaceChildren();empty.hidden=presets.length>0;for(const preset of presets){const button=document.createElement('button');button.type='button';button.className='icon-choice user-preset';button.dataset.presetId=preset.id;button.title=preset.name;button.setAttribute('aria-label',preset.name);button.draggable=true;button.disabled=blocked();button.append(thumbnail(preset.items));const icon={name:preset.name,userPresetId:preset.id};button.onclick=()=>{if(!blocked())selectPlacementIcon(icon)};button.ondragstart=e=>{if(blocked()){e.preventDefault();return}selectPlacementIcon(icon,false);e.dataTransfer.setData('application/x-tactica',JSON.stringify({type:'icon',...icon}));e.dataTransfer.effectAllowed='copy'};
-  function actions(){show(button,[['名前を変更',()=>nameDialog(preset.name,name=>{if(blocked())return false;return save(presets.map(p=>p.id===preset.id?{...p,name}:p))}),blocked()],['削除',()=>{if(blocked())return;if(activeIcon?.userPresetId===preset.id){tapPlacementArmed=false;selectPlacementTool('select')}save(presets.filter(p=>p.id!==preset.id))},blocked()]])}
-  button.oncontextmenu=e=>{e.preventDefault();e.stopPropagation();actions()};let timer=null,suppress=false,point=null;button.addEventListener('pointerdown',e=>{if(e.pointerType!=='touch')return;point={x:e.clientX,y:e.clientY};timer=setTimeout(()=>{timer=null;suppress=true;actions()},500)});button.addEventListener('pointermove',e=>{if(point&&Math.hypot(e.clientX-point.x,e.clientY-point.y)>8){clearTimeout(timer);timer=null}});for(const type of ['pointerup','pointercancel','dragstart'])button.addEventListener(type,()=>{clearTimeout(timer);timer=null});button.addEventListener('click',e=>{if(suppress){suppress=false;e.preventDefault();e.stopImmediatePropagation()}},true);grid.append(button)}}
- manage.onclick=e=>{e.stopPropagation();if(!menu.hidden){close();return}manage.setAttribute('aria-expanded','true');show(manage,[['選択中のオブジェクトを登録',()=>{
-  if(blocked())return;const originals=current().filter(o=>selectedIds.includes(o.id));if(originals.length<2)return;const items=JSON.parse(JSON.stringify(originals));for(const item of items){if(item.imageId){item.src=objectImageSource(item);delete item.imageId}delete item.id}
-  nameDialog(selectedObjectGroup().length?objectGroupName(originals):'新しいプリセット',name=>{if(blocked())return false;const id=createObjectId();for(const item of items){item.locked=false;item.objectGroupId=id;item.objectGroupName=name;delete item.objectGroupRotationOwner;delete item.objectGroupPlacementRotation;delete item.objectGroupOrientationRotation}return save([...presets,{id,name,items}])},items.some(o=>o.visible===false)?'非表示のオブジェクトを'+items.filter(o=>o.visible===false).length+'個含みます。非表示の状態も保持して登録します。':'');
- },blocked()||current().filter(o=>selectedIds.includes(o.id)).length<2]]);manage.setAttribute('aria-expanded','true')};
- function place(id,x,y){if(blocked())return;const preset=presets.find(p=>p.id===id);if(!preset)return;const items=JSON.parse(JSON.stringify(preset.items)),cx=(Math.min(...items.map(o=>o.x))+Math.max(...items.map(o=>o.x)))/2,cy=(Math.min(...items.map(o=>o.y))+Math.max(...items.map(o=>o.y)))/2;
-  for(const item of items){item.id=createObjectId();item.x+=x-cx;item.y+=y-cy;if(item.type==='icon'&&item.src?.startsWith('data:image/')){item.imageId=boardImageLibrary.register(item.src);delete item.src}}remapCopiedObjectGroups(items);snapshot();current().push(...items);individualGroupSelection=null;selectedIds=items.map(o=>o.id);selected=selectedIds[0];tapPlacementArmed=false;selectPlacementTool('select');hideTouchPlacementPreview();renderAndSave();closePaletteAfterPlacement();
+  function actions(){show(button,[['名前を変更',()=>renamePreset(preset),blocked()],['削除',()=>deletePreset(preset.id),blocked()]])}
+  button.oncontextmenu=e=>{e.preventDefault();e.stopPropagation();if(!matchMedia('(max-width:850px)').matches)actions()};grid.append(button)}}
+ let editingPreset=null,presetDraft=null;
+ function renamePreset(preset,isNew=false,onFinish=null){
+  if(blocked())return;if(editingPreset?.id===preset.id){editingPreset.input.focus();editingPreset.input.select();return}if(editingPreset&&!editingPreset.finish())return;
+  if(manager.hidden)openManager();
+  const row=[...manager.querySelectorAll('.preset-manager-row')].find(row=>row.dataset.presetId===preset.id);if(!row)return;
+  const input=document.createElement('input');input.type='text';input.className='preset-manager-name-input';input.value=preset.name;input.maxLength=80;input.setAttribute('aria-label','プリセット名');row.classList.add('renaming');row.append(input);let done=false;const viewport=window.visualViewport;const revealInput=()=>{if(!input.isConnected){cleanup();return}const bounds=manager.getBoundingClientRect(),r=input.getBoundingClientRect(),top=Math.max(bounds.top+manager.clientTop,viewport?.offsetTop||0)+4,bottom=Math.min(bounds.top+manager.clientTop+manager.clientHeight,viewport?viewport.offsetTop+viewport.height:innerHeight)-4;if(r.top<top)manager.scrollTop+=r.top-top;else if(r.bottom>bottom)manager.scrollTop+=r.bottom-bottom};const resize=new ResizeObserver(()=>requestAnimationFrame(revealInput));resize.observe(manager);function cleanup(){resize.disconnect();window.removeEventListener('resize',revealInput);viewport?.removeEventListener('resize',revealInput);viewport?.removeEventListener('scroll',revealInput)}window.addEventListener('resize',revealInput);viewport?.addEventListener('resize',revealInput);viewport?.addEventListener('scroll',revealInput);
+  const previousSaveStatus=window.BolxivSaveStatus.get('presets')||'保存済み';
+  function complete(){done=true;cleanup();editingPreset=null;if(isNew){presetDraft=null;materialPane.classList.remove('preset-registering');manage.disabled=false;onFinish?.()}syncManagerControls();syncPresetHistory()}
+  function finish(cancel=false){
+   if(done)return true;
+   if(cancel){if(isNew)presetDraft=null;window.BolxivSaveStatus.set('presets',previousSaveStatus);complete();renderManager();return true}
+   if(blocked()){notify('編集モードに戻してから確定してください');return false}
+   const name=input.value.trim()||preset.name;
+   if(!isNew&&name===preset.name){window.BolxivSaveStatus.set('presets',previousSaveStatus);complete();renderManager();return true}
+   const next=isNew?[...presets,{...preset,name}]:presets.map(item=>item.id===preset.id?{...item,name}:item),draft=presetDraft;
+   if(isNew)presetDraft=null;
+   if(!save(next)){presetDraft=draft;input.focus({preventScroll:true});revealInput();return false}
+   complete();return true;
+  }
+
+  editingPreset={id:preset.id,input,finish,isNew};if(isNew){materialPane.classList.add('preset-registering');manage.disabled=true;manager.querySelector('#registerUserPreset').disabled=true}syncPresetHistory();if(isNew)window.BolxivSaveStatus.set('presets','未保存の変更あり');input.oninput=()=>window.BolxivSaveStatus.set('presets',isNew||input.value.trim()!==preset.name?'未保存の変更あり':previousSaveStatus);row.querySelectorAll('button').forEach(button=>button.remove());const confirm=document.createElement('button'),cancel=document.createElement('button');for(const button of [confirm,cancel]){button.type='button';button.className='btn preset-manager-action';button.dataset.presetAction='編集';button.onpointerdown=event=>event.preventDefault();row.append(button)}confirm.textContent='✓';confirm.title='変更を確定';confirm.setAttribute('aria-label',preset.name+'：変更を確定');confirm.onclick=()=>finish();cancel.textContent='↶';cancel.title=isNew?'登録を取り消す':'変更を取り消す';cancel.setAttribute('aria-label',preset.name+'：'+cancel.title);cancel.onpointerdown=event=>{event.preventDefault();event.stopPropagation()};cancel.onclick=()=>finish(true);
+  input.onkeydown=event=>{if(event.isComposing||event.keyCode===229)return;if(event.key==='Enter'){event.preventDefault();event.stopPropagation();finish()}else if(event.key==='Escape'){event.preventDefault();event.stopPropagation();finish(true)}};input.onblur=()=>{if(!isNew)finish()};input.focus();input.select();revealInput();requestAnimationFrame(revealInput);
  }
- document.addEventListener('board-view-mode-changed',render);render();return {place,thumbnail:id=>{const p=presets.find(p=>p.id===id);return p?thumbnail(p.items):null}};
+ function deletePreset(id){if(blocked())return;if(editingPreset&&!editingPreset.finish())return;if(activeIcon?.userPresetId===id){tapPlacementArmed=false;selectPlacementTool('select')}save(presets.filter(preset=>preset.id!==id))}
+ function registerSelection(onFinish=null){  if(blocked())return;const originals=current().filter(o=>selectedIds.includes(o.id));if(originals.length<2)return;const items=JSON.parse(JSON.stringify(originals));for(const item of items){if(item.imageId){item.src=objectImageSource(item);delete item.imageId}delete item.id}
+  if(editingPreset&&!editingPreset.finish())return;const name=selectedObjectGroup().length?objectGroupName(originals):'新しいプリセット',id=createObjectId();for(const item of items){item.locked=false;item.objectGroupId=id;item.objectGroupName=name;delete item.objectGroupRotationOwner;delete item.objectGroupPlacementRotation;delete item.objectGroupOrientationRotation}const preset={id,name,items};presetDraft=preset;renderManager();renamePreset(preset,true,onFinish);
+ }
+
+ const materialCategories=document.createElement('div');materialCategories.className='material-categories-scroll';const materialHost=document.querySelector('.left');for(const child of [...materialHost.children])if(!child.matches('.material-heading,.object-pane-actions'))materialCategories.append(child);materialHost.append(materialCategories);const syncMaterialScrollInset=()=>{const style=getComputedStyle(materialHost),padding=parseFloat(style.paddingRight)||0,gutter=materialHost.offsetWidth-materialHost.clientWidth-(parseFloat(style.borderLeftWidth)||0)-(parseFloat(style.borderRightWidth)||0);materialHost.style.setProperty('--material-scroll-inset',padding+'px');materialHost.style.setProperty('--material-scroll-outset',(padding+gutter)+'px')};new ResizeObserver(syncMaterialScrollInset).observe(materialHost);syncMaterialScrollInset();
+ const manager=document.createElement('section');manager.id='userPresetManager';manager.className='preset-manager-panel';manager.hidden=true;manager.setAttribute('role','region');manager.setAttribute('aria-labelledby','userPresetManagerTitle');manager.innerHTML='<header class="preset-manager-heading"><span class="preset-manager-title-icon" aria-hidden="true"></span><h2 id="userPresetManagerTitle">プリセット管理</h2><button type="button" class="btn" id="registerUserPreset" aria-label="選択中のオブジェクトを登録" title="選択中をプリセットに登録"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button></header><div class="preset-manager-body"><p class="preset-manager-hint">2個以上選択して登録</p><div class="preset-manager-list" role="list" aria-label="登録済みプリセット"></div><p class="preset-manager-empty">登録済みプリセットはありません。</p></div>';manager.querySelector('.preset-manager-title-icon').innerHTML=heading.querySelector('.palette-category-icon').innerHTML;const managerFrame=document.createElement('div');managerFrame.className='preset-manager-frame';managerFrame.append(...manager.childNodes);manager.append(managerFrame);const materialPane=document.querySelector('.left');materialPane.append(manager);let materialScroll=0,categoryDisabled=false;const categoryMode=document.getElementById('categoryModeToggle');
+ manage.removeAttribute('aria-haspopup');manage.setAttribute('aria-controls',manager.id);
+ function openManager(){if(!manager.hidden)return;close();materialScroll=materialCategories.scrollTop;renderManager();manager.hidden=false;materialPane.classList.add('preset-managing');materialCategories.scrollTop=0;manage.setAttribute('aria-expanded','true');manage.setAttribute('aria-pressed','true');syncMaterialViewIcon(true);categoryDisabled=categoryMode.disabled;categoryMode.disabled=true}
+ function closeManager(){if(editingPreset&&!editingPreset.finish())return;manager.hidden=true;materialPane.classList.remove('preset-managing');manage.setAttribute('aria-expanded','false');manage.setAttribute('aria-pressed','false');syncMaterialViewIcon(false);categoryMode.disabled=categoryDisabled;manage.focus({preventScroll:true});materialCategories.scrollTop=materialScroll;requestAnimationFrame(()=>{if(manager.hidden)materialCategories.scrollTop=materialScroll})}
+ manager.querySelector('#registerUserPreset').onclick=()=>registerSelection();
+ manager.addEventListener('keydown',event=>{if(event.key==='Escape'){event.preventDefault();event.stopPropagation();if(editingPreset)editingPreset.finish(true);else closeManager()}});
+ document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!manager.hidden&&!event.defaultPrevented){event.preventDefault();if(editingPreset)editingPreset.finish(true);else closeManager()}});
+ function movePreset(id,targetId,after=false){if(blocked()||editingPreset||id===targetId)return;const next=presets.slice(),from=next.findIndex(item=>item.id===id);if(from<0)return;const [item]=next.splice(from,1),at=next.findIndex(item=>item.id===targetId);if(at<0)return;next.splice(at+(after?1:0),0,item);save(next)}
+ function bindPresetReorder(row,preset){row.draggable=true;row.onpointerdown=event=>{row.draggable=!blocked()&&!editingPreset&&!event.target.closest('button,input')};row.ondragstart=event=>{if(blocked()||editingPreset){event.preventDefault();return}event.dataTransfer.setData('application/x-bolxiv-user-preset-order',preset.id);event.dataTransfer.effectAllowed='move'};row.ondragover=event=>{if(!event.dataTransfer.types.includes('application/x-bolxiv-user-preset-order')||blocked()||editingPreset)return;event.preventDefault();const after=event.clientY>row.getBoundingClientRect().top+row.offsetHeight/2;row.classList.toggle('drop-after',after);row.classList.toggle('drop-before',!after);row.classList.add('drag-over')};row.ondragleave=()=>row.classList.remove('drag-over','drop-before','drop-after');row.ondrop=event=>{event.preventDefault();row.classList.remove('drag-over','drop-before','drop-after');movePreset(event.dataTransfer.getData('application/x-bolxiv-user-preset-order'),preset.id,event.clientY>row.getBoundingClientRect().top+row.offsetHeight/2)};row.ondragend=()=>manager.querySelectorAll('.preset-manager-row.drag-over').forEach(node=>node.classList.remove('drag-over','drop-before','drop-after'))}
+ window.bindTouchListReorder?.(['userPresetManager','.preset-manager-row','.preset-manager-leading,.preset-manager-menu','application/x-bolxiv-user-preset-order']);
+ function renderManager(){
+  const list=manager.querySelector('.preset-manager-list');list.replaceChildren();manager.querySelector('#registerUserPreset').disabled=!!editingPreset?.isNew||blocked()||current().filter(o=>selectedIds.includes(o.id)).length<2;manager.querySelector('.preset-manager-hint').hidden=!manager.querySelector('#registerUserPreset').disabled;manager.querySelector('.preset-manager-empty').hidden=presets.length>0||!!presetDraft;
+  for(const preset of presetDraft?[...presets,presetDraft]:presets){const row=document.createElement('div');row.className='preset-manager-row';row.dataset.presetId=preset.id;row.setAttribute('role','listitem');const leading=document.createElement('span');leading.className='preset-manager-leading';const grip=document.createElement('span');grip.className='list-drag-grip';grip.setAttribute('aria-hidden','true');grip.innerHTML='<svg viewBox="0 0 10 16" fill="currentColor"><circle cx="3" cy="3" r="1.2"/><circle cx="7" cy="3" r="1.2"/><circle cx="3" cy="8" r="1.2"/><circle cx="7" cy="8" r="1.2"/><circle cx="3" cy="13" r="1.2"/><circle cx="7" cy="13" r="1.2"/></svg>';leading.append(grip,thumbnail(preset.items));row.append(leading);const summary=document.createElement('div');summary.className='preset-manager-summary';const name=document.createElement('span');name.className='preset-manager-name';name.textContent=preset.name;name.title=preset.name;summary.append(name);row.append(summary);const button=document.createElement('button');button.type='button';button.className='btn preset-manager-action preset-manager-menu';button.textContent='…';button.title='操作メニュー';button.setAttribute('aria-label',preset.name+'：操作メニュー');button.setAttribute('aria-haspopup','menu');button.setAttribute('aria-controls',menu.id);button.disabled=blocked();button.dataset.presetAction='メニュー';button.onpointerdown=event=>event.preventDefault();const actions=()=>{const index=presets.findIndex(item=>item.id===preset.id);return [['名前変更',()=>renamePreset(preset),blocked()],['前へ移動',()=>movePreset(preset.id,presets[index-1]?.id),blocked()||index===0],['後ろへ移動',()=>movePreset(preset.id,presets[index+1]?.id,true),blocked()||index===presets.length-1],['削除',()=>deletePreset(preset.id),blocked()]]};button.onclick=()=>show(button,actions());row.oncontextmenu=event=>{if(event.target.closest('input'))return;event.preventDefault();event.stopPropagation();if(!row.classList.contains('renaming'))show(button,actions(),{left:event.clientX,bottom:event.clientY})};row.append(button);const remove=document.createElement('button');remove.type='button';remove.className='btn preset-manager-action preset-manager-delete preset-manager-desktop-delete';remove.textContent='×';remove.title='削除';remove.setAttribute('aria-label',preset.name+'：削除');remove.dataset.presetAction='削除';remove.disabled=blocked();remove.onpointerdown=event=>event.preventDefault();remove.onclick=()=>deletePreset(preset.id);row.append(remove);bindPresetReorder(row,preset);row.querySelector('.preset-thumbnail').title='ドラッグで並べ替え';list.append(row)}
+ }
+ let reopenManager=false;manage.addEventListener('pointerdown',()=>{reopenManager=matchMedia('(min-width:851px)').matches&&!materialPane.matches('.pinned,.palette-hover-open,:focus-within')},true);
+ manage.onclick=event=>{event.stopPropagation();if(reopenManager){reopenManager=false;manage.focus({preventScroll:true});return}if(manager.hidden)openManager();else closeManager()};
+
+ function place(id,x,y){if(blocked())return;const preset=presets.find(p=>p.id===id);if(!preset)return;const items=JSON.parse(JSON.stringify(preset.items)),cx=(Math.min(...items.map(o=>o.x))+Math.max(...items.map(o=>o.x)))/2,cy=(Math.min(...items.map(o=>o.y))+Math.max(...items.map(o=>o.y)))/2;
+  for(const item of items){item.id=createObjectId();item.x+=x-cx;item.y+=y-cy;if(item.objectGroupId)item.objectGroupName=preset.name;if(item.type==='icon'&&item.src?.startsWith('data:image/')){item.imageId=boardImageLibrary.register(item.src);delete item.src}}remapCopiedObjectGroups(items);snapshot();current().push(...items);individualGroupSelection=null;selectedIds=items.map(o=>o.id);selected=selectedIds[0];tapPlacementArmed=false;selectPlacementTool('select');hideTouchPlacementPreview();renderAndSave();closePaletteAfterPlacement();
+ }
+ function syncManagerControls(){syncPresetHistory();if(manager.hidden)return;manager.querySelector('#registerUserPreset').disabled=!!editingPreset||blocked()||current().filter(o=>selectedIds.includes(o.id)).length<2;manager.querySelector('.preset-manager-hint').hidden=!manager.querySelector('#registerUserPreset').disabled;for(const button of manager.querySelectorAll('[data-preset-action]'))button.disabled=blocked()}
+ new MutationObserver(syncManagerControls).observe(document.body,{attributes:true,attributeFilter:['class']});
+ const beforeManagerInspector=renderInspector;renderInspector=function(){const result=beforeManagerInspector.apply(this,arguments);syncManagerControls();return result};const beforeManagerSelection=renderSelectionOnly;renderSelectionOnly=function(){const result=beforeManagerSelection.apply(this,arguments);syncManagerControls();return result};
+
+ const presetFileFormat='board-of-light-xiv-user-presets';
+ function parsePresetFile(text){
+  const value=JSON.parse(text,(key,value)=>{if(['__proto__','prototype','constructor'].includes(key))throw new Error('使用できない項目が含まれています');return value});
+  if(value?.contents)throw new Error('コンテンツ用のJSONです。コンテンツの読み込みを選んでください');
+  if(!value||value.format!==presetFileFormat||value.version!==1||!Array.isArray(value.presets))throw new Error('対応するユーザープリセットのJSONではありません');
+  const types=new Set(['circle','donut','aoe','line','segment','text','marker','gaze','stack','linestack','targetcircle','knockback','lineknockback','icon']);
+  return value.presets.map((preset,index)=>{
+   if(!preset||typeof preset.name!=='string'||!preset.name.trim()||preset.name.length>80||!Array.isArray(preset.items)||!preset.items.length)throw new Error((index+1)+'件目のプリセットの名称またはオブジェクトが不正です');
+   const id=createObjectId(),name=preset.name.trim();
+   const items=preset.items.map(source=>{
+    if(!source||!types.has(source.type)||!Number.isFinite(source.x)||!Number.isFinite(source.y))throw new Error(name+'：オブジェクトの種類または位置が不正です');
+    for(const [key,value] of Object.entries(source))if(typeof value==='number'&&!Number.isFinite(value))throw new Error(name+'：数値が不正です');
+    for(const key of ['width','height','fontSize'])if(source[key]!=null&&(!Number.isFinite(source[key])||source[key]<=0))throw new Error(name+'：サイズが不正です');
+    for(const key of ['label','iconName','iconBadge','color'])if(source[key]!=null&&typeof source[key]!=='string')throw new Error(name+'：文字情報が不正です');
+    for(const key of ['visible','locked'])if(source[key]!=null&&typeof source[key]!=='boolean')throw new Error(name+'：表示・編集設定が不正です');
+    const item={...source};delete item.id;if(item.color&&!CSS.supports('color',item.color))throw new Error(name+'：色の指定が不正です');
+    if(item.type==='icon'){
+     if(item.imageId)throw new Error(name+'：画像データが含まれていません');
+     if(isTowerObject(item)&&/^assets\/aoe\/tower[1-4]\.svg$/.test(item.src||''))item.src=towerIconSource(item);if(isBossObject(item)&&['assets/enemies/mini-boss.svg','assets/enemies/mid-boss.svg','assets/enemies/small-boss.svg'].includes(item.src))item.src=bossIconSource(item);
+     if(item.src){const src=embeddedPngs[item.src]||item.src;if(typeof src!=='string'||!/^data:image\/(?:png|jpeg|gif|webp|svg\+xml)(?:;|,)/i.test(src))throw new Error(name+'：対応する埋め込み画像ではありません');item.src=src}
+     else if(!isBossObject(item)&&!isTowerObject(item))throw new Error(name+'：画像がありません');
+    }
+    item.locked=false;item.objectGroupId=id;item.objectGroupName=name;delete item.objectGroupRotationOwner;delete item.objectGroupPlacementRotation;delete item.objectGroupOrientationRotation;
+    return item;
+   });return {id,name,items};
+  });
+ }
+ async function exportPresets(){
+  if(editingPreset)throw new Error('名前の入力を確定または取り消してから保存してください');
+  const exported=presets.map(preset=>({...preset,items:preset.items.map(source=>{const item={...source};if(item.type==='icon'){item.src=isTowerObject(item)?towerIconSource(item):isBossObject(item)?bossIconSource(item):objectImageSource(item);if(!item.src)throw new Error(preset.name+'：画像データが見つかりません');delete item.imageId}return item})}));
+  const payload={format:presetFileFormat,version:1,presets:exported};
+  return saveExportBlob(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),'BOARD_OF_LIGHT_XIV_ユーザープリセット.json','application/json','ユーザープリセット');
+ }
+ const presetImportInput=document.createElement('input');presetImportInput.type='file';presetImportInput.accept='.json,application/json';presetImportInput.id='presetFileInput';presetImportInput.hidden=true;document.body.append(presetImportInput);let presetImportMode='append';
+ const presetReplaceDialog=document.createElement('dialog');presetReplaceDialog.id='replacePresetImportDialog';presetReplaceDialog.className='confirm-dialog';presetReplaceDialog.setAttribute('aria-labelledby','replacePresetImportTitle');presetReplaceDialog.innerHTML='<h2 id="replacePresetImportTitle">ユーザープリセットをすべて置き換え</h2><p data-preset-import-summary></p><p>コンテンツと配置済みオブジェクトは変更しません。置き換え後はプリセットの「元に戻す」で復元できます。</p><div class="confirm-actions"><button class="btn" type="button" data-preset-import-cancel autofocus>キャンセル</button><button class="btn primary" type="button" data-preset-import-confirm>置き換える</button></div>';document.body.append(presetReplaceDialog);
+ function confirmPresetReplace(count){return new Promise(resolve=>{presetReplaceDialog.querySelector('[data-preset-import-summary]').textContent='現在のユーザープリセット（'+presets.length+'件）を、読み込んだデータ（'+count+'件）に置き換えます。';let done=false;const finish=accepted=>{if(done)return;done=true;presetReplaceDialog.oncancel=null;presetReplaceDialog.onclose=null;presetReplaceDialog.close();resolve(accepted)};presetReplaceDialog.querySelector('[data-preset-import-cancel]').onclick=()=>finish(false);presetReplaceDialog.querySelector('[data-preset-import-confirm]').onclick=()=>finish(true);presetReplaceDialog.oncancel=event=>{event.preventDefault();finish(false)};presetReplaceDialog.onclose=()=>finish(false);presetReplaceDialog.showModal()})}
+ function choosePresetImport(mode){if(blocked()||editingPreset){notify('編集モードで名前入力を終えてから読み込んでください');return}presetImportMode=mode==='replace'?'replace':'append';presetImportInput.value='';presetImportInput.click()}
+ presetImportInput.onchange=async()=>{const file=presetImportInput.files[0],mode=presetImportMode;if(!file)return;try{const imported=await withDesktopDisplayBusy(async()=>parsePresetFile(await file.text()));if(mode==='replace'&&!await confirmPresetReplace(imported.length))return;if(blocked()||editingPreset)throw new Error('編集モードで名前入力を終えてから読み込んでください');if(mode==='append'&&!imported.length){notify('追加するプリセットがありません');return}if(save(mode==='append'?[...presets,...imported]:imported,{label:mode==='append'?'追加読み込み':'全置き換え'})){if(activeIcon?.userPresetId&&!presets.some(preset=>preset.id===activeIcon.userPresetId)){tapPlacementArmed=false;selectPlacementTool('select')}notify(mode==='append'?imported.length+'件のユーザープリセットを追加しました':'ユーザープリセットを'+imported.length+'件に置き換えました')}}catch(error){console.error('Preset import failed',error);notify('ユーザープリセットを読み込めませんでした：'+(error?.message||String(error)))}finally{presetImportInput.value=''}};
+ document.addEventListener('board-view-mode-changed',()=>{render();syncPresetHistory()});document.addEventListener('keydown',event=>{if(manager.hidden||editingPreset||!materialPane.contains(event.target)||event.target.closest('input,textarea,[contenteditable="true"]')||!(event.ctrlKey||event.metaKey))return;const key=event.key.toLowerCase();if(key==='z'||key==='y'){event.preventDefault();event.stopImmediatePropagation();restorePresetHistory(key==='y'||event.shiftKey)}},true);render();syncPresetHistory();return {place,exportAll:exportPresets,chooseImport:choosePresetImport,registerSelection:()=>{if(blocked()||current().filter(o=>selectedIds.includes(o.id)).length<2)return;const layout=document.querySelector('.layout'),phone=matchMedia('(max-width:850px)').matches,wasManaging=!manager.hidden,wasOpen=phone?layout.classList.contains('phone-materials-open'):materialPane.matches('.pinned,.palette-hover-open,:focus-within'),scroll=wasManaging?manager.scrollTop:materialCategories.scrollTop;const restore=()=>{if(!wasManaging)closeManager();if(wasManaging)manager.scrollTop=scroll;else materialCategories.scrollTop=scroll;if(!wasOpen){if(materialPane.contains(document.activeElement))document.activeElement.blur();materialPane.dispatchEvent(new Event('reset-material-hover'));if(phone)document.dispatchEvent(new Event('close-material-pane'))}else if(!phone)manage.focus({preventScroll:true})};if(matchMedia('(max-width:850px)').matches&&!document.querySelector('.layout').classList.contains('phone-materials-open'))document.querySelector('.phone-material-pin')?.click();manage.focus({preventScroll:true});openManager();registerSelection(restore)},thumbnail:id=>{const p=presets.find(p=>p.id===id);return p?thumbnail(p.items):null}};
 })();
 // Desktop keeps history/save status together and the mode next to the menu.
 (function placeDesktopModeBesideMenu(){
@@ -935,10 +1055,11 @@ const userPresetLibrary=(()=>{
 // Reflect the actual popup state on its opener, including indirect dismissal.
 (()=>{
  const watched=new WeakSet();let pending=false;
- function sync(){pending=false;const popups=[...document.querySelectorAll('[role="menu"]')].filter(menu=>!menu.hidden&&menu.getClientRects().length>0);for(const button of document.querySelectorAll('button[aria-haspopup="menu"][aria-controls]')){const menu=document.getElementById(button.getAttribute('aria-controls')),open=!!menu&&(menu.id==='headerActions'?document.querySelector('.top').classList.contains('phone-menu-open'):!menu.hidden&&menu.getClientRects().length>0)||popups.some(menu=>menu._opener===button);button.classList.toggle('menu-open-trigger',open);const value=String(open);if(button.getAttribute('aria-expanded')!==value)button.setAttribute('aria-expanded',value)}}
+ function sync(){pending=false;const buttons=[...document.querySelectorAll('button[aria-haspopup="menu"][aria-controls]')],menus=new Map(),counts=new Map();for(const button of buttons){const id=button.getAttribute('aria-controls');counts.set(id,(counts.get(id)||0)+1);if(!menus.has(id))menus.set(id,document.getElementById(id))}for(const menu of document.querySelectorAll('[role="menu"]'))if(!menus.has(menu.id))menus.set(menu.id,menu);const visible=new Map();for(const [id,menu] of menus)visible.set(id,!!menu&&(id==='headerActions'?document.querySelector('.top').classList.contains('phone-menu-open'):!menu.hidden&&menu.getClientRects().length>0));for(const menu of menus.values())if(menu?._openerResolver)menu._opener=menu._openerResolver();const openers=new Set([...menus.values()].filter(menu=>menu&&visible.get(menu.id)&&menu._opener).map(menu=>menu._opener));const shared=new Set(['userPresetMenu','phaseItemMenu','contentItemMenu','objectContextMenu']);const changes=buttons.map(button=>{const id=button.getAttribute('aria-controls'),menu=menus.get(id);return {button,open:openers.has(button)||!!visible.get(id)&&!menu?._opener&&!shared.has(id)&&counts.get(id)===1}});for(const {button,open} of changes){if(button.classList.contains('menu-open-trigger')!==open)button.classList.toggle('menu-open-trigger',open);const value=String(open);if(button.getAttribute('aria-expanded')!==value)button.setAttribute('aria-expanded',value)}}
+
  function schedule(){if(pending)return;pending=true;queueMicrotask(sync)}
  function watch(){for(const menu of document.querySelectorAll('[role="menu"],#headerActions')){if(watched.has(menu))continue;watched.add(menu);new MutationObserver(schedule).observe(menu,{attributes:true,attributeFilter:['hidden','style']})}schedule()}
- new MutationObserver(watch).observe(document.body,{childList:true});new MutationObserver(schedule).observe(document.querySelector('.top'),{attributes:true,attributeFilter:['class']});watch();
+ for(const id of ['pages','objectList','contentOptions','userPresetManager']){const list=document.getElementById(id);if(list)new MutationObserver(schedule).observe(list,{childList:true,subtree:true})}new MutationObserver(watch).observe(document.body,{childList:true});new MutationObserver(schedule).observe(document.querySelector('.top'),{attributes:true,attributeFilter:['class']});watch();
 })();
 
 // Match the mode button's left edge to the visible desktop property pane.

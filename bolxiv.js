@@ -1,3 +1,5 @@
+// Aggregate independent content and user-preset persistence without merging their data.
+window.BolxivSaveStatus=(()=>{const states=new Map([['content','保存済み'],['presets','保存済み']]);function set(source,text){states.set(source,text);const values=[...states.values()],combined=values.includes('未保存')?'未保存':values.includes('未保存の変更あり')?'未保存の変更あり':values.includes('保存中…')?'保存中…':'保存済み',node=document.getElementById('saved');if(node&&node.textContent!==combined)node.textContent=combined;document.dispatchEvent(new CustomEvent('bolxiv-save-status',{detail:{source,text:combined}}));return combined}return {set,get:source=>states.get(source)}})();
 // One editor per browser storage origin. Web Locks survive background throttling;
 // LAN HTTP uses an IndexedDB lease, checked atomically before every write.
 window.BolxivSession=(()=>{
@@ -63,7 +65,7 @@ window.BolxivSession=(()=>{
 
 async function initializeBoardStorage(){
  const key='tactica-board-v1';let db=null,storageError=null,pending=null,worker=null,lastSaved=null,revision=0,clearing=false,warned=false,editingSavePending=false,savedImageIds=new Set();
- function status(text){const node=document.getElementById('saved');if(node)node.textContent=text==='保存済み'&&typeof boardSavePending!=='undefined'&&boardSavePending&&!boardSaveNavigationOnly?'未保存の変更あり':text}
+ function status(text){window.BolxivSaveStatus.set('content',text==='保存済み'&&typeof boardSavePending!=='undefined'&&boardSavePending&&!boardSaveNavigationOnly?'未保存の変更あり':text)}
  function report(error){if(!window.BolxivSession.owned)return;status('未保存');console.warn('Board persistence failed',error);if(!warned){warned=true;if(typeof notify==='function')notify('自動保存できません：'+(error?.message||String(error))+'。エクスポートで保存してください。')}}
  function transaction(mode,action){return new Promise((resolve,reject)=>{let tx;try{tx=db.transaction(['boards','images'],mode);tx.oncomplete=()=>resolve();tx.onabort=()=>reject(tx.error||new Error('保存処理が中断されました'));tx.onerror=()=>{};const boards=tx.objectStore('boards'),images=tx.objectStore('images');if(mode==='readwrite')window.BolxivSession.guardWrite(boards,tx,()=>action(boards,images));else action(boards,images)}catch(error){if(tx)try{tx.abort()}catch{}reject(error)}})}
  async function drain(){while(pending&&!clearing){const item=pending;pending=null;try{

@@ -402,7 +402,7 @@ function phoneReaderLayoutMetrics(panel,footerHeight,rowHeight,zoom=boardDisplay
  }
  listButton.addEventListener('click',()=>{if(active&&!readingMode)rememberViewSetting('desktopObjectListExpanded',listButton.getAttribute('aria-expanded')==='true');syncResizeHandle()});
  const renderBeforeTools=render;render=function(){renderBeforeTools();syncReadingMode();selectionChanged();syncPropertyHeadings();syncColumns()};
- const selectionBeforeTools=renderSelectionOnly;renderSelectionOnly=function(){selectionBeforeTools();selectionChanged();syncPropertyHeadings();syncColumns()};
+ const selectionBeforeTools=renderSelectionOnly;renderSelectionOnly=function(){selectionBeforeTools.apply(this,arguments);selectionChanged();syncPropertyHeadings();syncColumns()};
  new MutationObserver(()=>{syncReadingMode();syncColumns()}).observe(document.body,{attributes:true,attributeFilter:['class']});
  desktop.addEventListener('change',()=>{place();syncPropertyHeadings()});place();syncPropertyHeadings();
 })();
@@ -488,6 +488,7 @@ function phoneReaderLayoutMetrics(panel,footerHeight,rowHeight,zoom=boardDisplay
   const enabled=mobile.matches&&!boardReadOnly;panel.classList.toggle('phone-object-tabbed',enabled);panel.dataset.objectTab=selected;panel.dataset.objectExpanded=(selected==='list'?listButton:propertyButton).getAttribute('aria-expanded');
   for(const entry of entries){entry.title.innerHTML=entry.key==='list'?'<strong>オブジェクト リスト</strong> / プロパティ':'<strong>オブジェクト</strong> リスト / <strong>プロパティ</strong>';entry.title.title=entry.key==='properties'?entry.heading.textContent.trim():'オブジェクトリスト';const open=entry.heading.getAttribute('aria-expanded')==='true';entry.title.setAttribute('aria-expanded',String(open));entry.collapse.textContent=open?'−':'＋';entry.collapse.setAttribute('aria-expanded',String(open));entry.collapse.setAttribute('aria-label',(entry.key==='list'?'オブジェクトリスト':'オブジェクトプロパティ')+(open?'を閉じる':'を開く'))}
  }
+ panel.addEventListener('reveal-object-list',()=>{if(!mobile.matches)return;selected='list';rememberViewSetting('phoneObjectTab',selected);if(listButton.getAttribute('aria-expanded')!=='true')listButton.click();sync()});
  for(const heading of [listButton,propertyButton])new MutationObserver(sync).observe(heading,{attributes:true,attributeFilter:['aria-expanded'],childList:true,subtree:true,characterData:true});
  new MutationObserver(sync).observe(document.body,{attributes:true,attributeFilter:['class']});
  const before=render;render=function(){before();sync()};mobile.addEventListener('change',sync);sync();
