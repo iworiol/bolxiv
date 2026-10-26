@@ -1810,42 +1810,42 @@
   background:#ddd;
   margin:5px 4px;
 }
-#replaceImportDialog {
+:is(#replaceImportDialog,#replacePresetImportDialog) {
   box-sizing:border-box;
   background:#fff;
   color:#000;
   max-height:calc(100dvh - 30px);
   overflow:auto;
 }
-#replaceImportDialog h2 {
+:is(#replaceImportDialog,#replacePresetImportDialog) h2 {
   font-size:14px;
   margin:0 0 16px;
 }
-#replaceImportDialog button {
+:is(#replaceImportDialog,#replacePresetImportDialog) button {
   white-space:normal;
 }
-#replaceImportDialog .confirm-actions {
+:is(#replaceImportDialog,#replacePresetImportDialog) .confirm-actions {
   flex-wrap:wrap;
 }
-#replaceImportDialog .btn {
+:is(#replaceImportDialog,#replacePresetImportDialog) .btn {
   background:#fff!important;
   color:#000!important;
   -webkit-text-fill-color:#000!important;
   border:1px solid #999!important;
 }
-#replaceImportDialog .btn.primary {
+:is(#replaceImportDialog,#replacePresetImportDialog) .btn.primary {
   background:var(--accent)!important;
   color:#fff!important;
   -webkit-text-fill-color:#fff!important;
   border-color:var(--accent)!important;
 }
-#replaceImportDialog .btn:hover:not(:where(.phone-touch-mode *)):not(:disabled) {
+:is(#replaceImportDialog,#replacePresetImportDialog) .btn:hover:not(:where(.phone-touch-mode *)):not(:disabled) {
   background:var(--blue)!important;
   color:#fff!important;
   -webkit-text-fill-color:#fff!important;
   border-color:var(--blue)!important;
 }
-#replaceImportDialog .btn:disabled {
+:is(#replaceImportDialog,#replacePresetImportDialog) .btn:disabled {
   opacity:.5;
   cursor:wait;
 }
