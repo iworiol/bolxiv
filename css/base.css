@@ -1921,7 +1921,7 @@ input[type=file] {
 .right .section-title,.right .field label,.right .object-index,.right .inspector-empty,.right .object-empty,.right .object-list-help {
   color:#000!important;
 }
-.right button,.right select,.right input:not([type=range]) {
+.right button:not(.color-swatch):not([data-color-value]),.right select,.right input:not([type=range]) {
   background:#fff!important;
   color:#000!important;
   border-color:#999!important;
