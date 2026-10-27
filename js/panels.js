@@ -276,26 +276,39 @@ function phoneReaderLayoutMetrics(panel,footerHeight,rowHeight,zoom=boardDisplay
  let readingMode=false,editingTool=currentTool,editingListOpen=true;
  let selectedPhaseTool=['phase','memo'].includes(currentTool)?currentTool:viewSettings.desktopPhasePanelTab==='memo'?'memo':'phase';
  const phaseHeading=document.createElement('div');phaseHeading.className='desktop-phase-shared-heading';phaseHeading.hidden=true;
+ const contentPhasePanel=document.createElement('section');contentPhasePanel.className='desktop-content-phase-panel';contentPhasePanel.hidden=true;document.getElementById('contentPanel').append(contentPhasePanel);
+ let phasePanelOpen=viewSettings.desktopContentPhaseExpanded!==false;
+ if(currentTool==='phase'||currentTool==='memo')currentTool='object';
+ const contentResize=document.getElementById('phasePropertyResize'),contentList=phaseListButton.closest('.page-controls');
+ let contentShare=Number.isFinite(viewSettings.desktopContentPhaseShare)?Math.max(.1,Math.min(.9,viewSettings.desktopContentPhaseShare)):.5,contentGesture=null;
+ function updateContentSplit(){if(!active)return;contentResize.setAttribute('aria-disabled',String(!phasePanelOpen));if(!phasePanelOpen){contentList.style.removeProperty('flex');return}const available=contentList.getBoundingClientRect().height+contentPhasePanel.getBoundingClientRect().height;if(available<=0)return;const height=Math.max(100,Math.min(available-180,available*contentShare));contentList.style.setProperty('flex','0 0 '+height+'px','important');contentResize.setAttribute('aria-valuemin','10');contentResize.setAttribute('aria-valuemax','90');contentResize.setAttribute('aria-valuenow',String(Math.round(contentShare*100)))}
+ contentResize.addEventListener('pointerdown',event=>{if(!active||!phasePanelOpen||event.button!==0)return;event.preventDefault();contentGesture={id:event.pointerId,y:event.clientY,height:contentList.getBoundingClientRect().height,total:contentList.getBoundingClientRect().height+contentPhasePanel.getBoundingClientRect().height};contentResize.setPointerCapture(event.pointerId);contentResize.classList.add('resizing')});
+ contentResize.addEventListener('pointermove',event=>{if(!contentGesture||event.pointerId!==contentGesture.id)return;contentShare=Math.max(.1,Math.min(.9,(contentGesture.height+event.clientY-contentGesture.y)/contentGesture.total));rememberViewSetting('desktopContentPhaseShare',contentShare);updateContentSplit()});
+ for(const name of ['pointerup','pointercancel','lostpointercapture'])contentResize.addEventListener(name,()=>{contentGesture=null;contentResize.classList.remove('resizing')});
+ contentResize.addEventListener('keydown',event=>{if(!active||!phasePanelOpen||!['ArrowUp','ArrowDown'].includes(event.key))return;event.preventDefault();contentShare=Math.max(.1,Math.min(.9,contentShare+(event.key==='ArrowDown'?.02:-.02)));rememberViewSetting('desktopContentPhaseShare',contentShare);updateContentSplit()});
+ new ResizeObserver(()=>updateContentSplit()).observe(document.getElementById('contentPanel'));
  const phaseTitle=document.createElement('button');phaseTitle.type='button';phaseTitle.id='desktopPhasePanelTitle';phaseTitle.className='desktop-phase-panel-title';
  const phaseSwitch=document.createElement('button');phaseSwitch.type='button';phaseSwitch.id='desktopPhaseSwitch';phaseSwitch.className='desktop-phase-switch';phaseSwitch.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h16l-4-4M20 16H4l4 4"/></svg>';
  const phaseCollapse=document.createElement('button');phaseCollapse.type='button';phaseCollapse.id='desktopPhaseSectionToggle';phaseCollapse.className='desktop-phase-collapse';
  for(const button of [phaseTitle,phaseSwitch,phaseCollapse])button.setAttribute('aria-controls',phaseBody.id+' '+memo.id);
  phaseHeading.append(phaseTitle,phaseSwitch,phaseCollapse);
  function syncPhaseHeading(){
-  const group=!!data.activePhaseGroup;rail.classList.toggle('desktop-group-tools',group);phaseHeading.hidden=!active||group;
-  const open=currentTool==='phase'||currentTool==='memo';phaseHeading.dataset.expanded=String(open);
+  const group=!!data.activePhaseGroup;rail.classList.toggle('desktop-group-tools',group);phaseHeading.hidden=!active||group;contentPhasePanel.classList.toggle('desktop-group-tools',group);
+  const open=phasePanelOpen;phaseHeading.dataset.expanded=String(open);
   const phaseLabel='<strong>フェーズ プロパティ</strong> / ノート',memoLabel='<strong>フェーズ</strong> プロパティ / <strong>ノート</strong>';
   const markup='<span class="desktop-phase-label">'+(selectedPhaseTool==='phase'?phaseLabel:memoLabel)+'</span><span class="desktop-phase-label-measure" aria-hidden="true">'+phaseLabel+'</span><span class="desktop-phase-label-measure" aria-hidden="true">'+memoLabel+'</span>';
   if(phaseTitle.innerHTML!==markup)phaseTitle.innerHTML=markup;
   phaseTitle.setAttribute('aria-expanded',String(open));phaseTitle.setAttribute('aria-label',(selectedPhaseTool==='phase'?'フェーズプロパティ':'フェーズノート')+'を選択中。設定・ノート欄を'+(open?'閉じる':'開く'));
   phaseSwitch.title=selectedPhaseTool==='phase'?'フェーズノートを表示':'フェーズプロパティを表示';phaseSwitch.setAttribute('aria-label',phaseSwitch.title);
   phaseCollapse.textContent=open?'−':'＋';phaseCollapse.title=open?'設定・ノートを閉じる':'設定・ノートを開く';phaseCollapse.setAttribute('aria-label',phaseCollapse.title);phaseCollapse.setAttribute('aria-expanded',String(open));
-  for(const button of [phaseTitle,phaseSwitch,phaseCollapse])button.disabled=readingMode;
+  for(const button of [phaseTitle,phaseSwitch,phaseCollapse])button.disabled=false;
+  if(active){contentPhasePanel.hidden=false;phase.hidden=!open||!group&&(selectedPhaseTool!=='phase'||readingMode);memo.hidden=!open||!group&&(selectedPhaseTool!=='memo'&&!readingMode);phase.classList.toggle('is-open',!phase.hidden);memo.classList.toggle('is-open',!memo.hidden);phaseBody.hidden=phase.hidden;phaseBody.classList.toggle('hidden',phase.hidden);phaseBody.style.display=phase.hidden?'none':'flex';memo.open=!memo.hidden;phaseButton.setAttribute('aria-expanded',String(!phase.hidden))}
+  updateContentSplit();
  }
- function togglePhasePanel(){if(active&&!readingMode)showTool(currentTool==='phase'||currentTool==='memo'?'':selectedPhaseTool)}
+ function togglePhasePanel(){if(active){phasePanelOpen=!phasePanelOpen;rememberViewSetting('desktopContentPhaseExpanded',phasePanelOpen);syncPhaseHeading()}}
  phaseTitle.onclick=togglePhasePanel;phaseCollapse.onclick=togglePhasePanel;
  phaseHeading.addEventListener('click',event=>{if(!event.target.closest('button'))togglePhasePanel()});
- phaseSwitch.onclick=()=>{if(!active||readingMode)return;selectedPhaseTool=selectedPhaseTool==='phase'?'memo':'phase';rememberViewSetting('desktopPhasePanelTab',selectedPhaseTool);if(currentTool==='phase'||currentTool==='memo')showTool(selectedPhaseTool);else syncPhaseHeading()};
+ phaseSwitch.onclick=()=>{if(!active)return;selectedPhaseTool=selectedPhaseTool==='phase'?'memo':'phase';rememberViewSetting('desktopPhasePanelTab',selectedPhaseTool);syncPhaseHeading()};
 
  let twoColumns=viewSettings.desktopToolsTwoColumns===true;
  const columnsButton=document.createElement('button');columnsButton.type='button';columnsButton.className='desktop-columns-toggle';columnsButton.setAttribute('aria-controls',rail.id='desktopPhaseSidebar');list.append(columnsButton);
@@ -355,11 +368,12 @@ function phoneReaderLayoutMetrics(panel,footerHeight,rowHeight,zoom=boardDisplay
   syncResizeHandle();
  }
  function showTool(key,remember=true){
+  if(key==='phase'||key==='memo'){selectedPhaseTool=key;phasePanelOpen=true;syncPhaseHeading();return}
   currentTool=key;
   if(!data.activePhaseGroup&&(key==='phase'||key==='memo')){selectedPhaseTool=key;if(remember)rememberViewSetting('desktopPhasePanelTab',key)}
   if(active&&twoColumns&&key&&!readingMode)setDisclosure(listButton,document.getElementById('layerListPanel'),true);
-  object.classList.toggle('is-open',key==='object');phase.classList.toggle('is-open',key==='phase');memo.classList.toggle('is-open',key==='memo');
-  setDisclosure(objectButton,objectBody,key==='object');setDisclosure(phaseButton,phaseBody,key==='phase');memo.open=key==='memo';
+  object.classList.toggle('is-open',key==='object');
+  setDisclosure(objectButton,objectBody,key==='object');
   if(remember)rememberViewSetting('desktopPhaseTool',key);
   syncPhaseHeading();
  }
@@ -378,16 +392,16 @@ function phoneReaderLayoutMetrics(panel,footerHeight,rowHeight,zoom=boardDisplay
    mobileState={object:objectButton.getAttribute('aria-expanded')==='true',phase:phaseButton.getAttribute('aria-expanded')==='true',memo:memo.open,phaseList:phaseListButton.getAttribute('aria-expanded')==='true'};
    active=true;layout.classList.add('desktop-phase-tools');rail.hidden=false;
    setPhaseList(true);phaseListButton.disabled=true;phaseListButton.title='フェーズリスト';phaseListButton.setAttribute('role','heading');phaseListButton.setAttribute('aria-level','2');
-   rail.append(list,resizeHandle,object,phaseHeading,phase,memo);
+   rail.append(list,resizeHandle,object);contentPhasePanel.append(phaseHeading,phase,memo);
    if(typeof viewSettings.desktopObjectListExpanded==='boolean')setDisclosure(listButton,document.getElementById('layerListPanel'),viewSettings.desktopObjectListExpanded);
    showTool(currentTool,false);syncReadingMode();selectionChanged();syncPropertyHeadings();syncColumns();
   }else{
-   active=false;
+   active=false;contentList.style.removeProperty('flex');
    syncReadingMode();
    objectButton.textContent='オブジェクト';objectButton.title='オブジェクト設定を開閉';
    phaseButton.firstChild.textContent='フェーズ：';phaseButton.title='選択中フェーズの設定を開閉';
    for(const {node,anchor} of homes)anchor.after(node);
-   rail.hidden=true;layout.classList.remove('desktop-phase-tools');syncColumns();
+   rail.hidden=true;contentPhasePanel.hidden=true;phase.hidden=false;memo.hidden=false;layout.classList.remove('desktop-phase-tools');syncColumns();
    phaseListButton.disabled=false;phaseListButton.title='フェーズリストを開閉';phaseListButton.removeAttribute('role');phaseListButton.removeAttribute('aria-level');setPhaseList(mobileState.phaseList);
    for(const node of [object,phase,memo])node.classList.remove('is-open');
    setDisclosure(objectButton,objectBody,mobileState.object);setDisclosure(phaseButton,phaseBody,mobileState.phase);memo.open=mobileState.memo;
@@ -569,7 +583,7 @@ function phoneReaderLayoutMetrics(panel,footerHeight,rowHeight,zoom=boardDisplay
   {title:'サイズを変える',text:'円範囲をクリックして選び、右側のプロパティで「サイズ」を150px以上にしてください。スライダーでも数値入力でも変更できます。',target:()=>get('widthSpin')||document.querySelector('#objects .obj'),done:()=>!!circle()&&circle().width>=150},
   {title:'矢印キーで移動する',text:'キャンバス上の円範囲をクリックして選び、上下左右キーで動かしてください。数値欄を入力中なら、先に円範囲をクリックします。',target:()=>document.querySelector('#objects .obj'),enter:()=>{const item=circle();session.position=item?{x:item.x,y:item.y}:null},done:()=>{const item=circle();return !!item&&!!session.position&&(Math.abs(item.x-session.position.x)>.001||Math.abs(item.y-session.position.y)>.001)}},
   {title:'フェーズをコピーする',text:'フェーズリスト見出し右側のコピーを押し、「このコンテンツにコピー」を選んでください。配置と設定を引き継いだ次のフェーズを作れます。',target:()=>get('copyPage'),enter:()=>{session.sourcePage=data.page;session.sourceId=circle()?.id},done:()=>data.pages.length>=2&&data.page!==session.sourcePage&&!!circle()&&circle().id!==session.sourceId},
-  {title:'ノートを残す',text:'右側の「フェーズ プロパティ / ノート」の＋で欄を開き、切り替えボタンでノートを表示します。「ここで集合」など短いメモを入力してください。ノートはフェーズごとに保存されます。',target:()=>get('phaseMemo').open?get('phaseMemo').querySelector('textarea'):get('desktopPhaseSectionToggle')?.getAttribute('aria-expanded')==='false'?get('desktopPhaseSectionToggle'):get('desktopPhaseSwitch'),done:()=>!!data.pageNotes?.[data.page]?.trim()},
+  {title:'ノートを残す',text:'コンテンツペイン下部の「フェーズ プロパティ / ノート」の＋で欄を開き、切り替えボタンでノートを表示します。「ここで集合」など短いメモを入力してください。ノートはフェーズごとに保存されます。',target:()=>get('phaseMemo').open?get('phaseMemo').querySelector('textarea'):get('desktopPhaseSectionToggle')?.getAttribute('aria-expanded')==='false'?get('desktopPhaseSectionToggle'):get('desktopPhaseSwitch'),done:()=>!!data.pageNotes?.[data.page]?.trim()},
   {title:'元に戻す・やり直す',text:'ノート欄の外をクリックし、左上の「元に戻す」、続けて「やり直す」を押してください。入力したノートが戻れば完了です。',target:()=>get(session.sawUndo?'redo':'undo'),enter:()=>{session.note=data.pageNotes[data.page];session.notePage=data.page;session.sawUndo=false},done:()=>{const note=data.pageNotes?.[session.notePage]||'';if(note!==session.note)session.sawUndo=true;return session.sawUndo&&note===session.note}}
  ];
  const mobileSteps=[

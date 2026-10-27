@@ -29,7 +29,7 @@
   white-space:nowrap;
   z-index:3;
 }
-.stagewrap>.layout-heading #selectionTitle {
+.stagewrap>.layout-heading :is(#selectionTitle,#guideEditorTitle) {
   min-width:0;
   max-width:100%;
   overflow:hidden;
@@ -204,7 +204,7 @@
   height:84%;
   border-left:1px dashed #c8ced4;
 }
-#toggleObjectList #selectionTitle {
+#toggleObjectList :is(#selectionTitle,#guideEditorTitle) {
   display:block;
   max-width:100%;
   overflow:hidden;
@@ -667,7 +667,7 @@
   color:#fff!important;
   -webkit-text-fill-color:#fff!important;
 }
-#selectionTitle {
+:is(#selectionTitle,#guideEditorTitle) {
   color:#fff!important;
   -webkit-text-fill-color:#fff!important;
 }
@@ -1379,7 +1379,7 @@ body.resizing-content-pane,body.resizing-content-pane * {
   align-items:center;
   gap:10px;
 }
-#toggleObjectList #selectionTitle {
+#toggleObjectList :is(#selectionTitle,#guideEditorTitle) {
   flex:1;
   min-width:0;
   text-align:left;
@@ -1463,7 +1463,7 @@ body.resizing-content-pane,body.resizing-content-pane * {
   border-radius:0;
   filter:none;
 }
-.right .board-title-row>#toggleObjectList #selectionTitle,.right .board-title-row>.board-zoom-value {
+.right .board-title-row>#toggleObjectList :is(#selectionTitle,#guideEditorTitle),.right .board-title-row>.board-zoom-value {
   color:#fff!important;
   -webkit-text-fill-color:#fff!important;
 }
@@ -3112,7 +3112,7 @@ dialog.confirm-dialog {
   padding-left:10px;
 }
 /* Rotation artwork must remain visible over the shared button theme. */
-#objectControls .handle.rotate,#objectControls .handle.rotate:is(:hover,:focus,:active,.phone-control-pressed){background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important}
+:is(#objectControls,.guide-selection-controls) .handle.rotate,:is(#objectControls,.guide-selection-controls) .handle.rotate:is(:hover,:focus,:active,.phone-control-pressed){background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important}
 
 .object-context-menu>button[hidden]{display:none!important}
 

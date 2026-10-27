@@ -1383,7 +1383,7 @@
     height:16px;
     pointer-events:none;
   }
-  .layout[data-phone-pane="canvas"] .right .board-title-row>#toggleObjectList>#selectionTitle {
+  .layout[data-phone-pane="canvas"] .right .board-title-row>#toggleObjectList>:is(#selectionTitle,#guideEditorTitle) {
     display:flex;
     min-width:0;
     max-width:100%;
@@ -1563,7 +1563,7 @@
   .app>.layout[data-phone-pane="canvas"].phone-content-open #objectLayerPanel>.phone-material-pin {
     display:none!important;
   }
-  .app>.layout[data-phone-pane="canvas"].phone-content-open #objectControls {
+  .app>.layout[data-phone-pane="canvas"].phone-content-open :is(#objectControls,.guide-selection-controls) {
     display:none!important;
   }
   .app>.layout[data-phone-pane="canvas"].phone-content-open #objectLayerPanel#objectLayerPanel#objectLayerPanel {
@@ -2235,19 +2235,19 @@ body:not(.board-read-only) .page-list-box>.page-tab-actions {
 
 /* Separate touch movement from resizing, with the same artwork style as rotation. */
 @media(max-width:850px){
- #objectControls .controlbox .move-handle{width:32px;height:32px;left:calc(50% - 16px);top:calc(100% + var(--rotation-handle-distance,70px) - 32px);background:transparent!important;border:0!important;border-radius:0;cursor:grab;z-index:5;box-shadow:none!important;padding:0!important;display:grid;place-items:center;filter:none}
- #objectControls .controlbox .move-handle:is(:hover,:focus,:focus-visible,:active,.phone-control-pressed){background:transparent!important;border:0!important;box-shadow:none!important}
- #objectControls .controlbox .move-handle:active{cursor:grabbing}
- #objectControls .controlbox .move-handle::before{content:"";position:absolute;left:50%;bottom:100%;height:calc(var(--rotation-handle-distance,70px) - 32px);border-left:1px solid var(--handle-connector-color,#42b8ff);pointer-events:none}
- #objectControls .controlbox .move-handle svg{display:block;width:100%;height:100%;pointer-events:none;overflow:visible}
+ :is(#objectControls,.guide-selection-controls) .controlbox .move-handle{width:32px;height:32px;left:calc(50% - 16px);top:calc(100% + var(--rotation-handle-distance,70px) - 32px);background:transparent!important;border:0!important;border-radius:0;cursor:grab;z-index:5;box-shadow:none!important;padding:0!important;display:grid;place-items:center;filter:none}
+ :is(#objectControls,.guide-selection-controls) .controlbox .move-handle:is(:hover,:focus,:focus-visible,:active,.phone-control-pressed){background:transparent!important;border:0!important;box-shadow:none!important}
+ :is(#objectControls,.guide-selection-controls) .controlbox .move-handle:active{cursor:grabbing}
+ :is(#objectControls,.guide-selection-controls) .controlbox .move-handle::before{content:"";position:absolute;left:50%;bottom:100%;height:calc(var(--rotation-handle-distance,70px) - 32px);border-left:1px solid var(--handle-connector-color,#42b8ff);pointer-events:none}
+ :is(#objectControls,.guide-selection-controls) .controlbox .move-handle svg{display:block;width:100%;height:100%;pointer-events:none;overflow:visible}
 }
 
 /* Shared feedback: change only the white artwork while a handle is held. */
-#objectControls .handle{ -webkit-tap-highlight-color:transparent }
-#objectControls .handle:focus:not(:focus-visible){outline:none}
-#objectControls .handle:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
-#objectControls .handle:not(.rotate):not(.move-handle):is(:active,.phone-control-pressed){background:var(--blue)!important}
-#objectControls .handle:is(.rotate,.move-handle):is(:active,.phone-control-pressed){background:transparent!important;box-shadow:none!important}
-#objectControls .handle:is(.rotate,.move-handle):is(:active,.phone-control-pressed) svg path:last-child{stroke:var(--blue)!important}
+:is(#objectControls,.guide-selection-controls) .handle{ -webkit-tap-highlight-color:transparent }
+:is(#objectControls,.guide-selection-controls) .handle:focus:not(:focus-visible){outline:none}
+:is(#objectControls,.guide-selection-controls) .handle:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+:is(#objectControls,.guide-selection-controls) .handle:not(.rotate):not(.move-handle):is(:active,.phone-control-pressed){background:var(--blue)!important}
+:is(#objectControls,.guide-selection-controls) .handle:is(.rotate,.move-handle):is(:active,.phone-control-pressed){background:transparent!important;box-shadow:none!important}
+:is(#objectControls,.guide-selection-controls) .handle:is(.rotate,.move-handle):is(:active,.phone-control-pressed) svg path:last-child{stroke:var(--blue)!important}
 
 @media(max-width:850px){.app>.layout.phone-materials-open>.left #enemyPanel:not([hidden]):not(.hidden){display:grid!important}}

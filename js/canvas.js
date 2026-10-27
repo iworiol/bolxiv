@@ -231,34 +231,37 @@ function createFieldImageLayer(className){const visual=document.createElement('d
 function renderImage4Fields(){let holder=stage.querySelector('.image4-fields');if(activeBoardShape()!=='image4'){holder?.remove();return}if(!holder){holder=document.createElement('div');holder.className='image4-fields';for(let i=0;i<4;i++){const cell=document.createElement('div');cell.className='image4-cell';cell.append(createFieldImageLayer('field-image-tile'));holder.append(cell)}stage.insertBefore(holder,stage.firstChild)}for(const img of holder.querySelectorAll('img'))img.src=fieldImageSource()}
 
 // Field guides are phase artwork, independent of the editing grid.
+function fieldGuideReference(board,index){const shape=board.pageBoardShapes?.[index]||board.boardShape,size=board.pageFieldSizes?.[index]||{width:shape==='portrait'?320:538,height:shape==='landscape'?320:538};return {width:size.width,height:size.height,shape:shape==='circle'?'circle':shape==='image4'?'image4':'rect'}}
 function fieldGuides(board,index){
  const value=board.pageFieldGuides?.[index]||{},integer=(key,fallback,min,max)=>Number.isFinite(value[key])?Math.max(min,Math.min(max,Math.round(value[key]))):fallback;
  const shapes=[],ids=new Set();
  for(const item of (Array.isArray(value.shapes)?value.shapes:[]).slice(0,500)){
-  if(!item||!['line','circle','rect'].includes(item.type)||!['x','y','width','height','rotation'].every(key=>Number.isFinite(item[key])))continue;
+  if(!item||!['line','circle','rect','triangle'].includes(item.type)||!['x','y','width','height','rotation'].every(key=>Number.isFinite(item[key])))continue;
   const id=typeof item.id==='string'&&/^[\w-]{1,80}$/.test(item.id)?item.id:'guide-'+shapes.length;if(ids.has(id))continue;ids.add(id);
   shapes.push({id,type:item.type,x:Math.max(0,Math.min(640,item.x)),y:Math.max(0,Math.min(640,item.y)),width:Math.max(1,Math.min(1280,item.width)),height:Math.max(1,Math.min(1280,item.height)),rotation:((item.rotation%360)+360)%360});
  }
- return {circles:value.circles===true,rays:value.rays===true,rings:integer('rings',3,2,12),sectors:integer('sectors',8,2,32),rayLength:integer('rayLength',100,0,100),rayBoundary:value.rayBoundary==='circle'?'circle':'field',rayScale:Number.isFinite(value.rayScale)?Math.max(0,Math.min(32,value.rayScale)):null,rotation:integer('rotation',0,0,359),color:/^#[0-9a-f]{6}$/i.test(value.color)?value.color:'#ffffff',opacity:integer('opacity',50,0,100),shapes};
+ const source=value.reference&&typeof value.reference==='object'?value.reference:value.circles||value.rays||shapes.length?fieldGuideReference(board,index):null;
+ const reference=source?{width:Number.isFinite(source.width)?Math.max(64,Math.min(960,source.width)):538,height:Number.isFinite(source.height)?Math.max(64,Math.min(960,source.height)):538,shape:['circle','image4'].includes(source.shape)?source.shape:'rect'}:null;
+ return {reference,circles:value.circles===true,rays:value.rays===true,rings:integer('rings',3,2,12),sectors:integer('sectors',8,2,32),rayLength:integer('rayLength',100,0,100),rayBoundary:value.rayBoundary==='circle'?'circle':'field',rayScale:Number.isFinite(value.rayScale)?Math.max(0,Math.min(32,value.rayScale)):null,rotation:integer('rotation',0,0,359),color:/^#[0-9a-f]{6}$/i.test(value.color)?value.color:'#ffffff',opacity:integer('opacity',50,0,100),shapes};
 }
 function fieldGuideRayMetrics(board=data,index=board.page){
- const size=board.pageFieldSizes?.[index]||{width:538,height:538},tiled=board.pageBoardShapes?.[index]==='image4',rx=Math.min(size.width/2,tiled?160:Infinity),ry=Math.min(size.height/2,tiled?160:Infinity),circle=Math.min(rx,ry),square=Math.hypot(rx,ry);return {circle,square,maximum:square/circle};
+ const size=fieldGuides(board,index).reference||fieldGuideReference(board,index),tiled=size.shape==='image4',rx=Math.min(size.width/2,tiled?160:Infinity),ry=Math.min(size.height/2,tiled?160:Infinity),circle=Math.min(rx,ry),square=Math.hypot(rx,ry);return {circle,square,maximum:square/circle};
 }
 function fieldGuideRayScale(settings,metrics){return Math.min(metrics.maximum,settings.rayScale??settings.rayLength/100*(settings.rayBoundary==='circle'?1:metrics.maximum))}
 function fieldGuideRayValues(settings,metrics){const scale=fieldGuideRayScale(settings,metrics);return {fieldRayLength:Math.round(scale/metrics.maximum*100),circleRayLength:Math.round(scale*100)}}
 function createFieldGuideShape(shape){
- const node=document.createElementNS('http://www.w3.org/2000/svg',shape.type==='line'?'line':shape.type==='circle'?'ellipse':'rect');
- const attributes=shape.type==='line'?{x1:-shape.width/2,y1:0,x2:shape.width/2,y2:0}:shape.type==='circle'?{cx:0,cy:0,rx:shape.width/2,ry:shape.height/2}:{x:-shape.width/2,y:-shape.height/2,width:shape.width,height:shape.height};
+ const node=document.createElementNS('http://www.w3.org/2000/svg',shape.type==='line'?'line':shape.type==='circle'?'ellipse':shape.type==='triangle'?'polygon':'rect');
+ const attributes=shape.type==='line'?{x1:-shape.width/2,y1:0,x2:shape.width/2,y2:0}:shape.type==='circle'?{cx:0,cy:0,rx:shape.width/2,ry:shape.height/2}:shape.type==='triangle'?{points:'0,'+(-shape.height/2)+' '+shape.width/2+','+shape.height/2+' '+(-shape.width/2)+','+shape.height/2}:{x:-shape.width/2,y:-shape.height/2,width:shape.width,height:shape.height};
  for(const [key,value] of Object.entries(attributes))node.setAttribute(key,value);
  node.setAttribute('transform','translate('+shape.x+' '+shape.y+') rotate('+shape.rotation+')');node.dataset.guideShapeId=shape.id;return node;
 }
 function renderFieldGuides(){
  stage.querySelector('.field-guides')?.remove();
- const settings=fieldGuides(data,data.page),shape=activeBoardShape();
- if(shape==='none'||!settings.circles&&!settings.rays&&!settings.shapes.length)return;
+ const settings=fieldGuides(data,data.page),reference=settings.reference||fieldGuideReference(data,data.page),shape=reference.shape;
+ if(!settings.circles&&!settings.rays&&!settings.shapes.length)return;
  const ns='http://www.w3.org/2000/svg',svg=document.createElementNS(ns,'svg');
  svg.setAttribute('class','field-guides');svg.setAttribute('viewBox','0 0 640 640');svg.setAttribute('aria-hidden','true');
- const size=data.pageFieldSizes[data.page],tiles=shape==='image4'?[[160,160],[480,160],[160,480],[480,480]]:[[320,320]],defs=document.createElementNS(ns,'defs');svg.append(defs);
+ const size=reference,tiles=shape==='image4'?[[160,160],[480,160],[160,480],[480,480]]:[[320,320]],defs=document.createElementNS(ns,'defs');svg.append(defs);
  tiles.forEach(([cx,cy],tile)=>{
   const clipId='field-guide-clip-'+tile,clip=document.createElementNS(ns,'clipPath');clip.id=clipId;
   const boundary=document.createElementNS(ns,shape==='circle'?'ellipse':'rect');
