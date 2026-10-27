@@ -523,21 +523,22 @@ function clonePngNode(source){if(source.nodeType===Node.TEXT_NODE)return source.
 function clonePngStage(){let originalClass=stage.className,originalClip=objectClip.style.getPropertyValue('clip-path'),originalPriority=objectClip.style.getPropertyPriority('clip-path');try{stage.classList.add('grid-hidden');stage.classList.remove('field-hidden');objectClip.style.setProperty('clip-path','none','important');return clonePngNode(stage)}finally{stage.className=originalClass;if(originalClip)objectClip.style.setProperty('clip-path',originalClip,originalPriority);else objectClip.style.removeProperty('clip-path')}}
 
 const phasePngCaches=new WeakMap();
-async function rasterizePngSource(source,scale=1,stageSource=false){
+async function rasterizePngSource(source,scale=1,stageSource=false,readable=false){
  for(const image of source.querySelectorAll('img')){if(!image.complete)await image.decode();if(!image.naturalWidth)throw new Error('画像を読み込めません：'+(image.alt||'アイコン'))}
  const width=source.offsetWidth,height=source.offsetHeight,clone=stageSource?clonePngStage():clonePngNode(source);
+ if(readable)enhancePrintReadability(clone);
  for(const [key,value] of Object.entries({margin:'0',position:'relative',left:'auto',top:'auto',right:'auto',bottom:'auto',transform:'none',zoom:'1',boxShadow:'none',display:'block',width:width+'px',height:height+'px'}))clone.style.setProperty(key.replace(/[A-Z]/g,c=>'-'+c.toLowerCase()),value,'important');
  clone.setAttribute('xmlns','http://www.w3.org/1999/xhtml');const outputWidth=width*scale,outputHeight=height*scale,html=new XMLSerializer().serializeToString(clone),svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+outputWidth+'" height="'+outputHeight+'" viewBox="0 0 '+width+' '+height+'"><foreignObject x="0" y="0" width="100%" height="100%">'+html+'</foreignObject></svg>',image=new Image();image.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);await image.decode();const canvas=document.createElement('canvas');canvas.width=outputWidth;canvas.height=outputHeight;const ctx=canvas.getContext('2d');if(!ctx)throw new Error('Canvas context unavailable');ctx.drawImage(image,0,0);return canvas;
 }
-async function drawPngCanvas(scale=1){
+async function drawPngCanvas(scale=1,readable=false){
  if(document.fonts)await document.fonts.ready;
  const groupArtwork=document.querySelector('.phase-group-overview:not([hidden]) .phase-group-artwork'),comparison=!groupArtwork&&phaseComparisonActive()?document.querySelector('.phase-comparison-grid'):null;
- if(!comparison)return rasterizePngSource(groupArtwork||stage,scale,!groupArtwork);
+ if(!comparison)return rasterizePngSource(groupArtwork||stage,scale,!groupArtwork,readable);
  const cells=[...comparison.querySelectorAll(':scope>.phase-comparison-cell')],layout=phaseComparisonLayout(),width=comparison.offsetWidth,height=comparison.offsetHeight;
  const images=await Promise.all(cells.map(cell=>{
-  const tile=cell.querySelector('.phase-preview-stage'),key=scale+'|'+cell.querySelector('.phase-comparison-label').textContent;
+  const tile=cell.querySelector('.phase-preview-stage'),key=scale+'|'+readable+'|'+cell.querySelector('.phase-comparison-label').textContent;
   let cache=phasePngCaches.get(tile);if(!cache){cache=new Map();phasePngCaches.set(tile,cache)}
-  if(!cache.has(key)){const pending=rasterizePngSource(cell,scale);cache.set(key,pending);pending.catch(()=>{if(cache.get(key)===pending)cache.delete(key)})}
+  if(!cache.has(key)){const pending=rasterizePngSource(cell,scale,false,readable);cache.set(key,pending);pending.catch(()=>{if(cache.get(key)===pending)cache.delete(key)})}
   return cache.get(key);
  }));
  const canvas=document.createElement('canvas');canvas.width=width*scale;canvas.height=height*scale;const ctx=canvas.getContext('2d');if(!ctx)throw new Error('Canvas context unavailable');ctx.fillStyle=getComputedStyle(comparison).backgroundColor;ctx.fillRect(0,0,canvas.width,canvas.height);images.forEach((image,i)=>ctx.drawImage(image,i%layout.columns*layout.cellSize*scale,Math.floor(i/layout.columns)*layout.cellSize*scale));return canvas;
@@ -568,12 +569,12 @@ function outputNoteLayout(width){
  }
  return includeNote?outputPhaseNote(width,data.pageNotes[data.page]):{height:0,lines:[],error:''};
 }
-function drawOutputNote(ctx,width,y,note){
- if(!note.height)return;ctx.save();ctx.translate(0,y);ctx.fillStyle='#ffffff';ctx.fillRect(0,0,width,note.height);const scale=note.scale||1;ctx.strokeStyle='#9ca8ba';ctx.lineWidth=2*scale;ctx.strokeRect(scale,scale,width-2*scale,note.height-2*scale);ctx.strokeStyle='#e0e5ed';ctx.lineWidth=scale;ctx.strokeRect(5.5*scale,5.5*scale,width-11*scale,note.height-11*scale);ctx.fillStyle='#17212c';ctx.font=note.font+"px 'BIZ UDGothic', 'BIZ UDゴシック', monospace";ctx.fontKerning='none';ctx.textBaseline='alphabetic';for(let i=0;i<note.lines.length;i++)ctx.fillText(note.lines[i],note.padding,note.padding+note.ascent+i*note.lineHeight);ctx.restore();
+function drawOutputNote(ctx,width,y,note,readable=false){
+ if(!note.height)return;ctx.save();ctx.translate(0,y);ctx.fillStyle='#ffffff';ctx.fillRect(0,0,width,note.height);const scale=note.scale||1;ctx.strokeStyle='#9ca8ba';ctx.lineWidth=2*scale;ctx.strokeRect(scale,scale,width-2*scale,note.height-2*scale);ctx.strokeStyle='#e0e5ed';ctx.lineWidth=scale;ctx.strokeRect(5.5*scale,5.5*scale,width-11*scale,note.height-11*scale);ctx.fillStyle='#17212c';ctx.font=note.font+"px 'BIZ UDGothic', 'BIZ UDゴシック', monospace";ctx.fontKerning='none';ctx.textBaseline='alphabetic';for(let i=0;i<note.lines.length;i++){if(readable){ctx.strokeStyle="#17212c";ctx.lineWidth=.6*scale;ctx.strokeText(note.lines[i],note.padding,note.padding+note.ascent+i*note.lineHeight)}ctx.fillText(note.lines[i],note.padding,note.padding+note.ascent+i*note.lineHeight);}ctx.restore();
 }
 
 const drawDiagramPngCanvas=drawPngCanvas;
-drawPngCanvas=async function(scale=1){return composeOutputPngCanvas(await drawDiagramPngCanvas(scale),scale)};
+drawPngCanvas=async function(scale=1,readable=false){return composeOutputPngCanvas(await drawDiagramPngCanvas(scale,readable),scale,true,readable)};
 // One outer guard pixel, one frame pixel and four clear pixels before the content.
 const outputBorderPadding=6;
 function outputFrameLayout(width,height){
@@ -590,9 +591,9 @@ function drawOutputBorder(ctx,width,height){
  else rectangle(0,0,frame.width,frame.height);ctx.restore();
 }
 
-function composeOutputPngCanvas(source,scale=1,includeBorder=true){
+function composeOutputPngCanvas(source,scale=1,includeBorder=true,readable=false){
  const width=source.width/scale,height=source.height/scale,frame=outputFrameLayout(width,height),{note,padding}=frame;if(note.error)throw new Error(note.error);if(!note.height&&!note.notes&&!padding)return source;
  const canvas=document.createElement('canvas');canvas.width=Math.ceil(frame.width*scale);canvas.height=Math.ceil(frame.height*scale);const ctx=canvas.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.scale(scale,scale);
- if(note.notes){const {cellSize,columns}=note.layout;note.notes.forEach((entry,i)=>{const column=i%columns,x=column*(frame.blockWidth+note.gapX)+padding,row=Math.floor(i/columns),y=row*(frame.blockHeight+note.gapY)+padding;ctx.drawImage(source,column*cellSize*scale,row*cellSize*scale,cellSize*scale,cellSize*scale,x,y,cellSize,cellSize);ctx.save();ctx.translate(x,0);drawOutputNote(ctx,cellSize,y+cellSize,entry);ctx.restore()})}
- else{ctx.drawImage(source,padding,padding,width,height);ctx.save();ctx.translate(padding,0);drawOutputNote(ctx,width,height+padding,note);ctx.restore()}if(includeBorder)drawOutputBorder(ctx,width,height);return canvas;
+ if(note.notes){const {cellSize,columns}=note.layout;note.notes.forEach((entry,i)=>{const column=i%columns,x=column*(frame.blockWidth+note.gapX)+padding,row=Math.floor(i/columns),y=row*(frame.blockHeight+note.gapY)+padding;ctx.drawImage(source,column*cellSize*scale,row*cellSize*scale,cellSize*scale,cellSize*scale,x,y,cellSize,cellSize);ctx.save();ctx.translate(x,0);drawOutputNote(ctx,cellSize,y+cellSize,entry,readable);ctx.restore()})}
+ else{ctx.drawImage(source,padding,padding,width,height);ctx.save();ctx.translate(padding,0);drawOutputNote(ctx,width,height+padding,note,readable);ctx.restore()}if(includeBorder)drawOutputBorder(ctx,width,height);return canvas;
 };

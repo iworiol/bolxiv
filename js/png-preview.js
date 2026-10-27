@@ -1,14 +1,67 @@
 // ===== js/canvas/png-preview.js =====
+// Conservative screen/print adjustment, not a printer ICC proof.
+function plainPaperPrintFilter(){return document.getElementById('outputPlainPaper')?.checked?'saturate(0.85)':'none'}
+function printReadabilityEnabled(){return !!document.getElementById('outputPrintReadability')?.checked}
+function enhancePrintReadability(clone){
+ // Adjust only detached output nodes. Keep text metrics, positions, colors and images intact.
+ for(const text of clone.querySelectorAll('.labelobj,.labelobj *'))text.style.setProperty('-webkit-text-stroke','0.3px currentColor','important');
+ for(const object of clone.querySelectorAll('.obj:not(.labelobj):not(.job-icon)')){
+  for(const node of [object,...object.querySelectorAll('*')]){
+   if(node.namespaceURI==='http://www.w3.org/2000/svg'){
+    const stroke=node.style.stroke||node.getAttribute('stroke'),width=parseFloat(node.style.strokeWidth||node.getAttribute('stroke-width'));
+    if(stroke&&stroke!=='none'&&Number.isFinite(width)&&width>0)node.style.setProperty('stroke-width',String(width*1.4),'important');
+   }else for(const side of ['top','right','bottom','left']){
+    const width=parseFloat(node.style.getPropertyValue('border-'+side+'-width')),style=node.style.getPropertyValue('border-'+side+'-style');
+    if(width>0&&style!=='none'&&style!=='hidden')node.style.setProperty('border-'+side+'-width',width*1.4+'px','important');
+   }
+  }
+  const segment=object.querySelector('.segment-visual');if(segment&&!segment.querySelector('svg')){segment.style.transform='scaleY(1.4)';segment.style.transformOrigin='center'}
+ }
+ return clone;
+}
+// A 1mm white cutting allowance surrounds the complete output, including notes/frame.
+function layoutPrintCutGuide(node,page,unit,suffix){
+ const left=Math.max(0,page.x-1),top=Math.max(0,page.y-1),right=Math.min(page.paperWidth,page.x+page.imageWidth+1),bottom=Math.min(page.paperHeight,page.y+page.imageHeight+1);
+ Object.assign(node.style,{position:'absolute',boxSizing:'border-box',left:left*unit+suffix,top:top*unit+suffix,width:(right-left)*unit+suffix,height:(bottom-top)*unit+suffix,border:'0.15mm dashed #777',pointerEvents:'none'});
+}
+function printPageLayout(width,height){
+ const value=id=>document.getElementById(id)?.value;
+ const number=(id,fallback)=>{const raw=value(id);return raw===''||!Number.isFinite(Number(raw))?fallback:Math.max(0,Number(raw))};
+ const sizes={A4:[210,297],A3:[297,420],B5:[182,257],B4:[257,364],A5:[148,210],Letter:[215.9,279.4]};
+ let [paperWidth,paperHeight]=sizes[value('printPaper')]||sizes.A4;if(value('printOrientation')==='landscape')[paperWidth,paperHeight]=[paperHeight,paperWidth];
+ const top=Math.min(number('printMarginTop',10),paperHeight-1),bottom=Math.min(number('printMarginBottom',10),paperHeight-top-1),left=Math.min(number('printMarginLeft',10),paperWidth-1),right=Math.min(number('printMarginRight',10),paperWidth-left-1);
+ const availableWidth=paperWidth-left-right,availableHeight=paperHeight-top-bottom,fitWidth=Math.min(availableWidth,availableHeight*width/height);
+ const requested=value('printSize')==='width'?Math.max(1,number('printWidth',150)):fitWidth;
+ const imageWidth=Math.min(requested,fitWidth),imageHeight=imageWidth*height/width;
+ const position=value('printPosition')||'center',alignment={center:[.5,.5],top:[.5,0],bottom:[.5,1],left:[0,.5],right:[1,.5],'top-left':[0,0],'top-right':[1,0],'bottom-left':[0,1],'bottom-right':[1,1]}[position]||[.5,.5],x=left+(availableWidth-imageWidth)*alignment[0],y=top+(availableHeight-imageHeight)*alignment[1];
+ return {paperWidth,paperHeight,top,bottom,left,right,imageWidth,imageHeight,x,y,maxImageWidth:fitWidth,limited:requested>fitWidth+.01};
+}
 (()=>{
  const host=document.querySelector('.layout>.right'),layout=document.querySelector('.layout');
  const dialog=document.createElement('dialog');dialog.id='pngPreview';dialog.className='png-preview-panel';dialog.setAttribute('aria-labelledby','pngPreviewTitle');
- dialog.innerHTML='<header class="png-preview-heading"><h2 id="pngPreviewTitle">画像生成・印刷</h2><span class="phone-canvas-mode-status" id="pngCanvasModeStatus">画像生成・印刷</span></header><div class="png-preview-content"><div class="png-preview-surface" aria-label="出力画像"><p class="png-preview-status" id="pngPreviewStatus" role="status" aria-live="polite"></p></div><aside class="png-preview-settings"><h3><button type="button" id="pngPropertiesToggle" aria-controls="pngPropertiesBody" aria-expanded="true"><span>画像生成・印刷プロパティ</span><span class="png-properties-mark" aria-hidden="true">−</span></button></h3><div class="png-preview-settings-body" id="pngPropertiesBody"><section class="output-section output-note-section"><h4>出力内容</h4><label class="output-note-toggle"><input type="checkbox" id="outputIncludeNote"> ノートを含める</label><label class="output-note-toggle"><input type="checkbox" id="outputShowBorder"> 外枠を表示</label><div id="outputPhaseGapField" hidden><span>フェーズ間隔</span><label for="outputPhaseGapX">横 <input id="outputPhaseGapX" class="output-phase-gap" type="number" min="0" max="100" step="1" value="12" aria-label="フェーズ間隔 横"> px</label><label for="outputPhaseGapY">縦 <input id="outputPhaseGapY" class="output-phase-gap" type="number" min="0" max="100" step="1" value="12" aria-label="フェーズ間隔 縦"> px</label></div><p id="outputNoteError" role="status" hidden></p></section><section class="output-section output-png-section" id="outputPngSettings"><div class="png-settings-fields png-scale-field"><label for="pngPreviewScale">出力倍率</label><div class="png-scale-control"><select id="pngPreviewScale"><option value="1">1倍</option><option value="2">2倍</option></select><output id="pngOutputSize" for="pngPreviewScale" aria-live="polite"></output></div></div><button type="button" class="btn primary" id="pngPreviewSave" disabled>PNGを保存</button></section><section class="output-section output-print-section" id="outputPrintSettings" hidden><button type="button" class="btn primary" id="outputPrintButton">印刷</button></section></div></aside></div>';
+ dialog.innerHTML='<header class="png-preview-heading"><h2 id="pngPreviewTitle">画像生成・印刷</h2><span class="phone-canvas-mode-status" id="pngCanvasModeStatus">画像生成・印刷</span></header><div class="png-preview-content"><div class="png-preview-surface" aria-label="出力画像"><p class="png-preview-status" id="pngPreviewStatus" role="status" aria-live="polite"></p></div><aside class="png-preview-settings"><h3><button type="button" id="pngPropertiesToggle" aria-controls="pngPropertiesBody" aria-expanded="true"><span>画像生成・印刷プロパティ</span><span class="png-properties-mark" aria-hidden="true">−</span></button><button type="button" id="printSettingsReset" class="btn" aria-label="印刷設定を初期値に戻す" hidden>設定リセット</button></h3><div class="png-preview-settings-body" id="pngPropertiesBody"><section class="output-section output-note-section"><h4>出力内容</h4><label class="output-note-toggle"><input type="checkbox" id="outputIncludeNote"> ノートを含める</label><label class="output-note-toggle"><input type="checkbox" id="outputShowBorder"> 外枠を表示</label><div id="outputPhaseGapField" hidden><span>フェーズ間隔</span><label for="outputPhaseGapX">横 <input id="outputPhaseGapX" class="output-phase-gap" type="number" min="0" max="100" step="1" value="12" aria-label="フェーズ間隔 横"> px</label><label for="outputPhaseGapY">縦 <input id="outputPhaseGapY" class="output-phase-gap" type="number" min="0" max="100" step="1" value="12" aria-label="フェーズ間隔 縦"> px</label></div><p id="outputNoteError" role="status" hidden></p></section><section class="output-section output-png-section" id="outputPngSettings"><div class="png-settings-fields png-scale-field"><label for="pngPreviewScale">出力倍率</label><div class="png-scale-control"><select id="pngPreviewScale"><option value="1">1倍</option><option value="2">2倍</option></select><output id="pngOutputSize" for="pngPreviewScale" aria-live="polite"></output></div></div><button type="button" class="btn primary" id="pngPreviewSave" disabled>PNGを保存</button></section><section class="output-section output-print-section" id="outputPrintSettings" hidden><div class="print-page-fields"><label>用紙<select id="printPaper"><option>A4</option><option>A3</option><option>B5</option><option>B4</option><option>A5</option><option>Letter</option></select></label><label>向き<select id="printOrientation"><option value="portrait">縦</option><option value="landscape">横</option></select></label><fieldset><legend>余白（mm）</legend><label>上<input id="printMarginTop" type="number" min="0" max="419" value="10"></label><label>下<input id="printMarginBottom" type="number" min="0" max="419" value="10"></label><label>左<input id="printMarginLeft" type="number" min="0" max="419" value="10"></label><label>右<input id="printMarginRight" type="number" min="0" max="419" value="10"></label></fieldset><label>図の大きさ<select id="printSize"><option value="fit">用紙に合わせる</option><option value="width">幅を指定</option></select></label><label id="printWidthField" hidden>図の幅（mm）<input id="printWidth" type="number" min="1" max="420" value="150"></label><label>配置<select id="printPosition"><option value="center">中央</option><option value="top-left">左上</option><option value="top">上中央</option><option value="top-right">右上</option><option value="left">左中央</option><option value="right">右中央</option><option value="bottom-left">左下</option><option value="bottom">下中央</option><option value="bottom-right">右下</option></select></label><output id="printActualSize"></output><output id="printImageDpi" hidden></output></div><label class="output-note-toggle"><input type="checkbox" id="outputPrintCutGuide"> 切り取りガイド（点線）</label><p class="output-print-color-info">同じ用紙・向き／倍率100％／余白なし。</p><label class="output-note-toggle" title="印刷時だけ文字を少し太く、図形の線を約1.4倍にします。画像内の文字・線は変わりません。"><input type="checkbox" id="outputPrintReadability"> 文字・線を強調</label><label class="output-note-toggle"><input type="checkbox" id="outputPlainPaper" checked> 普通紙向けの色調整</label><p class="output-print-color-info"><button type="button" class="print-guide-link" id="printGuideLink">印刷の操作ガイド</button></p><button type="button" class="btn primary" id="outputPrintButton">印刷</button></section></div></aside></div>';
  host.append(dialog);
+ const printSettingsKey='bolxiv-print-settings-v1',printDefaults={printPaper:'A4',printOrientation:'portrait',printMarginTop:'10',printMarginBottom:'10',printMarginLeft:'10',printMarginRight:'10',printSize:'fit',printWidth:'150',printPosition:'center',outputPlainPaper:true,outputPrintCutGuide:false,outputPrintReadability:false};
+ const printSettingsReset=document.getElementById('printSettingsReset'),printSettings={...printDefaults};
+ function validPrintSetting(node,value){
+  if(node.type==='checkbox')return typeof value==='boolean';
+  if(node.tagName==='SELECT')return typeof value==='string'&&[...node.options].some(option=>option.value===value);
+  return typeof value==='string'&&value.trim()!==''&&Number.isFinite(Number(value))&&Number(value)>=Number(node.min)&&Number(value)<=Number(node.max);
+ }
+ function applyPrintSettings(){for(const [id,value] of Object.entries(printSettings)){const node=document.getElementById(id);if(node.type==='checkbox')node.checked=value;else node.value=value}}
+ function savePrintSettings(){try{localStorage.setItem(printSettingsKey,JSON.stringify(printSettings))}catch{}}
+ try{const saved=JSON.parse(localStorage.getItem(printSettingsKey)||'{}');if(saved&&typeof saved==='object'&&!Array.isArray(saved))for(const id of Object.keys(printDefaults)){if(validPrintSetting(document.getElementById(id),saved[id]))printSettings[id]=saved[id]}}catch{}
+ applyPrintSettings();
+ for(const id of Object.keys(printDefaults)){
+  const node=document.getElementById(id);node.addEventListener(node.type==='checkbox'?'change':'input',()=>{const value=node.type==='checkbox'?node.checked:node.value;if(validPrintSetting(node,value)){printSettings[id]=value;savePrintSettings()}});
+ }
+ printSettingsReset.onclick=()=>{if(!session||session.saving)return;Object.assign(printSettings,printDefaults);applyPrintSettings();savePrintSettings();syncPrintColor();fit();refreshPaperArtwork();fitOutputToViewport()};
  const surface=dialog.querySelector('.png-preview-surface'),status=document.getElementById('pngPreviewStatus'),scaleInput=document.getElementById('pngPreviewScale'),save=document.getElementById('pngPreviewSave'),back=document.getElementById('editModeToggle'),printButton=document.getElementById('outputPrintButton');
  let outputAction='png';
  function outputPropertiesName(){return outputAction==='png'?'画像生成プロパティ':'印刷プロパティ'}
- function syncOutputAction(){const png=outputAction==='png',name=png?'画像生成':'印刷';document.getElementById('outputPngSettings').hidden=!png;document.getElementById('outputPrintSettings').hidden=png;document.getElementById('pngPropertiesToggle').firstElementChild.textContent=outputPropertiesName();document.getElementById('pngCanvasModeStatus').textContent=name;helpButton?.setAttribute('aria-label',name+'のアイコン説明')}
- function fitZoomStep(){const dimensions=outputDimensions(),ratio=Math.min((surface.clientWidth-40)/dimensions.width,(surface.clientHeight-40)/dimensions.height);return Math.max(.05,Math.min(3,Math.floor((ratio+1e-9)*20)/20))}
+ function syncPrintColor(){if(paperImage)paperImage.style.filter=plainPaperPrintFilter();liveSpace.style.setProperty('--plain-paper-print-filter',outputAction==='print'?plainPaperPrintFilter():'none')}
+ function syncOutputAction(){syncPrintColor();const png=outputAction==='png',name=png?'画像生成':'印刷';document.getElementById('outputPngSettings').hidden=!png;document.getElementById('outputPrintSettings').hidden=png;printSettingsReset.hidden=png;document.getElementById('pngPropertiesToggle').firstElementChild.textContent=outputPropertiesName();document.getElementById('pngCanvasModeStatus').textContent=name;helpButton?.setAttribute('aria-label',name+'のアイコン説明');surface.classList.toggle('print-paper-active',!png);paperPreview.hidden=png;if(session&&!opening){refresh();fitOutputToViewport()}}
+ function fitZoomStep(){const dimensions=previewDimensions(),style=getComputedStyle(surface),insetX=parseFloat(style.paddingLeft)+parseFloat(style.paddingRight),insetY=parseFloat(style.paddingTop)+parseFloat(style.paddingBottom),gutterX=outputAction==='print'?72:40,gutterY=outputAction==='print'?60:40,ratio=Math.min((surface.clientWidth-insetX-gutterX)/dimensions.width,(surface.clientHeight-insetY-gutterY)/dimensions.height);return Math.max(.05,Math.min(3,Math.floor((ratio+1e-9)*20)/20))}
  const toolbar=document.querySelector('.board-display-toolbar').cloneNode(true);toolbar.classList.add('png-preview-toolbar');toolbar.setAttribute('aria-label','出力プレビューの表示');
  toolbar.querySelector('.phone-content-icon')?.remove();toolbar.querySelector('.phone-icon-help-toggle')?.remove();toolbar.querySelector('.phone-help-separator')?.remove();
  for(const node of toolbar.querySelectorAll('[id]')){node.dataset.sourceId=node.id;node.id='png-'+node.id}
@@ -19,6 +72,59 @@
  dialog.querySelector('.png-preview-heading').append(toolbar);
  const helpButton=document.createElement('button');helpButton.type='button';helpButton.className='phone-icon-help-toggle png-icon-help';helpButton.textContent='？';helpButton.setAttribute('aria-label','画像生成・印刷のアイコン説明');helpButton.setAttribute('aria-controls','phoneIconHelp');helpButton.setAttribute('aria-haspopup','dialog');helpButton.setAttribute('aria-expanded','false');helpButton.onclick=()=>window.Bolxiv.iconHelp.open(helpButton);const helpSeparator=document.createElement('span');helpSeparator.className='phone-help-separator';helpSeparator.setAttribute('aria-hidden','true');toolbar.append(helpSeparator,helpButton);
  const liveSpace=document.getElementById('boardZoomSpace'),liveAnchor=document.createComment('PNG canvas home');liveSpace.before(liveAnchor);
+  const paperPreview=document.createElement('div');paperPreview.className='print-paper-preview';paperPreview.hidden=true;paperPreview.setAttribute('aria-label','印刷用紙プレビュー');
+ const paperSheet=document.createElement('div');paperSheet.className='print-paper-sheet';const paperImage=document.createElement('img');paperImage.alt='用紙上の攻略図';const marginGuide=document.createElement('div');marginGuide.className='print-margin-guide';const cutGuide=document.createElement('div');cutGuide.className='print-cut-guide';cutGuide.setAttribute('aria-hidden','true');cutGuide.hidden=true;paperSheet.append(paperImage,marginGuide,cutGuide);paperPreview.append(paperSheet);surface.append(paperPreview);
+ const paperWidthLabel=document.createElement('div'),paperHeightLabel=document.createElement('div');paperWidthLabel.className='print-paper-dimension print-paper-width';paperHeightLabel.className='print-paper-dimension print-paper-height';paperWidthLabel.append(document.createElement('span'));paperHeightLabel.append(document.createElement('span'));paperPreview.append(paperWidthLabel,paperHeightLabel);
+ let paperRevision=0;
+ function previewDimensions(){if(outputAction!=='print')return outputDimensions();const size=printPageLayout(1,1),unit=96/25.4;return {width:size.paperWidth*unit,height:size.paperHeight*unit}}
+ function syncPrintImageDpi(source,page){
+  const output=document.getElementById('printImageDpi'),parallel=phaseComparisonActive(),indexes=parallel?selectedPhaseIndexes:[data.page],tileScale=parallel?phaseComparisonLayout().cellSize/640:1,values=[];
+  if(!data.activePhaseGroup)for(const index of indexes){
+   if(!['image','image4'].includes(data.pageBoardShapes[index]))continue;
+   const id=data.pageFieldImageIds[index],src=boardImageLibrary.get(id);if(!src)continue;
+   let pixels=boardImageLibrary.dimensions(id);
+   if(!pixels.width||!pixels.height){
+    // Older JSON may lack pixel dimensions; decode once per output session.
+    const active=session;active.dpiImages??=new Map();let img=active.dpiImages.get(id);
+    if(!img){img=new Image();active.dpiImages.set(id,img);img.onload=()=>{if(session===active&&outputAction==='print')fitPaper()};img.src=src}
+    pixels={width:img.naturalWidth,height:img.naturalHeight};
+   }
+   const field=data.pageFieldSizes[index],mmPerPixel=page.imageWidth/source.width;
+   if(pixels.width&&pixels.height&&field?.width&&field?.height)values.push(Math.min(pixels.width/(field.width*tileScale*mmPerPixel),pixels.height/(field.height*tileScale*mmPerPixel))*25.4);
+  }
+  output.hidden=!values.length;
+  if(values.length){const min=Math.round(Math.min(...values)),max=Math.round(Math.max(...values));output.textContent='フィールド画像：約'+min+(min===max?'':'〜'+max)+' dpi';output.title='保存されている画像の画素数と、印刷時のフィールドサイズから算出した目安です。プリンターの解像度設定ではありません。'}else output.textContent='';
+ }
+ function fitPaper(){
+  const source=outputDimensions();let page=printPageLayout(source.width,source.height);
+  const widthInput=document.getElementById('printWidth'),maximum=Math.floor(page.maxImageWidth*1000)/1000;
+  widthInput.max=String(maximum);widthInput.min=String(Math.min(1,maximum));widthInput.step='any';
+  // Keep the entered and saved width consistent with the actual printable diagram.
+  if(document.getElementById('printSize').value==='width'&&widthInput.value!==''&&Number.isFinite(widthInput.valueAsNumber)&&widthInput.valueAsNumber>maximum){
+   widthInput.value=String(maximum);printSettings.printWidth=widthInput.value;savePrintSettings();page=printPageLayout(source.width,source.height);
+  }
+  const unit=96/25.4,zoom=session.zoom;
+  const displayWidth=page.paperWidth*unit*zoom,displayHeight=page.paperHeight*unit*zoom;
+  paperPreview.style.width=(displayWidth+72)+'px';paperPreview.style.height=(displayHeight+60)+'px';paperPreview.style.setProperty('--paper-display-width',displayWidth+'px');paperPreview.style.setProperty('--paper-display-height',displayHeight+'px');
+  paperWidthLabel.firstChild.textContent=page.paperWidth+' mm';paperHeightLabel.firstChild.textContent=page.paperHeight+' mm';
+  Object.assign(paperSheet.style,{width:page.paperWidth*unit+'px',height:page.paperHeight*unit+'px',transform:'scale('+zoom+')'});
+  Object.assign(paperImage.style,{left:page.x*unit+'px',top:page.y*unit+'px',width:page.imageWidth*unit+'px',height:page.imageHeight*unit+'px',filter:plainPaperPrintFilter()});
+  Object.assign(marginGuide.style,{left:page.left*unit+'px',top:page.top*unit+'px',width:(page.paperWidth-page.left-page.right)*unit+'px',height:(page.paperHeight-page.top-page.bottom)*unit+'px'});
+  cutGuide.hidden=!document.getElementById('outputPrintCutGuide').checked;layoutPrintCutGuide(cutGuide,page,unit,'px');
+  syncPrintImageDpi(source,page);
+  document.getElementById('printWidthField').hidden=document.getElementById('printSize').value!=='width';
+  document.getElementById('printActualSize').textContent='図：'+page.imageWidth.toFixed(1)+' × '+page.imageHeight.toFixed(1)+' mm'+(page.limited?'（用紙内に収まる幅に調整）':'');
+ }
+ async function refreshPaperArtwork(){
+  const ticket=++paperRevision;if(outputAction!=='print'||!session)return;
+  try{let src;if(desktopVectorPrintAvailable()){
+   // Notes and borders change the output frame, not the diagram's computed styles.
+   const active=session;if(active.printSourceVersion!==diagramVersion||!active.printSource){active.printSourceVersion=diagramVersion;active.printSource=createVectorPrintSource();active.printSource.catch(()=>{if(session===active)active.printSource=null})}
+   const source=await active.printSource;if(ticket!==paperRevision||session!==active||outputAction!=='print')return;src=await createVectorPrintSvg(source);
+  }else src=(await drawPngCanvas(2,printReadabilityEnabled())).toDataURL('image/png');if(ticket!==paperRevision||!session||outputAction!=='print')return;paperImage.src=src;fitPaper()}
+  catch(error){if(ticket===paperRevision&&session){status.hidden=false;status.textContent='印刷プレビューを作成できませんでした：'+error.message}}
+ }
+ for(const input of dialog.querySelectorAll('.print-page-fields input,.print-page-fields select'))input.addEventListener('input',()=>{if(session){fit();fitOutputToViewport()}});
  const zoomTrigger=toolbar.querySelector('[data-source-id=resetBoardZoom]'),zoomMenu=document.getElementById('boardZoomMenu').cloneNode(true);zoomMenu.id='pngPreviewZoomMenu';document.body.append(zoomMenu);zoomTrigger.setAttribute('aria-controls',zoomMenu.id);
  const zoomItems=[...zoomMenu.querySelectorAll('[data-zoom]')];
  function closeZoomMenu(focus=false){zoomMenu.hidden=true;zoomTrigger.setAttribute('aria-expanded','false');if(focus)zoomTrigger.focus({preventScroll:true})}
@@ -45,6 +151,7 @@
   if(reader.dataset.readerTab!==tab)reader.dataset.readerTab=tab;
   if(reader.dataset.readerExpanded!==String(expanded))reader.dataset.readerExpanded=String(expanded);
   const title=reader.querySelector('.phone-reader-title'),change=reader.querySelector('.phone-reader-switch'),collapse=reader.querySelector('.phone-reader-collapse');
+  printSettingsReset.hidden=outputAction!=='print'||tab!=='properties'||!expanded;
   const propertiesName=outputPropertiesName();const markup=tab==='list'?'<span class="phone-reader-label-part"><strong>フェーズリスト</strong> / </span><span class="phone-reader-label-part">'+propertiesName+'</span>':'<span class="phone-reader-label-part">フェーズリスト / </span><span class="phone-reader-label-part"><strong>'+propertiesName+'</strong></span>';
   if(title&&title.innerHTML!==markup)title.innerHTML=markup;
   const attr=(node,key,value)=>{if(node&&node.getAttribute(key)!==value)node.setAttribute(key,value)};
@@ -88,7 +195,7 @@
  function outputContentAnchor(framed){const full=phaseComparisonActive(),source=full?liveSpace.querySelector('.output-note-preview'):document.querySelector('.phase-group-overview:not([hidden]) .phase-group-artwork')||stage,rect=source.getBoundingClientRect(),padding=full&&framed?outputBorderPadding*session.zoom:0;return {x:rect.left+padding,y:rect.top+padding}}
  function changeOutputBorder(){if(!session)return;const checked=document.getElementById('outputShowBorder').checked,before=outputContentAnchor(!checked);refresh();const after=outputContentAnchor(checked);surface.scrollLeft+=after.x-before.x;surface.scrollTop+=after.y-before.y;const remaining=outputContentAnchor(checked);session.borderShiftX=(session.borderShiftX||0)+before.x-remaining.x;session.borderShiftY=(session.borderShiftY||0)+before.y-remaining.y;liveSpace.style.translate=session.borderShiftX+'px '+session.borderShiftY+'px'}
  function syncOutputBorderPreview(){let border=liveSpace.querySelector('.output-border-preview');if(!border){border=document.createElement('canvas');border.className='output-border-preview';border.setAttribute('aria-hidden','true');liveSpace.append(border)}border.hidden=!document.getElementById('outputShowBorder').checked;const dimensions=outputDimensions();border.width=dimensions.width*2;border.height=dimensions.height*2;const ctx=border.getContext('2d');ctx.scale(2,2);const source=diagramDimensions();drawOutputBorder(ctx,source.width,source.height);border.style.width=dimensions.width+'px';border.style.height=dimensions.height+'px';border.style.transform='translateX(-50%) scale('+session.zoom+')';if(phaseComparisonActive())border.style.top='20px';else{const element=document.querySelector('.phase-group-overview:not([hidden]) .phase-group-artwork')||stage;border.style.top=(element.getBoundingClientRect().top-liveSpace.getBoundingClientRect().top-outputBorderPadding*session.zoom)+'px'}}
- function fit(){if(!session)return;const dimensions=outputDimensions();toolbar.querySelector('[data-source-id=boardZoomValue]').textContent=Math.round(session.zoom*100);liveSpace.style.setProperty('--board-display-scale',String(session.zoom));stage.style.setProperty('--board-display-scale',String(session.zoom));const contentWidth=dimensions.width*session.zoom,contentHeight=dimensions.height*session.zoom;liveSpace.style.width=(contentWidth<=surface.clientWidth?Math.min(contentWidth+40,surface.clientWidth):contentWidth+40)+'px';liveSpace.style.height=(contentHeight+20<=surface.clientHeight?Math.min(contentHeight+40,surface.clientHeight):contentHeight+40)+'px';const comparison=liveSpace.querySelector('.phase-comparison-grid');if(comparison)comparison.style.transform='translate(-50%,-50%) scale('+session.zoom+')';syncNotePreview();syncOutputBorderPreview();syncPhoneLayout()}
+ function fit(){if(!session)return;const dimensions=outputDimensions();toolbar.querySelector('[data-source-id=boardZoomValue]').textContent=Math.round(session.zoom*100);liveSpace.style.setProperty('--board-display-scale',String(session.zoom));stage.style.setProperty('--board-display-scale',String(session.zoom));const contentWidth=dimensions.width*session.zoom,contentHeight=dimensions.height*session.zoom;liveSpace.style.width=(contentWidth<=surface.clientWidth?Math.min(contentWidth+40,surface.clientWidth):contentWidth+40)+'px';liveSpace.style.height=(contentHeight+20<=surface.clientHeight?Math.min(contentHeight+40,surface.clientHeight):contentHeight+40)+'px';const comparison=liveSpace.querySelector('.phase-comparison-grid');if(comparison)comparison.style.transform='translate(-50%,-50%) scale('+session.zoom+')';syncNotePreview();syncOutputBorderPreview();if(outputAction==='print')fitPaper();syncPhoneLayout()}
  new ResizeObserver(fit).observe(surface);
  function syncToolbarAppearance(){
   const properties=['display','box-sizing','width','min-width','max-width','height','min-height','max-height','padding','margin','border','border-radius','background','color','-webkit-text-fill-color','font','line-height','letter-spacing','text-align','align-items','justify-content','gap','fill','stroke','stroke-width'];
@@ -111,16 +218,16 @@
   const nodes=[...host.children].filter(node=>node&&node!==dialog);
   const states=[...new Set(nodes)].map(node=>({node,inert:node.inert}));for(const {node} of states)node.inert=true;return states;
  }
- function refresh(){if(!session)return;const sourceTitle=document.getElementById('selectionTitle'),previewTitle=document.getElementById('pngPreviewTitle');previewTitle.replaceChildren(...[...sourceTitle.childNodes].map(node=>node.cloneNode(true)));const prefix=previewTitle.querySelector('.phase-label-prefix');if(prefix)prefix.textContent='フェーズ：';previewTitle.title=previewTitle.textContent;session.scale=Number(scaleInput.value);const dimensions=outputDimensions();document.getElementById('pngOutputSize').textContent=Math.round(dimensions.width*session.scale)+' × '+Math.round(dimensions.height*session.scale)+' px';status.hidden=true;fit();save.disabled=printButton.disabled=!!session.saving||!!outputNoteLayout(diagramDimensions().width).error;if(session.initialScroll){surface.scrollLeft=session.initialScroll.left;surface.scrollTop=session.initialScroll.top;session.initialScroll=null}}
+ function refresh(){if(!session)return;const sourceTitle=document.getElementById('selectionTitle'),previewTitle=document.getElementById('pngPreviewTitle');previewTitle.replaceChildren(...[...sourceTitle.childNodes].map(node=>node.cloneNode(true)));const prefix=previewTitle.querySelector('.phase-label-prefix');if(prefix)prefix.textContent='フェーズ：';previewTitle.title=previewTitle.textContent;session.scale=Number(scaleInput.value);const dimensions=outputDimensions();document.getElementById('pngOutputSize').textContent=Math.round(dimensions.width*session.scale)+' × '+Math.round(dimensions.height*session.scale)+' px';status.hidden=true;fit();refreshPaperArtwork();save.disabled=printButton.disabled=!!session.saving||!!outputNoteLayout(diagramDimensions().width).error;if(session.initialScroll){surface.scrollLeft=session.initialScroll.left;surface.scrollTop=session.initialScroll.top;session.initialScroll=null}}
  function mountPhoneReader(readerHomes){if(dialog.querySelector('.png-reader-controls'))return;const reader=document.createElement('div');reader.className='phone-view-content png-reader-controls';for(const node of [document.querySelector('.content-select-row'),document.querySelector('.page-controls')]){const anchor=document.createComment('PNG control home');node.before(anchor);readerHomes.push({node,anchor});reader.append(node)}const tabs=document.createElement('div');tabs.className='phone-reader-tabs';
     const title=document.createElement('button');title.type='button';title.className='phone-reader-title';
     const change=document.createElement('button');change.type='button';change.className='phone-reader-switch';change.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h16l-4-4M20 16H4l4 4"/></svg>';
-    const collapse=document.createElement('button');collapse.type='button';collapse.className='phone-reader-collapse';tabs.append(title,change,collapse);tabs.addEventListener('click',event=>{if(event.target.closest('button'))return;collapse.click()});
+    const collapse=document.createElement('button');collapse.type='button';collapse.className='phone-reader-collapse';tabs.append(title,printSettingsReset,change,collapse);tabs.addEventListener('click',event=>{if(event.target.closest('button'))return;collapse.click()});
     reader.querySelector('.page-controls').before(tabs);
     collapse.onclick=()=>{if(session?.saving)return;document.getElementById('toggleBattlePages').click();syncPhoneLayout()};title.onclick=()=>collapse.click();
     change.onclick=()=>{if(!session||session.saving)return;session.phoneTab=session.phoneTab==='list'?'properties':'list';const toggle=document.getElementById('toggleBattlePages');if(toggle.getAttribute('aria-expanded')!=='true')toggle.click();syncPhoneLayout()};
     propertiesExpanded=true;syncProperties();reader.append(dialog.querySelector('.png-preview-settings'));dialog.querySelector('.png-preview-content').append(reader)}
- function unmountPhoneReader(state){const reader=dialog.querySelector('.png-reader-controls');if(!reader)return;dialog.querySelector('.png-preview-content').append(dialog.querySelector('.png-preview-settings'));for(const {node,anchor} of state.readerHomes){anchor.after(node);anchor.remove()}state.readerHomes.length=0;reader.remove()}
+ function unmountPhoneReader(state){const reader=dialog.querySelector('.png-reader-controls');if(!reader)return;propertiesPanel.querySelector('h3').append(printSettingsReset);printSettingsReset.hidden=outputAction!=='print';dialog.querySelector('.png-preview-content').append(dialog.querySelector('.png-preview-settings'));for(const {node,anchor} of state.readerHomes){anchor.after(node);anchor.remove()}state.readerHomes.length=0;reader.remove()}
  let responsiveFrame=0;
  function syncResponsiveOutput(){responsiveFrame=0;if(!session)return;if(matchMedia('(max-width:850px)').matches)mountPhoneReader(session.readerHomes);else unmountPhoneReader(session);syncProperties();surface.append(liveSpace);liveSpace.inert=true;alignFrame();fit();fitOutputToViewport()}
  function scheduleResponsiveOutput(){if(!session||responsiveFrame)return;responsiveFrame=requestAnimationFrame(syncResponsiveOutput)}
@@ -142,17 +249,21 @@
   }catch(error){if(session)close();throw error}finally{opening=false}
  }
  function close(){
-  if(!session||session.saving)return;const previous=session;clearPhasePrintFrame();pinch=null;closeZoomMenu();session=null;revision++;dialog.close();document.body.classList.remove('png-preview-active');dialog.removeAttribute('aria-busy');unmountPhoneReader(previous);liveSpace.querySelector('.output-note-preview')?.remove();liveSpace.querySelector('.output-border-preview')?.remove();liveSpace.classList.remove('has-output-note','has-output-frame');liveSpace.style.removeProperty('translate');liveAnchor.after(liveSpace);liveSpace.inert=previous.spaceInert;({gridVisible,fieldVisible,fieldClipEnabled}=previous.displayBefore);updateGridToggle();updateFieldToggle();updateClipToggle();setBoardDisplayZoom(previous.originalZoom,false,false);originalRender();updateModeStatus();updateHistoryButtons();
+  if(!session||session.saving)return;const previous=session;clearPhasePrintFrame();paperRevision++;paperImage.removeAttribute('src');surface.classList.remove('print-paper-active');paperPreview.hidden=true;pinch=null;closeZoomMenu();session=null;revision++;dialog.close();document.body.classList.remove('png-preview-active');dialog.removeAttribute('aria-busy');unmountPhoneReader(previous);liveSpace.querySelector('.output-note-preview')?.remove();liveSpace.querySelector('.output-border-preview')?.remove();liveSpace.classList.remove('has-output-note','has-output-frame');liveSpace.style.removeProperty('translate');liveSpace.style.removeProperty('--plain-paper-print-filter');liveAnchor.after(liveSpace);liveSpace.inert=previous.spaceInert;({gridVisible,fieldVisible,fieldClipEnabled}=previous.displayBefore);updateGridToggle();updateFieldToggle();updateClipToggle();setBoardDisplayZoom(previous.originalZoom,false,false);originalRender();updateModeStatus();updateHistoryButtons();
   for(const {node,inert} of previous.inert)node.inert=inert;for(const {node,disabled} of previous.placementControls)node.disabled=disabled;
   const restore=()=>{for(const {node,left,top} of previous.scrolls){node.scrollLeft=left;node.scrollTop=top}};restore();requestAnimationFrame(restore);
   const focus=[previous.focus,document.getElementById('exportBtn'),document.querySelector('.phone-menu-toggle')].find(node=>node?.isConnected&&node.getClientRects().length);focus?.focus({preventScroll:true});
  }
+ document.getElementById('outputPlainPaper').onchange=syncPrintColor;
+ document.getElementById('outputPrintReadability').onchange=refreshPaperArtwork;
+ document.getElementById('printGuideLink').onclick=()=>{const guide=document.getElementById('operationGuideDialog');guide.showModal();document.getElementById('printGuideSection').scrollIntoView({block:'start'})};
+ document.getElementById('outputPrintCutGuide').onchange=()=>{if(session)fitPaper()};
  scaleInput.onchange=refresh;document.getElementById('outputShowBorder').onchange=changeOutputBorder;document.getElementById('outputIncludeNote').onchange=()=>{refresh();fitOutputToViewport()};for(const input of document.querySelectorAll('.output-phase-gap'))input.oninput=()=>{if(input.value==='')return;input.value=String(Math.max(0,Math.min(100,Math.round(Number(input.value)||0))));refresh();fitOutputImmediately()};
  async function runOutput(printing){
-  if(!session||session.saving)return;const current=session;current.saving=true;save.disabled=printButton.disabled=true;scaleInput.disabled=true;back.disabled=true;
+  if(!session||session.saving)return;const current=session;current.saving=true;save.disabled=printButton.disabled=true;scaleInput.disabled=true;back.disabled=true;printSettingsReset.disabled=true;
   try{if(printing)await printOutputCanvas();else{const target=window.showSaveFilePicker?await window.showSaveFilePicker(exportPickerOptions(safeExportName('.png'),'image/png','PNG画像')):null;await exportPng(target,current.scale)}}
   catch(error){if(error?.name!=='AbortError')notify((printing?'印刷画面を開けませんでした：':'PNGを書き出せませんでした：')+(error?.message||String(error)))}
-  finally{if(session===current){current.saving=false;save.disabled=printButton.disabled=false;scaleInput.disabled=false;back.disabled=false}}
+  finally{if(session===current){current.saving=false;save.disabled=printButton.disabled=false;scaleInput.disabled=false;back.disabled=false;printSettingsReset.disabled=false}}
  }
  save.onclick=()=>runOutput(false);printButton.onclick=()=>runOutput(true);
  dialog.addEventListener('close',()=>{if(session&&!dialog.open&&!session.saving)close()});
@@ -169,23 +280,64 @@
  function allowed(target){return zoomMenu.contains(target)||target===back||dialog.contains(target)||target.closest(navigation)||target.closest('.left')&&!target.closest('.tool,.icon-choice')||target.closest('#pages .phase-group-toggle:not([data-cancel-group-addition]),#pages .phase-group-name')||target.closest('#pages .page-tab')&&!target.closest('.page-tab-x')}
  for(const type of ['click','dblclick','pointerdown','contextmenu','dragstart','drop','change'])window.addEventListener(type,event=>{if(!session||event.target.closest?.('#changeLogDialog,#operationGuideDialog,#aboutToolDialog,#phoneIconHelp')||session.saving&&event.target.matches('a[download]'))return;if(readOnlyTarget(event.target)){event.preventDefault();event.stopImmediatePropagation();return}if(event.target===back&&type==='pointerdown'){event.stopImmediatePropagation();return}if(session.saving&&event.target!==back&&!dialog.contains(event.target)||!allowed(event.target)||['dblclick','contextmenu','dragstart','drop'].includes(type)&&!dialog.contains(event.target)){event.preventDefault();event.stopImmediatePropagation()}},true);
  const originalRender=render;let refreshFrame;
- render=function(){originalRender();diagramVersion++;if(session){cancelAnimationFrame(refreshFrame);refreshFrame=requestAnimationFrame(()=>{if(session)refresh()})}};
+ render=function(){originalRender();diagramVersion++;if(session&&!opening){cancelAnimationFrame(refreshFrame);refreshFrame=requestAnimationFrame(()=>{if(session)refresh()})}};
  window.Bolxiv.pngPreview={open,close,get kind(){return session?.kind||'image'},get active(){return !!session},get saving(){return !!session?.saving},get returnMode(){return session?.returnMode||'編集'}};
 })();
 
 ;
 
 // The shared output mode owns the preview; only the browser print document is separate.
+function desktopVectorPrintAvailable(){return matchMedia('(min-width:851px)').matches}
+// Reuse the output layout and typography, preserving vector content for printing.
+async function createVectorPrintSource(){
+ if(document.fonts)await document.fonts.ready;
+ const groupArtwork=document.querySelector('.phase-group-overview:not([hidden]) .phase-group-artwork'),source=groupArtwork||(phaseComparisonActive()?document.querySelector('.phase-comparison-grid'):stage);
+ for(const image of source.querySelectorAll('img')){if(!image.complete)await image.decode();if(!image.naturalWidth)throw new Error('画像を読み込めません：'+(image.alt||'アイコン'))}
+ const width=source.offsetWidth,height=source.offsetHeight;
+ const clone=source===stage?clonePngStage():clonePngNode(source);for(const [key,value] of Object.entries({margin:'0',position:'relative',left:'auto',top:'auto',right:'auto',bottom:'auto',transform:'none',zoom:'1',boxShadow:'none',display:'block',width:width+'px',height:height+'px'}))clone.style.setProperty(key.replace(/[A-Z]/g,c=>'-'+c.toLowerCase()),value,'important');
+ // Keep the comparison grid's layout when removing the editor zoom transform.
+ if(source.classList.contains('phase-comparison-grid'))clone.style.setProperty('display','grid','important');
+ clone.setAttribute('xmlns','http://www.w3.org/1999/xhtml');
+ return {width,height,clone};
+}
+async function createVectorPrintSvg(source){
+ const {width,height,clone}=source||await createVectorPrintSource(),frame=outputFrameLayout(width,height),{note,padding}=frame;if(note.error)throw new Error(note.error);
+ const ns='http://www.w3.org/2000/svg',svg=document.createElementNS(ns,'svg');svg.setAttribute('xmlns',ns);svg.setAttribute('width',Math.ceil(frame.width));svg.setAttribute('height',Math.ceil(frame.height));svg.setAttribute('viewBox','0 0 '+frame.width+' '+frame.height);
+ function element(tag,attributes){const node=document.createElementNS(ns,tag);for(const [key,value] of Object.entries(attributes))node.setAttribute(key,value);svg.append(node);return node}
+ element('rect',{width:frame.width,height:frame.height,fill:'#fff'});
+ if(note.notes){
+  const {cellSize,columns}=note.layout,cells=[...clone.querySelectorAll(':scope>.phase-comparison-cell')];
+  for(let i=0;i<note.notes.length;i++){
+   const entry=note.notes[i],column=i%columns,row=Math.floor(i/columns),x=column*(frame.blockWidth+note.gapX)+padding,y=row*(frame.blockHeight+note.gapY)+padding;
+   const cell=cells[i].cloneNode(true);for(const [key,value] of Object.entries({position:'relative',left:'auto',top:'auto',margin:'0',transform:'none',width:cellSize+'px',height:cellSize+'px'}))cell.style.setProperty(key,value,'important');
+   if(printReadabilityEnabled())enhancePrintReadability(cell);element('foreignObject',{x,y,width:cellSize,height:cellSize}).append(cell);
+   if(entry.height){const group=element('g',{transform:'translate('+x+' '+(y+cellSize)+')'}),scale=entry.scale||1;
+    function noteElement(tag,attributes){const node=element(tag,attributes);group.append(node);return node}
+    noteElement('rect',{width:cellSize,height:entry.height,fill:'#fff'});
+    noteElement('rect',{x:scale,y:scale,width:cellSize-2*scale,height:entry.height-2*scale,fill:'none',stroke:'#9ca8ba','stroke-width':2*scale});
+    noteElement('rect',{x:5.5*scale,y:5.5*scale,width:cellSize-11*scale,height:entry.height-11*scale,fill:'none',stroke:'#e0e5ed','stroke-width':scale});
+    entry.lines.forEach((line,j)=>{const text=noteElement('text',{x:entry.padding,y:entry.padding+entry.ascent+j*entry.lineHeight,fill:'#17212c','font-family':"'BIZ UDGothic', 'BIZ UDゴシック', monospace",'font-size':entry.font,'font-kerning':'none','xml:space':'preserve'});text.textContent=line;if(printReadabilityEnabled()){text.setAttribute('stroke','#17212c');text.setAttribute('stroke-width',String(.6*scale));text.setAttribute('paint-order','stroke fill')}});
+   }
+   if(padding)element('rect',{x:x-padding+1.5,y:y-padding+1.5,width:frame.blockWidth+padding*2-3,height:frame.blockHeight+padding*2-3,fill:'none',stroke:'#999','stroke-width':1});
+  }
+  return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(new XMLSerializer().serializeToString(svg));
+ }
+ const artwork=clone.cloneNode(true);if(printReadabilityEnabled())enhancePrintReadability(artwork);element('foreignObject',{x:padding,y:padding,width,height}).append(artwork);
+ if(note.height){const y=padding+height,scale=note.scale||1;element('rect',{x:padding,y,width,height:note.height,fill:'#fff'});element('rect',{x:padding+scale,y:y+scale,width:width-2*scale,height:note.height-2*scale,fill:'none',stroke:'#9ca8ba','stroke-width':2*scale});element('rect',{x:padding+5.5*scale,y:y+5.5*scale,width:width-11*scale,height:note.height-11*scale,fill:'none',stroke:'#e0e5ed','stroke-width':scale});note.lines.forEach((line,i)=>{const text=element('text',{x:padding+note.padding,y:y+note.padding+note.ascent+i*note.lineHeight,fill:'#17212c','font-family':"'BIZ UDGothic', 'BIZ UDゴシック', monospace",'font-size':note.font,'font-kerning':'none','xml:space':'preserve'});text.textContent=line;if(printReadabilityEnabled()){text.setAttribute('stroke','#17212c');text.setAttribute('stroke-width',String(.6*scale));text.setAttribute('paint-order','stroke fill')}})}
+ if(padding)element('rect',{x:1.5,y:1.5,width:frame.width-3,height:frame.height-3,fill:'none',stroke:'#999','stroke-width':1});
+ return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(new XMLSerializer().serializeToString(svg));
+}
+
 let phasePrintFrame=null,phasePrintOverlay=null;
 function clearPhasePrintFrame(){phasePrintFrame?.remove();phasePrintFrame=null;phasePrintOverlay?.remove();phasePrintOverlay=null;document.body.classList.remove('phase-print-preparing','phase-print-open')}
 async function printOutputCanvas(){
  const finishBusy=beginDesktopDisplayBusy();try{await yieldDesktopBusyPaint();
  clearPhasePrintFrame();phasePrintOverlay=document.createElement('div');phasePrintOverlay.className='phase-print-overlay';phasePrintOverlay.setAttribute('role','status');phasePrintOverlay.setAttribute('aria-label','印刷画面を準備しています');document.body.append(phasePrintOverlay);document.body.classList.add('phase-print-preparing','phase-print-open');
- let src;try{await new Promise(resolve=>requestAnimationFrame(()=>setTimeout(resolve,0)));const canvas=await drawPngCanvas(2);src=canvas.toDataURL('image/png')}catch(error){clearPhasePrintFrame();throw error}
+ let src;try{await new Promise(resolve=>requestAnimationFrame(()=>setTimeout(resolve,0)));if(desktopVectorPrintAvailable())src=await createVectorPrintSvg();else{const canvas=await drawPngCanvas(2,printReadabilityEnabled());src=canvas.toDataURL('image/png')}}catch(error){clearPhasePrintFrame();throw error}
  await new Promise((resolve,reject)=>{
   const frame=document.createElement('iframe');phasePrintFrame=frame;frame.title='表示中の攻略図の印刷';frame.className='phase-print-frame';
-  frame.onload=async()=>{try{const win=frame.contentWindow;await frame.contentDocument.querySelector('img').decode();if(phasePrintFrame!==frame){resolve();return}win.addEventListener('afterprint',clearPhasePrintFrame,{once:true});document.body.classList.remove('phase-print-preparing');phasePrintOverlay?.setAttribute('aria-label','印刷画面を開いています');finishBusy();win.focus();win.print();resolve()}catch(error){clearPhasePrintFrame();reject(error)}};
-  frame.srcdoc='<!doctype html><html lang="ja"><head><meta charset="utf-8"><title>攻略図</title><style>@page{margin:10mm}html,body{margin:0;padding:0;background:white}body{width:100%;height:100vh;box-sizing:border-box;display:flex;align-items:center;justify-content:center}img{display:block;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;print-color-adjust:exact;-webkit-print-color-adjust:exact}</style></head><body><img alt="攻略図" src="'+src+'"></body></html>';document.body.append(frame);
+  frame.onload=async()=>{try{const win=frame.contentWindow;const image=frame.contentDocument.querySelector('img');await image.decode();const page=printPageLayout(image.naturalWidth,image.naturalHeight);Object.assign(image.style,{left:page.x+'mm',top:page.y+'mm',width:page.imageWidth+'mm',height:page.imageHeight+'mm'});if(document.getElementById('outputPrintCutGuide').checked){const guide=frame.contentDocument.createElement('div');guide.className='print-cut-guide';layoutPrintCutGuide(guide,page,1,'mm');frame.contentDocument.body.append(guide)}if(phasePrintFrame!==frame){resolve();return}win.addEventListener('afterprint',clearPhasePrintFrame,{once:true});document.body.classList.remove('phase-print-preparing');phasePrintOverlay?.setAttribute('aria-label','印刷画面を開いています');finishBusy();win.focus();win.print();resolve()}catch(error){clearPhasePrintFrame();reject(error)}};
+  const page=printPageLayout(1,1);frame.srcdoc='<!doctype html><html lang="ja"><head><meta charset="utf-8"><title>攻略図</title><style>@page{size:'+page.paperWidth+'mm '+page.paperHeight+'mm;margin:0}html,body{margin:0;padding:0;background:white;width:'+page.paperWidth+'mm;height:'+page.paperHeight+'mm}body{position:relative;overflow:hidden}img{position:absolute;display:block;max-width:none;max-height:none;filter:'+plainPaperPrintFilter()+';print-color-adjust:exact;-webkit-print-color-adjust:exact}</style></head><body><img alt="攻略図" src="'+src+'"></body></html>';document.body.append(frame);
  });
  }finally{finishBusy()}
 }
