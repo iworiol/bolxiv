@@ -895,15 +895,17 @@ phoneLayerDeleteDialog.addEventListener('close',()=>{pendingPhoneLayerDeletion=n
  let readerTab=viewSettings.phoneReaderTab==='memo'?'memo':'list';
  function syncReaderTabs(){
   const open=phaseToggle.getAttribute('aria-expanded')==='true';
-  if(host.dataset.readerTab!==readerTab)host.dataset.readerTab=readerTab;if(host.dataset.readerExpanded!==String(open))host.dataset.readerExpanded=String(open);
-  const markup=readerTab==='list'?'<strong>フェーズリスト</strong> / ノート':'フェーズリスト / <strong>ノート</strong>';
+  const group=!!data.activePhaseGroup,visibleTab=group?'list':readerTab;
+  change.hidden=group;
+  if(host.dataset.readerTab!==visibleTab)host.dataset.readerTab=visibleTab;if(host.dataset.readerExpanded!==String(open))host.dataset.readerExpanded=String(open);
+  const markup=group?'<strong>フェーズリスト</strong>':readerTab==='list'?'<strong>フェーズリスト</strong> / ノート':'フェーズリスト / <strong>ノート</strong>';
   if(title.innerHTML!==markup)title.innerHTML=markup;
   const setAttribute=(node,name,value)=>{if(node.getAttribute(name)!==value)node.setAttribute(name,value)};
-  setAttribute(title,'aria-expanded',String(open));setAttribute(title,'aria-label',(readerTab==='list'?'フェーズリスト':'フェーズノート')+'を'+(open?'閉じる':'開く'));
+  setAttribute(title,'aria-expanded',String(open));setAttribute(title,'aria-label',(visibleTab==='list'?'フェーズリスト':'フェーズノート')+'を'+(open?'閉じる':'開く'));
   setAttribute(change,'aria-label',readerTab==='list'?'フェーズノートを表示':'フェーズリストを表示');
   const mark=open?'−':'＋';if(collapse.textContent!==mark)collapse.textContent=mark;setAttribute(collapse,'aria-expanded',String(open));setAttribute(collapse,'aria-label',title.getAttribute('aria-label'));
   const memo=host.querySelector('.phase-memo');
-  if(active&&memo&&readerTab==='memo'&&!memo.open)memo.open=true;
+  if(active&&memo&&visibleTab==='memo'&&!memo.open)memo.open=true;
  }
  collapse.onclick=()=>{phaseToggle.click();syncReaderTabs()};title.onclick=()=>collapse.click();
  change.onclick=()=>{readerTab=readerTab==='list'?'memo':'list';rememberViewSetting('phoneReaderTab',readerTab);if(phaseToggle.getAttribute('aria-expanded')!=='true')phaseToggle.click();syncReaderTabs();size()};
