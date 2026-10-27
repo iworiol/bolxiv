@@ -1,3 +1,162 @@
+// ===== js/phases/field-guides.js =====
+(()=>{
+ const settings=document.createElement('section');settings.id='fieldGuideSettings';
+ const control=(key,title,min,max,value,unit='')=>'<div class="field field-guide-number" data-guide-setting="'+key+'"><label for="fieldGuide-'+key+'">'+title+'：<span data-guide-value="'+key+'">'+value+'</span>'+unit+'</label><div class="coordinate-control"><input id="fieldGuide-'+key+'" data-guide-key="'+key+'" type="range" min="'+min+'" max="'+max+'" step="1" value="'+value+'" aria-label="'+title+'"><input id="fieldGuide-'+key+'Spin" data-guide-key="'+key+'" type="number" min="'+min+'" max="'+max+'" step="1" value="'+value+'" aria-label="'+title+'"></div></div>';
+ settings.innerHTML='<h3>フィールド補助線</h3><div class="field-guide-body"><label class="field-guide-check"><input id="fieldGuideCircles" data-guide-key="circles" type="checkbox"> 同心円</label>'+control('rings','半径の分割数',2,12,3)+'<label class="field-guide-check"><input id="fieldGuideRays" data-guide-key="rays" type="checkbox"> 放射線</label>'+control('sectors','角度の分割数',2,32,8)+control('fieldRayLength','四角基準の長さ',0,100,100,'%')+control('circleRayLength','円形基準の長さ',0,100,100,'%')+control('rotation','放射線の回転',0,359,0,'°')+'<div class="field"><label>線の色</label><div id="fieldGuideColorControl"></div></div>'+control('opacity','線の濃さ',0,100,50,'%')+'<p class="field-guide-help">中心を基準に等間隔で表示します。PNG・印刷にも含まれます。</p></div>';
+ const body=settings.querySelector('.field-guide-body');
+ for(const [name,nodes] of [['同心円',[settings.querySelector('#fieldGuideCircles').parentElement,settings.querySelector('[data-guide-setting="rings"]')]],['放射線',[settings.querySelector('#fieldGuideRays').parentElement,settings.querySelector('[data-guide-setting="sectors"]'),settings.querySelector('[data-guide-setting="fieldRayLength"]'),settings.querySelector('[data-guide-setting="circleRayLength"]'),settings.querySelector('[data-guide-setting="rotation"]')]],['線の見た目',[settings.querySelector('#fieldGuideColorControl').parentElement,settings.querySelector('[data-guide-setting="opacity"]')]]]){const group=document.createElement('section');group.className='guide-property-group';group.setAttribute('aria-label',name);body.insertBefore(group,body.querySelector('.field-guide-help'));group.append(...nodes)}
+ const entry=document.createElement('div');entry.id='fieldGuideEntry';entry.innerHTML='<button type="button" class="btn" id="editFieldGuides">補助線を編集</button>';document.getElementById('layoutPropertiesPanel').append(entry);
+ const dialog=document.createElement('dialog');dialog.id='fieldGuideEditor';dialog.className='guide-editor-dialog';dialog.setAttribute('aria-labelledby','guideEditorTitle');
+ dialog.innerHTML='<header class="guide-editor-heading"><h2 id="guideEditorTitle">キャンバス</h2><select id="guideEditorPhase" aria-label="フェーズを変更して補助線編集を終了"></select><button class="btn primary" type="button" id="finishFieldGuides">完了</button></header><div class="guide-editor-content"><main class="guide-editor-preview"><div class="guide-editor-tools" role="toolbar" aria-label="補助線を描く"><button class="btn" type="button" data-guide-tool="select">選択</button><button class="btn" type="button" data-guide-tool="line">直線</button><button class="btn" type="button" data-guide-tool="circle">円</button><button class="btn" type="button" data-guide-tool="rect">四角形</button><button class="btn" type="button" id="guideUndo" aria-label="補助線の編集を元に戻す">↶</button><button class="btn" type="button" id="guideRedo" aria-label="補助線の編集をやり直す">↷</button></div><div class="guide-editor-viewport"><div class="guide-editor-canvas"><div class="guide-editor-art"></div><svg class="guide-editor-overlay" viewBox="0 0 640 640" aria-label="補助線の描画領域"></svg></div></div><p class="guide-editor-hint" role="status">ドラッグして線・図形を描けます。通常のオブジェクトは操作できません。</p></main><aside class="guide-editor-properties"><div class="guide-properties-title" role="heading" aria-level="3">フェーズプロパティ：補助線</div><label class="field-guide-check guide-hide-objects"><input type="checkbox" id="guideHideObjects"> オブジェクトを隠す</label><section id="guideShapeProperties"><h3>選択した補助線</h3><p id="guideNoSelection">線・図形を選ぶと位置や大きさを変更できます。</p><div id="guideShapeFields" hidden></div><div class="guide-shape-actions"><button type="button" class="btn" id="duplicateGuideShape">複製</button><button type="button" class="btn" id="deleteGuideShape">削除</button></div></section></aside></div>';
+ document.body.append(dialog);const propertyPane=dialog.querySelector('.guide-editor-properties'),propertyBody=document.createElement('div');propertyBody.className='guide-properties-body';for(const node of [...propertyPane.children])if(!node.classList.contains('guide-properties-title'))propertyBody.append(node);propertyBody.append(settings);propertyPane.append(propertyBody);propertyPane.querySelector('.guide-properties-title').append(dialog.querySelector('#finishFieldGuides'));const zoomToolbar=document.createElement('div');zoomToolbar.className='board-display-toolbar guide-zoom-toolbar';const zoomGroup=document.querySelector('.board-display-toolbar .board-zoom-group').cloneNode(true);for(const node of zoomGroup.querySelectorAll('[id]')){node.dataset.sourceId=node.id;node.id='guide-'+node.id}zoomToolbar.append(zoomGroup);const guideHeading=dialog.querySelector('.guide-editor-heading');guideHeading.classList.add('board-title-row');guideHeading.append(zoomToolbar);
+ const zoomTrigger=zoomGroup.querySelector('[data-source-id="resetBoardZoom"]'),zoomValue=zoomGroup.querySelector('[data-source-id="boardZoomValue"]'),zoomMenu=document.getElementById('boardZoomMenu').cloneNode(true);zoomMenu.id='guideZoomMenu';dialog.append(zoomMenu);zoomTrigger.setAttribute('aria-controls',zoomMenu.id);const zoomItems=[...zoomMenu.querySelectorAll('[data-zoom]')];
+ function closeZoomMenu(focus=false){zoomMenu.hidden=true;zoomTrigger.setAttribute('aria-expanded','false');if(focus)zoomTrigger.focus({preventScroll:true})}
+ function openZoomMenu(){if(!dialog.open)return;addPhoneMenuClose(zoomMenu,()=>closeZoomMenu(true));for(const item of zoomItems)item.setAttribute('aria-checked',String(Number(item.dataset.zoom)===guideZoom));zoomMenu.hidden=false;zoomTrigger.setAttribute('aria-expanded','true');const r=zoomTrigger.getBoundingClientRect();zoomMenu.style.left=Math.max(8,Math.min(r.right-zoomMenu.offsetWidth,innerWidth-zoomMenu.offsetWidth-8))+'px';zoomMenu.style.top=Math.max(8,Math.min(r.bottom+4,innerHeight-zoomMenu.offsetHeight-8))+'px';(zoomItems.find(item=>item.getAttribute('aria-checked')==='true')||zoomItems[0]).focus({preventScroll:true})}
+ zoomTrigger.onclick=()=>zoomMenu.hidden?openZoomMenu():closeZoomMenu();zoomTrigger.onkeydown=event=>{if(['ArrowDown','ArrowUp'].includes(event.key)){event.preventDefault();openZoomMenu()}};
+ for(const item of zoomItems)item.onclick=()=>{guideZoom=Number(item.dataset.zoom);fit();closeZoomMenu(true)};
+ zoomMenu.onkeydown=event=>{const at=zoomItems.indexOf(document.activeElement);if(['ArrowDown','ArrowUp'].includes(event.key)){event.preventDefault();zoomItems[(at+(event.key==='ArrowDown'?1:zoomItems.length-1))%zoomItems.length].focus()}else if(['Home','End'].includes(event.key)){event.preventDefault();zoomItems[event.key==='Home'?0:zoomItems.length-1].focus()}else if(event.key==='Tab')closeZoomMenu()};
+ window.addEventListener('pointerdown',event=>{if(!zoomMenu.contains(event.target)&&!zoomTrigger.contains(event.target))closeZoomMenu()},true);
+ propertyBody.prepend(dialog.querySelector('.guide-editor-tools'));dialog.querySelector('.guide-editor-tools').after(dialog.querySelector('.guide-editor-hint'));
+ 
+ let owner=null,ownerPage=-1,ownerContent=-1,activeTool='select',shapeId=null,gesture=null,steps=0,redoSteps=0,lastCommitted='',ownHistory=false,guideZoom=100,embeddedHost=null,hiddenSiblings=[];
+ const desktopEditor=matchMedia('(min-width:851px)');
+ let phoneLayoutState=null;
+ function unmountEditor(){if(phoneLayoutState){canvas.append(overlay);const layout=document.querySelector('.layout');layout.dataset.phonePane=phoneLayoutState.pane;layout.classList.toggle('phone-content-open',phoneLayoutState.content);layout.classList.toggle('phone-materials-open',phoneLayoutState.materials);phoneLayoutState=null}if(embeddedHost)embeddedHost.classList.remove('guide-editor-host');for(const [node,inert] of hiddenSiblings)node.inert=inert;hiddenSiblings=[];embeddedHost=null;dialog.classList.remove('guide-editor-embedded','guide-editor-phone')}
+ function mountEditor(){
+  unmountEditor();
+  if(desktopEditor.matches){
+   embeddedHost=document.querySelector('.layout>.right>.layer-group');embeddedHost.classList.add('guide-editor-host');hiddenSiblings=[...embeddedHost.children].filter(node=>node!==dialog).map(node=>[node,node.inert]);for(const [node] of hiddenSiblings)node.inert=true;embeddedHost.append(dialog);dialog.classList.add('guide-editor-embedded');dialog.show();
+  }else{const layout=document.querySelector('.layout');phoneLayoutState={pane:layout.dataset.phonePane,content:layout.classList.contains('phone-content-open'),materials:layout.classList.contains('phone-materials-open')};layout.dataset.phonePane='canvas';layout.classList.remove('phone-content-open','phone-materials-open');document.getElementById('objectLayerPanel').append(dialog);dialog.classList.add('guide-editor-phone');dialog.show();stage.append(overlay)}
+ }
+ const overlay=dialog.querySelector('.guide-editor-overlay'),art=dialog.querySelector('.guide-editor-art'),canvas=dialog.querySelector('.guide-editor-canvas'),viewport=dialog.querySelector('.guide-editor-viewport'),properties=dialog.querySelector('#guideShapeFields');
+ for(const [key,title,min,max] of [['x','横位置',0,640],['y','縦位置',0,640],['width','横幅',1,1280],['height','縦幅',1,1280],['rotation','回転',0,359]])properties.insertAdjacentHTML('beforeend','<div class="field"><label for="guideShape-'+key+'">'+title+(key==='rotation'?'（°）':'（px）')+'</label><input type="number" id="guideShape-'+key+'" data-guide-shape-key="'+key+'" min="'+min+'" max="'+max+'" step="1"></div>');
+ for(const [name,keys] of [['位置',['x','y']],['大きさ',['width','height']],['回転',['rotation']]]){const group=document.createElement('section');group.className='guide-shape-group';group.setAttribute('aria-label',name);properties.append(group);for(const key of keys)group.append(properties.querySelector('[data-guide-shape-key="'+key+'"]').parentElement)}
+ const phaseSelect=dialog.querySelector('#guideEditorPhase'),entryButton=entry.querySelector('button');
+ function currentGuide(){return fieldGuides(data,data.page)}
+ function currentShape(){return currentGuide().shapes.find(shape=>shape.id===shapeId)}
+ function allowed(){return !boardReadOnly&&!phaseComparisonActive()&&!data.activePhaseGroup&&!window.Bolxiv?.pngPreview?.active&&activeBoardShape()!=='none'}
+ function finishEdit(){if(!dialog.open)return;const next=JSON.stringify(currentGuide());if(next!==lastCommitted){commitPendingHistory();steps=Math.min(history.length,steps+1);redoSteps=0;lastCommitted=next}sync()}
+ function updateArtwork(full=false){
+  if(!dialog.open)return;
+  if(full||!art.firstElementChild){const clone=clonePngStage();for(const [key,value] of Object.entries({position:'absolute',left:'0',top:'0',right:'auto',bottom:'auto',width:'640px',height:'640px',margin:'0',transform:'none',zoom:'1',visibility:'visible',boxShadow:'none'}))clone.style.setProperty(key.replace(/[A-Z]/g,c=>'-'+c.toLowerCase()),value,'important');clone.classList.remove('selected');art.replaceChildren(clone)}
+  else{art.firstElementChild.querySelector('.field-guides')?.remove();const guides=stage.querySelector('.field-guides');if(guides)art.firstElementChild.insertBefore(guides.cloneNode(true),art.firstElementChild.querySelector('.object-clip'))}
+  if(dialog.classList.contains('guide-editor-phone'))stage.append(overlay);drawOverlay();fit();
+ }
+ function fit(){if(!dialog.open||dialog.classList.contains('guide-editor-phone'))return;const scale=guideZoom/100;canvas.style.width=canvas.style.height=640*scale+'px';art.style.transform='scale('+scale+')';zoomValue.textContent=String(guideZoom);zoomGroup.querySelector('[data-source-id=zoomOut]').disabled=guideZoom<=5;zoomGroup.querySelector('[data-source-id=zoomIn]').disabled=guideZoom>=200}
+ function svgNode(tag,attributes){const node=document.createElementNS('http://www.w3.org/2000/svg',tag);for(const [key,value] of Object.entries(attributes))node.setAttribute(key,value);return node}
+ function drawOverlay(){
+  overlay.replaceChildren();
+  for(const shape of currentGuide().shapes){const hit=createFieldGuideShape(shape);hit.setAttribute('fill',shape.type==='line'?'none':'transparent');hit.setAttribute('stroke','transparent');hit.setAttribute('stroke-width','14');hit.dataset.guideHit=shape.id;overlay.append(hit)}
+  const shape=currentShape();if(!shape)return;const group=svgNode('g',{transform:'translate('+shape.x+' '+shape.y+') rotate('+shape.rotation+')'}),height=shape.type==='line'?0:shape.height;
+  group.append(svgNode('rect',{x:-shape.width/2,y:-height/2,width:shape.width,height:Math.max(1,height),fill:'none',stroke:'#3182ce','stroke-width':1.5,'stroke-dasharray':'5 4','pointer-events':'none'}));
+  for(const [action,x,y] of [['start',-shape.width/2,-height/2],['end',shape.width/2,height/2],['rotate',0,-height/2-30]]){const handle=svgNode('circle',{cx:x,cy:y,r:9,fill:'#fff',stroke:'#2463a2','stroke-width':2});handle.dataset.guideHandle=action;group.append(handle)}overlay.append(group);
+ }
+ function changeShape(patch){const value=currentGuide();value.shapes=value.shapes.map(shape=>shape.id===shapeId?{...shape,...patch}:shape);data.pageFieldGuides[data.page]=fieldGuides({pageFieldGuides:[value]},0);renderFieldGuides();updateArtwork();sync()}
+ function transact(change){if(!dialog.open||!allowed())return;endSession();recordHistory();change();renderFieldGuides();save();finishEdit();updateArtwork();sync()}
+ function duplicateShape(){const shape=currentShape();if(!shape)return;transact(()=>{const value=currentGuide(),copy={...shape,id:createObjectId(),x:Math.min(640,shape.x+12),y:Math.min(640,shape.y+12)};value.shapes.push(copy);data.pageFieldGuides[data.page]=value;shapeId=copy.id})}
+ function deleteShape(){if(!currentShape())return;transact(()=>{const value=currentGuide();value.shapes=value.shapes.filter(shape=>shape.id!==shapeId);data.pageFieldGuides[data.page]=value;shapeId=null})}
+ function point(event){const rect=overlay.getBoundingClientRect();return {x:Math.max(0,Math.min(640,(event.clientX-rect.left)/rect.width*640)),y:Math.max(0,Math.min(640,(event.clientY-rect.top)/rect.height*640))}}
+ function startPointer(event){
+  if(event.button!==0||!allowed())return;event.preventDefault();event.stopPropagation();endSession();
+  const start=point(event),handle=event.target.dataset.guideHandle,hit=event.target.dataset.guideHit,before=JSON.stringify(currentGuide());
+  if(activeTool==='select'){if(hit)shapeId=hit;else if(!handle)shapeId=null;const shape=currentShape();if(!shape){drawOverlay();sync();return}gesture={id:event.pointerId,start,before,shape:{...shape},action:handle||'move',recorded:false}}
+  else{if(currentGuide().shapes.length>=500){notify('補助線は500個まで追加できます');return}shapeId=createObjectId();gesture={id:event.pointerId,start,before,action:'draw',recorded:false,type:activeTool}}
+  gesture.board=data;gesture.page=data.page;
+  overlay.setPointerCapture(event.pointerId);drawOverlay();sync();
+ }
+ function movePointer(event){
+  const g=gesture;if(!g||event.pointerId!==g.id)return;event.preventDefault();event.stopPropagation();const position=point(event),dx=position.x-g.start.x,dy=position.y-g.start.y;if(!g.recorded&&Math.hypot(dx,dy)<2)return;if(!g.recorded){recordHistory();g.recorded=true}
+  if(g.action==='draw'){
+   const value=JSON.parse(g.before),width=Math.hypot(dx,dy),shape=g.type==='line'?{id:shapeId,type:'line',x:(g.start.x+position.x)/2,y:(g.start.y+position.y)/2,width:Math.max(1,width),height:1,rotation:Math.atan2(dy,dx)*180/Math.PI}:{id:shapeId,type:g.type,x:(g.start.x+position.x)/2,y:(g.start.y+position.y)/2,width:Math.max(1,Math.abs(dx)),height:Math.max(1,Math.abs(dy)),rotation:0};
+   if(event.shiftKey&&g.type!=='line'){shape.width=shape.height=Math.max(shape.width,shape.height);shape.x=g.start.x+(dx<0?-1:1)*shape.width/2;shape.y=g.start.y+(dy<0?-1:1)*shape.height/2}value.shapes.push(shape);data.pageFieldGuides[data.page]=fieldGuides({pageFieldGuides:[value]},0);renderFieldGuides();updateArtwork();sync();
+  }else if(g.action==='move')changeShape({x:g.shape.x+dx,y:g.shape.y+dy});
+  else if(g.action==='rotate')changeShape({rotation:Math.round((Math.atan2(position.y-g.shape.y,position.x-g.shape.x)*180/Math.PI+90)/ (event.shiftKey?15:1))*(event.shiftKey?15:1)});
+  else{
+   const shape=g.shape,angle=shape.rotation*Math.PI/180,sign=g.action==='end'?1:-1,ax=shape.x-sign*shape.width/2*Math.cos(angle)+(shape.type==='line'?0:sign*shape.height/2*Math.sin(angle)),ay=shape.y-sign*shape.width/2*Math.sin(angle)-(shape.type==='line'?0:sign*shape.height/2*Math.cos(angle));
+   if(shape.type==='line'){changeShape({x:(ax+position.x)/2,y:(ay+position.y)/2,width:Math.hypot(position.x-ax,position.y-ay),rotation:Math.atan2(sign*(position.y-ay),sign*(position.x-ax))*180/Math.PI})}
+   else{const localX=(position.x-ax)*Math.cos(angle)+(position.y-ay)*Math.sin(angle),localY=-(position.x-ax)*Math.sin(angle)+(position.y-ay)*Math.cos(angle);changeShape({x:(ax+position.x)/2,y:(ay+position.y)/2,width:Math.max(1,Math.abs(localX)),height:Math.max(1,Math.abs(localY))})}
+  }
+ }
+ function finishPointer(event,cancel=false){const g=gesture;if(!g||event.pointerId!==g.id)return;event.preventDefault();event.stopPropagation();if(!cancel)movePointer(event);gesture=null;if(overlay.hasPointerCapture(g.id))overlay.releasePointerCapture(g.id);if(cancel){g.board.pageFieldGuides[g.page]=JSON.parse(g.before);pendingHistoryState=null;pendingHistoryOwner=null;renderFieldGuides();if(g.action==='draw')shapeId=null}else if(g.recorded){save();finishEdit();if(g.action==='draw')activeTool='select'}updateArtwork();sync()}
+ function cancelPointer(){if(gesture)finishPointer({pointerId:gesture.id,preventDefault(){},stopPropagation(){}},true)}
+ function openEditor(){
+  if(dialog.open||!allowed())return;commitPendingHistory();closeColorPopovers();drag=null;tapPlacementArmed=false;owner=data;ownerPage=data.page;ownerContent=activeContent;steps=redoSteps=0;lastCommitted=JSON.stringify(currentGuide());shapeId=null;activeTool='select';guideZoom=Math.max(5,Math.min(200,boardDisplayZoom));
+  phaseSelect.replaceChildren(...data.pages.map((_,index)=>{const option=document.createElement('option');option.value=index;option.textContent=String(index+1).padStart(2,'0')+' '+data.pageNames[index];return option}));phaseSelect.value=data.page;
+  dialog.querySelector('#guideHideObjects').checked=false;dialog.classList.remove('guide-objects-hidden');mountEditor();document.body.classList.add('field-guide-editing');updateModeStatus();updateArtwork(true);sync();dialog.querySelector('[data-guide-tool="select"]').focus();
+ }
+ function closeEditor(){if(!dialog.open)return;cancelPointer();endSession();closeColorPopovers();closeZoomMenu();dialog.close();unmountEditor();document.body.append(dialog);document.body.classList.remove('field-guide-editing');owner=null;shapeId=null;updateModeStatus();updateHistoryButtons();entryButton.focus({preventScroll:true})}
+ function historyAction(forward){endSession();cancelPointer();if(forward?!redoSteps:!steps)return;ownHistory=true;try{if(forward){redo();steps++;redoSteps--}else{undo();steps--;redoSteps++}owner=data;lastCommitted=JSON.stringify(currentGuide())}finally{ownHistory=false}updateArtwork(true);sync()}
+ entryButton.onclick=openEditor;dialog.querySelector('#finishFieldGuides').onclick=closeEditor;
+ phaseSelect.onchange=()=>{const index=Number(phaseSelect.value);closeEditor();selectPhase(index)};
+ dialog.addEventListener('cancel',event=>{event.preventDefault();if(gesture)cancelPointer();else closeEditor()});
+ dialog.querySelector('#guideHideObjects').onchange=event=>dialog.classList.toggle('guide-objects-hidden',event.target.checked);
+ dialog.querySelector('#duplicateGuideShape').onclick=duplicateShape;dialog.querySelector('#deleteGuideShape').onclick=deleteShape;
+ dialog.querySelector('#guideUndo').onclick=()=>historyAction(false);dialog.querySelector('#guideRedo').onclick=()=>historyAction(true);
+ for(const button of dialog.querySelectorAll('[data-guide-tool]'))button.onclick=()=>{cancelPointer();activeTool=button.dataset.guideTool;sync()};
+ for(const input of properties.querySelectorAll('input'))input.onchange=()=>{const shape=currentShape();if(!shape||!input.value.trim()||!Number.isFinite(Number(input.value))){sync();return}transact(()=>changeShape({[input.dataset.guideShapeKey]:Number(input.value)}))};
+ // Capture before normal canvas gestures and document shortcuts can see these events.
+ for(const type of ['pointerdown','pointermove','pointerup','pointercancel','click','dblclick','contextmenu','dragstart','drop'])window.addEventListener(type,event=>{if(!dialog.open||!overlay.contains(event.target)&&event.target!==overlay&&gesture?.id!==event.pointerId)return;if(type==='pointerdown')startPointer(event);else if(type==='pointermove')movePointer(event);else if(type==='pointerup'||type==='pointercancel')finishPointer(event,type==='pointercancel');else event.preventDefault();event.stopImmediatePropagation()},true);
+ for(const type of ['pointerdown','click','dblclick','contextmenu','dragstart','dragover','drop'])window.addEventListener(type,event=>{if(dialog.open&&event.target.closest?.('.left .tool,.left .icon-choice'))blockReadOnlyEvent(event)},true);
+ window.addEventListener('click',event=>{if(!dialog.open)return;const button=event.target.closest?.('#undo,#redo');if(!button)return;event.preventDefault();event.stopImmediatePropagation();historyAction(button.id==='redo')},true);
+ window.addEventListener('keydown',event=>{
+  if(!dialog.open)return;
+  if(event.key==='Escape'){event.preventDefault();event.stopImmediatePropagation();if(!zoomMenu.hidden)closeZoomMenu(true);else if(dialog.querySelector('.color-popover:not([hidden])'))closeColorPopovers();else if(gesture)cancelPointer();else closeEditor();return}
+  if(zoomMenu.contains(event.target)||zoomToolbar.contains(event.target))return;const input=event.target.closest?.('input,select,textarea');if(input)return;
+  if(!dialog.contains(event.target)){if((event.ctrlKey||event.metaKey)&&['c','v','x','z','y'].includes(event.key.toLowerCase())||['Delete','Backspace'].includes(event.key)){event.preventDefault();event.stopImmediatePropagation()}return}
+  const key=event.key.toLowerCase(),modifier=event.ctrlKey||event.metaKey;
+  if(modifier&&key==='z'){event.preventDefault();event.stopImmediatePropagation();historyAction(event.shiftKey);return}
+  if(modifier&&key==='y'){event.preventDefault();event.stopImmediatePropagation();historyAction(true);return}
+  if(modifier&&key==='d'){event.preventDefault();event.stopImmediatePropagation();duplicateShape();return}
+  if(['delete','backspace'].includes(key)){event.preventDefault();event.stopImmediatePropagation();deleteShape();return}
+  if(key.startsWith('arrow')){event.preventDefault();event.stopImmediatePropagation();const shape=currentShape(),amount=event.shiftKey?10:1;if(shape)transact(()=>changeShape({x:shape.x+(key==='arrowright'?amount:key==='arrowleft'?-amount:0),y:shape.y+(key==='arrowdown'?amount:key==='arrowup'?-amount:0)}));return}
+  if(modifier&&['c','v','x','a'].includes(key)){event.preventDefault();event.stopImmediatePropagation()}
+ },true);
+ for(const [id,step] of [['zoomOut',-5],['zoomIn',5]])zoomGroup.querySelector('[data-source-id='+id+']').onclick=()=>{guideZoom=Math.max(5,Math.min(200,guideZoom+step));fit()};
+ zoomGroup.querySelector('[data-source-id=fitBoardZoom]').onclick=()=>{guideZoom=Math.max(5,Math.min(200,Math.floor(Math.min((viewport.clientWidth-40)/640,(viewport.clientHeight-40)/640)*20)*5));fit()};
+ desktopEditor.addEventListener('change',()=>{if(!dialog.open)return;cancelPointer();closeColorPopovers();dialog.close();mountEditor();updateArtwork(true);sync()});
+ window.addEventListener('blur',cancelPointer);
+ window.Bolxiv.fieldGuideEditor={open:openEditor,close:closeEditor,get active(){return dialog.open}};
+ const color=document.getElementById('fieldGuideColorControl');let session=null;
+ for(const group of settings.querySelectorAll('.coordinate-control')){
+  const range=group.querySelector('input[type="range"]'),buttons=document.createElement('span');buttons.className='phone-number-step-buttons';
+  for(const [text,amount] of [['−',-1],['＋',1]]){const button=document.createElement('button');button.type='button';button.className='btn';button.textContent=text;button.setAttribute('aria-label',range.getAttribute('aria-label')+(amount<0?'を減らす':'を増やす'));button.onclick=()=>{if(range.disabled)return;range.value=String(Number(range.value)+amount);range.dispatchEvent(new Event('input',{bubbles:true}));range.dispatchEvent(new Event('change',{bubbles:true}))};buttons.append(button)}group.append(buttons);
+ }
+ function endSession(){if(!session)return;session=null;finishEdit()}
+ function sync(){
+  const value=fieldGuides(data,data.page),blocked=boardReadOnly||!!window.Bolxiv?.pngPreview?.active||phaseComparisonActive()||!!data.activePhaseGroup||activeBoardShape()==='none',enabled=value.circles||value.rays||value.shapes.length>0;
+  const metrics=fieldGuideRayMetrics(),lengths=fieldGuideRayValues(value,metrics);
+  for(const input of settings.querySelectorAll('[data-guide-key]')){const key=input.dataset.guideKey,linked=Object.hasOwn(lengths,key);input.disabled=blocked||(key==='rings'&&!value.circles)||(['sectors','fieldRayLength','circleRayLength','rotation'].includes(key)&&!value.rays)||(key==='opacity'&&!enabled);if(linked){input.step='1';input.max=key==='fieldRayLength'?'100':String(Math.round(metrics.maximum*100))}if(input.type==='checkbox')input.checked=value[key];else input.value=linked?lengths[key]:value[key]}
+  for(const label of settings.querySelectorAll('[data-guide-value]'))label.textContent=lengths[label.dataset.guideValue]??value[label.dataset.guideValue];
+  for(const group of settings.querySelectorAll('.coordinate-control'))for(const button of group.querySelectorAll('.phone-number-step-buttons button'))button.disabled=group.querySelector('input[type="range"]').disabled;
+  if(color.dataset.color!==value.color){color.innerHTML=colorPickerMarkup('fieldGuides',value.color);color.dataset.color=value.color}color.querySelector('[data-color-trigger]').disabled=blocked||!enabled;
+  if(session&&(session.board!==data||session.page!==data.page))session=null;
+  entryButton.disabled=!allowed();
+  if(!dialog.open)return;
+  const title=document.getElementById('selectionTitle').textContent;if(dialog.querySelector('#guideEditorTitle').textContent!==title)dialog.querySelector('#guideEditorTitle').textContent=title;
+  const selected=currentShape();dialog.querySelector('#guideNoSelection').hidden=!!selected;properties.hidden=!selected;
+  for(const input of properties.querySelectorAll('input')){if(selected)input.value=Math.round(selected[input.dataset.guideShapeKey]*10)/10;input.disabled=!selected||selected.type==='line'&&input.dataset.guideShapeKey==='height'}
+  dialog.querySelector('#duplicateGuideShape').disabled=dialog.querySelector('#deleteGuideShape').disabled=!selected;
+  dialog.querySelector('#guideUndo').disabled=steps===0;dialog.querySelector('#guideRedo').disabled=redoSteps===0;
+  document.getElementById('undo').disabled=steps===0;document.getElementById('redo').disabled=redoSteps===0;
+  for(const button of dialog.querySelectorAll('[data-guide-tool]'))button.setAttribute('aria-pressed',String(activeTool===button.dataset.guideTool));
+  overlay.style.cursor=activeTool==='select'?'default':'crosshair';
+ }
+ for(const input of settings.querySelectorAll('[data-guide-key]')){
+  input.addEventListener(input.type==='checkbox'?'change':'input',()=>{
+   if(input.disabled||input.value==='')return;
+   const uiKey=input.dataset.guideKey,linked=['fieldRayLength','circleRayLength'].includes(uiKey),key=linked?'rayScale':uiKey,before=fieldGuides(data,data.page),metrics=fieldGuideRayMetrics(),patch={[key]:input.type==='checkbox'?input.checked:Number(input.value)};
+   if(linked){if(Number(input.value)===fieldGuideRayValues(before,metrics)[uiKey])return;patch.rayScale=Math.min(metrics.maximum,Math.max(0,Number(input.value)/100*(uiKey==='fieldRayLength'?metrics.maximum:1)))}
+   const next=fieldGuides({pageFieldGuides:[{...before,...patch}]},0);
+   if(next[key]===before[key]&&next.rayBoundary===before.rayBoundary)return;
+   if(!session||session.board!==data||session.page!==data.page){recordHistory();session={board:data,page:data.page}}
+   data.pageFieldGuides[data.page]=next;renderFieldGuides();save();updateArtwork();sync();
+   if(input.type==='checkbox')endSession();
+  });
+  for(const name of ['change','blur','pointercancel'])input.addEventListener(name,()=>{endSession();sync()});
+ }
+ const previousRender=render;render=function(){previousRender();if(dialog.open&&!ownHistory){if(owner!==data||ownerPage!==data.page||ownerContent!==activeContent||!allowed()){session=null;closeEditor()}else{if(!session&&!gesture)finishEdit();updateArtwork(true)}}sync()};new MutationObserver(sync).observe(document.body,{attributes:true,attributeFilter:['class']});sync();
+})();
+
 // ===== js/phases/phase-content-copy.js =====
 (()=>{
  const original=document.getElementById('copyPage'),button=document.createElement('button');
@@ -11,10 +170,10 @@
   const selectedGroup=sourceGroup?sourceBoard.phaseGroups?.find(group=>group.id===sourceGroup):null;
   if(sourceGroup&&(!selectedGroup||data.activePhaseGroup!==sourceGroup)){close();return}
   if(!sourceGroup&&!sourceBoard.pages[sourcePage]){close();return}
-  const fields=['pageNames','pageNotes','pageColors','pageBoardShapes','pageFieldBackgroundColors','pageFieldImageIds','pageFieldImageTints','pageFieldSizes'];
+  const fields=['pageNames','pageNotes','pageColors','pageBoardShapes','pageFieldBackgroundColors','pageFieldImageIds','pageFieldImageTints','pageFieldGuides','pageFieldSizes'];
   const indexes=selectedGroup?sourceBoard.pages.flatMap((_,i)=>sourceBoard.pageGroupIds[i]===sourceGroup?[i]:[]):[sourcePage];
   const before=JSON.stringify(destination);
-  normalizePhaseGroups(destination);destination.pageFieldImageTints=destination.pages.map((_,i)=>fieldImageTint(destination,i));
+  normalizePhaseGroups(destination);destination.pageFieldGuides=destination.pages.map((_,i)=>fieldGuides(destination,i));destination.pageFieldImageTints=destination.pages.map((_,i)=>fieldImageTint(destination,i));
   let groupId=null;
   if(selectedGroup){const copied=JSON.parse(JSON.stringify(selectedGroup));groupId=copied.id=createObjectId();copied.position=destination.pages.length;destination.phaseGroups.push(copied)}
   for(const index of indexes){
@@ -82,7 +241,7 @@
   const current=data.pages[data.page],selected=selectedPhaseIndexes.map(index=>data.pages[index]);recordHistory();
   if(ownGroup&&targetGroup!==ownGroup){data.pageGroupIds[from]=null;to=from}
   else if(!ownGroup&&targetGroup){const group=data.phaseGroups.find(item=>item.id===targetGroup);if(group?.collapsed)to=direction>0?data.pageGroupIds.lastIndexOf(targetGroup):data.pageGroupIds.indexOf(targetGroup);else data.pageGroupIds[from]=targetGroup}
-  for(const key of ['pageGroupIds','pages','pageNames','pageNotes','pageColors','pageBoardShapes','pageFieldBackgroundColors','pageFieldImageIds','pageFieldImageTints','pageFieldSizes']){const [value]=data[key].splice(from,1);data[key].splice(to,0,value)}
+  for(const key of ['pageGroupIds','pages','pageNames','pageNotes','pageColors','pageBoardShapes','pageFieldBackgroundColors','pageFieldImageIds','pageFieldImageTints','pageFieldGuides','pageFieldSizes']){const [value]=data[key].splice(from,1);data[key].splice(to,0,value)}
   data.page=data.pages.indexOf(current);selectedPhaseIndexes=selected.map(page=>data.pages.indexOf(page));renderAndSave();revealMovedPhase(to);
  }
  function open(row,x,y){
@@ -274,6 +433,7 @@
 // ===== js/canvas/field-image-tint.js =====
 (()=>{
  const settings=document.createElement('div');settings.id='fieldImageTintSettings';settings.innerHTML='<div class="field"><label>補正色</label><div id="fieldImageTintColorControl"></div></div><div class="field"><label for="fieldImageTintStrength">補正の強さ：<span id="fieldImageTintStrengthValue">0</span>%</label><div class="coordinate-control"><input id="fieldImageTintStrength" type="range" min="0" max="100" step="1" value="0"><input id="fieldImageTintStrengthSpin" type="number" min="0" max="100" step="1" value="0" aria-label="補正の強さ"></div></div>';document.getElementById('layoutPropertiesPanel').append(settings);
+ settings.after(document.getElementById('fieldGuideEntry'));
  const colors=document.createElement('div');colors.className='layout-background-colors';const colorField=settings.firstElementChild;colorField.before(colors);colors.append(colorField);
  const color=settings.querySelector('#fieldImageTintColorControl'),range=settings.querySelector('input[type=range]'),spin=settings.querySelector('input[type=number]'),label=settings.querySelector('#fieldImageTintStrengthValue');let session=null;
  function sync(){settings.hidden=!['image','image4'].includes(activeBoardShape());const tint=fieldImageTint(data,data.page),disabled=boardReadOnly||phaseComparisonActive();if(color.dataset.color!==tint.color){color.innerHTML=colorPickerMarkup('fieldImageTint',tint.color);color.dataset.color=tint.color}color.querySelector('[data-color-trigger]').disabled=disabled;range.disabled=spin.disabled=disabled;range.value=spin.value=tint.strength;label.textContent=tint.strength;if(session&&(session.board!==data||session.page!==data.page))session=null}
@@ -454,7 +614,7 @@
   data.pages.forEach((_,i)=>{const id=data.pageGroupIds[i];if(!id)order.push(i);else if(!seen.has(id)){seen.add(id);data.pageGroupIds.forEach((g,j)=>{if(g===id)order.push(j)})}});
   if(order.every((value,i)=>value===i))return;
   const at=data.page,comparisons=selectedPhaseIndexes.slice();
-  for(const key of ['pageGroupIds','pages','pageNames','pageNotes','pageColors','pageBoardShapes','pageFieldBackgroundColors','pageFieldImageIds','pageFieldImageTints','pageFieldSizes']){const previous=data[key];if(Array.isArray(previous))data[key]=order.map(i=>previous[i])}
+  for(const key of ['pageGroupIds','pages','pageNames','pageNotes','pageColors','pageBoardShapes','pageFieldBackgroundColors','pageFieldImageIds','pageFieldImageTints','pageFieldGuides','pageFieldSizes']){const previous=data[key];if(Array.isArray(previous))data[key]=order.map(i=>previous[i])}
   data.page=order.indexOf(at);selectedPhaseIndexes=comparisons.map(i=>order.indexOf(i));
  }
  const beforePages=renderPages;renderPages=function(){
@@ -486,7 +646,7 @@
     for(const item of data.phaseGroups){if(!data.pageGroupIds.includes(item.id)){const slot=item.position??data.pages.length,boundary=remaining.filter(i=>i<slot).length;item.position=boundary+(at<boundary||(at===boundary&&item.id===beforeEmpty)?moving.length:0)}}
     group.position=at;
     if(!moving.length){const target=data.phaseGroups.find(item=>item.id===groupId);data.phaseGroups=data.phaseGroups.filter(item=>item!==group);const index=target?data.phaseGroups.indexOf(target):data.phaseGroups.length;data.phaseGroups.splice(index<0?data.phaseGroups.length:index,0,group)}
-    for(const key of ['pages','pageGroupIds','pageNames','pageNotes','pageColors','pageBoardShapes','pageFieldBackgroundColors','pageFieldImageIds','pageFieldImageTints','pageFieldSizes']){const previous=data[key];data[key]=order.map(i=>previous[i])}
+    for(const key of ['pages','pageGroupIds','pageNames','pageNotes','pageColors','pageBoardShapes','pageFieldBackgroundColors','pageFieldImageIds','pageFieldImageTints','pageFieldGuides','pageFieldSizes']){const previous=data[key];data[key]=order.map(i=>previous[i])}
     data.page=data.pages.indexOf(active);selectedPhaseIndexes=comparison.map(page=>data.pages.indexOf(page));renderAndSave();return;
    }
    const raw=event.dataTransfer?.getData('application/x-tactica-page');if(!raw)return;const from=Number(raw);
@@ -495,7 +655,7 @@
    recordHistory();data.pageGroupIds[from]=groupId;
    const at=Math.max(0,Math.min(data.pages.length-1,position-(from<position?1:0)));
    for(const empty of data.phaseGroups.filter(g=>!data.pageGroupIds.includes(g.id))){let slot=Number.isInteger(empty.position)?empty.position:data.pages.length;if(from<slot)slot--;const targetGroup=event.target.closest('.phase-group-heading')?.dataset.groupId;if(at<slot||(at===slot&&groupId===null&&targetGroup===empty.id))slot++;empty.position=slot}
-   for(const key of ['pages','pageGroupIds','pageNames','pageNotes','pageColors','pageBoardShapes','pageFieldBackgroundColors','pageFieldImageIds','pageFieldImageTints','pageFieldSizes']){const [value]=data[key].splice(from,1);data[key].splice(at,0,value)}
+   for(const key of ['pages','pageGroupIds','pageNames','pageNotes','pageColors','pageBoardShapes','pageFieldBackgroundColors','pageFieldImageIds','pageFieldImageTints','pageFieldGuides','pageFieldSizes']){const [value]=data[key].splice(from,1);data[key].splice(at,0,value)}
    const group=data.phaseGroups.find(g=>g.id===groupId);if(group)group.collapsed=false;
    data.page=data.pages.indexOf(active);selectedPhaseIndexes=comparison.map(page=>data.pages.indexOf(page));renderAndSave();revealMovedPhase(data.pages.indexOf(moving));
   }

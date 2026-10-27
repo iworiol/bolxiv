@@ -350,7 +350,7 @@
     align-items:center;
     white-space:nowrap;
   }
-  .right .board-title-row .board-zoom-group #boardZoomValue {
+  .right .board-title-row .board-zoom-group :is(#boardZoomValue,[data-source-id="boardZoomValue"]) {
     min-width:28px;
     line-height:1;
   }
@@ -369,7 +369,7 @@
     gap:0;
     padding:0 1px;
   }
-  .right .board-title-row .board-zoom-group #boardZoomValue {
+  .right .board-title-row .board-zoom-group :is(#boardZoomValue,[data-source-id="boardZoomValue"]) {
     min-width:0;
   }
 }
@@ -1392,7 +1392,7 @@
     white-space:nowrap;
   }
 }
-.right .board-title-row .board-zoom-group #boardZoomValue {
+.right .board-title-row .board-zoom-group :is(#boardZoomValue,[data-source-id="boardZoomValue"]) {
   display:inline-block;
   box-sizing:border-box;
   flex:0 0 3ch!important;

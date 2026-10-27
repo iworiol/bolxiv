@@ -666,7 +666,7 @@ function phoneReaderLayoutMetrics(panel,footerHeight,rowHeight,zoom=boardDisplay
 // Defer phone range changes until a tap or horizontal gesture is established.
 (()=>{
  const mobile=matchMedia('(max-width:850px)');let gesture=null;
- const eligible=node=>node instanceof HTMLInputElement&&node.matches('#inspector input[type="range"],#layoutPropertiesPanel input[type="range"]')&&!node.disabled;
+ const eligible=node=>node instanceof HTMLInputElement&&node.matches('#inspector input[type="range"],#layoutPropertiesPanel input[type="range"],#fieldGuideSettings input[type="range"]')&&!node.disabled;
  function valid(g){return g.input.isConnected&&!g.input.disabled&&!boardReadOnly&&!phaseComparisonActive()}
  function apply(g,x){
   if(!valid(g))return;

@@ -60,8 +60,8 @@ function printPageLayout(width,height){
  let outputAction='png';
  function outputPropertiesName(){return outputAction==='png'?'画像生成プロパティ':'印刷プロパティ'}
  function syncPrintColor(){if(paperImage)paperImage.style.filter=plainPaperPrintFilter();liveSpace.style.setProperty('--plain-paper-print-filter',outputAction==='print'?plainPaperPrintFilter():'none')}
- function syncOutputAction(){syncPrintColor();const png=outputAction==='png',name=png?'画像生成':'印刷';document.getElementById('outputPngSettings').hidden=!png;document.getElementById('outputPrintSettings').hidden=png;printSettingsReset.hidden=png;document.getElementById('pngPropertiesToggle').firstElementChild.textContent=outputPropertiesName();document.getElementById('pngCanvasModeStatus').textContent=name;helpButton?.setAttribute('aria-label',name+'のアイコン説明');surface.classList.toggle('print-paper-active',!png);paperPreview.hidden=png;if(session&&!opening){refresh();fitOutputToViewport()}}
- function fitZoomStep(){const dimensions=previewDimensions(),style=getComputedStyle(surface),insetX=parseFloat(style.paddingLeft)+parseFloat(style.paddingRight),insetY=parseFloat(style.paddingTop)+parseFloat(style.paddingBottom),gutterX=outputAction==='print'?72:40,gutterY=outputAction==='print'?60:40,ratio=Math.min((surface.clientWidth-insetX-gutterX)/dimensions.width,(surface.clientHeight-insetY-gutterY)/dimensions.height);return Math.max(.05,Math.min(3,Math.floor((ratio+1e-9)*20)/20))}
+ function syncOutputAction(){syncPrintColor();const png=outputAction==='png',name=png?'画像生成':'印刷';document.getElementById('outputPngSettings').hidden=!png;document.getElementById('outputPrintSettings').hidden=png;printSettingsReset.hidden=png;document.getElementById('pngPropertiesToggle').firstElementChild.textContent=outputPropertiesName();document.getElementById('pngCanvasModeStatus').textContent=name;helpButton?.setAttribute('aria-label',name+'のアイコン説明');syncPaperMode();if(session&&!opening){refresh();fitOutputToViewport()}}
+ function fitZoomStep(){const dimensions=previewDimensions(),style=getComputedStyle(surface),insetX=parseFloat(style.paddingLeft)+parseFloat(style.paddingRight),insetY=parseFloat(style.paddingTop)+parseFloat(style.paddingBottom),gutterX=paperMode()?72:40,gutterY=paperMode()?60:40,ratio=Math.min((surface.clientWidth-insetX-gutterX)/dimensions.width,(surface.clientHeight-insetY-gutterY)/dimensions.height);return Math.max(.05,Math.min(3,Math.floor((ratio+1e-9)*20)/20))}
  const toolbar=document.querySelector('.board-display-toolbar').cloneNode(true);toolbar.classList.add('png-preview-toolbar');toolbar.setAttribute('aria-label','出力プレビューの表示');
  toolbar.querySelector('.phone-content-icon')?.remove();toolbar.querySelector('.phone-icon-help-toggle')?.remove();toolbar.querySelector('.phone-help-separator')?.remove();
  for(const node of toolbar.querySelectorAll('[id]')){node.dataset.sourceId=node.id;node.id='png-'+node.id}
@@ -76,7 +76,9 @@ function printPageLayout(width,height){
  const paperSheet=document.createElement('div');paperSheet.className='print-paper-sheet';const paperImage=document.createElement('img');paperImage.alt='用紙上の攻略図';const marginGuide=document.createElement('div');marginGuide.className='print-margin-guide';const cutGuide=document.createElement('div');cutGuide.className='print-cut-guide';cutGuide.setAttribute('aria-hidden','true');cutGuide.hidden=true;paperSheet.append(paperImage,marginGuide,cutGuide);paperPreview.append(paperSheet);surface.append(paperPreview);
  const paperWidthLabel=document.createElement('div'),paperHeightLabel=document.createElement('div');paperWidthLabel.className='print-paper-dimension print-paper-width';paperHeightLabel.className='print-paper-dimension print-paper-height';paperWidthLabel.append(document.createElement('span'));paperHeightLabel.append(document.createElement('span'));paperPreview.append(paperWidthLabel,paperHeightLabel);
  let paperRevision=0;
- function previewDimensions(){if(outputAction!=='print')return outputDimensions();const size=printPageLayout(1,1),unit=96/25.4;return {width:size.paperWidth*unit,height:size.paperHeight*unit}}
+ function paperMode(){return outputAction==='print'&&desktopVectorPrintAvailable()}
+ function syncPaperMode(){const paper=paperMode();surface.classList.toggle('print-paper-active',paper);paperPreview.hidden=!paper;printSettingsReset.hidden=!paper;}
+ function previewDimensions(){if(!paperMode())return outputDimensions();const size=printPageLayout(1,1),unit=96/25.4;return {width:size.paperWidth*unit,height:size.paperHeight*unit}}
  function syncPrintImageDpi(source,page){
   const output=document.getElementById('printImageDpi'),parallel=phaseComparisonActive(),indexes=parallel?selectedPhaseIndexes:[data.page],tileScale=parallel?phaseComparisonLayout().cellSize/640:1,values=[];
   if(!data.activePhaseGroup)for(const index of indexes){
@@ -96,7 +98,7 @@ function printPageLayout(width,height){
   if(values.length){const min=Math.round(Math.min(...values)),max=Math.round(Math.max(...values));output.textContent='フィールド画像：約'+min+(min===max?'':'〜'+max)+' dpi';output.title='保存されている画像の画素数と、印刷時のフィールドサイズから算出した目安です。プリンターの解像度設定ではありません。'}else output.textContent='';
  }
  function fitPaper(){
-  const source=outputDimensions();let page=printPageLayout(source.width,source.height);
+  if(!paperMode())return;const source=outputDimensions();let page=printPageLayout(source.width,source.height);
   const widthInput=document.getElementById('printWidth'),maximum=Math.floor(page.maxImageWidth*1000)/1000;
   widthInput.max=String(maximum);widthInput.min=String(Math.min(1,maximum));widthInput.step='any';
   // Keep the entered and saved width consistent with the actual printable diagram.
@@ -116,7 +118,7 @@ function printPageLayout(width,height){
   document.getElementById('printActualSize').textContent='図：'+page.imageWidth.toFixed(1)+' × '+page.imageHeight.toFixed(1)+' mm'+(page.limited?'（用紙内に収まる幅に調整）':'');
  }
  async function refreshPaperArtwork(){
-  const ticket=++paperRevision;if(outputAction!=='print'||!session)return;
+  const ticket=++paperRevision;if(!paperMode()||!session)return;
   try{let src;if(desktopVectorPrintAvailable()){
    // Notes and borders change the output frame, not the diagram's computed styles.
    const active=session;if(active.printSourceVersion!==diagramVersion||!active.printSource){active.printSourceVersion=diagramVersion;active.printSource=createVectorPrintSource();active.printSource.catch(()=>{if(session===active)active.printSource=null})}
@@ -151,7 +153,7 @@ function printPageLayout(width,height){
   if(reader.dataset.readerTab!==tab)reader.dataset.readerTab=tab;
   if(reader.dataset.readerExpanded!==String(expanded))reader.dataset.readerExpanded=String(expanded);
   const title=reader.querySelector('.phone-reader-title'),change=reader.querySelector('.phone-reader-switch'),collapse=reader.querySelector('.phone-reader-collapse');
-  printSettingsReset.hidden=outputAction!=='print'||tab!=='properties'||!expanded;
+  printSettingsReset.hidden=!paperMode()||tab!=='properties'||!expanded;
   const propertiesName=outputPropertiesName();const markup=tab==='list'?'<span class="phone-reader-label-part"><strong>フェーズリスト</strong> / </span><span class="phone-reader-label-part">'+propertiesName+'</span>':'<span class="phone-reader-label-part">フェーズリスト / </span><span class="phone-reader-label-part"><strong>'+propertiesName+'</strong></span>';
   if(title&&title.innerHTML!==markup)title.innerHTML=markup;
   const attr=(node,key,value)=>{if(node&&node.getAttribute(key)!==value)node.setAttribute(key,value)};
@@ -229,7 +231,7 @@ function printPageLayout(width,height){
     propertiesExpanded=true;syncProperties();reader.append(dialog.querySelector('.png-preview-settings'));dialog.querySelector('.png-preview-content').append(reader)}
  function unmountPhoneReader(state){const reader=dialog.querySelector('.png-reader-controls');if(!reader)return;propertiesPanel.querySelector('h3').append(printSettingsReset);printSettingsReset.hidden=outputAction!=='print';dialog.querySelector('.png-preview-content').append(dialog.querySelector('.png-preview-settings'));for(const {node,anchor} of state.readerHomes){anchor.after(node);anchor.remove()}state.readerHomes.length=0;reader.remove()}
  let responsiveFrame=0;
- function syncResponsiveOutput(){responsiveFrame=0;if(!session)return;if(matchMedia('(max-width:850px)').matches)mountPhoneReader(session.readerHomes);else unmountPhoneReader(session);syncProperties();surface.append(liveSpace);liveSpace.inert=true;alignFrame();fit();fitOutputToViewport()}
+ function syncResponsiveOutput(){responsiveFrame=0;if(!session)return;syncPaperMode();if(matchMedia('(max-width:850px)').matches)mountPhoneReader(session.readerHomes);else unmountPhoneReader(session);syncProperties();surface.append(liveSpace);liveSpace.inert=true;alignFrame();fit();fitOutputToViewport()}
  function scheduleResponsiveOutput(){if(!session||responsiveFrame)return;responsiveFrame=requestAnimationFrame(syncResponsiveOutput)}
  matchMedia('(max-width:850px)').addEventListener('change',scheduleResponsiveOutput);window.addEventListener('resize',scheduleResponsiveOutput);
  async function open(scale=1,kind='image'){
@@ -336,8 +338,8 @@ async function printOutputCanvas(){
  let src;try{await new Promise(resolve=>requestAnimationFrame(()=>setTimeout(resolve,0)));if(desktopVectorPrintAvailable())src=await createVectorPrintSvg();else{const canvas=await drawPngCanvas(2,printReadabilityEnabled());src=canvas.toDataURL('image/png')}}catch(error){clearPhasePrintFrame();throw error}
  await new Promise((resolve,reject)=>{
   const frame=document.createElement('iframe');phasePrintFrame=frame;frame.title='表示中の攻略図の印刷';frame.className='phase-print-frame';
-  frame.onload=async()=>{try{const win=frame.contentWindow;const image=frame.contentDocument.querySelector('img');await image.decode();const page=printPageLayout(image.naturalWidth,image.naturalHeight);Object.assign(image.style,{left:page.x+'mm',top:page.y+'mm',width:page.imageWidth+'mm',height:page.imageHeight+'mm'});if(document.getElementById('outputPrintCutGuide').checked){const guide=frame.contentDocument.createElement('div');guide.className='print-cut-guide';layoutPrintCutGuide(guide,page,1,'mm');frame.contentDocument.body.append(guide)}if(phasePrintFrame!==frame){resolve();return}win.addEventListener('afterprint',clearPhasePrintFrame,{once:true});document.body.classList.remove('phase-print-preparing');phasePrintOverlay?.setAttribute('aria-label','印刷画面を開いています');finishBusy();win.focus();win.print();resolve()}catch(error){clearPhasePrintFrame();reject(error)}};
-  const page=printPageLayout(1,1);frame.srcdoc='<!doctype html><html lang="ja"><head><meta charset="utf-8"><title>攻略図</title><style>@page{size:'+page.paperWidth+'mm '+page.paperHeight+'mm;margin:0}html,body{margin:0;padding:0;background:white;width:'+page.paperWidth+'mm;height:'+page.paperHeight+'mm}body{position:relative;overflow:hidden}img{position:absolute;display:block;max-width:none;max-height:none;filter:'+plainPaperPrintFilter()+';print-color-adjust:exact;-webkit-print-color-adjust:exact}</style></head><body><img alt="攻略図" src="'+src+'"></body></html>';document.body.append(frame);
+  frame.onload=async()=>{try{const win=frame.contentWindow;const image=frame.contentDocument.querySelector('img');await image.decode();if(desktopVectorPrintAvailable()){const page=printPageLayout(image.naturalWidth,image.naturalHeight);Object.assign(image.style,{left:page.x+'mm',top:page.y+'mm',width:page.imageWidth+'mm',height:page.imageHeight+'mm'});if(document.getElementById('outputPrintCutGuide').checked){const guide=frame.contentDocument.createElement('div');guide.className='print-cut-guide';layoutPrintCutGuide(guide,page,1,'mm');frame.contentDocument.body.append(guide)}}if(phasePrintFrame!==frame){resolve();return}win.addEventListener('afterprint',clearPhasePrintFrame,{once:true});document.body.classList.remove('phase-print-preparing');phasePrintOverlay?.setAttribute('aria-label','印刷画面を開いています');finishBusy();win.focus();win.print();resolve()}catch(error){clearPhasePrintFrame();reject(error)}};
+  const page=printPageLayout(1,1);frame.srcdoc='<!doctype html><html lang="ja"><head><meta charset="utf-8"><title>攻略図</title><style>@page{size:'+page.paperWidth+'mm '+page.paperHeight+'mm;margin:0}html,body{margin:0;padding:0;background:white;width:'+page.paperWidth+'mm;height:'+page.paperHeight+'mm}body{position:relative;overflow:hidden}img{position:absolute;display:block;max-width:none;max-height:none;filter:'+plainPaperPrintFilter()+';print-color-adjust:exact;-webkit-print-color-adjust:exact}</style></head><body><img alt="攻略図" src="'+src+'"></body></html>';if(!desktopVectorPrintAvailable())frame.srcdoc='<!doctype html><html lang="ja"><head><meta charset="utf-8"><title>攻略図</title><style>@page{size:auto}html,body{margin:0;padding:0;background:white}img{display:block;max-width:100%;max-height:95vh;width:auto;height:auto;margin:0 auto;filter:'+plainPaperPrintFilter()+';print-color-adjust:exact;-webkit-print-color-adjust:exact}</style></head><body><img alt="攻略図" src="'+src+'"></body></html>';document.body.append(frame);
  });
  }finally{finishBusy()}
 }

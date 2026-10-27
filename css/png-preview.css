@@ -322,5 +322,14 @@
 .print-cut-guide[hidden]{display:none!important}
 #printImageDpi{font-size:12px;line-height:1.5;color:#526078}
 #printImageDpi[hidden]{display:none!important}
+/* Phone printing leaves paper layout to the device print dialog. */
+@media(max-width:850px){
+ #outputPrintSettings .print-page-fields,
+ #outputPrintSettings label:has(#outputPrintCutGuide),
+ #outputPrintSettings>.output-print-color-info:not(:has(#printGuideLink)){display:none!important}
+ .app .layout .right #pngPreview #printSettingsReset{display:none!important}
+ .app .layout .right #pngPreview .png-preview-toolbar [data-source-id="resetBoardZoom"],
+ .app .layout .right #pngPreview .png-preview-toolbar [data-source-id="boardZoomValue"]{background:transparent!important;color:#fff!important;-webkit-text-fill-color:#fff!important;border:0!important}
+}
 .app .layout #pngPreview .print-guide-link{display:inline;padding:0;border:0;background:transparent!important;color:var(--blue)!important;-webkit-text-fill-color:var(--blue)!important;font:inherit;text-decoration:underline;text-underline-offset:2px;cursor:pointer;filter:none}
 .app .layout #pngPreview .print-guide-link:focus-visible{outline:2px solid var(--blue);outline-offset:2px}

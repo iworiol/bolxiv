@@ -2280,17 +2280,17 @@ body.resizing-phase-panels,body.resizing-phase-panels * {
   -webkit-appearance:none;
   margin:0;
 }
-.right .board-title-row .board-zoom-group #boardZoomValue {
+.right .board-title-row .board-zoom-group :is(#boardZoomValue,[data-source-id="boardZoomValue"]) {
   min-width:32px;
   font-size:14px;
 }
-.right .board-title-row .board-zoom-group #zoomOut {
+.right .board-title-row .board-zoom-group :is(#zoomOut,[data-source-id="zoomOut"]) {
   font-size:0;
   display:flex;
   align-items:center;
   justify-content:center;
 }
-.right .board-title-row .board-zoom-group #zoomOut::before {
+.right .board-title-row .board-zoom-group :is(#zoomOut,[data-source-id="zoomOut"])::before {
   content:"";
   display:block;
   width:11px;
@@ -2300,7 +2300,7 @@ body.resizing-phase-panels,body.resizing-phase-panels * {
 .right .board-title-row .board-zoom-group .board-zoom-spin {
   gap:1px;
 }
-.right .board-title-row .board-zoom-group #boardZoomValue {
+.right .board-title-row .board-zoom-group :is(#boardZoomValue,[data-source-id="boardZoomValue"]) {
   min-width:0;
 }
 .content-heading-row {
@@ -3041,7 +3041,7 @@ dialog.confirm-dialog {
   margin:0 3px;
   background:#999;
 }
-.right .board-title-row .board-zoom-group>#fitBoardZoom svg {
+.right .board-title-row .board-zoom-group>:is(#fitBoardZoom,[data-source-id="fitBoardZoom"]) svg {
   display:block;
   width:18px;
   height:18px;
