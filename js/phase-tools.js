@@ -548,7 +548,7 @@
   input.blur();
  },true);
  window.addEventListener('click',event=>{
-  if(!data.activePhaseGroup||!event.target.closest('#toggleLayers,#toggleInspector,#toggleLayoutProperties,#phaseMemo>summary,.desktop-columns-toggle,.phone-object-tabs'))return;
+  if(!data.activePhaseGroup||!event.target.closest('#toggleLayers,#toggleInspector,#phaseMemo>summary,.desktop-columns-toggle,.phone-object-tabs'))return;
   if(matchMedia('(max-width:850px)').matches)return;
   event.preventDefault();event.stopImmediatePropagation();
  },true);
@@ -587,7 +587,7 @@
   if(phone)return;
   if(active){
    propertiesBeforeGroup??={expanded:heading.getAttribute('aria-expanded'),hidden:panel.hidden,hiddenClass:panel.classList.contains('hidden'),display:panel.style.display,open:section.classList.contains('is-open')};
-   heading.setAttribute('aria-expanded','true');panel.hidden=false;panel.classList.remove('hidden');panel.style.display='flex';section.classList.add('is-open');const memo=document.getElementById('phaseMemo');memo.open=true;memo.classList.add('is-open');
+   heading.setAttribute('aria-expanded','true');panel.hidden=false;panel.classList.remove('hidden');panel.style.display='flex';section.classList.add('is-open');
   }else if(propertiesBeforeGroup){
    const previous=propertiesBeforeGroup;propertiesBeforeGroup=null;
    // Desktop tools have already restored their selected section during render.
@@ -598,7 +598,7 @@
   const item=group();for(const id of ['gridToggle','fieldToggle','clipToggle'])document.getElementById(id).disabled=!!item;overview.hidden=!item;groupProperties.hidden=!item;host.classList.toggle('group-overview-active',!!item);if(document.body.classList.contains('phase-group-selected')!==!!item)document.body.classList.toggle('phase-group-selected',!!item);
   expandGroupProperties(!!item);
   const phaseListTitle=document.getElementById('toggleBattlePages');if(phaseListTitle.textContent!=='フェーズリスト')phaseListTitle.textContent='フェーズリスト';const propertyTitle=document.getElementById('toggleLayoutProperties');if(propertyTitle.firstChild?.nodeType===3)propertyTitle.firstChild.textContent=item?'グループプロパティ':'フェーズプロパティ';
-  const phoneTitle=document.querySelector('.phone-phase-switch-title');if(item&&phoneTitle)phoneTitle.innerHTML='<strong>グループプロパティ</strong> / グループノート';
+  const phoneTitle=document.querySelector('.phone-phase-switch-title');if(item&&phoneTitle)phoneTitle.innerHTML='<strong>グループプロパティ</strong>';
   if(!item)return;
   const selectedLabel=document.getElementById('selectionTitle');selectedLabel.textContent='グループ：'+item.name;selectedLabel.title=selectedLabel.textContent;document.getElementById('clearBtn').disabled=true;for(const id of ['copyPage','copyPageToContent'])document.getElementById(id).disabled=boardReadOnly||phaseComparisonActive();
   drawGroupArtwork();

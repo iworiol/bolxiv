@@ -158,11 +158,9 @@ function phoneReaderLayoutMetrics(panel,footerHeight,rowHeight,zoom=boardDisplay
   const phaseChanged=lastNoteContent!==activeContent||lastNotePage!==data.page||lastNoteGroup!==data.activePhaseGroup;
   lastNoteContent=activeContent;lastNotePage=data.page;lastNoteGroup=data.activePhaseGroup;
   const groupSelected=!!data.activePhaseGroup,enteringGroup=groupSelected&&groupMemoState===null;
-  memo.classList.toggle('group-note-static',groupSelected&&desktop.matches);
-  const noteHeading=memo.querySelector('summary');if(groupSelected&&desktop.matches){noteHeading.setAttribute('role','heading');noteHeading.setAttribute('aria-level','3');noteHeading.tabIndex=-1}else{noteHeading.removeAttribute('role');noteHeading.removeAttribute('aria-level');noteHeading.removeAttribute('tabindex')}
-  memo.querySelector('.phase-memo-caption').textContent=groupSelected?'グループノート':'フェーズノート';
   if(enteringGroup)groupMemoState={open:memo.open,phoneNoteOpen};
-  const value=groupSelected?'そう、証明よ。':data.pageNotes?.[data.page]||'';
+  if(groupSelected){memo.hidden=true;return}
+  const value=data.pageNotes?.[data.page]||'';
   const phone=!desktop.matches;
   const nextPhoneReading=phone&&boardReadOnly;
   if(nextPhoneReading!==phoneReading){
@@ -193,14 +191,12 @@ function phoneReaderLayoutMetrics(panel,footerHeight,rowHeight,zoom=boardDisplay
   if(phaseChanged){reading.scrollTop=0;input.scrollTop=0}
   input.readOnly=groupSelected||boardReadOnly||phaseComparisonActive();
   input.setAttribute('aria-label','フェーズ'+String(data.page+1).padStart(2,'0')+'のノート');
-  phase.textContent=groupSelected?'グループ：'+(data.phaseGroups?.find(group=>group.id===data.activePhaseGroup)?.name||''):String(data.page+1).padStart(2,'0')+' '+(data.pageNames[data.page]||'');phase.title=phase.textContent;
-  preview.textContent=value.trim().replace(/\s+/g,' ')||'未記入';const summary=memo.querySelector('summary');summary.title=phase.textContent+(groupSelected&&desktop.matches?'\nグループノート':'\nフェーズノートを開閉')+(value?'\n'+value:'\nノートは未記入です');preview.title=summary.title;
-  if(enteringGroup)memo.open=true;
-  else if(!groupSelected&&groupMemoState!==null){memo.open=groupMemoState.open;phoneNoteOpen=groupMemoState.phoneNoteOpen;groupMemoState=null}
+  phase.textContent=String(data.page+1).padStart(2,'0')+' '+(data.pageNames[data.page]||'');phase.title=phase.textContent;
+  preview.textContent=value.trim().replace(/\s+/g,' ')||'未記入';const summary=memo.querySelector('summary');summary.title=phase.textContent+'\nフェーズノートを開閉'+(value?'\n'+value:'\nノートは未記入です');preview.title=summary.title;
+  if(groupMemoState!==null){memo.open=groupMemoState.open;phoneNoteOpen=groupMemoState.phoneNoteOpen;groupMemoState=null}
   if(session&&(session.board!==data||session.page!==data.page))session=null;
  }
  function closeProperties(){if(memo.dataset.sidebarManaged==='true')return;if(desktop.matches&&memo.open&&properties.getAttribute('aria-expanded')==='true'){restorePropertiesAfterMemo=true;properties.onclick({currentTarget:properties})}}
- memo.querySelector('summary').addEventListener('click',event=>{if(!data.activePhaseGroup||!desktop.matches)return;event.preventDefault();event.stopImmediatePropagation();memo.open=true},true);
  memo.open=desktop.matches&&viewSettings.phaseMemoExpanded===true;
  memo.addEventListener('toggle',()=>{
   if(phoneReading){phoneNoteOpen=memo.open;return}
@@ -277,15 +273,15 @@ function phoneReaderLayoutMetrics(panel,footerHeight,rowHeight,zoom=boardDisplay
  let selectedPhaseTool=['phase','memo'].includes(currentTool)?currentTool:viewSettings.desktopPhasePanelTab==='memo'?'memo':'phase';
  const phaseHeading=document.createElement('div');phaseHeading.className='desktop-phase-shared-heading';phaseHeading.hidden=true;
  const contentPhasePanel=document.createElement('section');contentPhasePanel.className='desktop-content-phase-panel';contentPhasePanel.hidden=true;document.getElementById('contentPanel').append(contentPhasePanel);
- let phasePanelOpen=viewSettings.desktopContentPhaseExpanded!==false;
+ let phasePanelOpen=viewSettings.desktopContentPhaseExpanded!==false,groupPanelOpen=true;
  if(currentTool==='phase'||currentTool==='memo')currentTool='object';
  const contentResize=document.getElementById('phasePropertyResize'),contentList=phaseListButton.closest('.page-controls');
  let contentShare=Number.isFinite(viewSettings.desktopContentPhaseShare)?Math.max(.1,Math.min(.9,viewSettings.desktopContentPhaseShare)):.5,contentGesture=null;
- function updateContentSplit(){if(!active)return;contentResize.setAttribute('aria-disabled',String(!phasePanelOpen));if(!phasePanelOpen){contentList.style.removeProperty('flex');return}const available=contentList.getBoundingClientRect().height+contentPhasePanel.getBoundingClientRect().height;if(available<=0)return;const height=Math.max(100,Math.min(available-180,available*contentShare));contentList.style.setProperty('flex','0 0 '+height+'px','important');contentResize.setAttribute('aria-valuemin','10');contentResize.setAttribute('aria-valuemax','90');contentResize.setAttribute('aria-valuenow',String(Math.round(contentShare*100)))}
- contentResize.addEventListener('pointerdown',event=>{if(!active||!phasePanelOpen||event.button!==0)return;event.preventDefault();contentGesture={id:event.pointerId,y:event.clientY,height:contentList.getBoundingClientRect().height,total:contentList.getBoundingClientRect().height+contentPhasePanel.getBoundingClientRect().height};contentResize.setPointerCapture(event.pointerId);contentResize.classList.add('resizing')});
+ function updateContentSplit(){if(!active)return;const open=data.activePhaseGroup?groupPanelOpen:phasePanelOpen;contentResize.setAttribute('aria-disabled',String(!open));if(!open){contentList.style.removeProperty('flex');return}const available=contentList.getBoundingClientRect().height+contentPhasePanel.getBoundingClientRect().height;if(available<=0)return;const height=Math.max(100,Math.min(available-180,available*contentShare));contentList.style.setProperty('flex','0 0 '+height+'px','important');contentResize.setAttribute('aria-valuemin','10');contentResize.setAttribute('aria-valuemax','90');contentResize.setAttribute('aria-valuenow',String(Math.round(contentShare*100)))}
+ contentResize.addEventListener('pointerdown',event=>{if(!active||!(data.activePhaseGroup?groupPanelOpen:phasePanelOpen)||event.button!==0)return;event.preventDefault();contentGesture={id:event.pointerId,y:event.clientY,height:contentList.getBoundingClientRect().height,total:contentList.getBoundingClientRect().height+contentPhasePanel.getBoundingClientRect().height};contentResize.setPointerCapture(event.pointerId);contentResize.classList.add('resizing')});
  contentResize.addEventListener('pointermove',event=>{if(!contentGesture||event.pointerId!==contentGesture.id)return;contentShare=Math.max(.1,Math.min(.9,(contentGesture.height+event.clientY-contentGesture.y)/contentGesture.total));rememberViewSetting('desktopContentPhaseShare',contentShare);updateContentSplit()});
  for(const name of ['pointerup','pointercancel','lostpointercapture'])contentResize.addEventListener(name,()=>{contentGesture=null;contentResize.classList.remove('resizing')});
- contentResize.addEventListener('keydown',event=>{if(!active||!phasePanelOpen||!['ArrowUp','ArrowDown'].includes(event.key))return;event.preventDefault();contentShare=Math.max(.1,Math.min(.9,contentShare+(event.key==='ArrowDown'?.02:-.02)));rememberViewSetting('desktopContentPhaseShare',contentShare);updateContentSplit()});
+ contentResize.addEventListener('keydown',event=>{if(!active||!(data.activePhaseGroup?groupPanelOpen:phasePanelOpen)||!['ArrowUp','ArrowDown'].includes(event.key))return;event.preventDefault();contentShare=Math.max(.1,Math.min(.9,contentShare+(event.key==='ArrowDown'?.02:-.02)));rememberViewSetting('desktopContentPhaseShare',contentShare);updateContentSplit()});
  new ResizeObserver(()=>updateContentSplit()).observe(document.getElementById('contentPanel'));
  const phaseTitle=document.createElement('button');phaseTitle.type='button';phaseTitle.id='desktopPhasePanelTitle';phaseTitle.className='desktop-phase-panel-title';
  const phaseSwitch=document.createElement('button');phaseSwitch.type='button';phaseSwitch.id='desktopPhaseSwitch';phaseSwitch.className='desktop-phase-switch';phaseSwitch.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h16l-4-4M20 16H4l4 4"/></svg>';
@@ -294,7 +290,7 @@ function phoneReaderLayoutMetrics(panel,footerHeight,rowHeight,zoom=boardDisplay
  phaseHeading.append(phaseTitle,phaseSwitch,phaseCollapse);
  function syncPhaseHeading(){
   const group=!!data.activePhaseGroup;rail.classList.toggle('desktop-group-tools',group);phaseHeading.hidden=!active||group;contentPhasePanel.classList.toggle('desktop-group-tools',group);
-  const open=phasePanelOpen;phaseHeading.dataset.expanded=String(open);
+  const open=group?groupPanelOpen:phasePanelOpen;phaseHeading.dataset.expanded=String(open);contentPhasePanel.classList.toggle('group-properties-collapsed',group&&!open);
   const phaseLabel='<strong>フェーズ プロパティ</strong> / ノート',memoLabel='<strong>フェーズ</strong> プロパティ / <strong>ノート</strong>';
   const markup='<span class="desktop-phase-label">'+(selectedPhaseTool==='phase'?phaseLabel:memoLabel)+'</span><span class="desktop-phase-label-measure" aria-hidden="true">'+phaseLabel+'</span><span class="desktop-phase-label-measure" aria-hidden="true">'+memoLabel+'</span>';
   if(phaseTitle.innerHTML!==markup)phaseTitle.innerHTML=markup;
@@ -302,7 +298,7 @@ function phoneReaderLayoutMetrics(panel,footerHeight,rowHeight,zoom=boardDisplay
   phaseSwitch.title=selectedPhaseTool==='phase'?'フェーズノートを表示':'フェーズプロパティを表示';phaseSwitch.setAttribute('aria-label',phaseSwitch.title);
   phaseCollapse.textContent=open?'−':'＋';phaseCollapse.title=open?'設定・ノートを閉じる':'設定・ノートを開く';phaseCollapse.setAttribute('aria-label',phaseCollapse.title);phaseCollapse.setAttribute('aria-expanded',String(open));
   for(const button of [phaseTitle,phaseSwitch,phaseCollapse])button.disabled=false;
-  if(active){contentPhasePanel.hidden=false;phase.hidden=!open||!group&&(selectedPhaseTool!=='phase'||readingMode);memo.hidden=!open||!group&&(selectedPhaseTool!=='memo'&&!readingMode);phase.classList.toggle('is-open',!phase.hidden);memo.classList.toggle('is-open',!memo.hidden);phaseBody.hidden=phase.hidden;phaseBody.classList.toggle('hidden',phase.hidden);phaseBody.style.display=phase.hidden?'none':'flex';memo.open=!memo.hidden;phaseButton.setAttribute('aria-expanded',String(!phase.hidden))}
+  if(active){contentPhasePanel.hidden=false;phase.hidden=!group&&(!open||selectedPhaseTool!=='phase'||readingMode);memo.hidden=group||!open||(selectedPhaseTool!=='memo'&&!readingMode);phase.classList.toggle('is-open',!phase.hidden);memo.classList.toggle('is-open',!memo.hidden);phaseBody.hidden=phase.hidden||!open;phaseBody.classList.toggle('hidden',phaseBody.hidden);phaseBody.style.display=phaseBody.hidden?'none':'flex';memo.open=!memo.hidden;phaseButton.setAttribute('aria-expanded',String(!phaseBody.hidden))}
   updateContentSplit();
  }
  function togglePhasePanel(){if(active){phasePanelOpen=!phasePanelOpen;rememberViewSetting('desktopContentPhaseExpanded',phasePanelOpen);syncPhaseHeading()}}
@@ -379,10 +375,10 @@ function phoneReaderLayoutMetrics(panel,footerHeight,rowHeight,zoom=boardDisplay
  }
  function selectionChanged(){
   const groupSelected=!!data.activePhaseGroup;
-  if(active&&groupSelected&&!groupWasSelected){toolBeforeGroup=readingMode?editingTool:currentTool;listBeforeGroup={twoColumns,open:listButton.getAttribute('aria-expanded')==='true'};twoColumns=false}
+  if(active&&groupSelected&&!groupWasSelected){groupPanelOpen=true;toolBeforeGroup=readingMode?editingTool:currentTool;listBeforeGroup={twoColumns,open:listButton.getAttribute('aria-expanded')==='true'};twoColumns=false}
   if(active&&!groupSelected&&groupWasSelected){if(listBeforeGroup){twoColumns=listBeforeGroup.twoColumns;setDisclosure(listButton,document.getElementById('layerListPanel'),listBeforeGroup.open);listBeforeGroup=null}if(boardReadOnly||phaseComparisonActive())showTool('memo',false);else showTool(toolBeforeGroup)}
-  if(active&&groupSelected){twoColumns=false;setDisclosure(listButton,document.getElementById('layerListPanel'),false);showTool('phase',false);memo.open=true;memo.classList.add('is-open')}
-  listButton.disabled=readingMode||groupSelected;objectButton.disabled=readingMode||groupSelected;phaseButton.disabled=readingMode||groupSelected;
+  if(active&&groupSelected){twoColumns=false;setDisclosure(listButton,document.getElementById('layerListPanel'),false);syncPhaseHeading()}
+  listButton.disabled=readingMode||groupSelected;objectButton.disabled=readingMode||groupSelected;phaseButton.disabled=readingMode&&!groupSelected;
   groupWasSelected=groupSelected;
   // Selection updates the inspector content without changing the chosen panel.
  }
@@ -411,7 +407,7 @@ function phoneReaderLayoutMetrics(panel,footerHeight,rowHeight,zoom=boardDisplay
  for(const [button,key] of [[objectButton,'object'],[phaseButton,'phase'],[memo.querySelector('summary'),'memo']]){
   button.addEventListener('click',event=>{
    if(!active)return;
-   event.preventDefault();event.stopImmediatePropagation();if(boardReadOnly||phaseComparisonActive()||data.activePhaseGroup)return;showTool(currentTool===key?'':key);
+   event.preventDefault();event.stopImmediatePropagation();if(data.activePhaseGroup&&key==='phase'){groupPanelOpen=!groupPanelOpen;syncPhaseHeading();return}if(boardReadOnly||phaseComparisonActive()||data.activePhaseGroup)return;showTool(currentTool===key?'':key);
   },true);
  }
  listButton.addEventListener('click',()=>{if(active&&!readingMode)rememberViewSetting('desktopObjectListExpanded',listButton.getAttribute('aria-expanded')==='true');syncResizeHandle()});
@@ -534,7 +530,7 @@ function phoneReaderLayoutMetrics(panel,footerHeight,rowHeight,zoom=boardDisplay
  handle.addEventListener('keydown',event=>{if(!canResize()||!['ArrowUp','ArrowDown'].includes(event.key))return;event.preventDefault();event.stopImmediatePropagation();resizeList(list.getBoundingClientRect().height+(event.key==='ArrowDown'?10:-10))},true);
  new MutationObserver(()=>{if(ownsResize&&phaseButton.getAttribute('aria-expanded')==='false'){list.style.removeProperty('flex');ownsResize=false}sync()}).observe(phaseButton,{attributes:true,attributeFilter:['aria-expanded']});
  function sync(){
-  const enabled=mobile.matches&&!boardReadOnly;tabs.hidden=!enabled;host.classList.toggle('phone-phase-tabbed',enabled);host.dataset.phaseTab=selected;
+  const enabled=mobile.matches&&!boardReadOnly;tabs.hidden=!enabled;host.classList.toggle('phone-phase-tabbed',enabled);host.dataset.phaseTab=data.activePhaseGroup?'properties':selected;
   shared.hidden=!enabled;
   const open=expanded;collapse.disabled=false;
   shared.classList.toggle('is-collapsed',!open);collapse.textContent=open?'−':'＋';collapse.setAttribute('aria-expanded',String(open));collapse.title=open?'設定・ノートを閉じる':'設定・ノートを開く';collapse.setAttribute('aria-label',collapse.title);
@@ -549,12 +545,12 @@ function phoneReaderLayoutMetrics(panel,footerHeight,rowHeight,zoom=boardDisplay
    if(mobile.matches){const target=boardReadOnly?document.querySelector('.phone-view-content'):host;if(target&&memo.parentElement!==target)target.append(memo)}
   }
   const prefix=data.activePhaseGroup?'グループ':'フェーズ';
-  const titleMarkup=selected==='properties'?'<strong>'+prefix+' プロパティ</strong> / ノート':'<strong>'+prefix+'</strong> プロパティ / <strong>ノート</strong>';
+  const titleMarkup=data.activePhaseGroup?'<strong>グループプロパティ</strong>':selected==='properties'?'<strong>'+prefix+' プロパティ</strong> / ノート':'<strong>'+prefix+'</strong> プロパティ / <strong>ノート</strong>';
   if(title.innerHTML!==titleMarkup)title.innerHTML=titleMarkup;
   title.setAttribute('aria-label','フェーズ '+(selected==='properties'?'プロパティ':'ノート')+'を表示中。設定・ノート欄を'+(expanded?'閉じる':'開く'));
-  buttons.forEach(button=>{button.title=prefix+(selected==='properties'?'ノートを表示':'プロパティを表示');button.setAttribute('aria-label',button.title)});
+  buttons.forEach(button=>{button.hidden=!!data.activePhaseGroup;button.title=prefix+(selected==='properties'?'ノートを表示':'プロパティを表示');button.setAttribute('aria-label',button.title)});
   if(!enabled)return;
-  if(selected==='memo')memo.open=true;
+  if(selected==='memo'&&!data.activePhaseGroup)memo.open=true;
   else{properties.setAttribute('aria-expanded','true');body.hidden=false;body.classList.remove('hidden');body.style.display='flex'}
  }
  window.Bolxiv.phasePanel={

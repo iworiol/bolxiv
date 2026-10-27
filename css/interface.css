@@ -1083,8 +1083,8 @@
 .phase-group-selected #toggleLayoutProperties>:is(#activePhaseIndex,#activePhaseLabel){display:none}
 .phase-group-selected :is(#toggleLayers,#toggleInspector,#toggleLayoutProperties):disabled{opacity:1}
 @media(min-width:851px){
- .phase-group-selected :is(#toggleLayers,#toggleInspector,#toggleLayoutProperties){pointer-events:none!important}
- .phase-group-selected :is(#toggleLayers,#toggleInspector,#toggleLayoutProperties)::after{display:none!important}
+ .phase-group-selected :is(#toggleLayers,#toggleInspector){pointer-events:none!important}
+ .phase-group-selected :is(#toggleLayers,#toggleInspector)::after{display:none!important}
 }
 
 #phaseGroupProperties{display:flex;flex-direction:column;flex:1;gap:10px;padding:0;min-width:0;min-height:0}
@@ -1335,9 +1335,6 @@ body .app .layout #contentSelect::after{
 
 /* Preset actions are visual placeholders until registration is implemented. */
 .left .preset-actions{display:flex;gap:8px}
-body .app .layout #phaseMemo.group-note-static>summary,body .app .layout #objectLayerPanel #phaseMemo.group-note-static>summary{background:#eef2f7!important;color:#33445f!important;-webkit-text-fill-color:#33445f!important;cursor:default;outline:none}
-body .app .layout #phaseMemo.group-note-static>summary *,body .app .layout #objectLayerPanel #phaseMemo.group-note-static>summary *{color:inherit!important;-webkit-text-fill-color:inherit!important}
-#phaseMemo.group-note-static>summary::after{display:none!important}
 .left .preset-grid{margin-bottom:0}.left .builtin-preset .preset-thumbnail{display:block;position:relative;width:26px;height:26px}.left .builtin-preset .preset-thumbnail img{position:absolute;width:8px;height:8px;max-width:8px;max-height:8px;transform:translate(-50%,-50%);object-fit:contain}
 .object-group-control{--handle-connector-color:#ffaa33;border:3px solid #ffaa33}
 .object-group-control.group-only-selection{border-style:dashed}
@@ -1876,6 +1873,9 @@ body .app .layout #contentPanel :is(.desktop-phase-shared-heading,.phone-phase-t
  .desktop-content-phase-panel .desktop-phase-panel-title strong{font-size:14px}
  .desktop-content-phase-panel>:is(.content-properties,.phase-memo){display:flex!important;flex-direction:column;flex:1 1 0!important;height:auto!important;min-height:0!important;margin:0!important;border:1px solid #d0d4da;border-top:0;border-radius:0 0 7px 7px;overflow:hidden;background:#fff}
  .desktop-content-phase-panel>:is(.content-properties,.phase-memo)[hidden]{display:none!important}
+ .desktop-content-phase-panel.desktop-group-tools>.content-properties{border-top:1px solid #d0d4da;border-radius:7px}
+ .desktop-content-phase-panel.group-properties-collapsed{flex:0 0 auto;min-height:36px}
+ .desktop-content-phase-panel.group-properties-collapsed>.content-properties{flex:0 0 auto!important}
  .desktop-content-phase-panel:not(.desktop-group-tools)>.content-properties>#toggleLayoutProperties,.desktop-content-phase-panel:not(.desktop-group-tools)>.phase-memo>summary{display:none!important}
  .app .layout.desktop-phase-tools .desktop-content-phase-panel #layoutPropertiesPanel:not([hidden]):not(.hidden){box-sizing:border-box;display:flex!important;flex-direction:column;flex:1 1 0!important;height:0!important;min-height:0!important;max-height:none;gap:10px;overflow-x:hidden!important;overflow-y:auto!important;padding:8px;scrollbar-gutter:stable}
  .app .layout.desktop-phase-tools .battle #contentPanel>#phasePropertyResize{display:block!important;flex:0 0 6px;height:6px;min-height:6px;cursor:ns-resize;touch-action:none;background:#ddd;border-radius:3px}
@@ -1916,3 +1916,7 @@ body .app .layout #contentPanel :is(.desktop-phase-shared-heading,.phone-phase-t
  .app .layout .right .board-title-row>#toggleObjectList{box-sizing:border-box;height:100%!important;min-height:0!important;max-height:100%;background:transparent!important}
 }
 
+
+body.phase-group-selected .app .layout #phaseMemo{display:none!important}
+body.phase-group-selected .app .layout :is(#phonePhaseSwitch-toggle,.phone-reader-switch){display:none!important}
+@media(max-width:850px){body.phase-group-selected .app .layout #editFieldGuides{display:none!important}}
