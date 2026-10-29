@@ -322,7 +322,7 @@ button:hover:not(:where(.phone-touch-mode *)) {
   position:absolute;
   transform:translate(-50%,-50%);
   user-select:none;
-  cursor:grab;
+  cursor:move;
   z-index:2;
 }
 .stage.ctrl-copy,.stage.ctrl-copy * {
@@ -556,7 +556,7 @@ input[type=file] {
 }
 .shape {
   pointer-events:auto;
-  cursor:grab;
+  cursor:move;
   transform:translate(-50%,-50%) rotate(var(--rot,0deg));
   transform-origin:center;
 }
@@ -683,7 +683,7 @@ input[type=file] {
   height:44px;
   display:grid;
   place-items:center;
-  cursor:grab;
+  cursor:move;
   position:absolute;
 }
 .job-icon img {

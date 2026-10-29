@@ -322,14 +322,49 @@
 .print-cut-guide[hidden]{display:none!important}
 #printImageDpi{font-size:12px;line-height:1.5;color:#526078}
 #printImageDpi[hidden]{display:none!important}
-/* Phone printing leaves paper layout to the device print dialog. */
-@media(max-width:850px){
- #outputPrintSettings .print-page-fields,
- #outputPrintSettings label:has(#outputPrintCutGuide),
- #outputPrintSettings>.output-print-color-info:not(:has(#printGuideLink)){display:none!important}
- .app .layout .right #pngPreview #printSettingsReset{display:none!important}
- .app .layout .right #pngPreview .png-preview-toolbar [data-source-id="resetBoardZoom"],
- .app .layout .right #pngPreview .png-preview-toolbar [data-source-id="boardZoomValue"]{background:transparent!important;color:#fff!important;-webkit-text-fill-color:#fff!important;border:0!important}
-}
+.app .layout .right #pngPreview .png-preview-toolbar [data-source-id="resetBoardZoom"],
+.app .layout .right #pngPreview .png-preview-toolbar [data-source-id="boardZoomValue"]{background:transparent!important;color:#fff!important;-webkit-text-fill-color:#fff!important;border:0!important}
 .app .layout #pngPreview .print-guide-link{display:inline;padding:0;border:0;background:transparent!important;color:var(--blue)!important;-webkit-text-fill-color:var(--blue)!important;font:inherit;text-decoration:underline;text-underline-offset:2px;cursor:pointer;filter:none}
 .app .layout #pngPreview .print-guide-link:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+
+
+
+.print-reset-icon{display:none}
+@media(max-width:850px){
+ .app .layout .right #pngPreview .phone-reader-tabs>#printSettingsReset{display:grid;place-items:center;box-sizing:border-box;flex:0 0 28px;width:28px;min-width:28px;height:28px;min-height:28px;padding:3px;margin:0 0 0 auto}
+ #pngPreview #printSettingsReset .print-reset-label{display:none}
+ #pngPreview #printSettingsReset .print-reset-icon{display:block;width:18px;height:18px}
+ .app .layout .right #pngPreview .phone-reader-tabs:has(>#printSettingsReset:not([hidden]))>.phone-reader-collapse{margin-left:0!important}
+ #pngPreview .print-page-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 12px}
+ #pngPreview .print-page-fields>*{grid-column:1/-1;order:4}
+ #pngPreview .print-page-fields>label:has(#printPaper,#printOrientation){grid-column:auto;order:0;min-width:0;flex-direction:column;align-items:stretch;gap:5px}
+ #pngPreview .print-page-fields :is(#printPaper,#printOrientation){width:100%;flex:none}
+ #pngPreview .print-page-fields>fieldset{order:1;justify-self:start;margin:0;width:max-content;max-width:100%;box-sizing:border-box;grid-template-columns:repeat(2,max-content)}
+ #pngPreview .print-page-fields fieldset input{width:64px}
+ #pngPreview .print-page-fields>label:has(#printSize,#printPosition,#printWidth){grid-column:1;order:2;min-width:0;flex-direction:column;align-items:stretch;gap:5px}
+ #pngPreview .print-page-fields :is(#printSize,#printPosition,#printWidth){width:100%}
+ #pngPreview .print-page-fields>label#printWidthField{grid-column:2;order:2}
+ .app .layout #pngPreview .print-page-fields #printWidth{height:40px;min-height:40px}
+ #pngPreview .print-page-fields>label:has(#printPosition){grid-column:1;order:3}
+}
+.print-width-adjustment,#printWidthValue{display:none}
+@media(max-width:850px){
+ #pngPreview .print-page-fields #printWidth{display:none}
+ #pngPreview .print-width-adjustment{display:flex;flex-wrap:nowrap;align-items:center;gap:4px;min-width:0;width:auto;margin-inline:-3px 9px;justify-content:space-between}
+ .app .layout #pngPreview .print-width-adjustment #printWidthRange{flex:1 1 0;width:0;min-width:0;height:32px;min-height:32px;padding:0;border:0!important;background:transparent!important;box-shadow:none}
+ #pngPreview .print-width-heading{display:flex;align-items:baseline;gap:6px;white-space:nowrap}
+ #pngPreview .print-width-heading .print-width-unit{display:none}
+ #pngPreview #printWidthValue{display:inline;font-size:12px;min-width:0}
+ #pngPreview .print-width-adjustment .phone-number-step-buttons{gap:4px}
+ #pngPreview .print-page-fields>label:has(#printSize,#printPosition,#printWidth){justify-content:flex-start}
+}
+.print-margin-adjustment,.print-margin-value{display:none}
+@media(max-width:850px){
+ #pngPreview .print-page-fields>fieldset{width:100%;grid-template-columns:repeat(2,minmax(0,1fr))}
+ #pngPreview .print-page-fields fieldset label{flex-direction:column;align-items:stretch;min-width:0;gap:5px}
+ #pngPreview .print-page-fields fieldset label>input{display:none}
+ #pngPreview .print-margin-heading{display:flex;align-items:baseline;gap:6px;white-space:nowrap}
+ #pngPreview .print-margin-value{display:inline}
+ #pngPreview .print-margin-adjustment{display:flex;align-items:center;gap:4px;min-width:0}
+ .app .layout #pngPreview .print-margin-adjustment input[type=range]{flex:1 1 0;width:0;min-width:0;max-width:none;height:32px;min-height:32px;padding:0;border:0!important;background:transparent!important;box-shadow:none}
+}
