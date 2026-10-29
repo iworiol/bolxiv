@@ -1,7 +1,8 @@
 // ===== js/canvas/number-input-commit.js =====
 (()=>{
  const states=new WeakMap();let applying=false;
- const isSpin=node=>node?.matches?.('.coordinate-control input[type="number"]');
+ const spinSelector='.coordinate-control input[type="number"],#printWidth,.print-page-fields fieldset label>input[type="number"]';
+ const isSpin=node=>node?.matches?.(spinSelector);
  function state(spin){if(!states.has(spin))states.set(spin,{saved:spin.value,dirty:false,stepping:false});return states.get(spin)}
  function restore(spin){const current=state(spin);spin.value=current.saved;current.dirty=false}
  function commit(spin){
@@ -22,9 +23,11 @@
   const spin=event.target,current=state(spin),rect=spin.getBoundingClientRect();
   current.stepping=event.clientX>=rect.right-20;
  },true);
- document.addEventListener('pointerup',()=>{document.querySelectorAll('.coordinate-control input[type="number"]').forEach(spin=>state(spin).stepping=false)},true);
+ document.addEventListener('pointerup',()=>{document.querySelectorAll(spinSelector).forEach(spin=>state(spin).stepping=false)},true);
  document.addEventListener('input',event=>{
   if(applying||!isSpin(event.target))return;
+  // Hidden desktop fields also receive programmatic updates from phone controls.
+  if(!event.isTrusted&&document.activeElement!==event.target&&event.target.matches('#printWidth,.print-page-fields fieldset label>input[type="number"]'))return;
   const current=state(event.target);current.dirty=true;
   event.stopImmediatePropagation();
   if(current.stepping)commit(event.target);
@@ -41,7 +44,8 @@
   if(event.key==='Escape'){restore(spin);return}
   if(event.key==='Enter'){commit(spin);return}
   if(!spin.value.trim()||!Number.isFinite(Number(spin.value)))restore(spin);
-  if(event.key==='ArrowUp')spin.stepUp();else spin.stepDown();
+  if(spin.step==='any')spin.value=String(Number(spin.value)+(event.key==='ArrowUp'?1:-1));
+  else if(event.key==='ArrowUp')spin.stepUp();else spin.stepDown();
   current.dirty=true;commit(spin);
  },true);
 })();
@@ -267,7 +271,7 @@ function phoneReaderLayoutMetrics(panel,footerHeight,rowHeight,zoom=boardDisplay
  resizeHandle.addEventListener('keydown',event=>{if(active&&['ArrowUp','ArrowDown'].includes(event.key)){event.preventDefault();resizeList(list.getBoundingClientRect().height+(event.key==='ArrowDown'?10:-10))}});
  memo.dataset.sidebarManaged='true';
  let active=false,mobileState=null;
- let groupWasSelected=false,toolBeforeGroup='',listBeforeGroup=null;
+ let groupWasSelected=false,columnsBeforeGroup=null;
  let currentTool=['object','phase','memo',''].includes(viewSettings.desktopPhaseTool)?viewSettings.desktopPhaseTool:'object';
  let readingMode=false,editingTool=currentTool,editingListOpen=true;
  let selectedPhaseTool=['phase','memo'].includes(currentTool)?currentTool:viewSettings.desktopPhasePanelTab==='memo'?'memo':'phase';
@@ -277,12 +281,13 @@ function phoneReaderLayoutMetrics(panel,footerHeight,rowHeight,zoom=boardDisplay
  if(currentTool==='phase'||currentTool==='memo')currentTool='object';
  const contentResize=document.getElementById('phasePropertyResize'),contentList=phaseListButton.closest('.page-controls');
  let contentShare=Number.isFinite(viewSettings.desktopContentPhaseShare)?Math.max(.1,Math.min(.9,viewSettings.desktopContentPhaseShare)):.5,contentGesture=null;
- function updateContentSplit(){if(!active)return;const open=data.activePhaseGroup?groupPanelOpen:phasePanelOpen;contentResize.setAttribute('aria-disabled',String(!open));if(!open){contentList.style.removeProperty('flex');return}const available=contentList.getBoundingClientRect().height+contentPhasePanel.getBoundingClientRect().height;if(available<=0)return;const height=Math.max(100,Math.min(available-180,available*contentShare));contentList.style.setProperty('flex','0 0 '+height+'px','important');contentResize.setAttribute('aria-valuemin','10');contentResize.setAttribute('aria-valuemax','90');contentResize.setAttribute('aria-valuenow',String(Math.round(contentShare*100)))}
- contentResize.addEventListener('pointerdown',event=>{if(!active||!(data.activePhaseGroup?groupPanelOpen:phasePanelOpen)||event.button!==0)return;event.preventDefault();contentGesture={id:event.pointerId,y:event.clientY,height:contentList.getBoundingClientRect().height,total:contentList.getBoundingClientRect().height+contentPhasePanel.getBoundingClientRect().height};contentResize.setPointerCapture(event.pointerId);contentResize.classList.add('resizing')});
+ function updateContentSplit(){if(!active)return;const open=(data.activePhaseGroup?groupPanelOpen:phasePanelOpen)&&phaseListButton.getAttribute('aria-expanded')==='true';contentResize.setAttribute('aria-disabled',String(!open));if(!open){contentList.style.removeProperty('flex');return}const available=contentList.getBoundingClientRect().height+contentPhasePanel.getBoundingClientRect().height;if(available<=0)return;const height=Math.max(100,Math.min(available-180,available*contentShare));contentList.style.setProperty('flex','0 0 '+height+'px','important');contentResize.setAttribute('aria-valuemin','10');contentResize.setAttribute('aria-valuemax','90');contentResize.setAttribute('aria-valuenow',String(Math.round(contentShare*100)))}
+ contentResize.addEventListener('pointerdown',event=>{if(!active||phaseListButton.getAttribute('aria-expanded')!=='true'||!(data.activePhaseGroup?groupPanelOpen:phasePanelOpen)||event.button!==0)return;event.preventDefault();contentGesture={id:event.pointerId,y:event.clientY,height:contentList.getBoundingClientRect().height,total:contentList.getBoundingClientRect().height+contentPhasePanel.getBoundingClientRect().height};contentResize.setPointerCapture(event.pointerId);contentResize.classList.add('resizing')});
  contentResize.addEventListener('pointermove',event=>{if(!contentGesture||event.pointerId!==contentGesture.id)return;contentShare=Math.max(.1,Math.min(.9,(contentGesture.height+event.clientY-contentGesture.y)/contentGesture.total));rememberViewSetting('desktopContentPhaseShare',contentShare);updateContentSplit()});
  for(const name of ['pointerup','pointercancel','lostpointercapture'])contentResize.addEventListener(name,()=>{contentGesture=null;contentResize.classList.remove('resizing')});
- contentResize.addEventListener('keydown',event=>{if(!active||!(data.activePhaseGroup?groupPanelOpen:phasePanelOpen)||!['ArrowUp','ArrowDown'].includes(event.key))return;event.preventDefault();contentShare=Math.max(.1,Math.min(.9,contentShare+(event.key==='ArrowDown'?.02:-.02)));rememberViewSetting('desktopContentPhaseShare',contentShare);updateContentSplit()});
+ contentResize.addEventListener('keydown',event=>{if(!active||phaseListButton.getAttribute('aria-expanded')!=='true'||!(data.activePhaseGroup?groupPanelOpen:phasePanelOpen)||!['ArrowUp','ArrowDown'].includes(event.key))return;event.preventDefault();contentShare=Math.max(.1,Math.min(.9,contentShare+(event.key==='ArrowDown'?.02:-.02)));rememberViewSetting('desktopContentPhaseShare',contentShare);updateContentSplit()});
  new ResizeObserver(()=>updateContentSplit()).observe(document.getElementById('contentPanel'));
+ new MutationObserver(()=>updateContentSplit()).observe(phaseListButton,{attributes:true,attributeFilter:['aria-expanded']});
  const phaseTitle=document.createElement('button');phaseTitle.type='button';phaseTitle.id='desktopPhasePanelTitle';phaseTitle.className='desktop-phase-panel-title';
  const phaseSwitch=document.createElement('button');phaseSwitch.type='button';phaseSwitch.id='desktopPhaseSwitch';phaseSwitch.className='desktop-phase-switch';phaseSwitch.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h16l-4-4M20 16H4l4 4"/></svg>';
  const phaseCollapse=document.createElement('button');phaseCollapse.type='button';phaseCollapse.id='desktopPhaseSectionToggle';phaseCollapse.className='desktop-phase-collapse';
@@ -335,7 +340,6 @@ function phoneReaderLayoutMetrics(panel,footerHeight,rowHeight,zoom=boardDisplay
  });
  listButton.addEventListener('click',event=>{if(active&&twoColumns){event.preventDefault();event.stopImmediatePropagation()}},true);
  function syncReadingMode(){
-  if(active&&phaseListButton.getAttribute('aria-expanded')!=='true')setPhaseList(true);
   const next=active&&(boardReadOnly||phaseComparisonActive());
   if(next===readingMode)return;
   readingMode=next;layout.classList.toggle('desktop-reading-tools',next);
@@ -375,9 +379,9 @@ function phoneReaderLayoutMetrics(panel,footerHeight,rowHeight,zoom=boardDisplay
  }
  function selectionChanged(){
   const groupSelected=!!data.activePhaseGroup;
-  if(active&&groupSelected&&!groupWasSelected){groupPanelOpen=true;toolBeforeGroup=readingMode?editingTool:currentTool;listBeforeGroup={twoColumns,open:listButton.getAttribute('aria-expanded')==='true'};twoColumns=false}
-  if(active&&!groupSelected&&groupWasSelected){if(listBeforeGroup){twoColumns=listBeforeGroup.twoColumns;setDisclosure(listButton,document.getElementById('layerListPanel'),listBeforeGroup.open);listBeforeGroup=null}if(boardReadOnly||phaseComparisonActive())showTool('memo',false);else showTool(toolBeforeGroup)}
-  if(active&&groupSelected){twoColumns=false;setDisclosure(listButton,document.getElementById('layerListPanel'),false);syncPhaseHeading()}
+  if(active&&groupSelected&&!groupWasSelected){groupPanelOpen=true;columnsBeforeGroup=twoColumns}
+  if(active&&!groupSelected&&groupWasSelected&&columnsBeforeGroup!==null){twoColumns=columnsBeforeGroup;columnsBeforeGroup=null}
+  if(active&&groupSelected){twoColumns=false;syncPhaseHeading()}
   listButton.disabled=readingMode||groupSelected;objectButton.disabled=readingMode||groupSelected;phaseButton.disabled=readingMode&&!groupSelected;
   groupWasSelected=groupSelected;
   // Selection updates the inspector content without changing the chosen panel.
@@ -387,7 +391,7 @@ function phoneReaderLayoutMetrics(panel,footerHeight,rowHeight,zoom=boardDisplay
   if(next){
    mobileState={object:objectButton.getAttribute('aria-expanded')==='true',phase:phaseButton.getAttribute('aria-expanded')==='true',memo:memo.open,phaseList:phaseListButton.getAttribute('aria-expanded')==='true'};
    active=true;layout.classList.add('desktop-phase-tools');rail.hidden=false;
-   setPhaseList(true);phaseListButton.disabled=true;phaseListButton.title='フェーズリスト';phaseListButton.setAttribute('role','heading');phaseListButton.setAttribute('aria-level','2');
+   phaseListButton.disabled=false;phaseListButton.title='フェーズリストを開閉';
    rail.append(list,resizeHandle,object);contentPhasePanel.append(phaseHeading,phase,memo);
    if(typeof viewSettings.desktopObjectListExpanded==='boolean')setDisclosure(listButton,document.getElementById('layerListPanel'),viewSettings.desktopObjectListExpanded);
    showTool(currentTool,false);syncReadingMode();selectionChanged();syncPropertyHeadings();syncColumns();
@@ -676,7 +680,7 @@ function phoneReaderLayoutMetrics(panel,footerHeight,rowHeight,zoom=boardDisplay
 // Defer phone range changes until a tap or horizontal gesture is established.
 (()=>{
  const mobile=matchMedia('(max-width:850px)');let gesture=null;
- const eligible=node=>node instanceof HTMLInputElement&&node.matches('#inspector input[type="range"],#layoutPropertiesPanel input[type="range"],#fieldGuideSettings input[type="range"]')&&!node.disabled;
+ const eligible=node=>node instanceof HTMLInputElement&&node.matches('#inspector input[type="range"],#layoutPropertiesPanel input[type="range"],#fieldGuideSettings input[type="range"],#guideShapeFields input[type="range"],#printWidthRange,.print-margin-adjustment input[type="range"]')&&!node.disabled;
  function valid(g){return g.input.isConnected&&!g.input.disabled&&!boardReadOnly&&!phaseComparisonActive()}
  function apply(g,x){
   if(!valid(g))return;

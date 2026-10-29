@@ -113,9 +113,10 @@ function placeBuiltinFieldMarkers(cx,cy){
  const button=document.getElementById('editModeToggle'),disabledForView=new Set();
  function syncControls(){
   if(!boardReadOnly&&!window.Bolxiv?.pngPreview?.active){
-   const guides=!!window.Bolxiv?.fieldGuideEditor?.active,palette='.left .tool,.left .icon-choice';
-   for(const node of disabledForView)if(!guides||!node.matches(palette)){node.disabled=false;disabledForView.delete(node)}
-   if(guides)for(const node of document.querySelectorAll(palette)){if(!node.disabled){node.disabled=true;disabledForView.add(node)}}
+   const guides=!!window.Bolxiv?.fieldGuideEditor?.active,group=!!data.activePhaseGroup,palette='.left .tool,.left .icon-choice',groupTargets=palette+',#builtinFieldMarkers,#objectList button,#objectList input,#inspector input,#inspector select,#inspector button,#inspector textarea,#layoutPropertiesPanel input,#layoutPropertiesPanel select,#layoutPropertiesPanel textarea,#layoutPropertiesPanel button';
+   const blocked=node=>(guides&&node.matches(palette))||(group&&node.matches(groupTargets)&&!node.closest('#phaseGroupProperties'));
+   for(const node of disabledForView)if(!blocked(node)){node.disabled=false;disabledForView.delete(node)}
+   if(guides||group)for(const node of document.querySelectorAll(group?groupTargets:palette)){if(blocked(node)&&!node.disabled){node.disabled=true;disabledForView.add(node)}}
    return;
   }
   for(const node of document.querySelectorAll(readOnlyEditTargets+',#objectList button,#inspector input,#inspector select,#inspector button')){
@@ -447,244 +448,255 @@ phoneLayerDeleteDialog.addEventListener('close',()=>{pendingPhoneLayerDeletion=n
  const mobile=matchMedia('(max-width:850px)'),toolbar=document.querySelector('.board-display-toolbar'),button=document.createElement('button');button.type='button';button.className='phone-icon-help-toggle';button.textContent='？';button.setAttribute('aria-label','アイコンの説明');button.setAttribute('aria-haspopup','dialog');button.setAttribute('aria-controls','phoneIconHelp');button.setAttribute('aria-expanded','false');toolbar.parentElement.append(button);
  const panel=document.createElement('dialog');panel.id='phoneIconHelp';panel.className='phone-icon-help';panel.setAttribute('aria-labelledby','phoneIconHelpTitle');panel.innerHTML='<div class="phone-icon-help-heading"><h2 id="phoneIconHelpTitle">アイコンの説明</h2><button type="button" class="btn">閉じる</button></div><div class="phone-icon-help-list"></div>';document.body.append(panel);
  const entries=[
- [
-  "#editModeToggle",
-  "編集・閲覧・画像生成・印刷の各モードを選びます。戻るときも同じメニューを使います。"
- ],
- [
-  "help-png-mode",
-  "編集・閲覧・画像生成・印刷の各モードを選びます。戻るときも同じメニューを使います。"
- ],
- [
-  "#pngPropertiesToggle",
-  "現在の画像生成／印刷プロパティ欄を開閉します。"
- ],
- [
-  ".phone-menu-toggle",
-  "インポート・エクスポート・全データ消去・ヘルプを開きます。"
- ],
- [
-  ".phone-content-icon",
-  "コンテンツ・フェーズ・設定・ノートのペインを開きます。"
- ],
- [
-  ".phone-content-close",
-  "コンテンツペインを閉じてキャンバスへ戻ります。"
- ],
- [
-  ".phone-material-pin",
-  "配置する素材の一覧を開閉します。"
- ],
- [
-  "#addPage",
-  "空のフェーズを追加します。Enter・✓で確定、Esc・↶で取り消します。"
- ],
- [
-  "#addPhaseGroup",
-  "フェーズをまとめるグループを追加します。Enter・✓で確定、Esc・↶で取り消します。"
- ],
- [
-  "#copyPage",
-  "フェーズのコピー先を選びます。グループ選択中は所属フェーズもまとめてコピーします。"
- ],
- [
-  "#copyPageToContent",
-  "現在のフェーズを別コンテンツへコピーします。元のフェーズは残ります。"
- ],
- [
-  "#phonePhaseSwitch-toggle",
-  "フェーズプロパティとフェーズノートを切り替えます。"
- ],
- [
-  "#phonePhaseSectionToggle",
-  "フェーズ設定・ノートの共通枠を開閉します。"
- ],
- [
-  "#phasePropertyResize",
-  "リストと設定欄の間を上下に動かし、高さを調整します。"
- ],
- [
-  "#toggleBattlePages",
-  "フェーズリストを開閉します。名前のタップでフェーズを切り替えます。"
- ],
- [
-  ".phase-select-check",
-  "並べて表示するフェーズを選びます。最大12個、2個以上で編集不可になります。"
- ],
- [
-  ".phone-phase-navigation>button:first-child",
-  "前のフェーズへ移動します。"
- ],
- [
-  ".phone-phase-navigation>button:last-child",
-  "次のフェーズへ移動します。"
- ],
- [
-  "help-name-edit",
-  "コンテンツ名・フェーズ名を変更します。"
- ],
- [
-  "help-item-delete",
-  "単体項目は削除します。グループの×は解除のみで、中身を残します。"
- ],
- [
-  "help-name-confirm",
-  "入力した名前を確定します。"
- ],
- [
-  "help-add-cancel",
-  "追加を取り消し、追加前の状態に戻します。"
- ],
- [
-  "help-object-selection",
-  "チェックで複数選択、「…」のタップでメニュー。つかみマーク・番号、または「…」の長押しから並べ替えます。"
- ],
- [
-  "help-object-visibility",
-  "選択したオブジェクトの表示・非表示を切り替えます。"
- ],
- [
-  "help-object-lock",
-  "編集可否を切り替えます。ロック中は移動・サイズ変更・削除ができません。"
- ],
- [
-  "help-number-step",
-  "対象のプロパティの数値を減らす・増やす操作です。"
- ],
- [
-  "help-disclosure",
-  "タイトル・余白・＋／−で欄を開閉します。⇄は表示内容の切り替えです。"
- ],
- [
-  "#pngPreviewSave",
-  "選んだ図とノート・外枠を、出力倍率1倍／2倍でPNGに保存します。表示倍率とは別です。"
- ],
- [
-  "#outputPrintButton",
-  "出力内容を印刷します。用紙・向き・印刷倍率・PDF保存はブラウザー側で指定します。"
- ],
- [
-  "#swapSelectedPositions",
-  "選択した2個の位置を交換します。サイズ・向き・所属は変わりません。"
- ],
- [
-  "#presetUndo",
-  "プリセットの登録・名前変更・削除・並べ替え・読み込みを元に戻します。履歴は最大50件、再読み込みで消えます。"
- ],
- [
-  "#presetRedo",
-  "元に戻したプリセット操作をやり直します。"
- ],
- [
-  "#registerUserPreset",
-  "選択中の2個以上のオブジェクトを登録します。名前を入力し、Enter・✓で確定、Esc・↶で取消。"
- ],
- [
-  "#contentListUndo",
-  "コンテンツリストの追加・削除・読み込みなどを元に戻します。"
- ],
- [
-  "#contentListRedo",
-  "元に戻したコンテンツリストの操作をやり直します。"
- ],
- [
-  "#undo",
-  "このコンテンツの操作を元に戻します。"
- ],
- [
-  "#redo",
-  "元に戻した操作をやり直します。"
- ],
- [
-  "#clearBtn",
-  "確認後、現在のフェーズのオブジェクトをすべて削除します。"
- ],
- [
-  ".phone-display-menu-toggle",
-  "グリッド・フィールド・フィールド外の表示を切り替えます。"
- ],
- [
-  "#fitBoardZoom",
-  "出力全体が収まる表示倍率にします。出力画像のサイズは変わりません。"
- ],
- [
-  "#zoomOut",
-  "表示倍率を5ポイント下げます。"
- ],
- [
-  "#resetBoardZoom",
-  "200%、150%、100%、75%、50%、25%から表示倍率を選ぶ"
- ],
- [
-  "#zoomIn",
-  "表示倍率を5ポイント上げます。"
- ],
- [
-  "#bulkVisibleInput",
-  "選択中の全体を表示・非表示にします。「−」は混在状態で、押すと全体を表示します。"
- ],
- [
-  "#bulkEditableInput",
-  "選択中の全体を編集可・ロックにします。「−」は混在状態で、押すと全体を編集可にします。"
- ],
- [
-  ".handle.move-handle",
-  "十字矢印をつかんで移動します。グループ選択中は全体を動かします。"
- ],
- [
-  ".handle.rotate",
-  "回転矢印をつかんで向きを変えます。グループでは配置を回します。"
- ],
- [
-  ".list-drag-grip",
-  "つかんで上下に動かすと、リストを並べ替えます。"
- ],
- [
-  ".phase-group-toggle",
-  "▶で展開、▼で折りたたみます。名前を押す操作とは別です。"
- ],
- [
-  ".object-group-disclosure",
-  "▶で展開、▼で折りたたみます。"
- ],
- [
-  "#outputIncludeNote",
-  "各図の下に5行分のノート欄を付けます。折り返し込みで5行を超える場合は内容を調整してください。"
- ],
- [
-  "#outputShowBorder",
-  "各図とノートの外側に余白を空けて枠を表示します。PNG・印刷にも反映されます。"
- ],
- [
-  "#outputPhaseGapField",
-  "複数フェーズの横・縦の間隔を別々に調整します。スマホは−／＋で変更します。"
- ],
- [
-  "#pngPreviewScale",
-  "PNGの出力サイズを1倍／2倍から選びます。右側に画像サイズを表示します。"
- ],
- [
-  ".preset-manage",
-  "配置とプリセット管理を切り替えます。閉じたペインでは現在の表示を開きます。"
- ]
+  [
+    "#editModeToggle",
+    "編集・閲覧・画像生成・印刷を切り替えます。"
+  ],
+  [
+    "help-png-mode",
+    "編集・閲覧・画像生成・印刷を切り替えます。"
+  ],
+  [
+    "#pngPropertiesToggle",
+    "出力の設定欄を開閉します。"
+  ],
+  [
+    ".phone-menu-toggle",
+    "保存・読み込み・ヘルプなどのメニューを開きます。"
+  ],
+  [
+    ".phone-content-icon",
+    "コンテンツ・フェーズ・設定・ノートを開きます。"
+  ],
+  [
+    ".phone-content-close",
+    "コンテンツペインを閉じます。"
+  ],
+  [
+    ".phone-material-pin",
+    "素材の一覧を開閉します。"
+  ],
+  [
+    "#addPage",
+    "フェーズを追加します。Enter・✓で確定、Esc・↶で取消。"
+  ],
+  [
+    "#addPhaseGroup",
+    "フェーズグループを追加します。Enter・✓で確定、Esc・↶で取消。"
+  ],
+  [
+    "#copyPage",
+    "フェーズやグループのコピー先を選びます。"
+  ],
+  [
+    "#copyPageToContent",
+    "別コンテンツへコピーします。元のデータは残します。"
+  ],
+  [
+    "#phonePhaseSwitch-toggle",
+    "フェーズプロパティとノートを切り替えます。"
+  ],
+  [
+    "#phonePhaseSectionToggle",
+    "設定・ノート欄を開閉します。"
+  ],
+  [
+    "#phasePropertyResize",
+    "上下に動かして欄の高さを調整します。"
+  ],
+  [
+    "#toggleBattlePages",
+    "フェーズリストを開閉します。"
+  ],
+  [
+    ".phase-select-check",
+    "並べて表示するフェーズを選びます。最大12個です。"
+  ],
+  [
+    ".phone-phase-navigation>button:first-child",
+    "前のフェーズへ移動します。"
+  ],
+  [
+    ".phone-phase-navigation>button:last-child",
+    "次のフェーズへ移動します。"
+  ],
+  [
+    "help-name-edit",
+    "コンテンツ名・フェーズ名を変更します。"
+  ],
+  [
+    "help-item-delete",
+    "単体は削除、グループの×は解除です。"
+  ],
+  [
+    "help-name-confirm",
+    "入力した名前を確定します。"
+  ],
+  [
+    "help-add-cancel",
+    "追加を取り消し、追加前の状態に戻します。"
+  ],
+  [
+    "help-object-selection",
+    "チェックで複数選択、「…」のタップでメニュー。つかみマーク・番号、または「…」の長押しから並べ替えます。"
+  ],
+  [
+    "help-object-visibility",
+    "選択したオブジェクトの表示・非表示を切り替えます。"
+  ],
+  [
+    "help-object-lock",
+    "移動・変形・削除をロックします。"
+  ],
+  [
+    "help-number-step",
+    "−／＋で数値を調整します。"
+  ],
+  [
+    "help-disclosure",
+    "タイトル・余白・＋／−で欄を開閉します。⇄は表示内容の切り替えです。"
+  ],
+  [
+    "#pngPreviewSave",
+    "出力倍率1倍／2倍でPNGを保存します。"
+  ],
+  [
+    "#outputPrintButton",
+    "用紙プレビューの設定で印刷します。PDF保存は印刷画面で選びます。"
+  ],
+  [
+    "#swapSelectedPositions",
+    "選択した2個の位置を交換します。"
+  ],
+  [
+    "#presetUndo",
+    "プリセットの操作を元に戻します。"
+  ],
+  [
+    "#presetRedo",
+    "元に戻したプリセット操作をやり直します。"
+  ],
+  [
+    "#registerUserPreset",
+    "選択中の2個以上を登録します。Enter・✓で保存、Esc・↶で取消。"
+  ],
+  [
+    "#contentListUndo",
+    "コンテンツの追加・削除・読み込みなどを元に戻します。"
+  ],
+  [
+    "#contentListRedo",
+    "元に戻したコンテンツリストの操作をやり直します。"
+  ],
+  [
+    "#undo",
+    "このコンテンツの操作を元に戻します。"
+  ],
+  [
+    "#redo",
+    "元に戻した操作をやり直します。"
+  ],
+  [
+    "#clearBtn",
+    "確認後、現在のフェーズのオブジェクトをすべて削除します。"
+  ],
+  [
+    ".phone-display-menu-toggle",
+    "グリッド・フィールド・フィールド外の表示を切り替えます。"
+  ],
+  [
+    "#fitBoardZoom",
+    "全体が収まる倍率で表示します。出力サイズは変わりません。"
+  ],
+  [
+    "#zoomOut",
+    "表示倍率を5ポイント下げます。"
+  ],
+  [
+    "#resetBoardZoom",
+    "数字を押して表示倍率を選びます。"
+  ],
+  [
+    "#zoomIn",
+    "表示倍率を5ポイント上げます。"
+  ],
+  [
+    "#bulkVisibleInput",
+    "選択中の全体を表示・非表示にします。「−」は混在状態です。"
+  ],
+  [
+    "#bulkEditableInput",
+    "選択中の全体の編集可否を切り替えます。「−」は混在状態です。"
+  ],
+  [
+    ".handle.move-handle",
+    "十字矢印をつかんで移動します。"
+  ],
+  [
+    ".handle.rotate",
+    "矢印をつかんで回転します。"
+  ],
+  [
+    ".list-drag-grip",
+    "つかんで上下に動かすと、リストを並べ替えます。"
+  ],
+  [
+    ".phase-group-toggle",
+    "三角でグループを開閉します。"
+  ],
+  [
+    ".object-group-disclosure",
+    "三角でグループを開閉します。"
+  ],
+  [
+    "#outputIncludeNote",
+    "ノートを各図の下に付けます。折り返し込みで5行までです。"
+  ],
+  [
+    "#outputShowBorder",
+    "図とノートの外側に枠と余白を付けます。"
+  ],
+  [
+    "#outputPhaseGapField",
+    "複数フェーズの横・縦の間隔を調整します。"
+  ],
+  [
+    "#pngPreviewScale",
+    "PNGの出力サイズを1倍／2倍から選びます。"
+  ],
+  [
+    ".preset-manage",
+    "オブジェクト配置とプリセット管理を切り替えます。"
+  ]
 ];
  const defaultSymbols={"#editModeToggle":{"svg":"<svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 20h9\"/><path d=\"M16.5 3.5a2.1 2.1 0 013 3L8 18l-4 1 1-4Z\"/></svg>","text":"編集","color":"#000","background":"#eaf3ff"},".phone-menu-toggle":{"svg":"<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\"><path d=\"M4 6h16M4 12h16M4 18h16\"/></svg>","text":"","color":"#fff","background":"var(--accent)"},".phone-content-icon":{"svg":"<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M9 5l7 7-7 7\"/></svg>","text":"","color":"#fff","background":"var(--accent)"},".phone-material-pin":{"svg":"<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"6.5\" cy=\"6.5\" r=\"3.5\"/><rect x=\"14\" y=\"3\" width=\"7\" height=\"7\" rx=\"1\"/><path d=\"m6.5 13 4.5 8H2z\"/><path d=\"m17.5 13 4.5 4.5-4.5 4.5-4.5-4.5z\"/></svg>","text":"","color":"#fff","background":"var(--accent)"},"#addPage":{"svg":"","text":"＋","color":"#000","background":"#fff"},"#copyPage":{"svg":"","text":"⧉","color":"#000","background":"#fff"},".phone-phase-navigation>button:first-child":{"svg":"<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M15 5l-7 7 7 7\"/></svg>","text":"","color":"#fff","background":"var(--accent)"},".phone-phase-navigation>button:last-child":{"svg":"<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M9 5l7 7-7 7\"/></svg>","text":"","color":"#fff","background":"var(--accent)"},"#undo":{"svg":"<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M9 5L4 10l5 5M4 10h10a6 6 0 0 1 6 6v3\"/></svg>","text":"","color":"#000","background":"#fff"},"#redo":{"svg":"<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M15 5l5 5-5 5M20 10H10a6 6 0 0 0-6 6v3\"/></svg>","text":"","color":"#000","background":"#fff"},"#clearBtn":{"svg":"<svg class=\"clear-icon\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M4 6h16M9 6V3h6v3M6 6l1 15h10l1-15M10 10v7M14 10v7\"/></svg>","text":"","color":"#000","background":"#fff"},"#gridToggle":{"svg":"<svg viewBox=\"0 0 20 20\" aria-hidden=\"true\"><path d=\"M3 3h14v14H3zM8 3v14M13 3v14M3 8h14M3 13h14\"/></svg>","text":"","color":"#fff","background":"var(--accent)"},"#fieldToggle":{"svg":"<svg viewBox=\"0 0 20 20\" aria-hidden=\"true\"><path d=\"M2 10s3-5 8-5 8 5 8 5-3 5-8 5-8-5-8-5Z\"/><circle cx=\"10\" cy=\"10\" r=\"2.2\"/></svg>","text":"","color":"#fff","background":"var(--accent)"},"#clipToggle":{"svg":"<svg viewBox=\"0 0 20 20\" aria-hidden=\"true\"><rect x=\"2\" y=\"2\" width=\"12\" height=\"12\" rx=\"1\"/><path d=\"M9 8h8v9H8v-3M8 8v6M8 8h6\"/><path d=\"M14 8h3v9H8v-3\" stroke-dasharray=\"2 2\"/></svg>","text":"","color":"#fff","background":"var(--accent)"},"#fitBoardZoom":{"svg":"<svg viewBox=\"0 0 20 20\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M7 3H3v4M13 3h4v4M17 13v4h-4M7 17H3v-4\"/></svg>","text":"","color":"#fff","background":"var(--accent)"},"#zoomOut":{"svg":"","text":"−","color":"#fff","background":"var(--accent)"},"#resetBoardZoom":{"svg":"","text":"100%","color":"#fff","background":"var(--accent)"},"#zoomIn":{"svg":"","text":"＋","color":"#fff","background":"var(--accent)"}};
 
  entries.push(
-  ['#editFieldGuides','［…］を開き、「補助線を編集」を選ぶと補助線の編集に切り替わります。'],
-  ['[data-guide-tool="line"]','直線を選び、キャンバスをタップして配置します。長押しして動かしても配置できます。'],
-  ['[data-guide-tool="circle"]','円を選び、キャンバスをタップして配置します。長押しして動かしても配置できます。'],
-  ['[data-guide-tool="rect"]','四角形を選び、キャンバスをタップして配置します。長押しして動かしても配置できます。'],
-  ['[data-guide-tool="triangle"]','三角形を選び、キャンバスをタップして配置します。長押しして動かしても配置できます。'],
-  ['#guideHideObjects','オブジェクトを一時的に隠して補助線を確認します。保存データの表示設定は変えません。'],
-  ['#fieldGuideCircles','中心から等間隔の同心円を表示します。半径3分割なら内側の円は2本です。'],
-  ['#fieldGuideRays','中心から等角度の放射線を表示します。四角基準／円形基準の長さは同じ放射線を別の基準で表示します。'],
-  ['#duplicateGuideShape','選択した補助線を複製します。複数選択中はまとめて複製します。'],
-  ['#deleteGuideShape','選択した補助線を削除します。元に戻すで復元できます。'],
-  ['.guide-selection-controls .aoe-box-handle','白い丸でサイズを変更します。角は縦横比を保って拡縮し、辺はその方向を調整します。'],
-  ['#outputPrintReadability','文字と図形の線を印刷時だけ少し太くします。画像内の文字・線やPNGには適用しません。'],
-  ['#outputPlainPaper','鮮やかさを少し抑える色調整を、印刷プレビューと印刷に適用します。'],
-  ['#outputPrintCutGuide','図・ノート・外枠の周囲に切り取り用の点線を印刷します。PCの印刷用設定です。']
+  ["#editFieldGuides","［…］からガイド編集の開始・終了を選びます。"],
+  ["[data-guide-tool=\"line\"]","直線を選び、キャンバスを押して配置します。"],
+  ["[data-guide-tool=\"circle\"]","円を選び、キャンバスを押して配置します。"],
+  ["[data-guide-tool=\"rect\"]","四角形を選び、キャンバスを押して配置します。"],
+  ["[data-guide-tool=\"triangle\"]","三角形を選び、キャンバスを押して配置します。"],
+  ["[data-guide-tool=\"diamond\"]","ひし形を選び、キャンバスを押して配置します。"],
+  ["#guideHideObjects","オブジェクトを一時的に隠します。"],
+  ["#fieldGuideCircles","フィールドの中心に同心円を表示します。"],
+  ["#fieldGuide-ringScale","同心円の大きさを調整します。"],
+  ["#fieldGuideOuterRing","一番外側の円を表示・非表示にします。"],
+  ["#fieldGuideRays","フィールドの中心から放射線を表示します。"],
+  ["#guideShapeFill","塗りを「なし」「薄く」「線と同じ濃さ」から選びます。"],
+  [".guide-property-group[aria-label=\"線の見た目\"]","個別図形・同心円・放射線すべての色と濃さを設定します。"],
+  ["#duplicateGuideShape","選択したガイドを複製します。"],
+  ["#deleteGuideShape","選択したガイドを削除します。"],
+  ["#groupGuideShapes","複数選択したガイドをグループ化します。"],
+  ["#ungroupGuideShapes","図形を残してグループを解除します。"],
+  ["#editGuideMember","グループ内の図形を個別に編集します。"],
+  ["#finishGuideMemberEdit","所属するグループ全体の選択へ戻ります。"],
+  [".guide-selection-controls .aoe-box-handle","白い丸でサイズを変更します。角は縦横比を保ちます。"],
+  [".print-page-fields","用紙・向き・余白・図の幅・配置を調整します。"],
+  ["#printSettingsReset","印刷設定を初期値に戻します。ノート・外枠の選択は保持します。"],
+  ["#outputPrintReadability","文字と図形の線を少し太く印刷します。"],
+  ["#outputPlainPaper","鮮やかさを少し抑えて印刷します。"],
+  ["#outputPrintCutGuide","切り取り位置の点線を印刷します。PNGには含めません。"]
  );
  for(const selector of ['#guideHideObjects','#fieldGuideCircles','#fieldGuideRays','#outputPrintReadability','#outputPlainPaper','#outputPrintCutGuide'])defaultSymbols[selector]={text:'☑',color:'#33445f',background:'#fff'};
  Object.assign(defaultSymbols,{
@@ -709,6 +721,7 @@ phoneLayerDeleteDialog.addEventListener('close',()=>{pendingPhoneLayerDeletion=n
   '#toggleBattlePages':{text:'＋ / −',color:'#33445f',background:'#eef2f7'},
   '.phase-select-check':{text:'☑',color:'#33445f',background:'#fff'}
  });
+ Object.assign(defaultSymbols,{"#fieldGuide-ringScale":{"text":"％","color":"#33445f","background":"#fff"},"#fieldGuideOuterRing":{"text":"☑","color":"#33445f","background":"#fff"},"#guideShapeFill":{"text":"塗","color":"#33445f","background":"#fff"},".guide-property-group[aria-label=\"線の見た目\"]":{"text":"線","color":"#33445f","background":"#fff"},".print-page-fields":{"text":"紙","color":"#33445f","background":"#fff"},"#printSettingsReset":{"text":"↶","color":"#33445f","background":"#fff"}});
  for(const key of ['.phone-phase-navigation>button:first-child','.phone-phase-navigation>button:last-child'])Object.assign(defaultSymbols[key],{color:'#000',background:'#fff'});
  for(const key of ['#phonePhaseSectionToggle','#toggleBattlePages','help-disclosure'])defaultSymbols[key].svg='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 7h6M5 4v6M14 3l-4 18M16 17h6"/></svg>';
  defaultSymbols['help-number-step'].svg='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 7h6M14 3l-4 18M16 17h6M19 14v6"/></svg>';
@@ -720,10 +733,10 @@ phoneLayerDeleteDialog.addEventListener('close',()=>{pendingPhoneLayerDeletion=n
  function close(){if(panel.open)panel.close();for(const node of document.querySelectorAll('.phone-icon-help-toggle'))if(node.getAttribute('aria-expanded')!=='false')node.setAttribute('aria-expanded','false')}
  function openHelp(source=button){
   if(panel.open){close();return}opener=source;
-  const png=!!window.Bolxiv?.pngPreview?.active,guides=!!window.Bolxiv?.fieldGuideEditor?.active,content=source===contentButton,mode=guides?'補助線編集':png?(window.Bolxiv.pngPreview.kind==='print'?'印刷':'画像生成'):boardReadOnly?'閲覧':'編集';
+  const png=!!window.Bolxiv?.pngPreview?.active,guides=!!window.Bolxiv?.fieldGuideEditor?.active,content=source===contentButton,mode=guides?'ガイド編集':png?(window.Bolxiv.pngPreview.kind==='print'?'印刷':'画像生成'):boardReadOnly?'閲覧':'編集';
   panel.querySelector('h2').textContent='アイコン説明 · '+mode+' · '+(content?'コンテンツ':'キャンバス');
   const list=panel.querySelector('.phone-icon-help-list');list.replaceChildren();
-  const intro=document.createElement('p');intro.className='phone-icon-help-intro';intro.textContent='現在の画面で使える操作です。モードや画面によって表示内容が変わります。';list.append(intro);
+  const intro=document.createElement('p');intro.className='phone-icon-help-intro';intro.textContent='現在の画面で使える操作です。';list.append(intro);
   const scope=content?document.querySelector('.battle'):png?document.getElementById('pngPreview'):document.querySelector('.right');
   const find=selector=>{try{return [...scope.querySelectorAll(selector),...document.querySelectorAll(selector)].find(node=>visible(node)&&!node.disabled&&(content?node.closest('.battle,.phone-content-close,.phone-phase-navigation,.header-mode-status'):!node.closest('.battle')))}catch{return null}};
   const outputProperties=mode+'プロパティ';
@@ -732,13 +745,13 @@ phoneLayerDeleteDialog.addEventListener('close',()=>{pendingPhoneLayerDeletion=n
    if(['.phase-select-check','help-object-selection'].includes(selector))continue;if((boardReadOnly||png)&&selector==='.list-drag-grip')continue;if(guides&&['.phone-material-pin','.preset-manage','#clearBtn'].includes(selector))continue;
    let description=original,node=null;
    if(selector.startsWith('help-')){
-    if(selector==='help-png-mode'){if(!png||content)continue;node=document.getElementById('editModeToggle');description='編集・閲覧・画像生成・印刷の各モードを選びます。戻るときも同じメニューを使います。'}
+    if(selector==='help-png-mode'){if(!png||content)continue;node=document.getElementById('editModeToggle');description='編集・閲覧・画像生成・印刷を切り替えます。'}
     else if(selector==='help-disclosure'){continue}
-    else if(selector==='help-number-step'){if(!content&&!guides||!visible(document.querySelector(content?'.battle .phone-number-step-buttons':'.guide-editor-properties .phone-number-step-buttons')))continue}
+    else if(selector==='help-number-step'){if(!(content||guides||png)||!visible(document.querySelector(content?'.battle .phone-number-step-buttons':guides?'.guide-editor-properties .phone-number-step-buttons':'#pngPreview .phone-number-step-buttons')))continue}
     else if(selector.startsWith('help-object-')){if(content||png||guides||boardReadOnly||!visible(document.getElementById('objectList')))continue}
     else{if(!content||png||boardReadOnly||!visible(document.querySelector('.battle .page-tab-input,.battle .content-option-input')))continue}
    }else{
-    if(selector==='#editModeToggle'){if(content||png)continue;description='編集・閲覧・画像生成・印刷の各モードを選びます。戻るときも同じメニューを使います。'}
+    if(selector==='#editModeToggle'){if(content||png)continue;description='編集・閲覧・画像生成・印刷を切り替えます。'}
     if(selector==='#pngPropertiesToggle')continue;
     if(selector==='.phone-content-icon'&&content)continue;
     if(selector==='.phone-content-close'&&!content)continue;
@@ -747,30 +760,30 @@ phoneLayerDeleteDialog.addEventListener('close',()=>{pendingPhoneLayerDeletion=n
     const mapped=['#fitBoardZoom','#zoomOut','#resetBoardZoom','#zoomIn'].includes(selector)?png?'#png-'+selector.slice(1):guides&&matchMedia('(min-width:851px)').matches?'#guide-'+selector.slice(1):selector:selector;
     node=find(mapped);if(!node)continue;
     if(content&&!node.closest('.battle,.phone-content-close,.phone-phase-navigation,.header-mode-status'))continue;
-    if(selector==='.phone-content-icon')description='コンテンツ・フェーズ・設定・ノートのペインを開きます。';
-    if(selector==='#editFieldGuides')description=guides?'［…］→「補助線編集を終了」で通常編集へ戻ります。スマホは元のコンテンツペイン・選択タブ・スクロール位置へ戻ります。':'フェーズプロパティ／ノート見出しの［…］→「補助線を編集」で開始します。スマホはペインを閉じ、補助線設定に切り替わります。';
-    if(guides&&selector==='.phone-content-icon')description='コンテンツペインを開き、フィールド設定・ノートを確認・調整します。フェーズを変えると補助線編集を終了します。';
-    if(guides&&selector==='#undo')description='補助線・通常プロパティ・ノートの変更を、操作順に元に戻します。';
-    if(guides&&selector==='#redo')description='元に戻した補助線・通常プロパティ・ノートの変更をやり直します。';
-    if(selector==='#outputPrintButton')description=matchMedia('(max-width:850px)').matches?'図を印刷します。用紙・向き・印刷倍率・PDF保存は端末の印刷画面で指定します。':'用紙プレビューと印刷プロパティの設定で印刷します。用紙・向き・印刷倍率・PDF保存はブラウザー側でも確認し、同じ用紙・向き、倍率100％、余白なしに合わせます。';
-    if(selector==='#toggleBattlePages')description='フェーズリストを開閉します。フェーズ名をタップすると表示するフェーズを切り替えます。';
+    if(selector==='.phone-content-icon')description='コンテンツ・フェーズ・設定・ノートを開きます。';
+    if(selector==='#editFieldGuides')description=guides?'［…］→「ガイド編集を終了」で通常編集へ戻ります。':'［…］→「ガイドを編集」で開始します。';
+    if(guides&&selector==='.phone-content-icon')description='フィールド設定・ノートを開きます。フェーズ変更でガイド編集を終了します。';
+    if(guides&&selector==='#undo')description='ガイド・プロパティ・ノートの操作を元に戻します。';
+    if(guides&&selector==='#redo')description='元に戻した操作をやり直します。';
+    if(selector==='#outputPrintButton')description='用紙プレビューの設定で印刷します。PDF保存は印刷画面で選びます。';
+    if(selector==='#toggleBattlePages')description='フェーズリストを開閉します。';
     if(selector==='.phase-select-check'&&(png||boardReadOnly))description='フェーズをチェックして並べて表示します。';
-    if(selector==='#fitBoardZoom')description='キャンバス全体が収まる表示倍率にします。保存画像の出力倍率とは別です。';
-    if(selector.startsWith('.phone-phase-navigation'))description=selector.includes('first-child')?'前のフェーズへ移動します。表示中のタブは維持します。':'次のフェーズへ移動します。表示中のタブは維持します。';
+    if(selector==='#fitBoardZoom')description='全体が収まる倍率で表示します。出力サイズは変わりません。';
+    if(selector.startsWith('.phone-phase-navigation'))description=selector.includes('first-child')?'前のフェーズへ移動します。':'次のフェーズへ移動します。';
    }
    contextual.push({selector,description,node});
   }
   for(const [selector,description] of [
-   ['.phone-reader-switch',png?'タイトル隣の⇄で、フェーズリストと'+outputProperties+'を切り替えます。':'タイトル隣の⇄で、フェーズリストとノートを切り替えます。'],
+   ['.phone-reader-switch',png?'⇄で、フェーズリストと'+outputProperties+'を切り替えます。':'⇄で、フェーズリストとノートを切り替えます。'],
    ['.phone-reader-collapse','フェーズリスト／'+(png?outputProperties:'ノート')+'の共通枠を開閉します。'],
    ['.phone-object-tabs button:not(.phone-object-collapse)','オブジェクトリストとオブジェクトプロパティを切り替えます。'],
-   ['.phone-object-collapse','オブジェクトリスト／プロパティの共通枠を開閉します。'],
+   ['.phone-object-collapse','オブジェクト欄を開閉します。'],
   ]){const node=find(selector);if(node)contextual.push({selector,description,node})}
   const helpTitles={
    '#editModeToggle':'モード切替','help-png-mode':'モード切替',
    '.phone-menu-toggle':'操作メニュー','.phone-content-icon':'コンテンツペインを開く','.phone-content-close':'コンテンツペインを閉じる','.phone-material-pin':'マテリアルを開閉',
-   '.preset-manage':'ユーザープリセットの管理','#addPage':'フェーズを追加','#addPhaseGroup':'フェーズグループを追加','#copyPage':'フェーズをコピー','#copyPageToContent':'別コンテンツへコピー',
-   '#editFieldGuides':'補助線の開始・終了メニュー','#phasePropertyResize':'ペインの高さ調整','#resetBoardZoom':'表示倍率を選ぶ','#guideHideObjects':'オブジェクトを一時的に隠す','#fieldGuideCircles':'同心円','#fieldGuideRays':'放射線','#duplicateGuideShape':'補助線を複製','#deleteGuideShape':'補助線を削除','.guide-selection-controls .aoe-box-handle':'サイズ変更ハンドル','#outputPrintReadability':'文字・線を強調','#outputPlainPaper':'普通紙向けの色調整','#outputPrintCutGuide':'切り取りガイド','#phonePhaseSwitch-toggle':'フェーズプロパティ・ノートの切り替え','#phonePhaseSectionToggle':'フェーズ設定・ノート欄を開閉','#toggleBattlePages':'フェーズリストを開閉',
+   '.preset-manage':'配置・プリセット管理の切り替え','#addPage':'フェーズを追加','#addPhaseGroup':'フェーズグループを追加','#copyPage':'フェーズをコピー','#copyPageToContent':'別コンテンツへコピー',
+   '#editFieldGuides':'ガイドの開始・終了メニュー','#phasePropertyResize':'ペインの高さ調整','#resetBoardZoom':'表示倍率を選ぶ','#guideHideObjects':'オブジェクトを一時的に隠す','#fieldGuide-ringScale':'同心円の大きさ','#fieldGuideOuterRing':'最外周を表示','#guideShapeFill':'ガイドの塗り','.guide-property-group[aria-label="線の見た目"]':'ガイド（共通）','.print-page-fields':'印刷の配置設定','#printSettingsReset':'印刷設定をリセット','#fieldGuideCircles':'同心円','#fieldGuideRays':'放射線','#duplicateGuideShape':'ガイドを複製','#deleteGuideShape':'ガイドを削除','.guide-selection-controls .aoe-box-handle':'サイズ変更ハンドル','#outputPrintReadability':'文字・線を強調','#outputPlainPaper':'普通紙向けの色調整','#outputPrintCutGuide':'切り取りガイド','#phonePhaseSwitch-toggle':'フェーズプロパティ・ノートの切り替え','#phonePhaseSectionToggle':'フェーズ設定・ノート欄を開閉','#toggleBattlePages':'フェーズリストを開閉',
    '.phone-phase-navigation>button:first-child':'前のフェーズへ','.phone-phase-navigation>button:last-child':'次のフェーズへ',
    'help-name-edit':'名前を変更','help-item-delete':'項目を削除','help-name-confirm':'名前を確定','help-add-cancel':'追加を取り消す',
    '#bulkVisibleInput':'全体の表示・非表示','#bulkEditableInput':'全体の編集可否','.handle.move-handle':'移動ハンドル','.handle.rotate':'回転ハンドル','.list-drag-grip':'並べ替え','.phase-group-toggle':'フェーズグループを開閉','.object-group-disclosure':'オブジェクトグループを開閉','help-object-visibility':'オブジェクトの表示・非表示','help-object-lock':'オブジェクトをロック','help-number-step':'プロパティの数値を調整',
@@ -790,7 +803,7 @@ phoneLayerDeleteDialog.addEventListener('close',()=>{pendingPhoneLayerDeletion=n
   }).sort((a,b)=>a.group-b.group||a.top-b.top||a.left-b.left||a.index-b.index);
   let previousGroup=-1;
   for(const {selector,description,node,group} of ordered){
-   if(group!==previousGroup){const section=document.createElement('h3');section.className='phone-icon-help-section';section.textContent=['上部の操作',content?'プレビューの操作':'キャンバスの操作',content?'コンテンツの操作':guides?'補助線の操作':png?'フェーズリスト・出力の操作':'リスト・マテリアルの操作'][group];list.append(section);previousGroup=group}
+   if(group!==previousGroup){const section=document.createElement('h3');section.className='phone-icon-help-section';section.textContent=['上部の操作',content?'プレビューの操作':'キャンバスの操作',content?'コンテンツの操作':guides?'ガイドの操作':png?'フェーズリスト・出力の操作':'リスト・マテリアルの操作'][group];list.append(section);previousGroup=group}
    const row=document.createElement('div');row.className='phone-icon-help-row';row.dataset.helpFor=selector;
    const symbol=document.createElement('span');symbol.className='phone-icon-help-symbol';symbol.setAttribute('aria-hidden','true');
    const fallback=defaultSymbols[selector],svg=node?.querySelector('svg');

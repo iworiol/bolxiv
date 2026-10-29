@@ -2235,9 +2235,9 @@ body:not(.board-read-only) .page-list-box>.page-tab-actions {
 
 /* Separate touch movement from resizing, with the same artwork style as rotation. */
 @media(max-width:850px){
- :is(#objectControls,.guide-selection-controls) .controlbox .move-handle{width:32px;height:32px;left:calc(50% - 16px);top:calc(100% + var(--rotation-handle-distance,70px) - 32px);background:transparent!important;border:0!important;border-radius:0;cursor:grab;z-index:5;box-shadow:none!important;padding:0!important;display:grid;place-items:center;filter:none}
+ :is(#objectControls,.guide-selection-controls) .controlbox .move-handle{width:32px;height:32px;left:calc(50% - 16px);top:calc(100% + var(--rotation-handle-distance,70px) - 32px);background:transparent!important;border:0!important;border-radius:0;cursor:move;z-index:5;box-shadow:none!important;padding:0!important;display:grid;place-items:center;filter:none}
  :is(#objectControls,.guide-selection-controls) .controlbox .move-handle:is(:hover,:focus,:focus-visible,:active,.phone-control-pressed){background:transparent!important;border:0!important;box-shadow:none!important}
- :is(#objectControls,.guide-selection-controls) .controlbox .move-handle:active{cursor:grabbing}
+ :is(#objectControls,.guide-selection-controls) .controlbox .move-handle:active{cursor:move}
  :is(#objectControls,.guide-selection-controls) .controlbox .move-handle::before{content:"";position:absolute;left:50%;bottom:100%;height:calc(var(--rotation-handle-distance,70px) - 32px);border-left:1px solid var(--handle-connector-color,#42b8ff);pointer-events:none}
  :is(#objectControls,.guide-selection-controls) .controlbox .move-handle svg{display:block;width:100%;height:100%;pointer-events:none;overflow:visible}
 }
@@ -2251,3 +2251,5 @@ body:not(.board-read-only) .page-list-box>.page-tab-actions {
 :is(#objectControls,.guide-selection-controls) .handle:is(.rotate,.move-handle):is(:active,.phone-control-pressed) svg path:last-child{stroke:var(--blue)!important}
 
 @media(max-width:850px){.app>.layout.phone-materials-open>.left #enemyPanel:not([hidden]):not(.hidden){display:grid!important}}
+
+@media(max-width:850px){#objectControls .controlbox .move-handle[data-edge-placement]::before{left:50%;top:50%;bottom:auto;height:var(--move-connector-length);transform-origin:0 0;transform:translate(var(--move-connector-x),var(--move-connector-y)) rotate(var(--move-connector-angle))}}

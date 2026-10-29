@@ -744,7 +744,7 @@
   flex:1 1 0!important;height:auto!important;min-height:0!important;
  }
  .app .layout.desktop-phase-tools .battle #contentPanel>.page-controls:has(#toggleBattlePages[aria-expanded="false"]){flex:0 0 36px!important}
- .app .layout.desktop-phase-tools #toggleBattlePages::after{content:none!important;display:none!important}
+
  .app .layout.desktop-phase-tools #toggleBattlePages[aria-controls][aria-expanded]:disabled,
  .app .layout.desktop-phase-tools #toggleBattlePages[aria-controls][aria-expanded]:disabled:is(:hover,:focus-visible){
   pointer-events:none!important;opacity:1!important;cursor:default!important;background:#eef2f7!important;
@@ -1754,9 +1754,12 @@ body .app .layout #objectList>.object-group-row>.object-delete{grid-column:5;gri
 .field-guide-editing #objectControls{visibility:hidden!important;pointer-events:none!important}
 .field-guide-editing #objects .obj{outline:none!important;pointer-events:none!important}
 .guide-selection-controls .controlbox{box-sizing:border-box}
+.guide-selection-controls .guide-selected-item-frame{border:0!important;outline:3px solid #42b8ff;outline-offset:3px;pointer-events:none}
 
 .guide-editor-tools [data-guide-tool]{touch-action:none}
 .touch-placement-preview>svg{width:26px;height:26px;stroke:#33445f}
+.guide-placement-preview{display:grid;place-items:center;width:52px;height:52px;background:transparent;border:0;pointer-events:none}
+.guide-placement-preview>svg{display:block;width:26px;height:26px;stroke:#fff;filter:drop-shadow(0 0 1px #000) drop-shadow(0 1px 1px #0008)}
 .guide-editor-dialog.guide-objects-hidden .guide-editor-art .object-clip{display:none!important}
 .guide-editor-hint{flex:none;font-size:12px;line-height:1.5;color:#526176;text-align:center;margin:8px 0 0}
 .guide-editor-properties{display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden;border:1px solid #cbd3df;border-radius:6px;padding:0;background:white;font-size:14px}
@@ -1780,14 +1783,36 @@ body .app .layout #objectList>.object-group-row>.object-delete{grid-column:5;gri
 .guide-editor-properties #guideShapeFields{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
 .guide-editor-properties #guideShapeFields[hidden]{display:none}
 .guide-shape-actions{display:flex;gap:8px;margin-top:8px}
+.guide-group-actions{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.guide-group-actions[hidden],.guide-group-actions>.btn[hidden]{display:none!important}
+#fieldGuideEditor #guideShapeProperties>h3>.guide-shape-actions{flex:none;gap:4px;margin:0 28px 0 auto;padding-left:6px}
+#fieldGuideEditor .guide-shape-actions>.btn{box-sizing:border-box;display:grid;place-items:center;flex:none;width:26px;min-width:26px;height:26px;min-height:26px;padding:3px;border:1px solid #d0d4da;border-radius:5px;background:#eef2f7;color:#33445f;-webkit-text-fill-color:currentColor;font-size:18px;line-height:1;filter:none;-webkit-tap-highlight-color:transparent}
+#fieldGuideEditor .guide-shape-actions>.btn svg{display:block;width:18px;height:18px;pointer-events:none}
+#fieldGuideEditor .guide-shape-actions>.btn:enabled:is(:hover:not(:where(.phone-touch-mode *)),:active,:focus-visible,.phone-control-pressed){background:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important;border-color:var(--blue)}
+#fieldGuideEditor .guide-shape-actions>.btn:disabled{opacity:.4;cursor:default}
 .guide-editor-properties .field-guide-check{display:flex;align-items:center;gap:5px;font:inherit;cursor:pointer}
 .guide-editor-properties .field-guide-check input{margin:0;accent-color:var(--blue,#3182ce)}
 .guide-editor-properties #guideNoSelection{font-size:12px;line-height:1.5;color:#526176}
-.guide-editor-properties #fieldGuideSettings{margin-bottom:0}
+#fieldGuideEditor #guideShapeProperties{box-sizing:border-box;min-width:0;border:1px solid #cbd3df;border-radius:6px;padding:10px;margin:12px 0}
+#fieldGuideEditor #guideShapeProperties>h3{box-sizing:border-box;display:flex;align-items:center;height:36px;margin:-10px -10px 10px;padding:0 11px;border-radius:5px 5px 0 0;background:#eef2f7;color:#33445f;-webkit-text-fill-color:#33445f;font-family:inherit;font-size:14px;font-weight:700;line-height:normal}
+.guide-editor-properties #fieldGuideSettings{margin-top:0;margin-bottom:0;padding-top:0;border-top:0;border-bottom:0}
+.guide-editor-properties #fieldGuideSettings>.field-guide-body{display:flow-root;padding-top:0}
+#fieldGuideEditor .field-guide-body>.guide-property-frame:first-child{margin-top:0}
 .guide-editor-properties #fieldGuideSettings>h3{margin:2px 0 8px}
 .guide-property-group+.guide-property-group,.guide-shape-group+.guide-shape-group{border-top:1px solid #d0d4da;padding-top:10px;margin-top:10px}
+#fieldGuideEditor .guide-property-frame{box-sizing:border-box;min-width:0;border:1px solid #cbd3df;border-radius:6px;padding:0;margin:12px 0}
+#fieldGuideEditor .guide-property-group>h3{margin:0;font-size:14px;font-weight:600}
+#fieldGuideEditor .guide-section-toggle{box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-width:0;height:36px;margin:0;padding:0 11px;border:0;border-radius:5px 5px 0 0;background:#eef2f7!important;color:#33445f!important;-webkit-text-fill-color:currentColor!important;font-family:inherit;font-size:14px;font-weight:700;line-height:normal;text-align:left;cursor:pointer;filter:none;-webkit-tap-highlight-color:transparent}
+#fieldGuideEditor .guide-section-toggle:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+#fieldGuideEditor .guide-section-toggle:is(:hover:not(:where(.phone-touch-mode *)),:focus-visible,:active){background:var(--blue)!important;color:#fff!important}
+#fieldGuideEditor .guide-section-toggle[aria-expanded="false"]{border-radius:5px}
+#fieldGuideEditor .guide-section-mark{flex:none;font-weight:400}
+#fieldGuideEditor .guide-section-body{margin:0;padding:10px;min-width:0}
+#fieldGuideEditor .guide-property-frame>.guide-section-body{display:flex;flex-direction:column;gap:10px}
+#fieldGuideEditor .guide-section-body[hidden]{display:none!important}
 .guide-editor-properties #guideShapeFields{display:flex;flex-direction:column;gap:0}
 .guide-shape-group{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
+.guide-editor-properties #guideShapeFields .guide-shape-group{grid-template-columns:minmax(0,1fr);gap:10px}
 .guide-editor-properties .phone-number-step-buttons{display:none}
 .guide-zoom-toolbar{margin-left:auto!important;flex:none!important}
 .guide-zoom-toolbar .board-zoom-group{display:flex;align-items:center;gap:6px;box-sizing:border-box;height:26px;padding:0 5px;border:1px solid #fff;border-radius:6px;color:#fff}
@@ -1808,6 +1833,7 @@ body .app .layout #objectList>.object-group-row>.object-delete{grid-column:5;gri
 #fieldGuideEditor .guide-properties-body .field>label{font-family:inherit;font-size:12px;font-weight:400;line-height:1.2;margin:0 0 4px;color:#000}
 #fieldGuideEditor .guide-property-group{display:flex;flex-direction:column;gap:10px}
 #fieldGuideEditor .field-guide-check{font-family:inherit;font-size:12px;font-weight:400;line-height:1.2;margin:0}
+#fieldGuideEditor .guide-hide-objects{box-sizing:border-box;width:100%;border-top:1px solid #d0d4da;padding-top:10px}
 #fieldGuideEditor #fieldGuideSettings .field-guide-number{margin:0}
 #fieldGuideEditor #fieldGuideSettings .field-guide-check input,#fieldGuideEditor .guide-hide-objects input,#fieldGuideEditor input[type="range"]{accent-color:auto}
 #fieldGuideEditor .guide-properties-body input[type="number"]{box-sizing:border-box;font-family:inherit;font-size:14px;font-weight:400;line-height:normal;height:24px;padding:4px;border:1px solid #d5dce6!important;border-radius:5px;background:#f8fafc!important;color:#000!important;-webkit-text-fill-color:#000!important}
@@ -1862,7 +1888,7 @@ body .app .layout #contentPanel :is(.desktop-phase-shared-heading,.phone-phase-t
 #editFieldGuides svg{fill:currentColor!important;stroke:none!important}
 @media(max-width:850px){
  body .app .layout #contentPanel .phone-phase-tabs>#editFieldGuides{flex-basis:28px;width:28px;min-width:28px;height:28px;min-height:28px}
- body .app .layout #fieldGuideEditor .guide-properties-title>#editFieldGuides{display:grid;place-items:center;box-sizing:border-box;flex:0 0 28px;width:28px;min-width:28px;height:28px;min-height:28px;margin:0 0 0 6px;padding:3px;border:1px solid #d0d4da!important;border-radius:5px;background:#eef2f7!important;color:#33445f!important;-webkit-text-fill-color:#33445f!important;cursor:pointer;-webkit-tap-highlight-color:transparent}
+ body .app .layout #fieldGuideEditor .guide-properties-title>#editFieldGuides{display:grid;place-items:center;box-sizing:border-box;flex:0 0 28px;width:28px;min-width:28px;height:28px;min-height:28px;margin:0 28px 0 auto;padding:3px;border:1px solid #d0d4da!important;border-radius:5px;background:#eef2f7!important;color:#33445f!important;-webkit-text-fill-color:#33445f!important;cursor:pointer;-webkit-tap-highlight-color:transparent}
  #fieldGuideEditor .guide-properties-title>#editFieldGuides svg{display:block;width:18px;height:18px}
 }
 @media(min-width:851px){
@@ -1920,3 +1946,19 @@ body .app .layout #contentPanel :is(.desktop-phase-shared-heading,.phone-phase-t
 body.phase-group-selected .app .layout #phaseMemo{display:none!important}
 body.phase-group-selected .app .layout :is(#phonePhaseSwitch-toggle,.phone-reader-switch){display:none!important}
 @media(max-width:850px){body.phase-group-selected .app .layout #editFieldGuides{display:none!important}}
+
+@media(min-width:851px){.app .layout.desktop-phase-tools .battle #contentPanel>.page-controls:has(#toggleBattlePages[aria-expanded="false"]){box-sizing:border-box!important;border:1px solid #d0d4da!important;flex:0 0 38px!important;height:38px!important;min-height:38px!important}}
+
+body .app .layout #contentPanel :is(.desktop-phase-shared-heading,.phone-phase-tabs){position:relative;padding-right:70px!important}
+body .app .layout #contentPanel :is(.desktop-phase-shared-heading,.phone-phase-tabs)>#editFieldGuides{position:absolute;right:38px;top:50%;transform:translateY(-50%);margin:0}
+body .app .layout #contentPanel :is(.desktop-phase-shared-heading,.phone-phase-tabs)>:is(#desktopPhaseSectionToggle,#phonePhaseSectionToggle){position:absolute;right:6px;top:50%;transform:translateY(-50%);margin:0!important}
+
+/* Separate expanded panel headings from their contents without doubling closed frames. */
+body .app .layout .page-controls>.phase-heading-row:has(>#toggleBattlePages[aria-expanded="true"]),
+body .app .layout.desktop-phase-tools .desktop-phase-sidebar :is(#toggleLayers,#toggleInspector,#toggleLayoutProperties)[aria-expanded="true"],
+body .app .layout :is(#toggleLayers,#toggleInspector,#toggleLayoutProperties)[aria-expanded="true"],
+body .app .layout .left .accordion-toggle[aria-expanded="true"],
+body .app .layout .phone-object-tabs:has(.phone-object-collapse[aria-expanded="true"]),
+body .app .layout #pngPreview .png-preview-settings:not(.png-properties-collapsed)>h3,
+body .app .layout #fieldGuideEditor #guideShapeProperties>h3,
+body .app .layout #fieldGuideEditor .guide-section-toggle[aria-expanded="true"]{border-bottom:1px solid #d0d4da!important}
