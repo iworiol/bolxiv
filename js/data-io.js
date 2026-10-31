@@ -525,7 +525,15 @@ function confirmReplaceImport(imported){
 function pngStyleValue(value){return value.replace(/url\((['"]?)(.*?)\1\)/g,(match,quote,url)=>{let hash=url.lastIndexOf('#');if(hash<0)return match;let id=url.slice(hash+1),definition=document.getElementById(id);return definition&&(stage.contains(definition)||definition.closest('.phase-comparison-grid,.phase-group-artwork'))?'url("#'+id+'")':match})}
 
 // Standard computed properties already resolve CSS variables. Copying inherited variables would repeat embedded field images on every descendant.
-function copyPngStyle(source,target,pseudo){let style=getComputedStyle(source,pseudo);for(let key of style){if(key.startsWith('--'))continue;try{target.style.setProperty(key,pngStyleValue(style.getPropertyValue(key)),style.getPropertyPriority(key))}catch{}}target.style.setProperty('animation','none','important');target.style.setProperty('transition','none','important');return style}
+function copyPngStyle(source,target,pseudo){
+ const style=getComputedStyle(source,pseudo),declarations=[];
+ for(const key of target.style)if(key.startsWith('--')){const priority=target.style.getPropertyPriority(key);declarations.push(key+':'+target.style.getPropertyValue(key)+(priority?' !'+priority:''))}
+ for(const key of style){if(key.startsWith('--'))continue;const value=pngStyleValue(style.getPropertyValue(key)),priority=style.getPropertyPriority(key);declarations.push(key+':'+value+(priority?' !'+priority:''))}
+ // Resolve standard inline declarations too, including !important var() values.
+ // One parse avoids hundreds of individual CSSOM mutations per element.
+ target.style.cssText=declarations.join(';')+';animation:none!important;transition:none!important';
+ return style;
+}
 
 function clonePngNode(source){if(source.nodeType===Node.TEXT_NODE)return source.cloneNode();if(source.nodeType!==Node.ELEMENT_NODE)return null;if(source.id==='objectControls'||source.classList.contains('selection-marquee')||source.classList.contains('guide-selection-controls')||source.classList.contains('guide-editor-overlay'))return null;let target=source.cloneNode(false);copyPngStyle(source,target);if(source.namespaceURI!=='http://www.w3.org/2000/svg')target.removeAttribute('id');if(source.classList.contains('selected')){target.classList.remove('selected');target.style.filter='none';target.style.outline='none'}if(source instanceof HTMLImageElement){let src=source.getAttribute('src');target.src=embeddedPngs[src]||source.currentSrc||source.src;if(!target.src.startsWith('data:'))throw new Error('画像を埋め込めません：'+(source.alt||src));target.removeAttribute('srcset');target.loading='eager'}let appendPseudo=pseudo=>{let style=getComputedStyle(source,pseudo);if(style.content==='none'||style.content==='normal'||style.display==='none')return;let node=document.createElement('span');copyPngStyle(source,node,pseudo);node.style.setProperty('content','normal');if(style.content!=='""'&&style.content!=="''")node.textContent=style.content.replace(/^['"]|['"]$/g,'');target.appendChild(node)};if(source.namespaceURI==='http://www.w3.org/1999/xhtml')appendPseudo('::before');for(let child of source.childNodes){let cloned=clonePngNode(child);if(cloned)target.appendChild(cloned)}if(source.namespaceURI==='http://www.w3.org/1999/xhtml')appendPseudo('::after');return target}
 
@@ -565,12 +573,12 @@ async function exportPng(handlePromise,scale=1,previewCanvas=null){
 // Shared note layout for the output preview, PNG and print.
 function outputPhaseNote(width,text){
  text=String(text||'').replace(/\r\n?/g,'\n').trim();
- const scale=width/640,font=16*scale,lineHeight=24*scale,padding=12*scale,ctx=document.createElement('canvas').getContext('2d');ctx.font=font+"px 'BIZ UDGothic', 'BIZ UDゴシック', monospace";ctx.fontKerning='none';const metrics=ctx.measureText('国あＡｇ'),ascent=metrics.actualBoundingBoxAscent,descent=metrics.actualBoundingBoxDescent;const lines=[];
+ const rows=Math.max(5,Math.min(10,Number(document.getElementById('outputNoteRows')?.value)||5)),scale=width/640,font=16*scale,lineHeight=24*scale,padding=12*scale,ctx=document.createElement('canvas').getContext('2d');ctx.font=font+"px 'BIZ UDGothic', 'BIZ UDゴシック', monospace";ctx.fontKerning='none';const metrics=ctx.measureText('国あＡｇ'),ascent=metrics.actualBoundingBoxAscent,descent=metrics.actualBoundingBoxDescent;const lines=[];
  for(const paragraph of text.split('\n')){let line='';for(const char of paragraph){if(line&&ctx.measureText(line+char).width>width-padding*2){lines.push(line);line=''}line+=char}lines.push(line)}
- return {height:padding*2+4*lineHeight+ascent+descent,lines,font,lineHeight,padding,scale,ascent,error:lines.length>5?'ノートは出力時の折り返しを含めて5行以内にしてください（保存したノートは変更されません）。':''};
+ return {height:padding*2+(rows-1)*lineHeight+ascent+descent,lines,font,lineHeight,padding,scale,ascent,error:lines.length>rows?'ノートは出力時の折り返しを含めて'+rows+'行以内にしてください（保存したノートは変更されません）。':''};
 }
 function outputNoteLayout(width){
- const includeNote=!!document.getElementById('outputIncludeNote')?.checked;
+ const includeNote=Number(document.getElementById('outputNoteRows')?.value)>0;
  if(data.activePhaseGroup)return {height:0,lines:[],error:''};
  if(phaseComparisonActive()){
   const layout=phaseComparisonLayout(),gapX=Math.max(0,Math.min(100,Number(document.getElementById('outputPhaseGapX')?.value)||0)),gapY=Math.max(0,Math.min(100,Number(document.getElementById('outputPhaseGapY')?.value)||0)),notes=selectedPhaseIndexes.map(index=>({...includeNote?outputPhaseNote(layout.cellSize,data.pageNotes[index]):{height:0,lines:[],error:''},index}));

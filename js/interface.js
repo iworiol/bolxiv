@@ -372,6 +372,7 @@ phoneLayerDeleteDialog.addEventListener('close',()=>{pendingPhoneLayerDeletion=n
  }
  function schedulePreview(){if(preview.hidden||viewport.parentElement!==preview||closing||previewFrame!==null)return;previewFrame=requestAnimationFrame(fitPreview)}
  function syncPreview(open){
+  if(window.Bolxiv?.pngPreview?.active){preview.hidden=true;preview.removeAttribute('aria-busy');return}
   preview.hidden=!open;viewport.inert=open||originalViewportInert;
   if(open){if(viewport.parentElement!==preview){savedPosition??=capturePosition();viewport.style.opacity='0';preview.append(viewport)}schedulePreview()}
   else{
@@ -649,8 +650,8 @@ phoneLayerDeleteDialog.addEventListener('close',()=>{pendingPhoneLayerDeletion=n
     "三角でグループを開閉します。"
   ],
   [
-    "#outputIncludeNote",
-    "ノートを各図の下に付けます。折り返し込みで5行までです。"
+    "#outputNoteRows",
+    "「なし」はノートを出力しません。5〜10行を選ぶと各図の下にノートを付けます。折り返し込みで指定行数までです。"
   ],
   [
     "#outputShowBorder",
@@ -725,7 +726,7 @@ phoneLayerDeleteDialog.addEventListener('close',()=>{pendingPhoneLayerDeletion=n
  for(const key of ['.phone-phase-navigation>button:first-child','.phone-phase-navigation>button:last-child'])Object.assign(defaultSymbols[key],{color:'#000',background:'#fff'});
  for(const key of ['#phonePhaseSectionToggle','#toggleBattlePages','help-disclosure'])defaultSymbols[key].svg='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 7h6M5 4v6M14 3l-4 18M16 17h6"/></svg>';
  defaultSymbols['help-number-step'].svg='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 7h6M14 3l-4 18M16 17h6M19 14v6"/></svg>';
- Object.assign(defaultSymbols,{'#outputIncludeNote':{text:'☑',color:'#33445f',background:'#fff'},'#outputShowBorder':{text:'□',color:'#33445f',background:'#fff'},'#outputPhaseGapField':{text:'横／縦',color:'#33445f',background:'#fff'},'#pngPreviewScale':{text:'1倍',color:'#33445f',background:'#fff'},'#pngPreviewSave':{text:'保存',color:'#fff',background:'#293c66'},'#outputPrintButton':{text:'印刷',color:'#fff',background:'#293c66'}});
+ Object.assign(defaultSymbols,{'#outputNoteRows':{text:'5行',color:'#33445f',background:'#fff'},'#outputShowBorder':{text:'□',color:'#33445f',background:'#fff'},'#outputPhaseGapField':{text:'横／縦',color:'#33445f',background:'#fff'},'#pngPreviewScale':{text:'1倍',color:'#33445f',background:'#fff'},'#pngPreviewSave':{text:'保存',color:'#fff',background:'#293c66'},'#outputPrintButton':{text:'印刷',color:'#fff',background:'#293c66'}});
  defaultSymbols['#editModeToggle'].background='#fff';defaultSymbols['#bulkVisibleInput']=defaultSymbols['help-object-visibility'];defaultSymbols['#bulkEditableInput']=defaultSymbols['help-object-lock'];
  const contentButton=button.cloneNode(true);contentButton.classList.add('phone-content-help');contentButton.setAttribute('aria-label','コンテンツのアイコン説明');document.querySelector('.content-heading-row').append(contentButton);
  let opener=button;
@@ -787,7 +788,7 @@ phoneLayerDeleteDialog.addEventListener('close',()=>{pendingPhoneLayerDeletion=n
    '.phone-phase-navigation>button:first-child':'前のフェーズへ','.phone-phase-navigation>button:last-child':'次のフェーズへ',
    'help-name-edit':'名前を変更','help-item-delete':'項目を削除','help-name-confirm':'名前を確定','help-add-cancel':'追加を取り消す',
    '#bulkVisibleInput':'全体の表示・非表示','#bulkEditableInput':'全体の編集可否','.handle.move-handle':'移動ハンドル','.handle.rotate':'回転ハンドル','.list-drag-grip':'並べ替え','.phase-group-toggle':'フェーズグループを開閉','.object-group-disclosure':'オブジェクトグループを開閉','help-object-visibility':'オブジェクトの表示・非表示','help-object-lock':'オブジェクトをロック','help-number-step':'プロパティの数値を調整',
-   '#outputIncludeNote':'ノートを含める','#outputShowBorder':'外枠を表示','#outputPhaseGapField':'フェーズ間隔','#pngPreviewScale':'出力倍率','#pngPreviewSave':'PNGを保存','#outputPrintButton':'印刷',
+   '#outputNoteRows':'ノート','#outputShowBorder':'外枠を表示','#outputPhaseGapField':'フェーズ間隔','#pngPreviewScale':'出力倍率','#pngPreviewSave':'PNGを保存','#outputPrintButton':'印刷',
    '#presetUndo':'プリセット操作を元に戻す','#presetRedo':'プリセット操作をやり直す','#registerUserPreset':'プリセットを登録','#contentListUndo':'コンテンツリストの操作を元に戻す','#contentListRedo':'コンテンツリストの操作をやり直す','#undo':'元に戻す','#redo':'やり直す','#clearBtn':'フェーズ内のオブジェクトを全削除',
    '.phone-display-menu-toggle':'キャンバスの表示設定','#fitBoardZoom':'キャンバス全体を表示','#zoomOut':'キャンバスを縮小','#zoomIn':'キャンバスを拡大',
    '.phone-reader-switch':png?'フェーズリスト・'+outputProperties+'の切り替え':'フェーズリスト・ノートの切り替え',
