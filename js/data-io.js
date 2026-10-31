@@ -252,7 +252,29 @@ function historyResultMessage(beforeState,afterState,action){
  return scope+'：'+historyActionLabel(beforeState,afterState)+'を'+action;
 }
 
-function updateHistoryButtons(state=JSON.stringify(data)){commitPendingHistory(state);let undoButton=document.getElementById('undo'),redoButton=document.getElementById('redo');if(!undoButton||!redoButton)return;undoButton.disabled=!!window.Bolxiv?.pngPreview?.active||phaseComparisonActive()||history.length===0;redoButton.disabled=!!window.Bolxiv?.pngPreview?.active||phaseComparisonActive()||future.length===0;undoButton.setAttribute('aria-disabled',String(undoButton.disabled));redoButton.setAttribute('aria-disabled',String(redoButton.disabled));let undoState;for(let i=history.length-1;i>=0;i--){if(!sameHistoryState(history[i],state)){undoState=history[i];break}}const redoState=future[future.length-1];const comparison=phaseComparisonActive();undoButton.title=comparison?'並列表示中は元に戻せません':undoState?'このコンテンツの操作を元に戻す (Ctrl+Z)\n対象：'+historyActionLabel(undoState,state):'このコンテンツに元に戻せる操作はありません';redoButton.title=comparison?'並列表示中はやり直せません':redoState?'このコンテンツの操作をやり直す (Ctrl+Y)\n対象：'+historyActionLabel(state,redoState):'このコンテンツにやり直せる操作はありません';undoButton.setAttribute('aria-label',undoButton.title);redoButton.setAttribute('aria-label',redoButton.title)}
+// Output mode permits note-only history steps, never changes to the diagram.
+function outputNoteHistoryTarget(forward=false){
+ if(!window.Bolxiv?.pngPreview?.active||window.Bolxiv.pngPreview.saving)return null;
+ const stack=forward?future:history;let index=stack.length-1;
+ while(index>=0&&sameHistoryState(stack[index],data))index--;
+ if(index<0)return null;const state=historySnapshot(stack[index]);
+ return sameHistoryState({...state,pageNotes:data.pageNotes},data)?{index,state}:null;
+}
+function applyOutputNoteHistory(forward=false){
+ const input=document.querySelector('#phaseMemo textarea'),focused=input&&document.activeElement===input;
+ const caret=focused?[input.selectionStart,input.selectionEnd]:null;
+ commitPendingHistory();
+ const target=outputNoteHistoryTarget(forward);if(!target)return;
+ input?.blur();
+ const currentState=JSON.stringify(data),stack=forward?future:history;
+ stack.splice(target.index);(forward?history:future).push(currentState);
+ pendingHistoryState=null;pendingHistoryOwner=null;
+ data.pageNotes=target.state.pageNotes?.slice()||data.pages.map(()=>'');
+ render();scheduleNoteSave();notify(forward?'ノートをやり直しました':'ノートを元に戻しました');
+ if(focused&&input.isConnected){input.focus({preventScroll:true});input.setSelectionRange(Math.min(caret[0],input.value.length),Math.min(caret[1],input.value.length))}
+}
+
+function updateHistoryButtons(state=JSON.stringify(data)){commitPendingHistory(state);let undoButton=document.getElementById('undo'),redoButton=document.getElementById('redo');if(!undoButton||!redoButton)return;const output=!!window.Bolxiv?.pngPreview?.active;undoButton.disabled=output?!outputNoteHistoryTarget(false):phaseComparisonActive()||history.length===0;redoButton.disabled=output?!outputNoteHistoryTarget(true):phaseComparisonActive()||future.length===0;undoButton.setAttribute('aria-disabled',String(undoButton.disabled));redoButton.setAttribute('aria-disabled',String(redoButton.disabled));let undoState;for(let i=history.length-1;i>=0;i--){if(!sameHistoryState(history[i],state)){undoState=history[i];break}}const redoState=future[future.length-1];const comparison=phaseComparisonActive()&&!output;undoButton.title=comparison?'並列表示中は元に戻せません':undoState?'このコンテンツの操作を元に戻す (Ctrl+Z)\n対象：'+historyActionLabel(undoState,state):'このコンテンツに元に戻せる操作はありません';redoButton.title=comparison?'並列表示中はやり直せません':redoState?'このコンテンツの操作をやり直す (Ctrl+Y)\n対象：'+historyActionLabel(state,redoState):'このコンテンツにやり直せる操作はありません';undoButton.setAttribute('aria-label',undoButton.title);redoButton.setAttribute('aria-label',redoButton.title)}
 
 // Keep the mobile inspector on surviving objects when applying history.
 function restoreHistorySelection(){
@@ -265,9 +287,9 @@ function restoreHistorySelection(){
  }else{selected=null;selectedIds=[]}
 }
 
-function undo(){if(boardReadOnly)return;if(phaseComparisonActive())return;commitPendingHistory();pendingHistoryState=null;pendingHistoryOwner=null;let page=data.page,currentState=JSON.stringify(data);while(history.length&&history[history.length-1]===currentState)history.pop();if(!history.length)return;future.push(currentState);const restoredState=history.pop(),message=historyResultMessage(restoredState,currentState,'元に戻しました');const previousBoard=data;data=cloneBoardSaveState(historySnapshot(restoredState));data.title=previousBoard.title;replaceContentHistoryBoard(previousBoard,data);data.page=Math.max(0,Math.min(page,data.pages.length-1));restoreHistorySelection();contentBoards[activeContent]=data;render();scheduleObjectPropertySave();notify(message)}
+function undo(){if(window.Bolxiv?.pngPreview?.active){applyOutputNoteHistory(false);return}if(boardReadOnly)return;if(phaseComparisonActive())return;commitPendingHistory();pendingHistoryState=null;pendingHistoryOwner=null;let page=data.page,currentState=JSON.stringify(data);while(history.length&&history[history.length-1]===currentState)history.pop();if(!history.length)return;future.push(currentState);const restoredState=history.pop(),message=historyResultMessage(restoredState,currentState,'元に戻しました');const previousBoard=data;data=cloneBoardSaveState(historySnapshot(restoredState));data.title=previousBoard.title;replaceContentHistoryBoard(previousBoard,data);data.page=Math.max(0,Math.min(page,data.pages.length-1));restoreHistorySelection();contentBoards[activeContent]=data;render();scheduleObjectPropertySave();notify(message)}
 
-function redo(){if(boardReadOnly)return;if(phaseComparisonActive())return;commitPendingHistory();pendingHistoryState=null;pendingHistoryOwner=null;if(!future.length)return;let page=data.page;const previousState=JSON.stringify(data),restoredState=future.pop(),message=historyResultMessage(previousState,restoredState,'やり直しました');history.push(previousState);const previousBoard=data;data=cloneBoardSaveState(historySnapshot(restoredState));data.title=previousBoard.title;replaceContentHistoryBoard(previousBoard,data);data.page=Math.max(0,Math.min(page,data.pages.length-1));restoreHistorySelection();contentBoards[activeContent]=data;render();scheduleObjectPropertySave();notify(message)}
+function redo(){if(window.Bolxiv?.pngPreview?.active){applyOutputNoteHistory(true);return}if(boardReadOnly)return;if(phaseComparisonActive())return;commitPendingHistory();pendingHistoryState=null;pendingHistoryOwner=null;if(!future.length)return;let page=data.page;const previousState=JSON.stringify(data),restoredState=future.pop(),message=historyResultMessage(previousState,restoredState,'やり直しました');history.push(previousState);const previousBoard=data;data=cloneBoardSaveState(historySnapshot(restoredState));data.title=previousBoard.title;replaceContentHistoryBoard(previousBoard,data);data.page=Math.max(0,Math.min(page,data.pages.length-1));restoreHistorySelection();contentBoards[activeContent]=data;render();scheduleObjectPropertySave();notify(message)}
 
 ;
 // ===== js/contents.js =====
@@ -575,7 +597,7 @@ function outputPhaseNote(width,text){
  text=String(text||'').replace(/\r\n?/g,'\n').trim();
  const rows=Math.max(5,Math.min(10,Number(document.getElementById('outputNoteRows')?.value)||5)),scale=width/640,font=16*scale,lineHeight=24*scale,padding=12*scale,ctx=document.createElement('canvas').getContext('2d');ctx.font=font+"px 'BIZ UDGothic', 'BIZ UDゴシック', monospace";ctx.fontKerning='none';const metrics=ctx.measureText('国あＡｇ'),ascent=metrics.actualBoundingBoxAscent,descent=metrics.actualBoundingBoxDescent;const lines=[];
  for(const paragraph of text.split('\n')){let line='';for(const char of paragraph){if(line&&ctx.measureText(line+char).width>width-padding*2){lines.push(line);line=''}line+=char}lines.push(line)}
- return {height:padding*2+(rows-1)*lineHeight+ascent+descent,lines,font,lineHeight,padding,scale,ascent,error:lines.length>rows?'ノートは出力時の折り返しを含めて'+rows+'行以内にしてください（保存したノートは変更されません）。':''};
+ return {height:padding*2+(rows-1)*lineHeight+ascent+descent,lines:lines.slice(0,rows),font,lineHeight,padding,scale,ascent,error:''};
 }
 function outputNoteLayout(width){
  const includeNote=Number(document.getElementById('outputNoteRows')?.value)>0;

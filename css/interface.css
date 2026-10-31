@@ -1989,3 +1989,5 @@ body .app .layout #fieldGuideEditor .guide-section-toggle[aria-expanded="true"]{
  body .app .layout #fieldGuideEditor .guide-properties-title>#editFieldGuides{box-sizing:border-box;flex:0 0 78px;width:78px;min-width:78px;height:28px;min-height:28px;padding:3px 6px;font:inherit;font-size:12px;white-space:nowrap}
 }
 @media(max-width:850px){body .app .layout #contentPanel .phone-phase-tabs>#editFieldGuides,body .app .layout #fieldGuideEditor .guide-properties-title>#editFieldGuides{font-weight:400}}
+
+@media(max-width:850px){.png-preview-active .app>.top>.header-mode-status>.header-history-actions{display:flex!important}.png-preview-active .app .top .header-history-actions>:is(#undo,#redo){display:grid!important}}
