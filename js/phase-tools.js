@@ -53,16 +53,16 @@
  for(const [id,label,action] of [['groupGuideShapes','グループ化',groupGuides],['ungroupGuideShapes','グループ解除',ungroupGuides],['editGuideMember','個別編集',()=>editGuideMember()],['finishGuideMemberEdit','グループに戻る',finishGuideMemberEdit]]){const button=document.createElement('button');button.id=id;button.type='button';button.className='btn';button.textContent=label;button.onclick=action;groupActions.append(button)}
  const phaseSelect=dialog.querySelector('#guideEditorPhase'),entryButton=entry.querySelector('button');
  dialog.querySelector('#finishFieldGuides').hidden=true;
- function placeEntry(){if(!desktopEditor.matches&&dialog.open){dialog.querySelector('.guide-properties-title').append(entryButton);return}const collapse=document.getElementById(desktopEditor.matches?'desktopPhaseSectionToggle':'phonePhaseSectionToggle');collapse.before(entryButton)}
+ function placeEntry(){syncEntry();if(!desktopEditor.matches&&dialog.open){dialog.querySelector('.guide-properties-title').append(entryButton);return}const collapse=document.getElementById(desktopEditor.matches?'desktopPhaseSectionToggle':'phonePhaseSectionToggle');collapse.before(entryButton)}
  desktopEditor.addEventListener('change',placeEntry);placeEntry();
- entryButton.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>';entryButton.setAttribute('aria-haspopup','menu');entryButton.setAttribute('aria-controls','fieldGuideModeMenu');entryButton.setAttribute('aria-expanded','false');entryButton.removeAttribute('aria-pressed');
- const modeMenu=document.createElement('div');modeMenu.id='fieldGuideModeMenu';modeMenu.className='object-context-menu';modeMenu.setAttribute('role','menu');modeMenu.hidden=true;document.body.append(modeMenu);
- function closeModeMenu(focus=false){modeMenu.hidden=true;entryButton.setAttribute('aria-expanded','false');if(focus)entryButton.focus({preventScroll:true})}
- function openModeMenu(){closeGuideMenu();closeZoomMenu();modeMenu.replaceChildren();const action=document.createElement('button');action.type='button';action.setAttribute('role','menuitem');action.textContent=dialog.open?'ガイド編集を終了':'ガイドを編集';action.onclick=()=>{closeModeMenu();if(dialog.open)closeEditor();else openEditor()};modeMenu.append(action);addPhoneMenuClose(modeMenu,()=>closeModeMenu(true));modeMenu.hidden=false;entryButton.setAttribute('aria-expanded','true');const r=entryButton.getBoundingClientRect();modeMenu.style.left=Math.max(4,Math.min(r.left,innerWidth-modeMenu.offsetWidth-4))+'px';modeMenu.style.top=Math.max(4,Math.min(r.bottom+4,innerHeight-modeMenu.offsetHeight-4))+'px';action.focus({preventScroll:true})}
- window.addEventListener('pointerdown',event=>{if(!modeMenu.contains(event.target)&&!entryButton.contains(event.target))closeModeMenu()},true);
- window.addEventListener('keydown',event=>{if(!modeMenu.hidden&&event.key==='Escape'){event.preventDefault();event.stopImmediatePropagation();closeModeMenu(true)}},true);window.addEventListener('resize',()=>closeModeMenu());desktopEditor.addEventListener('change',()=>closeModeMenu());
- modeMenu.onkeydown=event=>{const buttons=[...modeMenu.querySelectorAll('button:not(:disabled)')],at=buttons.indexOf(document.activeElement);if(['ArrowDown','ArrowUp'].includes(event.key)){event.preventDefault();event.stopPropagation();buttons[(at+(event.key==='ArrowDown'?1:buttons.length-1))%buttons.length]?.focus()}else if(event.key==='Escape'){event.preventDefault();event.stopImmediatePropagation();closeModeMenu(true)}};
- entryButton.onkeydown=event=>{if(['ArrowDown','ArrowUp'].includes(event.key)){event.preventDefault();openModeMenu()}};
+ function syncEntry(){
+  const active=dialog.open,phone=!desktopEditor.matches;
+  const pencil='<path d="m13 16 6-6 3 3-6 6-4 1zM18 11l3 3"/>';
+  const frame='<path d="M9 3H3v6M3 13v6h6M13 3h6v4"/>';
+  const back='<path d="M9 4 4 9l5 5M4 9h8a5 5 0 0 1 5 5"/>';
+  entryButton.innerHTML=phone?(active?'ガイド終了':'ガイド開始'):'<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">'+(active?back:frame)+pencil+'</svg>';
+  const label=active?'通常編集に戻る':'ガイドを編集';entryButton.title=label;entryButton.setAttribute('aria-label',phone?entryButton.textContent+'：'+label:label);entryButton.setAttribute('aria-controls','fieldGuideEditor');entryButton.removeAttribute('aria-haspopup');entryButton.removeAttribute('aria-expanded');entryButton.removeAttribute('aria-pressed');
+ }
  function currentGuide(){const value=fieldGuides(data,data.page);value.reference??=fieldGuideReference(data,data.page);return value}
  function currentShape(){return currentGuide().shapes.find(shape=>shape.id===shapeId)}
  let guideIds=[],guideClipboard=[],individualGuideGroup=null,guideControlPressed=false;
@@ -176,9 +176,9 @@
   phaseSelect.replaceChildren(...data.pages.map((_,index)=>{const option=document.createElement('option');option.value=index;option.textContent=String(index+1).padStart(2,'0')+' '+data.pageNames[index];return option}));phaseSelect.value=data.page;
   dialog.querySelector('#guideHideObjects').checked=true;dialog.classList.add('guide-objects-hidden');mountEditor();placeEntry();document.body.classList.add('field-guide-editing');updateModeStatus();updateArtwork(true);sync();if(!desktopEditor.matches&&document.querySelector('.layout').classList.contains('phone-content-open'))entryButton.focus({preventScroll:true});else entryButton.focus({preventScroll:true});
  }
- function closeEditor(){if(!dialog.open)return;cancelPalette();closeModeMenu();closeGuideMenu();cancelPointer();endSession();closeColorPopovers();closeZoomMenu();dialog.close();unmountEditor();placeEntry();document.body.append(dialog);document.body.classList.remove('field-guide-editing');owner=null;shapeId=null;updateModeStatus();updateHistoryButtons();entryButton.focus({preventScroll:true})}
+ function closeEditor(){if(!dialog.open)return;cancelPalette();closeGuideMenu();cancelPointer();endSession();closeColorPopovers();closeZoomMenu();dialog.close();unmountEditor();placeEntry();document.body.append(dialog);document.body.classList.remove('field-guide-editing');owner=null;shapeId=null;updateModeStatus();updateHistoryButtons();entryButton.focus({preventScroll:true})}
  function historyAction(forward){endSession();cancelPointer();commitPendingHistory();if(forward?!future.length:!history.length)return;ownHistory=true;try{if(forward)redo();else undo();owner=data;ownerPage=data.page;lastCommitted=JSON.stringify(currentGuide())}finally{ownHistory=false}updateArtwork(true);sync()}
- entryButton.onclick=()=>modeMenu.hidden?openModeMenu():closeModeMenu(true);dialog.querySelector('#finishFieldGuides').onclick=closeEditor;
+ entryButton.onclick=event=>{event.stopPropagation();if(entryButton.disabled)return;if(dialog.open)closeEditor();else openEditor()};dialog.querySelector('#finishFieldGuides').onclick=closeEditor;
  phaseSelect.onchange=()=>{const index=Number(phaseSelect.value);closeEditor();selectPhase(index)};
  dialog.addEventListener('cancel',event=>{event.preventDefault();if(gesture)cancelPointer();else closeEditor()});
  dialog.querySelector('#guideHideObjects').onchange=event=>dialog.classList.toggle('guide-objects-hidden',event.target.checked);
@@ -209,8 +209,8 @@
   if(event.key==='Control'){guideControlPressed=true;if(gesture?.action==='move'){gesture.memberOnClick=null;if(gesture.recorded)movePointer({pointerId:gesture.id,clientX:gesture.lastClientX,clientY:gesture.lastClientY,ctrlKey:true,shiftKey:event.shiftKey,preventDefault(){},stopPropagation(){}})}return}
   if(event.target.closest?.('.guide-section-toggle')&&event.key===' '){event.preventDefault();event.stopImmediatePropagation();if(!event.repeat)event.target.closest('.guide-section-toggle').click();return}
   if(event.key==='Escape'&&event.target.closest?.('input,select,textarea')&&!gesture&&guideMenu.hidden&&zoomMenu.hidden&&!dialog.querySelector('.color-popover:not([hidden])')){if(properties.contains(event.target)){event.preventDefault();event.stopImmediatePropagation();const shape=currentShape();if(shape&&event.target.dataset.guideShapeKey)event.target.value=Math.round(shape[event.target.dataset.guideShapeKey]);sync()}return}
-  if(event.key==='Escape'){event.preventDefault();event.stopImmediatePropagation();if(!modeMenu.hidden)closeModeMenu(true);else if(!guideMenu.hidden)closeGuideMenu();else if(!zoomMenu.hidden)closeZoomMenu(true);else if(dialog.querySelector('.color-popover:not([hidden])'))closeColorPopovers();else if(paletteGesture)cancelPalette();else if(gesture)cancelPointer();else{activeTool='select';selectGuides([]);drawOverlay();sync()}return}
-  if(modeMenu.contains(event.target)||guideMenu.contains(event.target)||zoomMenu.contains(event.target)||zoomToolbar.contains(event.target))return;const input=event.target.closest?.('input,select,textarea');if(input)return;
+  if(event.key==='Escape'){event.preventDefault();event.stopImmediatePropagation();if(!guideMenu.hidden)closeGuideMenu();else if(!zoomMenu.hidden)closeZoomMenu(true);else if(dialog.querySelector('.color-popover:not([hidden])'))closeColorPopovers();else if(paletteGesture)cancelPalette();else if(gesture)cancelPointer();else{activeTool='select';selectGuides([]);drawOverlay();sync()}return}
+  if(guideMenu.contains(event.target)||zoomMenu.contains(event.target)||zoomToolbar.contains(event.target))return;const input=event.target.closest?.('input,select,textarea');if(input)return;
   const key=event.key.toLowerCase(),modifier=event.ctrlKey||event.metaKey;
   if(modifier&&key==='g'){event.preventDefault();event.stopImmediatePropagation();if(event.shiftKey)ungroupGuides();else groupGuides();return}
   if(modifier&&key==='z'){event.preventDefault();event.stopImmediatePropagation();historyAction(event.shiftKey);return}
@@ -240,7 +240,7 @@
   for(const group of settings.querySelectorAll('.coordinate-control'))for(const button of group.querySelectorAll('.phone-number-step-buttons button'))button.disabled=group.querySelector('input[type="range"]').disabled;
   if(color.dataset.color!==value.color){color.innerHTML=colorPickerMarkup('fieldGuides',value.color);color.dataset.color=value.color}color.querySelector('[data-color-trigger]').disabled=blocked||!enabled;
   if(session&&(session.board!==data||session.page!==data.page))session=null;
-  entryButton.disabled=!dialog.open&&!allowed();entryButton.dataset.guideActive=String(dialog.open);entryButton.title=dialog.open?'ガイド編集メニュー':'フェーズのその他の操作';entryButton.setAttribute('aria-label',entryButton.title);
+  entryButton.disabled=!dialog.open&&!allowed();entryButton.dataset.guideActive=String(dialog.open);syncEntry();
   if(!dialog.open)return;
   const title=document.getElementById('selectionTitle'),guideTitle=dialog.querySelector('#guideEditorTitle');if(guideTitle.innerHTML!==title.innerHTML)guideTitle.replaceChildren(...[...title.childNodes].map(node=>node.cloneNode(true)));guideTitle.title=title.textContent;
   const picked=selectedGuides(),selected=picked.length===1?picked[0]:null,group=selectedGuideGroup();if(individualGuideGroup&&!picked.some(s=>s.objectGroupId===individualGuideGroup))individualGuideGroup=null;

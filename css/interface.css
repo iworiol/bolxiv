@@ -1962,3 +1962,30 @@ body .app .layout .phone-object-tabs:has(.phone-object-collapse[aria-expanded="t
 body .app .layout #pngPreview .png-preview-settings:not(.png-properties-collapsed)>h3,
 body .app .layout #fieldGuideEditor #guideShapeProperties>h3,
 body .app .layout #fieldGuideEditor .guide-section-toggle[aria-expanded="true"]{border-bottom:1px solid #d0d4da!important}
+@media(min-width:851px){#phaseMemo #outputNotePhase{box-sizing:border-box;flex:none;width:100%;min-width:0;max-width:100%;padding:6px;border:1px solid #d5dce6;border-radius:5px;background:#f8fafc;color:#17212c;font:inherit}#phaseMemo #outputNotePhase:focus{outline:2px solid var(--blue);outline-offset:-1px}}
+@media(min-width:851px){#desktopPhaseSwitch:disabled{opacity:.4;cursor:default}}
+
+/* Desktop property controls share a compact height; touch controls retain their sizing. */
+@media(min-width:851px){
+ .app .layout :is(#inspector,#layoutPropertiesPanel,#phaseGroupProperties,#fieldGuideEditor .guide-editor-properties,#pngPreview .png-preview-settings) :is(input[type="number"],select){box-sizing:border-box;height:28px!important;min-height:28px!important;max-height:28px!important;padding-top:3px!important;padding-bottom:3px!important;line-height:normal!important}
+ .app .layout :is(#inspector,#layoutPropertiesPanel,#phaseGroupProperties,#fieldGuideEditor .guide-editor-properties) .coordinate-control:has(input[type="number"]){height:28px;min-height:28px}
+}
+@media(min-width:851px){.app .layout :is(#inspector,#layoutPropertiesPanel,#phaseGroupProperties,#fieldGuideEditor .guide-editor-properties) .color-trigger{box-sizing:border-box;height:28px!important;min-height:28px!important;max-height:28px!important;padding-top:3px!important;padding-bottom:3px!important}}
+
+/* Touch-sized controls only inside property panels. */
+@media(max-width:850px){
+ .app .layout :is(#inspector,#layoutPropertiesPanel,#phaseGroupProperties,#fieldGuideEditor .guide-editor-properties,#pngPreview .png-preview-settings) :is(select,input[type="number"],input[type="text"],input:not([type]),.color-trigger,.phone-number-step-buttons button){box-sizing:border-box;height:40px!important;min-height:40px!important;max-height:40px!important;padding-top:4px!important;padding-bottom:4px!important;line-height:normal!important}
+ .app .layout :is(#inspector,#layoutPropertiesPanel,#phaseGroupProperties,#fieldGuideEditor .guide-editor-properties,#pngPreview .png-preview-settings) .phone-number-step-buttons button{min-width:40px!important}
+ .app .layout :is(#inspector,#layoutPropertiesPanel,#phaseGroupProperties,#fieldGuideEditor .guide-editor-properties,#pngPreview .png-preview-settings) .coordinate-control:has(.phone-number-step-buttons){height:40px;min-height:40px}
+}
+@media(max-width:850px){#phaseMemo #outputNotePhase{box-sizing:border-box;flex:none;width:100%;min-width:0;height:40px;min-height:40px;padding:4px 8px;border:1px solid #d5dce6;border-radius:6px;background:#f8fafc;color:#000;font:inherit;font-size:14px}#phaseMemo #outputNotePhase:focus-visible{outline:2px solid var(--blue);outline-offset:1px}}
+@media(max-width:850px){#phonePhaseSwitch-toggle:disabled{opacity:.4;cursor:default}}
+#phoneContentModeStatus{display:none}@media(max-width:850px){#phoneContentModeStatus{display:inline-block;margin-left:8px;font-size:12px;font-weight:400;line-height:1.2;white-space:nowrap;color:inherit}}
+@media(max-width:850px){#fieldGuideModeMenu{box-sizing:border-box;width:max-content;min-width:160px;max-width:calc(100vw - 8px)}#fieldGuideModeMenu>button{white-space:nowrap}}
+#editFieldGuides svg{fill:none!important;stroke:currentColor!important}
+@media(max-width:850px){
+ body .app .layout #contentPanel .phone-phase-tabs{padding-right:122px!important}
+ body .app .layout #contentPanel .phone-phase-tabs>#editFieldGuides{width:78px;min-width:78px;height:28px;min-height:28px;flex-basis:78px;font:inherit;font-size:12px;white-space:nowrap}
+ body .app .layout #fieldGuideEditor .guide-properties-title>#editFieldGuides{box-sizing:border-box;flex:0 0 78px;width:78px;min-width:78px;height:28px;min-height:28px;padding:3px 6px;font:inherit;font-size:12px;white-space:nowrap}
+}
+@media(max-width:850px){body .app .layout #contentPanel .phone-phase-tabs>#editFieldGuides,body .app .layout #fieldGuideEditor .guide-properties-title>#editFieldGuides{font-weight:400}}
