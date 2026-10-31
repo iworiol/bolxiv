@@ -146,7 +146,7 @@ function printPageLayout(width,height){
   paperArtworkRunning=(async()=>{while(paperArtworkRequested){paperArtworkRequested=false;await buildPaperArtwork()}})().finally(()=>{paperArtworkRunning=null});return paperArtworkRunning;
  }
  async function buildPaperArtwork(){
-  const ticket=++paperRevision;if(!paperMode()||!session)return;
+  const ticket=++paperRevision;if(!paperMode()||!session||contentPreviewPosition)return;
   try{let src;if(desktopVectorPrintAvailable()){
    // Notes and borders change the output frame, not the diagram's computed styles.
    const active=session,key=printSourceCacheKey();if(active.printSourceVersion!==diagramVersion||active.printSourceKey!==key||!active.printSource){
@@ -199,7 +199,7 @@ function printPageLayout(width,height){
  surface.addEventListener('touchstart',event=>{if(!session||event.touches.length!==2)return;event.preventDefault();event.stopImmediatePropagation();const [a,b]=event.touches,rect=(paperMode()?paperSheet:stage).getBoundingClientRect();pinch={distance:Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY),zoom:session.zoom,x:((a.clientX+b.clientX)/2-rect.left)/rect.width,y:((a.clientY+b.clientY)/2-rect.top)/rect.height}},{passive:false});
  surface.addEventListener('touchmove',event=>{if(!session||!pinch||event.touches.length!==2)return;event.preventDefault();event.stopImmediatePropagation();const [a,b]=event.touches;session.zoom=Math.max(.05,Math.min(3,Math.round(pinch.zoom*Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY)/pinch.distance*20)/20));fit();const rect=(paperMode()?paperSheet:stage).getBoundingClientRect();surface.scrollLeft+=rect.left+pinch.x*rect.width-(a.clientX+b.clientX)/2;surface.scrollTop+=rect.top+pinch.y*rect.height-(a.clientY+b.clientY)/2},{passive:false});
  for(const type of ['touchend','touchcancel'])surface.addEventListener(type,()=>{pinch=null},{passive:true});
- function syncPhoneCanvas(){if(!session||!matchMedia('(max-width:850px)').matches)return;if(liveSpace.parentElement!==surface){surface.append(liveSpace);liveSpace.inert=true}fit()}
+ function syncPhoneCanvas(){if(!session||!matchMedia('(max-width:850px)').matches||contentPreviewPosition)return;if(liveSpace.parentElement!==surface){surface.append(liveSpace);liveSpace.inert=true}fit()}
  function syncPhoneLayout(){
   if(!session||!matchMedia('(max-width:850px)').matches)return;
   const content=dialog.querySelector('.png-preview-content'),reader=dialog.querySelector('.png-reader-controls');if(!reader||!reader.querySelector('.content-select-row'))return;
@@ -292,17 +292,22 @@ function printPageLayout(width,height){
     change.onclick=()=>{if(!session||session.saving)return;session.phoneTab=session.phoneTab==='list'?'properties':'list';const toggle=document.getElementById('toggleBattlePages');if(toggle.getAttribute('aria-expanded')!=='true')toggle.click();syncPhoneLayout()};
     propertiesExpanded=true;syncProperties();reader.append(dialog.querySelector('.png-preview-settings'));dialog.querySelector('.png-preview-content').append(reader)}
  function unmountPhoneReader(state){const reader=dialog.querySelector('.png-reader-controls');if(!reader)return;propertiesPanel.querySelector('h3').append(printSettingsReset);printSettingsReset.hidden=outputAction!=='print';dialog.querySelector('.png-preview-content').append(dialog.querySelector('.png-preview-settings'));for(const {node,anchor} of state.readerHomes){anchor.after(node);anchor.remove()}state.readerHomes.length=0;reader.remove()}
- let outputContentOpen=false;
+ let outputContentOpen=false,contentPreviewPosition=null;
+ function setContentPreview(open,viewport){
+  if(open){if(!contentPreviewPosition)contentPreviewPosition={left:surface.scrollLeft,top:surface.scrollTop};viewport.append(liveSpace)}
+  else if(contentPreviewPosition){surface.append(liveSpace);const position=contentPreviewPosition;contentPreviewPosition=null;surface.scrollLeft=position.left;surface.scrollTop=position.top;requestAnimationFrame(()=>{if(session&&!contentPreviewPosition){surface.scrollLeft=position.left;surface.scrollTop=position.top}})}
+ }
+
  function syncOutputContentPane(){
   if(!session||!matchMedia('(max-width:850px)').matches)return;
   const open=layout.classList.contains('phone-content-open');if(open===outputContentOpen)return;outputContentOpen=open;
-  for(const home of session.readerHomes){if(open){home.readerAnchor=document.createComment('output reader home');home.node.before(home.readerAnchor);home.anchor.after(home.node)}else{home.readerAnchor?.after(home.node);home.readerAnchor?.remove();home.readerAnchor=null}}
-  if(!open){document.querySelector('#phaseMemo textarea')?.blur();flushNoteRefresh();syncPhoneLayout()}
+  for(const home of session.readerHomes){if(open){home.readerAnchor=document.createComment('output reader home');home.node.before(home.readerAnchor);const contentPanel=document.getElementById('contentPanel');contentPanel.insertBefore(home.node,contentPanel.querySelector('#phasePropertyResize')||contentPanel.querySelector('.phone-phase-shared'))}else{home.readerAnchor?.after(home.node);home.readerAnchor?.remove();home.readerAnchor=null}}
+  if(!open){document.querySelector('#phaseMemo textarea')?.blur();flushNoteRefresh();refresh();syncPhoneLayout()}
   document.getElementById('pngPreviewContent')?.setAttribute('aria-expanded',String(open));
  }
  new MutationObserver(syncOutputContentPane).observe(layout,{attributes:true,attributeFilter:['class']});
  let responsiveFrame=0;
- function syncResponsiveOutput(){responsiveFrame=0;if(!session)return;syncPaperMode();if(matchMedia('(max-width:850px)').matches)mountPhoneReader(session.readerHomes);else unmountPhoneReader(session);syncProperties();surface.append(liveSpace);liveSpace.inert=true;alignFrame();fit();fitOutputToViewport()}
+ function syncResponsiveOutput(){responsiveFrame=0;if(!session)return;syncPaperMode();if(matchMedia('(max-width:850px)').matches)mountPhoneReader(session.readerHomes);else unmountPhoneReader(session);syncProperties();if(!contentPreviewPosition)surface.append(liveSpace);liveSpace.inert=true;alignFrame();fit();if(!contentPreviewPosition)fitOutputToViewport()}
  function scheduleResponsiveOutput(){if(!session||responsiveFrame)return;responsiveFrame=requestAnimationFrame(syncResponsiveOutput)}
  matchMedia('(max-width:850px)').addEventListener('change',scheduleResponsiveOutput);window.addEventListener('resize',scheduleResponsiveOutput);
  async function open(scale=1,kind='image'){
@@ -326,7 +331,7 @@ function printPageLayout(width,height){
   }catch(error){if(session)close();throw error}finally{opening=false}
  }
  function close(){
-  if(!session||session.saving)return;endPreviewPan();clearTimeout(noteRefreshTimer);noteRefreshTimer=null;const previous=session;layout.classList.remove('phone-content-open');clearPhasePrintFrame();paperRevision++;paperImage.removeAttribute('src');surface.classList.remove('print-paper-active');paperPreview.hidden=true;pinch=null;closeZoomMenu();session=null;outputContentOpen=false;revision++;dialog.close();document.body.classList.remove('png-preview-active');dialog.removeAttribute('aria-busy');unmountPhoneReader(previous);liveSpace.querySelector('.output-note-preview')?.remove();liveSpace.querySelector('.output-border-preview')?.remove();liveSpace.classList.remove('has-output-note','has-output-frame');liveSpace.style.removeProperty('translate');liveSpace.style.removeProperty('--plain-paper-print-filter');liveAnchor.after(liveSpace);liveSpace.inert=previous.spaceInert;({gridVisible,fieldVisible,fieldClipEnabled}=previous.displayBefore);updateGridToggle();updateFieldToggle();updateClipToggle();setBoardDisplayZoom(previous.originalZoom,false,false);originalRender();updateModeStatus();updateHistoryButtons();
+  if(!session||session.saving)return;endPreviewPan();clearTimeout(noteRefreshTimer);noteRefreshTimer=null;const previous=session;setContentPreview(false);layout.classList.remove('phone-content-open');clearPhasePrintFrame();paperRevision++;paperImage.removeAttribute('src');surface.classList.remove('print-paper-active');paperPreview.hidden=true;pinch=null;closeZoomMenu();session=null;outputContentOpen=false;revision++;dialog.close();document.body.classList.remove('png-preview-active');dialog.removeAttribute('aria-busy');unmountPhoneReader(previous);liveSpace.querySelector('.output-note-preview')?.remove();liveSpace.querySelector('.output-border-preview')?.remove();liveSpace.classList.remove('has-output-note','has-output-frame');liveSpace.style.removeProperty('translate');liveSpace.style.removeProperty('--plain-paper-print-filter');liveAnchor.after(liveSpace);liveSpace.inert=previous.spaceInert;({gridVisible,fieldVisible,fieldClipEnabled}=previous.displayBefore);updateGridToggle();updateFieldToggle();updateClipToggle();setBoardDisplayZoom(previous.originalZoom,false,false);originalRender();updateModeStatus();updateHistoryButtons();
   window.Bolxiv.phasePanel.restore(previous.phoneNoteState);
   for(const state of previous.noteView){const change=document.getElementById(state.switchId),collapse=document.getElementById(state.collapseId);change.disabled=false;if(change.title!==state.title)change.click();if(collapse.getAttribute('aria-expanded')!==state.expanded)collapse.click()}
   for(const {node,inert} of previous.inert)node.inert=inert;for(const {node,disabled} of previous.placementControls)node.disabled=disabled;
@@ -363,7 +368,7 @@ function printPageLayout(width,height){
  for(const type of ['click','dblclick','pointerdown','contextmenu','dragstart','drop','change'])window.addEventListener(type,event=>{if(!session||event.target.closest?.('#changeLogDialog,#operationGuideDialog,#aboutToolDialog,#phoneIconHelp')||session.saving&&event.target.matches('a[download]'))return;if(readOnlyTarget(event.target)){event.preventDefault();event.stopImmediatePropagation();return}if(event.target===back&&type==='pointerdown'){event.stopImmediatePropagation();return}if(session.saving&&event.target!==back&&!dialog.contains(event.target)||!allowed(event.target)||['dblclick','contextmenu','dragstart','drop'].includes(type)&&!dialog.contains(event.target)&&!event.target.closest('#phaseMemo textarea')){event.preventDefault();event.stopImmediatePropagation()}},true);
  const originalRender=render;let refreshFrame;
  render=function(){originalRender();diagramVersion++;if(session&&!opening){cancelAnimationFrame(refreshFrame);refreshFrame=requestAnimationFrame(()=>{if(session)refresh()})}};
- window.Bolxiv.pngPreview={open,close,refresh,cancelNoteRefresh,scheduleNoteRefresh,flushNoteRefresh,get kind(){return session?.kind||'image'},get active(){return !!session},get saving(){return !!session?.saving},get returnMode(){return session?.returnMode||'編集'}};
+ window.Bolxiv.pngPreview={open,close,refresh,setContentPreview,cancelNoteRefresh,scheduleNoteRefresh,flushNoteRefresh,get kind(){return session?.kind||'image'},get active(){return !!session},get saving(){return !!session?.saving},get returnMode(){return session?.returnMode||'編集'}};
 })();
 
 ;

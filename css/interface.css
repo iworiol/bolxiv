@@ -1982,3 +1982,10 @@ body .app .layout #fieldGuideEditor .guide-section-toggle[aria-expanded="true"]{
 @media(max-width:850px){#phonePhaseSwitch-toggle:disabled{opacity:.4;cursor:default}}
 #phoneContentModeStatus{display:none}@media(max-width:850px){#phoneContentModeStatus{display:inline-block;margin-left:8px;font-size:12px;font-weight:400;line-height:1.2;white-space:nowrap;color:inherit}}
 @media(max-width:850px){#fieldGuideModeMenu{box-sizing:border-box;width:max-content;min-width:160px;max-width:calc(100vw - 8px)}#fieldGuideModeMenu>button{white-space:nowrap}}
+#editFieldGuides svg{fill:none!important;stroke:currentColor!important}
+@media(max-width:850px){
+ body .app .layout #contentPanel .phone-phase-tabs{padding-right:122px!important}
+ body .app .layout #contentPanel .phone-phase-tabs>#editFieldGuides{width:78px;min-width:78px;height:28px;min-height:28px;flex-basis:78px;font:inherit;font-size:12px;white-space:nowrap}
+ body .app .layout #fieldGuideEditor .guide-properties-title>#editFieldGuides{box-sizing:border-box;flex:0 0 78px;width:78px;min-width:78px;height:28px;min-height:28px;padding:3px 6px;font:inherit;font-size:12px;white-space:nowrap}
+}
+@media(max-width:850px){body .app .layout #contentPanel .phone-phase-tabs>#editFieldGuides,body .app .layout #fieldGuideEditor .guide-properties-title>#editFieldGuides{font-weight:400}}

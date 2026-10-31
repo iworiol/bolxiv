@@ -5,10 +5,10 @@ window.BolxivIntegrity = {
   "files": {
     "bolxiv.js": "sha384-prtDObC30B0Q+8ZcW/zg+KREaoSEddnfa9RrWGZgDhjIIkqUSx6wZEDfD6awOzdI",
     "css/base.css": "sha384-9h80Bev8FpP5bChxdtRVZ9qSE/tEfdKqfoLMfwol5OBjiAFKtoEHv//j1Uudb9MO",
-    "css/interface.css": "sha384-bDUmuZ16pPUUzWwC+5Lmy2UZYO4xckNjkH+0xeq+mUdTBmgrWJw7Fv30L4Ez1GJb",
+    "css/interface.css": "sha384-djsMs2G/bbvyDDp53PVf4d/g7I+9yja/68MQDjqxXUZSJ0rxt4PecLBws+IxuOMG",
     "css/mobile.css": "sha384-LO+YWh2eURagNQ554cS+jFu1h6Cd3jU5g9edyI0Wa9yLoZGNx85ARlJi7HHM3fI8",
     "css/panels.css": "sha384-P0Ue6DcSyVpIzKA3pLC3hVMuGEWyN/PROor921QqFEElJ3+5S0DknoYsC2GeFilP",
-    "css/png-preview.css": "sha384-QGyXw3FqgpI573THC5rpV1hd2+4ywMRA4YOnmVBVX8Qe4VR38EYSoqdeh87OKcXY",
+    "css/png-preview.css": "sha384-doil5vSfJ1nbkm6NKdjTTBHMRphWMAnKJcoyT28x+BRNxH5KAxWaDt9gAQJphFgS",
     "css/startup.css": "sha384-u+H/UhBfn8yD5sBibyQI4+WV3mV2/DHnWfE5JehGNAg99mlZgALRo5O9I+/9DsL1",
     "js/application.js": "sha384-C1RM79UkZF9MrEytzzEgTQMH1ydv8S+VQltRNYZ6drA54d9yr64Llpl4vjbTp10A",
     "js/canvas.js": "sha384-2ZxktZulc3+eoEPPMgtvPvsVp6FdK9IoaZFqAeXr98XOuR7Cqc3HYC7iHL0jtsPs",
@@ -16,9 +16,9 @@ window.BolxivIntegrity = {
     "js/editor.js": "sha384-vK6N2hMbx4zSlNZkOn2JCBHAm9YD2bdgmQKgtadPL3PsNSpLr2Q7sSgHFcoKcPA7",
     "js/embedded-images.js": "sha384-CYs7JKW5eoZAbfRHK9kVvFcuJ26ZbIR+iFkiL4sWAJ8nriY9f7Mhs/VRTIw9wrsc",
     "js/integrity-loader.js": "sha384-nBDJSwTnuFOHq6HsBwIYs2fv+IdGdSA4SWKe9YuwN2/e9Gdzn/fi+ozte3eSnKsi",
-    "js/interface.js": "sha384-mKa68xjir30myOYkDcDnekApkXiBPspyZeOgjk54uUScVFY3z5qFf4LnXiL456nZ",
+    "js/interface.js": "sha384-LgGPVugsxt1QKvtJM6MqSWfYqjXjadzPqNkMjqNv504VUPM/HgfM8wx4WzRFmgOE",
     "js/panels.js": "sha384-kHnlPg3ZTlPHsSM6kbxGgB7LtD5X5w5RmJgjzUutiy1QTFv1WaiQ0VF2kSVYSvNR",
-    "js/phase-tools.js": "sha384-pddH3aH8bHTbC4acziPxUB1sVnDpd5a3VPmPduTkNS/dhHMFUSNnZweFN40DH/zJ",
-    "js/png-preview.js": "sha384-xSGleNvTXolKWV7eZ/y/hl9KCB3/PtnefPhNGbfWc9VOY29BIuYm1aJ9j6Wk3+vJ"
+    "js/phase-tools.js": "sha384-KYwzgzKPV2CKqIR5x7RB/DipIIb8MglE2MRVJX9MRcok2DOgG6euQyenlLY2NUQi",
+    "js/png-preview.js": "sha384-3IJTadloNLEguVAZK1s00N97YNjWsjvkAVmkuxjL10P4rtsBPfuPD0JpHUHE1Las"
   }
 };
