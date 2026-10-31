@@ -81,7 +81,20 @@ function printPageLayout(width,height){
  function outputPropertiesName(){return outputAction==='png'?'画像生成プロパティ':'印刷プロパティ'}
  function syncPrintColor(){if(paperImage)paperImage.style.filter=plainPaperPrintFilter();liveSpace.style.setProperty('--plain-paper-print-filter',outputAction==='print'?plainPaperPrintFilter():'none')}
  function syncOutputAction(){syncPrintColor();const png=outputAction==='png',name=png?'画像生成':'印刷';document.getElementById('outputPngSettings').hidden=!png;document.getElementById('outputPrintSettings').hidden=png;printSettingsReset.hidden=png;document.getElementById('pngPropertiesToggle').firstElementChild.textContent=outputPropertiesName();document.getElementById('pngCanvasModeStatus').textContent=name;helpButton?.setAttribute('aria-label',name+'のアイコン説明');syncPaperMode();if(session&&!opening){refresh();fitOutputToViewport()}}
- function fitZoomStep(){const dimensions=previewDimensions(),style=getComputedStyle(surface),insetX=parseFloat(style.paddingLeft)+parseFloat(style.paddingRight),insetY=parseFloat(style.paddingTop)+parseFloat(style.paddingBottom),gutterX=paperMode()?72:40,gutterY=paperMode()?60:40,ratio=Math.min((surface.clientWidth-insetX-gutterX)/dimensions.width,(surface.clientHeight-insetY-gutterY)/dimensions.height);return Math.max(.05,Math.min(3,Math.floor((ratio+1e-9)*20)/20))}
+ function fitZoomStep(){
+  const dimensions=previewDimensions(),style=getComputedStyle(surface),insetX=parseFloat(style.paddingLeft)+parseFloat(style.paddingRight),insetY=parseFloat(style.paddingTop)+parseFloat(style.paddingBottom),gutterX=paperMode()?72:40,gutterY=paperMode()?60:40;
+  let height=surface.clientHeight;
+  if(matchMedia('(max-width:850px)').matches&&!contentPreviewPosition){
+   // The current surface shrinks with zoom. Fit against the available pane
+   // instead, so a small zoom never becomes its own permanent height limit.
+   const content=dialog.querySelector('.png-preview-content'),css=getComputedStyle(content),pixels=value=>parseFloat(value)||0;
+   const expanded=document.getElementById('toggleBattlePages').getAttribute('aria-expanded')==='true';
+   const controls=pixels(css.getPropertyValue(expanded?'--png-phone-controls-min-height':'--png-phone-closed-controls-height'))||(expanded?230:80);
+   height=Math.max(0,content.clientHeight-pixels(css.paddingTop)-pixels(css.paddingBottom)-pixels(css.rowGap)-controls);
+  }
+  const ratio=Math.min((surface.clientWidth-insetX-gutterX)/dimensions.width,(height-insetY-gutterY)/dimensions.height);
+  return Math.max(.05,Math.min(3,Math.floor((ratio+1e-9)*20)/20));
+ }
  const toolbar=document.querySelector('.board-display-toolbar').cloneNode(true);toolbar.classList.add('png-preview-toolbar');toolbar.setAttribute('aria-label','出力プレビューの表示');
  toolbar.querySelector('.phone-icon-help-toggle')?.remove();toolbar.querySelector('.phone-help-separator')?.remove();
  for(const node of toolbar.querySelectorAll('[id]')){node.dataset.sourceId=node.id;node.id='png-'+node.id}
@@ -214,7 +227,7 @@ function printPageLayout(width,height){
   attr(title,'aria-expanded',String(expanded));attr(title,'aria-label',(tab==='list'?'フェーズリスト':propertiesName)+'を'+(expanded?'閉じる':'開く'));
   attr(change,'aria-label',tab==='list'?propertiesName+'を表示':'フェーズリストを表示');
   const mark=expanded?'−':'＋';if(collapse&&collapse.textContent!==mark)collapse.textContent=mark;attr(collapse,'aria-expanded',String(expanded));attr(collapse,'aria-label',title?.getAttribute('aria-label'));
-  const surfaceStyle=getComputedStyle(surface),displayPadding=(parseFloat(surfaceStyle.paddingTop)||0)+(parseFloat(surfaceStyle.paddingBottom)||0)+(paperMode()?60:40);
+  const surfaceStyle=getComputedStyle(surface),displayPadding=(parseFloat(surfaceStyle.paddingTop)||0)+(parseFloat(surfaceStyle.paddingBottom)||0)+60;
   const rowHeight=reader.querySelector('.content-select-row').getBoundingClientRect().height,metrics=phoneReaderLayoutMetrics(content,0,rowHeight,session.zoom*100,previewDimensions().height,displayPadding);
   content.classList.toggle('png-phases-collapsed',!expanded);
   for(const [name,value] of Object.entries({'canvas-height':metrics.canvasHeight,'controls-min-height':metrics.controlsMinHeight,'closed-controls-height':metrics.closedControlsHeight})){const key='--png-phone-'+name,next=value+'px';if(content.style.getPropertyValue(key)!==next)content.style.setProperty(key,next)}
@@ -311,7 +324,7 @@ function printPageLayout(width,height){
  function scheduleResponsiveOutput(){if(!session||responsiveFrame)return;responsiveFrame=requestAnimationFrame(syncResponsiveOutput)}
  matchMedia('(max-width:850px)').addEventListener('change',scheduleResponsiveOutput);window.addEventListener('resize',scheduleResponsiveOutput);
  async function open(scale=1,kind='image'){
-  kind=kind==='print'?'print':'image';if(session){if(session.saving)return;outputAction=kind==='print'?'print':'png';session.kind=kind;dialog.dataset.outputMode=kind;syncOutputAction();syncPhoneLayout();updateModeStatus();return}if(opening)return;opening=true;const focus=document.activeElement;focus?.blur();
+  kind=kind==='print'?'print':'image';if(session){if(session.saving)return;outputAction=kind==='print'?'print':'png';session.kind=kind;dialog.dataset.outputMode=kind;syncOutputAction();syncPhoneLayout();updateModeStatus();return}if(opening)return;opening=true;const focus=document.activeElement;focus?.blur();const phoneContentBefore={open:matchMedia('(max-width:850px)').matches&&layout.classList.contains('phone-content-open'),noteScroll:document.querySelector('#phaseMemo textarea').scrollTop};
   try{
    if(matchMedia('(max-width:850px)').matches&&layout.classList.contains('phone-content-open')){document.querySelector('.phone-content-close').click();await Promise.allSettled(layout.querySelector('.battle').getAnimations().map(animation=>animation.finished))}
    const placementControls=[...document.querySelectorAll('.left .tool,.left .icon-choice')].map(node=>({node,disabled:node.disabled}));for(const {node} of placementControls)node.disabled=true;
@@ -320,7 +333,7 @@ function printPageLayout(width,height){
    for(const state of noteView){const change=document.getElementById(state.switchId),collapse=document.getElementById(state.collapseId);if(change.title.includes('ノートを表示'))change.click();if(collapse.getAttribute('aria-expanded')==='false')collapse.click()}if(noteView.length)document.getElementById('phaseMemo').open=true;
    const readerHomes=[];if(matchMedia('(max-width:850px)').matches)mountPhoneReader(readerHomes);
 
-   outputAction=kind==='print'?'print':'png';session={phoneNoteState:window.Bolxiv.phasePanel.capture(),noteView,kind,phoneTab:'properties',returnMode:boardReadOnly||phaseComparisonActive()?'閲覧':'編集',displayBefore:{gridVisible,fieldVisible,fieldClipEnabled},readerHomes,placementControls,zoom:boardDisplayZoom/100,initialScroll:{left:viewport.scrollLeft,top:viewport.scrollTop},originalZoom:boardDisplayZoom,spaceInert:liveSpace.inert,scale:scale===2?2:1,inert:freeze(),focus,scrolls:[document.scrollingElement,...document.querySelectorAll('.layout,.right,#objectLayerPanel,.object-layout-rect,#objectList,#inspector,#layoutPropertiesPanel,#phaseMemo textarea')].filter(Boolean).map(node=>({node,left:node.scrollLeft,top:node.scrollTop}))};
+   outputAction=kind==='print'?'print':'png';session={phoneContentBefore,phoneNoteState:window.Bolxiv.phasePanel.capture(),noteView,kind,phoneTab:'properties',returnMode:boardReadOnly||phaseComparisonActive()?'閲覧':'編集',displayBefore:{gridVisible,fieldVisible,fieldClipEnabled},readerHomes,placementControls,zoom:boardDisplayZoom/100,initialScroll:{left:viewport.scrollLeft,top:viewport.scrollTop},originalZoom:boardDisplayZoom,spaceInert:liveSpace.inert,scale:scale===2?2:1,inert:freeze(),focus,scrolls:[document.scrollingElement,...document.querySelectorAll('.layout,.right,#objectLayerPanel,.object-layout-rect,#objectList,#inspector,#layoutPropertiesPanel,#phaseMemo textarea')].filter(Boolean).map(node=>({node,left:node.scrollLeft,top:node.scrollTop}))};
    window.Bolxiv.phasePanel.showOutputNote();
    document.querySelector('.top').classList.remove('phone-menu-open');const headerMenu=document.querySelector('.phone-menu-toggle');headerMenu?.setAttribute('aria-expanded','false');
    for(const [menu,trigger] of [['#boardZoomMenu','#resetBoardZoom'],['#phoneDisplayMenu','.phone-display-menu-toggle']])if(document.querySelector(menu)?.hidden===false)document.querySelector(trigger)?.click();
@@ -333,9 +346,10 @@ function printPageLayout(width,height){
  function close(){
   if(!session||session.saving)return;endPreviewPan();clearTimeout(noteRefreshTimer);noteRefreshTimer=null;const previous=session;setContentPreview(false);layout.classList.remove('phone-content-open');clearPhasePrintFrame();paperRevision++;paperImage.removeAttribute('src');surface.classList.remove('print-paper-active');paperPreview.hidden=true;pinch=null;closeZoomMenu();session=null;outputContentOpen=false;revision++;dialog.close();document.body.classList.remove('png-preview-active');dialog.removeAttribute('aria-busy');unmountPhoneReader(previous);liveSpace.querySelector('.output-note-preview')?.remove();liveSpace.querySelector('.output-border-preview')?.remove();liveSpace.classList.remove('has-output-note','has-output-frame');liveSpace.style.removeProperty('translate');liveSpace.style.removeProperty('--plain-paper-print-filter');liveAnchor.after(liveSpace);liveSpace.inert=previous.spaceInert;({gridVisible,fieldVisible,fieldClipEnabled}=previous.displayBefore);updateGridToggle();updateFieldToggle();updateClipToggle();setBoardDisplayZoom(previous.originalZoom,false,false);originalRender();updateModeStatus();updateHistoryButtons();
   window.Bolxiv.phasePanel.restore(previous.phoneNoteState);
+  if(previous.phoneContentBefore.open&&matchMedia('(max-width:850px)').matches)layout.classList.add('phone-content-open');
   for(const state of previous.noteView){const change=document.getElementById(state.switchId),collapse=document.getElementById(state.collapseId);change.disabled=false;if(change.title!==state.title)change.click();if(collapse.getAttribute('aria-expanded')!==state.expanded)collapse.click()}
   for(const {node,inert} of previous.inert)node.inert=inert;for(const {node,disabled} of previous.placementControls)node.disabled=disabled;
-  const restore=()=>{for(const {node,left,top} of previous.scrolls){node.scrollLeft=left;node.scrollTop=top}};restore();requestAnimationFrame(restore);
+  const restore=()=>{for(const {node,left,top} of previous.scrolls){node.scrollLeft=left;node.scrollTop=top}if(previous.phoneContentBefore.open&&matchMedia('(max-width:850px)').matches)document.querySelector('#phaseMemo textarea').scrollTop=previous.phoneContentBefore.noteScroll};restore();requestAnimationFrame(restore);
   const focus=[previous.focus,document.getElementById('exportBtn'),document.querySelector('.phone-menu-toggle')].find(node=>node?.isConnected&&node.getClientRects().length);focus?.focus({preventScroll:true});
  }
  document.getElementById('outputPlainPaper').onchange=syncPrintColor;
@@ -355,6 +369,7 @@ function printPageLayout(width,height){
  window.addEventListener('keydown',event=>{
   if(!session||event.target.closest?.('#changeLogDialog,#operationGuideDialog,#aboutToolDialog,#phoneIconHelp'))return;
   if(event.key===' '&&event.target.matches?.('#desktopPhasePanelTitle,#desktopPhaseSectionToggle')){event.preventDefault();event.stopImmediatePropagation();if(!event.repeat)event.target.click();return}
+  if(!session.saving&&(event.ctrlKey||event.metaKey)&&['z','y'].includes(event.key.toLowerCase())){event.preventDefault();event.stopImmediatePropagation();if(event.key.toLowerCase()==='y'||event.shiftKey)redo();else undo();return}
   if(event.target.closest?.('#phaseMemo textarea,#outputNotePhase')&&!session.saving){event.stopImmediatePropagation();return}
   if(event.target.closest?.('#modeSwitchMenu')||event.target.matches?.('.print-page-fields input'))return;
   if(zoomMenu.contains(event.target)||event.target===zoomTrigger&&['ArrowDown','ArrowUp'].includes(event.key))return;
@@ -363,9 +378,9 @@ function printPageLayout(width,height){
   if((event.ctrlKey||event.metaKey)&&['z','y','v','x'].includes(event.key.toLowerCase())||['Delete','Backspace'].includes(event.key))event.preventDefault();
   event.stopImmediatePropagation();
  },true);
- const navigation='.desktop-phase-shared-heading,#phaseMemo,#desktopPhaseSwitch,#desktopPhaseSectionToggle,#phonePhaseSwitch-toggle,#phonePhaseSectionToggle,#modeSwitchMenu,#editModeToggle,.top .phone-menu-toggle,#headerActions,#jsonExportMenu,#helpMenu,#phasePropertyResize,.phone-phase-navigation,.phone-phase-tabs,#contentPaneResize,.phone-content-icon,.phone-content-close,.phone-content-backdrop,#contentObjectPin,#toggleContent,#toggleBattlePages,#contentSelect,#contentOptions,#exitPhaseComparison';
+ const navigation='#undo,#redo,.desktop-phase-shared-heading,#phaseMemo,#desktopPhaseSwitch,#desktopPhaseSectionToggle,#phonePhaseSwitch-toggle,#phonePhaseSectionToggle,#modeSwitchMenu,#editModeToggle,.top .phone-menu-toggle,#headerActions,#jsonExportMenu,#helpMenu,#phasePropertyResize,.phone-phase-navigation,.phone-phase-tabs,#contentPaneResize,.phone-content-icon,.phone-content-close,.phone-content-backdrop,#contentObjectPin,#toggleContent,#toggleBattlePages,#contentSelect,#contentOptions,#exitPhaseComparison';
  function allowed(target){return zoomMenu.contains(target)||target===back||dialog.contains(target)||target.closest(navigation)||target.closest('.left')&&!target.closest('.tool,.icon-choice')||target.closest('#pages .phase-group-toggle:not([data-cancel-group-addition]),#pages .phase-group-name')||target.closest('#pages .page-tab')&&!target.closest('.page-tab-x')}
- for(const type of ['click','dblclick','pointerdown','contextmenu','dragstart','drop','change'])window.addEventListener(type,event=>{if(!session||event.target.closest?.('#changeLogDialog,#operationGuideDialog,#aboutToolDialog,#phoneIconHelp')||session.saving&&event.target.matches('a[download]'))return;if(readOnlyTarget(event.target)){event.preventDefault();event.stopImmediatePropagation();return}if(event.target===back&&type==='pointerdown'){event.stopImmediatePropagation();return}if(session.saving&&event.target!==back&&!dialog.contains(event.target)||!allowed(event.target)||['dblclick','contextmenu','dragstart','drop'].includes(type)&&!dialog.contains(event.target)&&!event.target.closest('#phaseMemo textarea')){event.preventDefault();event.stopImmediatePropagation()}},true);
+ for(const type of ['click','dblclick','pointerdown','contextmenu','dragstart','drop','change'])window.addEventListener(type,event=>{if(!session||event.target.closest?.('#changeLogDialog,#operationGuideDialog,#aboutToolDialog,#phoneIconHelp')||session.saving&&event.target.matches('a[download]'))return;if(readOnlyTarget(event.target)&&!event.target.closest?.('#undo,#redo')){event.preventDefault();event.stopImmediatePropagation();return}if(event.target===back&&type==='pointerdown'){event.stopImmediatePropagation();return}if(session.saving&&event.target!==back&&!dialog.contains(event.target)||!allowed(event.target)||['dblclick','contextmenu','dragstart','drop'].includes(type)&&!dialog.contains(event.target)&&!event.target.closest('#phaseMemo textarea')){event.preventDefault();event.stopImmediatePropagation()}},true);
  const originalRender=render;let refreshFrame;
  render=function(){originalRender();diagramVersion++;if(session&&!opening){cancelAnimationFrame(refreshFrame);refreshFrame=requestAnimationFrame(()=>{if(session)refresh()})}};
  window.Bolxiv.pngPreview={open,close,refresh,setContentPreview,cancelNoteRefresh,scheduleNoteRefresh,flushNoteRefresh,get kind(){return session?.kind||'image'},get active(){return !!session},get saving(){return !!session?.saving},get returnMode(){return session?.returnMode||'編集'}};

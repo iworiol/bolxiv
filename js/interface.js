@@ -120,7 +120,7 @@ function placeBuiltinFieldMarkers(cx,cy){
    return;
   }
   for(const node of document.querySelectorAll(readOnlyEditTargets+',#objectList button,#inspector input,#inspector select,#inspector button')){
-   if(!node.matches('button,input,select,textarea')||node.disabled)continue;
+   if(window.Bolxiv?.pngPreview?.active&&node.matches('#undo,#redo')){disabledForView.delete(node);continue}if(!node.matches('button,input,select,textarea')||node.disabled)continue;
    node.disabled=true;disabledForView.add(node);
   }
   for(const node of disabledForView)if(!node.isConnected)disabledForView.delete(node);
@@ -139,7 +139,7 @@ function placeBuiltinFieldMarkers(cx,cy){
   if(window.Bolxiv?.pngPreview?.saving||!modes.some(([key])=>key===mode))return;
   closeMenu();if(currentMode()===mode)return;
   if(mode==='image'||mode==='print'){await window.Bolxiv.pngPreview.open(1,mode);return}
-  if(window.Bolxiv?.pngPreview?.active)window.Bolxiv.pngPreview.close();
+  if(window.Bolxiv?.pngPreview?.active){window.Bolxiv.pngPreview.close();if(currentMode()===mode)return}
   document.activeElement?.blur();if(mode==='edit')selectedPhaseIndexes=[];boardReadOnly=mode==='view';
   try{localStorage.setItem('bolxiv-read-only',String(boardReadOnly))}catch{}
   selected=null;selectedIds=[];drag=null;tapPlacementArmed=false;selectPlacementTool('select');hideTouchPlacementPreview();clearAlignmentGuides();closeObjectContextMenu();closeColorPopovers();closeJsonImportMenu();
@@ -440,7 +440,7 @@ phoneLayerDeleteDialog.addEventListener('close',()=>{pendingPhoneLayerDeletion=n
  },true);
  new MutationObserver(sync).observe(layout,{attributes:true,attributeFilter:['class']});
  mobile.addEventListener('change',()=>{layout.classList.remove('phone-content-open');sync()});sync();
- document.addEventListener('pointerdown',event=>{if(!mobile.matches||!visible||event.target.closest('#undo,#redo,.battle,.phone-phase-navigation,.phone-content-backdrop,.phone-content-close,.color-popover,.native-color-picker,.phone-nav,.phone-content-icon,.phase-content-copy-menu,.phase-item-menu,.content-item-menu,.phase-group-menu,.phase-copy-menu,#phoneIconHelp,#pcTutorial'))return;close()},true);
+ document.addEventListener('pointerdown',event=>{if(!mobile.matches||!visible||event.target.closest('#editModeToggle,#modeSwitchMenu,#undo,#redo,.battle,.phone-phase-navigation,.phone-content-backdrop,.phone-content-close,.color-popover,.native-color-picker,.phone-nav,.phone-content-icon,.phase-content-copy-menu,.phase-item-menu,.content-item-menu,.phase-group-menu,.phase-copy-menu,#phoneIconHelp,#pcTutorial'))return;close()},true);
 })();
 
 ;
