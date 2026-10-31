@@ -8,6 +8,50 @@ function fieldImageSource(board=data,index=board.page){return boardImageLibrary.
 
 function objectImageSource(object){return object.imageId?boardImageLibrary.get(object.imageId):embeddedPngs[object.src]||object.src}
 
+// Original bytes belong to the image library; decoded stills are a memory-only cache.
+const importedImageCache=new Map();
+const emptyImportedImage='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="1" height="1"/%3E';
+async function decodeImportedImage(source){
+ const image=new Image();image.src=source;await image.decode();
+ const width=image.naturalWidth,height=image.naturalHeight;if(!width||!height)throw new Error('画像の大きさを取得できませんでした');
+ const blob=await (await fetch(source)).blob();let frame=null,decoder=null;
+ let freeze=/image\/(gif|svg\+xml)/i.test(blob.type);
+ try{
+  if(typeof ImageDecoder!=='undefined'&&await ImageDecoder.isTypeSupported(blob.type)){
+   decoder=new ImageDecoder({data:await blob.arrayBuffer(),type:blob.type,preferAnimation:true});await decoder.tracks.ready;
+   if(decoder.tracks.selectedTrack?.animated){freeze=true;frame=(await decoder.decode({frameIndex:0})).image}
+  }else if(/image\/(png|webp|avif)/i.test(blob.type)){
+   const bytes=new Uint8Array(await blob.arrayBuffer()),tag=(offset,count)=>String.fromCharCode(...bytes.subarray(offset,offset+count));
+   if(/png/i.test(blob.type)){for(let offset=8;offset+12<=bytes.length;){const size=new DataView(bytes.buffer).getUint32(offset);if(tag(offset+4,4)==='acTL'){freeze=true;break}offset+=size+12}}
+   else if(/webp/i.test(blob.type)){for(let offset=12;offset+8<=bytes.length;){const size=new DataView(bytes.buffer).getUint32(offset+4,true);if(tag(offset,4)==='ANIM'){freeze=true;break}offset+=8+size+(size%2)}}
+   else freeze=tag(0,Math.min(64,bytes.length)).includes('avis');
+  }
+  if(!freeze)return {width,height,preview:source};
+  const canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;
+  const context=canvas.getContext('2d');if(!context)throw new Error('画像を静止画として読み込めませんでした');
+  context.drawImage(frame||image,0,0,width,height);const preview=canvas.toDataURL('image/png');
+  if(!preview.startsWith('data:image/png'))throw new Error('画像を静止画として読み込めませんでした');
+  return {width,height,preview};
+ }finally{frame?.close();decoder?.close()}
+}
+function importedImageRecord(source){
+ let record=importedImageCache.get(source);if(record)return record;
+ record={value:null,promise:null};record.promise=decodeImportedImage(source).then(value=>(record.value=value));
+ importedImageCache.set(source,record);record.promise.catch(()=>{if(importedImageCache.get(source)===record)importedImageCache.delete(source)});return record;
+}
+function bindImportedImage(image,object){
+ image.dataset.importedImageId=object.imageId;const record=importedImageRecord(boardImageLibrary.requireImage(object.imageId));
+ image.src=record.value?.preview||emptyImportedImage;
+ record.promise.then(value=>{if(image.dataset.importedImageId===object.imageId)image.src=value.preview}).catch(()=>{image.alt='画像を読み込めませんでした';if(!record.notified){record.notified=true;notify('配置した画像を読み込めませんでした')}});
+}
+async function prepareImportedImageElements(root){
+ await Promise.all([...root.querySelectorAll('img[data-imported-image-id]')].map(async image=>{
+  const value=await importedImageRecord(boardImageLibrary.requireImage(image.dataset.importedImageId)).promise;
+  image.src=value.preview;await image.decode();
+ }));
+}
+function selectionHasImportedImages(items=current().filter(o=>selectedIds.includes(o.id))){return items.some(o=>o.type==='image')}
+
 function migrateBoardImages(board,externalLibrary){
  const resolve=id=>{
   if(!id)return '';
@@ -562,7 +606,7 @@ function clonePngNode(source){if(source.nodeType===Node.TEXT_NODE)return source.
 function clonePngStage(){let originalClass=stage.className,originalClip=objectClip.style.getPropertyValue('clip-path'),originalPriority=objectClip.style.getPropertyPriority('clip-path');try{stage.classList.add('grid-hidden');stage.classList.remove('field-hidden');objectClip.style.setProperty('clip-path','none','important');return clonePngNode(stage)}finally{stage.className=originalClass;if(originalClip)objectClip.style.setProperty('clip-path',originalClip,originalPriority);else objectClip.style.removeProperty('clip-path')}}
 
 const phasePngCaches=new WeakMap();
-async function rasterizePngSource(source,scale=1,stageSource=false,readable=false){
+async function rasterizePngSource(source,scale=1,stageSource=false,readable=false){await prepareImportedImageElements(source);
  for(const image of source.querySelectorAll('img')){if(!image.complete)await image.decode();if(!image.naturalWidth)throw new Error('画像を読み込めません：'+(image.alt||'アイコン'))}
  const width=source.offsetWidth,height=source.offsetHeight,clone=stageSource?clonePngStage():clonePngNode(source);
  if(readable)enhancePrintReadability(clone);
