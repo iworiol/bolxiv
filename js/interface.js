@@ -13,8 +13,9 @@
  const clearMembershipGuide=()=>membershipList.querySelectorAll('.drag-over,.drop-before,.drop-after').forEach(n=>n.classList.remove('drag-over','drop-before','drop-after'));membershipList.addEventListener('dragleave',event=>{if(!membershipList.contains(event.relatedTarget))clearMembershipGuide()});document.addEventListener('dragend',clearMembershipGuide);
  const groupToggle=document.createElement('button');groupToggle.id='contextGroupMenuToggle';groupToggle.type='button';groupToggle.textContent='グループ ▸';groupToggle.setAttribute('role','menuitem');groupToggle.setAttribute('aria-haspopup','menu');groupToggle.setAttribute('aria-expanded','false');groupToggle.setAttribute('aria-controls','contextGroupMenu');menu.insertBefore(groupToggle,document.getElementById('contextCopy'));
  const groupMenu=document.createElement('div');groupMenu.id='contextGroupMenu';groupMenu.className='object-context-menu';groupMenu.hidden=true;groupMenu.setAttribute('role','menu');groupMenu.setAttribute('aria-label','グループ');menu.append(groupMenu);
- const closeGroupMenu=()=>{groupMenu.hidden=true;groupToggle.setAttribute('aria-expanded','false')};
- function openGroupMenu(){if(!groupMenu.hidden){closeGroupMenu();return}addPhoneMenuClose(groupMenu,closeGroupMenu);groupMenu.hidden=false;groupToggle.setAttribute('aria-expanded','true');const r=groupToggle.getBoundingClientRect(),width=groupMenu.offsetWidth,height=groupMenu.offsetHeight;groupMenu.style.left=Math.max(4,Math.min(r.right+4+width>innerWidth?r.left-width-4:r.right+4,innerWidth-width-4))+'px';groupMenu.style.top=Math.max(4,Math.min(r.top,innerHeight-height-4))+'px'}
+ const closeGroupMenu=()=>{groupMenu._openedByHover=false;groupMenu.hidden=true;groupToggle.setAttribute('aria-expanded','false')};
+ function openGroupMenu(fromHover=false){if(!groupMenu.hidden){if(fromHover!==true)closeGroupMenu();return}addPhoneMenuClose(groupMenu,closeGroupMenu);groupMenu.hidden=false;groupToggle.setAttribute('aria-expanded','true');const r=groupToggle.getBoundingClientRect(),width=groupMenu.offsetWidth,height=groupMenu.offsetHeight;groupMenu.style.left=Math.max(4,Math.min(r.right+4+width>innerWidth?r.left-width-4:r.right+4,innerWidth-width-4))+'px';groupMenu.style.top=Math.max(4,Math.min(r.top,innerHeight-height-4))+'px'}
+ bindSubmenuHover(groupToggle,groupMenu,openGroupMenu,closeGroupMenu);
  groupToggle.onclick=openGroupMenu;groupToggle.onkeydown=event=>{if(event.key==='ArrowRight'){event.preventDefault();if(groupMenu.hidden)openGroupMenu();groupMenu.querySelector('button:not(:disabled)')?.focus()}};
  groupMenu.addEventListener('keydown',event=>{if(event.key==='Escape'||event.key==='ArrowLeft'){event.preventDefault();event.stopPropagation();closeGroupMenu();groupToggle.focus()}});
  const groupStart=document.createElement('div');groupStart.className='context-separator';groupStart.setAttribute('role','separator');menu.insertBefore(groupStart,groupToggle);
@@ -24,9 +25,7 @@
   button.onclick=()=>{
    const ids=expandObjectGroups(JSON.parse(menu.dataset.ids||'[]')),items=current().filter(o=>ids.includes(o.id));closeObjectContextMenu();
    if(id==='contextRenameObjectGroup'){if(selectedObjectGroup().length)beginObjectGroupRename(items[0].objectGroupId);return}
-   if(boardReadOnly||phaseComparisonActive()||id==='contextGroup'&&items.length<2)return;
-   recordHistory();const groupId=createObjectId();for(const item of items){if(id==='contextGroup'){item.objectGroupId=groupId;item.objectGroupName='グループ'}else{delete item.objectGroupId;delete item.objectGroupName}}
-   selectedIds=ids;selected=ids[ids.length-1]||null;renderAndSave();if(id==='contextGroup')revealCreatedObjectGroup(groupId);
+   changeObjectGrouping(ids,id==='contextUngroup');
   };
  }
  const groupEnd=document.createElement('div');groupEnd.className='context-separator';groupEnd.setAttribute('role','separator');menu.insertBefore(groupEnd,document.getElementById('contextCopy'));
@@ -833,14 +832,35 @@ phoneLayerDeleteDialog.addEventListener('close',()=>{pendingPhoneLayerDeletion=n
 // ===== js/mobile/mobile-menu.js =====
 (function setupPhoneMenu(){
  const mobile=matchMedia('(max-width:850px)'),header=document.querySelector('.top'),actions=header.querySelector('.actions');
- actions.id='headerActions';const button=document.createElement('button');button.type='button';button.className='phone-menu-toggle';button.title='操作メニューを開閉';button.setAttribute('aria-label','操作メニュー');button.setAttribute('aria-controls',actions.id);button.setAttribute('aria-haspopup','menu');button.setAttribute('aria-expanded','false');
+ actions.id='headerActions';actions.setAttribute('role','menu');actions.setAttribute('aria-label','操作メニュー');actions.hidden=true;
+ for(const item of actions.querySelectorAll(':scope>button'))item.setAttribute('role','menuitem');
+ const button=document.createElement('button');button.type='button';button.className='phone-menu-toggle';button.title='操作メニューを開閉';button.setAttribute('aria-label','操作メニュー');button.setAttribute('aria-controls',actions.id);button.setAttribute('aria-haspopup','menu');button.setAttribute('aria-expanded','false');
  button.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg><span class="header-menu-label">メニュー</span>';header.insertBefore(button,actions);
- function close(){header.classList.remove('phone-menu-open');button.setAttribute('aria-expanded','false')}
- button.onclick=()=>{const open=header.classList.toggle('phone-menu-open');button.setAttribute('aria-expanded',String(open))};
- actions.addEventListener('click',event=>{const action=event.target.closest('button');if(action&&action.id!=='exportBtn'&&action.id!=='importBtn'&&action.id!=='operationGuideBtn')close()});for(const id of ['jsonExportMenu','jsonImportMenu','helpMenu'])document.getElementById(id).addEventListener('click',event=>{if(event.target.closest('button'))close()});
+ function close(focus=false){actions._headerSession=(actions._headerSession||0)+1;actions._cancelSubmenuHover?.();closeJsonImportMenu();closeJsonExportMenu();closeHelpMenu();header.classList.remove('phone-menu-open');actions.hidden=true;button.setAttribute('aria-expanded','false');if(focus)button.focus({preventScroll:true})}
+ function open(focus=false){closeObjectContextMenu();addPhoneMenuClose(actions,()=>close(true));actions.hidden=false;header.classList.add('phone-menu-open');button.setAttribute('aria-expanded','true');if(focus)actions.querySelector('button:not(:disabled)')?.focus({preventScroll:true})}
+ button.onclick=()=>header.classList.contains('phone-menu-open')?close():open();
+ button.onkeydown=event=>{if(['ArrowDown','ArrowUp'].includes(event.key)){event.preventDefault();open(true);if(event.key==='ArrowUp')[...actions.querySelectorAll(':scope>button:not(:disabled)')].filter(n=>n.getClientRects().length).at(-1)?.focus()}};
+ for(const [id,childId,closeChild] of [['importBtn','jsonImportMenu',closeJsonImportMenu],['exportBtn','jsonExportMenu',closeJsonExportMenu],['operationGuideBtn','helpMenu',closeHelpMenu]]){
+  const trigger=document.getElementById(id),child=document.getElementById(childId),original=trigger.onclick;
+  trigger.textContent=trigger.textContent.replace(/\s*▾$/,'');const arrow=document.createElement('span');arrow.className='header-submenu-arrow';arrow.setAttribute('aria-hidden','true');trigger.append(arrow);
+  trigger.onclick=event=>{
+   const fromHeader=!actions.hidden,session=actions._headerSession||0,origin=event?.submenuHover?document.activeElement:null;
+   const finish=()=>{
+    if(fromHeader&&(actions.hidden||session!==(actions._headerSession||0))){closeChild();return}
+    child._keyboardParent=fromHeader?actions:null;
+    if(!mobile.matches&&!child.hidden&&fromHeader){const r=trigger.getBoundingClientRect(),parent=actions.getBoundingClientRect(),w=child.offsetWidth,h=child.offsetHeight;child.style.left=Math.max(4,Math.min(parent.right+w+4>innerWidth?parent.left-w-4:parent.right+4,innerWidth-w-4))+'px';child.style.top=Math.max(4,Math.min(r.top,innerHeight-h-4))+'px'}
+    if(origin&&!child.hidden){child._openedByHover=true;origin.focus({preventScroll:true})}
+   };
+   const result=original.call(trigger,event);if(result?.then)return result.then(finish);finish();
+  };
+  bindSubmenuHover(trigger,child,()=>{if(child.hidden)trigger.onclick({submenuHover:true})},closeChild);
+  child.addEventListener('click',event=>{if(event.target.closest('button')&&!event.target.closest('[data-phone-menu-close]'))close()});
+ }
+ actions.addEventListener('click',event=>{const action=event.target.closest('button');if(action&&!['exportBtn','importBtn','operationGuideBtn'].includes(action.id)&&!action.hasAttribute('data-phone-menu-close'))close()});
  document.addEventListener('pointerdown',event=>{if(!header.contains(event.target)&&!event.target.closest('#jsonExportMenu,#jsonImportMenu,#helpMenu'))close()},true);
- document.addEventListener('keydown',event=>{if(event.key==='Escape'&&header.classList.contains('phone-menu-open')){close();button.focus()}});
- mobile.addEventListener('change',close);
+ document.addEventListener('keydown',event=>{if(event.key==='Escape'&&header.classList.contains('phone-menu-open')){event.preventDefault();close(true)}});
+ new MutationObserver(()=>{if(!header.classList.contains('phone-menu-open')){actions.hidden=true;actions._cancelSubmenuHover?.();button.setAttribute('aria-expanded','false')}}).observe(header,{attributes:true,attributeFilter:['class']});
+ mobile.addEventListener('change',()=>close());
 })();
 
 (function setupPhoneSaveSubtitle(){
@@ -1113,3 +1133,31 @@ const userPresetLibrary=(()=>{
 
 // Match the mode button's left edge to the visible desktop property pane.
 (()=>{const header=document.querySelector('.app>.top'),button=document.getElementById('editModeToggle'),desktop=matchMedia('(min-width:851px)');let frame=0;function sync(){frame=0;if(!desktop.matches)return;const pane=window.Bolxiv?.pngPreview?.active?document.querySelector('.png-preview-settings'):(document.getElementById('desktopPhaseSidebar')||document.getElementById('toggleInspector')?.closest('.property-group'));if(!pane?.getClientRects().length)return;const target=pane.getBoundingClientRect(),rect=button.getBoundingClientRect();if(!target.width)return;const width=Math.max(148,Math.min(240,rect.right-target.left)),value=width+'px';if(header.style.getPropertyValue('--mode-button-width')!==value)header.style.setProperty('--mode-button-width',value)}function schedule(){if(!frame)frame=requestAnimationFrame(sync)}const observer=new ResizeObserver(schedule);for(const node of [header,document.querySelector('.layout'),document.getElementById('toggleInspector')?.closest('.property-group'),document.getElementById('propertyPanel'),document.querySelector('.png-preview-settings')])if(node)observer.observe(node);new MutationObserver(schedule).observe(document.body,{attributes:true,attributeFilter:['class']});desktop.addEventListener('change',schedule);window.addEventListener('resize',schedule);schedule()})();
+// ===== Object appearance clipboard =====
+(()=>{
+ const menu=document.getElementById('objectContextMenu'),toggle=document.createElement('button'),sub=document.createElement('div');
+ toggle.id='contextClipboardToggle';toggle.type='button';toggle.textContent='コピー・貼り付け ▸';toggle.setAttribute('role','menuitem');toggle.setAttribute('aria-haspopup','menu');toggle.setAttribute('aria-expanded','false');toggle.setAttribute('aria-controls','contextClipboardMenu');
+ const copy=document.getElementById('contextCopy'),paste=document.getElementById('contextPaste');menu.insertBefore(toggle,copy);sub.id='contextClipboardMenu';sub.className='object-context-menu';sub.setAttribute('role','menu');sub.setAttribute('aria-label','コピー・貼り付け');sub.hidden=true;menu.append(sub);copy.textContent='オブジェクトをコピー';paste.textContent='オブジェクトを貼り付け';sub.append(copy,paste);
+ const separator=document.createElement('div');separator.className='context-separator';separator.setAttribute('role','separator');sub.append(separator);
+ const make=(id,label)=>{const b=document.createElement('button');b.id=id;b.type='button';b.textContent=label;b.setAttribute('role','menuitem');sub.append(b);return b},copyStyle=make('contextCopyAppearance','見た目をコピー'),pasteStyle=make('contextPasteAppearance','見た目を貼り付け');
+ let clipboard=null;
+ const fields=['color','strokeColor','opacity','width','height','gradient','fillType','innerSize','angle','fontSize','lineStyle','arrowEnds','arrowSize'];
+ const kind=o=>JSON.stringify([objectCategory(o),o.type,o.type==='icon'?objectTitle(o):o.type==='segment'?objectTitle(o):'']);
+ const items=()=>{const ids=JSON.parse(menu.dataset.ids||'[]');return current().filter(o=>ids.includes(o.id))};
+ const blocked=()=>boardReadOnly||phaseComparisonActive()||!!window.Bolxiv?.pngPreview?.active||!!window.Bolxiv?.fieldGuideEditor?.active;
+ const compatible=objects=>clipboard&&objects.length&&objects.every(o=>!o.locked&&kind(o)===clipboard.kind);
+ function close(){sub._openedByHover=false;sub.hidden=true;toggle.setAttribute('aria-expanded','false')}
+ function open(fromHover=false){if(!sub.hidden){if(fromHover!==true)close();return}document.getElementById('contextGroupMenu').hidden=true;document.getElementById('contextGroupMenuToggle').setAttribute('aria-expanded','false');addPhoneMenuClose(sub,()=>{close();toggle.focus()});sub.hidden=false;toggle.setAttribute('aria-expanded','true');const r=toggle.getBoundingClientRect();sub.style.left=Math.max(4,Math.min(r.right+4+sub.offsetWidth>innerWidth?r.left-sub.offsetWidth-4:r.right+4,innerWidth-sub.offsetWidth-4))+'px';sub.style.top=Math.max(4,Math.min(r.top,innerHeight-sub.offsetHeight-4))+'px';if(fromHover!==true)sub.querySelector('button:not(:disabled)')?.focus({preventScroll:true})}
+ bindSubmenuHover(toggle,sub,open,close);
+ toggle.onclick=open;toggle.onkeydown=e=>{if(e.key==='ArrowRight'){e.preventDefault();if(sub.hidden)open();sub.querySelector('button:not(:disabled)')?.focus()}};sub.addEventListener('keydown',e=>{if(['Escape','ArrowLeft'].includes(e.key)){e.preventDefault();e.stopPropagation();close();toggle.focus()}});
+ document.getElementById('contextGroupMenuToggle').addEventListener('click',close);
+ const previousOpen=openObjectContextMenu;openObjectContextMenu=function(...args){close();previousOpen(...args);const objects=items();copyStyle.disabled=blocked()||objects.length!==1;pasteStyle.disabled=blocked()||!compatible(objects)};
+ const previousClose=closeObjectContextMenu;closeObjectContextMenu=function(){close();previousClose()};
+ copyStyle.onclick=()=>{const objects=items();if(blocked()||objects.length!==1)return;const o=objects[0];clipboard={kind:kind(o),values:Object.fromEntries(fields.filter(k=>Object.hasOwn(o,k)).map(k=>[k,o[k]]))};closeObjectContextMenu();notify('見た目をコピーしました')};
+ pasteStyle.onclick=()=>{const objects=items();if(blocked()||!compatible(objects))return;const updates=objects.map(o=>{const next={...o};for(const key of fields){if(Object.hasOwn(clipboard.values,key))next[key]=clipboard.values[key];else delete next[key]}if(o.type==='image'){next.height=o.height*next.width/o.width}return next});closeObjectContextMenu();if(updates.every((o,i)=>JSON.stringify(o)===JSON.stringify(objects[i])))return;recordHistory();objects.forEach((o,i)=>{for(const key of fields){if(Object.hasOwn(updates[i],key))o[key]=updates[i][key];else delete o[key]}});renderAndSave();notify(objects.length+'個のオブジェクトに見た目を貼り付けました')};
+})();
+
+// Show only keyboard shortcuts implemented for the normal object menu.
+for(const [id,key] of [["contextCopy","Ctrl+C"],["contextPaste","Ctrl+V"],["contextDelete","Delete"]])document.getElementById(id).dataset.shortcut=key;
+
+for(const [id,key] of [['contextDuplicate','Ctrl+D'],['contextGroup','Ctrl+G'],['contextUngroup','Ctrl+Shift+G']])document.getElementById(id).dataset.shortcut=key;

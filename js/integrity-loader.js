@@ -47,7 +47,13 @@
    }
   }));
   window.BolxivIntegrityStyles.catch(()=>{});
-  if(!checked){const notice=document.createElement('div');notice.className='integrity-notice';notice.textContent='HTML直接起動：整合性検査なし';document.body.append(notice)}
+  if(!checked){
+   const notice=document.createElement('div');notice.className='integrity-notice';notice.textContent='HTML直接起動：整合性検査なし';document.body.append(notice);
+   const readyTimer=setInterval(()=>{
+    if(!window.Bolxiv?.ready||window.boardStorageStarting)return;
+    clearInterval(readyTimer);setTimeout(()=>notice.remove(),5000);
+   },100);
+  }
   return script('bolxiv.js',manifest.files['bolxiv.js']);
  }).catch(fail);
 })();

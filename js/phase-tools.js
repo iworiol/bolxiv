@@ -131,7 +131,7 @@
   actions.push(['グループ化',groupGuides,picked.length<2||!!individualGuideGroup||!!group.length],['グループ解除',ungroupGuides,!picked.some(s=>s.objectGroupId)||!!individualGuideGroup]);
   if(individualGuideGroup)actions.push(['個別編集を終了',finishGuideMemberEdit,false]);else if(member?.objectGroupId)actions.push(['個別編集',()=>editGuideMember(hit),false]);
   actions.push(['コピー',()=>guideClipboard=JSON.parse(JSON.stringify(selectedGuides())),!picked.length],['貼り付け',()=>pasteGuides(),!guideClipboard.length],['複製',duplicateShape,!picked.length],['削除',deleteShape,!picked.length]);
-  for(const [label,action,disabled] of actions){const button=document.createElement('button');button.type='button';button.textContent=label;button.setAttribute('role','menuitem');button.disabled=disabled;button.onclick=()=>{closeGuideMenu();action()};guideMenu.append(button)}addPhoneMenuClose(guideMenu,closeGuideMenu);guideMenu.hidden=false;guideMenu.style.left=Math.max(4,Math.min(event.clientX,innerWidth-guideMenu.offsetWidth-4))+'px';guideMenu.style.top=Math.max(4,Math.min(event.clientY,innerHeight-guideMenu.offsetHeight-4))+'px';guideMenu.querySelector('button:not(:disabled)')?.focus({preventScroll:true});
+  for(const [label,action,disabled] of actions){const button=document.createElement('button');button.type='button';button.textContent=label;button.setAttribute('role','menuitem');const shortcut={'グループ化':'Ctrl+G','グループ解除':'Ctrl+Shift+G','コピー':'Ctrl+C','貼り付け':'Ctrl+V','複製':'Ctrl+D','削除':'Delete'}[label];if(shortcut)button.dataset.shortcut=shortcut;button.disabled=disabled;button.onclick=()=>{closeGuideMenu();action()};guideMenu.append(button)}addPhoneMenuClose(guideMenu,closeGuideMenu);guideMenu.hidden=false;guideMenu.style.left=Math.max(4,Math.min(event.clientX,innerWidth-guideMenu.offsetWidth-4))+'px';guideMenu.style.top=Math.max(4,Math.min(event.clientY,innerHeight-guideMenu.offsetHeight-4))+'px';guideMenu.querySelector('button:not(:disabled)')?.focus({preventScroll:true});
  }
  window.addEventListener('pointerdown',event=>{if(!guideMenu.contains(event.target))closeGuideMenu()},true);
  guideMenu.onkeydown=event=>{const buttons=[...guideMenu.querySelectorAll('button:not(:disabled)')],index=buttons.indexOf(document.activeElement);if(['ArrowUp','ArrowDown'].includes(event.key)){event.preventDefault();event.stopPropagation();buttons[(index+(event.key==='ArrowDown'?1:buttons.length-1))%buttons.length]?.focus()}};
@@ -201,11 +201,12 @@
   for(const event of ['change','blur','pointercancel'])input.addEventListener(event,()=>{endSession();sync()});
  }
  // Capture before normal canvas gestures and document shortcuts can see these events.
- for(const type of ['pointerdown','pointermove','pointerup','pointercancel','click','dblclick','contextmenu','dragstart','drop'])window.addEventListener(type,event=>{if(!dialog.open||!overlay.contains(event.target)&&event.target!==overlay&&!guideControls.contains(event.target)&&!(gesture&&gesture.id===event.pointerId))return;if(type==='contextmenu'){event.preventDefault();event.stopImmediatePropagation();showGuideMenu(event);return}if(type==='drop'&&event.dataTransfer?.types.includes('application/x-bolxiv-guide')){event.preventDefault();event.stopImmediatePropagation();placeGuide(event.dataTransfer.getData('application/x-bolxiv-guide'),point(event));return}if(type==='pointerdown')startPointer(event);else if(type==='pointermove')movePointer(event);else if(type==='pointerup'||type==='pointercancel')finishPointer(event,type==='pointercancel');else event.preventDefault();event.stopImmediatePropagation()},true);
+ // Keep document capture listeners (outside-menu dismissal) running while blocking canvas handlers below.
+ for(const type of ['pointerdown','pointermove','pointerup','pointercancel','click','dblclick','contextmenu','dragstart','drop'])document.addEventListener(type,event=>{if(!dialog.open||!overlay.contains(event.target)&&event.target!==overlay&&!guideControls.contains(event.target)&&!(gesture&&gesture.id===event.pointerId))return;if(type==='contextmenu'){event.preventDefault();event.stopPropagation();showGuideMenu(event);return}if(type==='drop'&&event.dataTransfer?.types.includes('application/x-bolxiv-guide')){event.preventDefault();event.stopPropagation();placeGuide(event.dataTransfer.getData('application/x-bolxiv-guide'),point(event));return}if(type==='pointerdown')startPointer(event);else if(type==='pointermove')movePointer(event);else if(type==='pointerup'||type==='pointercancel')finishPointer(event,type==='pointercancel');else event.preventDefault();event.stopPropagation()},true);
  for(const type of ['pointerdown','click','dblclick','contextmenu','dragstart','dragover','drop'])window.addEventListener(type,event=>{if(dialog.open&&event.target.closest?.('.left .tool,.left .icon-choice'))blockReadOnlyEvent(event)},true);
  window.addEventListener('click',event=>{if(!dialog.open)return;const button=event.target.closest?.('#undo,#redo');if(!button)return;event.preventDefault();event.stopImmediatePropagation();historyAction(button.id==='redo')},true);
  window.addEventListener('keydown',event=>{
-  if(!dialog.open||event.target.closest?.('#phoneIconHelp,#operationGuideDialog,#changeLogDialog,#aboutToolDialog'))return;
+  if(!dialog.open||event.target.closest?.('#phoneIconHelp,#operationGuideDialog,#changeLogDialog,#aboutToolDialog,#shortcutDialog'))return;
   if(event.key==='Control'){guideControlPressed=true;if(gesture?.action==='move'){gesture.memberOnClick=null;if(gesture.recorded)movePointer({pointerId:gesture.id,clientX:gesture.lastClientX,clientY:gesture.lastClientY,ctrlKey:true,shiftKey:event.shiftKey,preventDefault(){},stopPropagation(){}})}return}
   if(event.target.closest?.('.guide-section-toggle')&&event.key===' '){event.preventDefault();event.stopImmediatePropagation();if(!event.repeat)event.target.closest('.guide-section-toggle').click();return}
   if(event.key==='Escape'&&event.target.closest?.('input,select,textarea')&&!gesture&&guideMenu.hidden&&zoomMenu.hidden&&!dialog.querySelector('.color-popover:not([hidden])')){if(properties.contains(event.target)){event.preventDefault();event.stopImmediatePropagation();const shape=currentShape();if(shape&&event.target.dataset.guideShapeKey)event.target.value=Math.round(shape[event.target.dataset.guideShapeKey]);sync()}return}
@@ -257,15 +258,15 @@
  for(const input of settings.querySelectorAll('[data-guide-key]')){
   input.addEventListener(input.type==='checkbox'?'change':'input',()=>{
    if(input.disabled||input.value==='')return;
-   const uiKey=input.dataset.guideKey,linked=['fieldRayLength','circleRayLength'].includes(uiKey),key=linked?'rayScale':uiKey,before=currentGuide(),metrics=fieldGuideRayMetrics(),patch={[key]:input.type==='checkbox'?input.checked:Number(input.value)};
-   if(linked){if(Number(input.value)===fieldGuideRayValues(before,metrics)[uiKey])return;patch.rayScale=Math.min(metrics.maximum,Math.max(0,Number(input.value)/100*(uiKey==='fieldRayLength'?metrics.maximum:1)))}
+   const uiKey=input.dataset.guideKey,linked=['fieldRayLength','circleRayLength'].includes(uiKey),key=uiKey,before=currentGuide(),metrics=fieldGuideRayMetrics(),patch={[key]:input.type==='checkbox'?input.checked:Number(input.value)};
+   if(linked){const lengths=fieldGuideRayValues(before,metrics);Object.assign(patch,lengths,{[uiKey]:Number(input.value),rayMode:uiKey==='fieldRayLength'?'field':'circle'})}
    const next=fieldGuides({pageFieldGuides:[{...before,...patch}]},0);
-   if(JSON.stringify(next[key])===JSON.stringify(before[key])&&next.rayBoundary===before.rayBoundary)return;
+   if(JSON.stringify(next)===JSON.stringify(before))return;
    if(!session||session.board!==data||session.page!==data.page){recordHistory();session={board:data,page:data.page}}
    data.pageFieldGuides[data.page]=next;renderFieldGuides();save();updateArtwork();sync();
    if(input.type==='checkbox')endSession();
   });
-  for(const name of ['change','blur','pointercancel'])input.addEventListener(name,()=>{endSession();sync()});
+  for(const name of ['change','blur','pointercancel'])input.addEventListener(name,()=>{if(name==='change'&&['fieldRayLength','circleRayLength'].includes(input.dataset.guideKey))input.dispatchEvent(new Event('input',{bubbles:true}));endSession();sync()});
  }
  const previousRender=render;render=function(){previousRender();if(dialog.open&&!ownHistory){if(owner!==data||ownerPage!==data.page||ownerContent!==activeContent||!allowed()){session=null;closeEditor()}else{if(!session&&!gesture)finishEdit();updateArtwork(true)}}sync()};new MutationObserver(sync).observe(document.body,{attributes:true,attributeFilter:['class']});sync();
 })();

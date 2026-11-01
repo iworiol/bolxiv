@@ -1998,3 +1998,39 @@ body .app .layout #fieldGuideEditor .guide-section-toggle[aria-expanded="true"]{
 
 /* Click-to-place mode: arrow plus an object/add badge. Touch placement retains its preview. */
 @media(hover:hover) and (pointer:fine){.stage.placement-waiting{cursor:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2232%22%20height%3D%2232%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cpath%20d%3D%22M2%202v21l5-6%204%209%204-2-4-9%208-1Z%22%20fill%3D%22%2317212c%22%20stroke%3D%22white%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%2F%3E%3Crect%20x%3D%2217%22%20y%3D%2215%22%20width%3D%2212%22%20height%3D%2212%22%20rx%3D%221.5%22%20fill%3D%22white%22%20stroke%3D%22white%22%20stroke-width%3D%223%22%2F%3E%3Crect%20x%3D%2217%22%20y%3D%2215%22%20width%3D%2212%22%20height%3D%2212%22%20rx%3D%221.5%22%20fill%3D%22%23eaf3ff%22%20stroke%3D%22%232056ad%22%20stroke-width%3D%221.5%22%2F%3E%3Ccircle%20cx%3D%2225%22%20cy%3D%2225%22%20r%3D%226%22%20fill%3D%22white%22%2F%3E%3Cpath%20d%3D%22M25%2021v8m-4-4h8%22%20stroke%3D%22%232056ad%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E") 2 2,copy}}
+
+/* Object centers: a short blue segment with endpoints; existing edge guides stay orange. */
+.alignment-guide-center{border-color:#399bff}.alignment-guide-center.alignment-guide-x{border-left-style:solid}.alignment-guide-center.alignment-guide-y{border-top-style:solid}
+.alignment-guide-center::before,.alignment-guide-center::after{content:'';position:absolute;width:6px;height:6px;box-sizing:border-box;background:#fff;border:1.5px solid #2585e6;border-radius:50%;pointer-events:none;transform:translate(-50%,-50%)}
+.alignment-guide-center.alignment-guide-x::before{left:-.5px;top:0}
+.alignment-guide-center.alignment-guide-x::after{left:-.5px;top:100%}
+.alignment-guide-center.alignment-guide-y::before{left:0;top:-.5px}
+.alignment-guide-center.alignment-guide-y::after{left:100%;top:-.5px}
+/* Keep temporary guides at 2 screen pixels, including fractional canvas zooms. */
+.alignment-guide-x{border-left-width:0;width:calc(2px / var(--board-display-scale,1));background:repeating-linear-gradient(to bottom,#ff9800 0 calc(5px / var(--board-display-scale,1)),transparent calc(5px / var(--board-display-scale,1)) calc(9px / var(--board-display-scale,1)))}
+.alignment-guide-y{border-top-width:0;height:calc(2px / var(--board-display-scale,1));background:repeating-linear-gradient(to right,#ff9800 0 calc(5px / var(--board-display-scale,1)),transparent calc(5px / var(--board-display-scale,1)) calc(9px / var(--board-display-scale,1)))}
+.alignment-guide-center{background:#399bff}
+.alignment-guide-center::before,.alignment-guide-center::after{width:calc(6px / var(--board-display-scale,1));height:calc(6px / var(--board-display-scale,1));border:0;box-shadow:inset 0 0 0 calc(1.5px / var(--board-display-scale,1)) #2585e6}
+.alignment-guide-center.alignment-guide-x::before,.alignment-guide-center.alignment-guide-x::after{left:50%}
+.alignment-guide-center.alignment-guide-y::before,.alignment-guide-center.alignment-guide-y::after{top:50%}
+.stage.center-align-x:after{border-left-width:0!important;width:calc(2px / var(--board-display-scale,1));background:repeating-linear-gradient(to bottom,#ff9800 0 calc(5px / var(--board-display-scale,1)),transparent calc(5px / var(--board-display-scale,1)) calc(9px / var(--board-display-scale,1)))}
+.stage.center-align-y>.axis{border-top-width:0!important;height:calc(2px / var(--board-display-scale,1));background:repeating-linear-gradient(to right,#ff9800 0 calc(5px / var(--board-display-scale,1)),transparent calc(5px / var(--board-display-scale,1)) calc(9px / var(--board-display-scale,1)))}
+
+#contextClipboardToggle[aria-expanded="true"]{background:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+
+/* Labels keep menu text and accessible names intact. */
+@media(min-width:851px){[role="menu"] button[data-shortcut]{display:flex;align-items:center;justify-content:space-between;gap:24px}[role="menu"] button[data-shortcut]::after{content:attr(data-shortcut);font-size:11px;font-weight:400;opacity:.65;white-space:nowrap;flex-shrink:0}}
+#shortcutDialog kbd{font:inherit;font-size:12px;overflow-wrap:anywhere}#shortcutDialog td:first-child{width:38%}
+@media(min-width:851px){[role="menu"]>button:focus-visible:not(:disabled){background:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important;outline:none}}
+
+.app>.top>.actions[hidden]{display:none!important}
+@media(min-width:851px){.app>.top.phone-menu-open>#headerActions{gap:0;padding:5px;min-width:190px;width:220px;border-radius:6px;box-shadow:0 5px 14px #0003}.app>.top.phone-menu-open>#headerActions>button.btn{font:inherit;font-size:14px;min-height:34px!important;padding:8px 10px;border:0;border-radius:4px;text-align:left!important;background:transparent;color:#000;justify-content:space-between}.app>.top.phone-menu-open>#headerActions>button.btn:enabled:is(:hover,:focus-visible){background:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important}}
+
+#headerActions .header-submenu-arrow{margin-left:6px}#headerActions .header-submenu-arrow::after{content:"▾"}@media(min-width:851px){#headerActions .header-submenu-arrow{float:right}#headerActions .header-submenu-arrow::after{content:"▸"}}
+/* Phone header rows use the same flat items as the other popup menus. */
+@media(max-width:850px){
+ .app>.top.phone-menu-open>#headerActions{gap:0;padding:5px;border-radius:6px;box-shadow:0 5px 14px #0003}
+ .app>.top.phone-menu-open>#headerActions.actions>button{box-sizing:border-box;display:block;width:100%;min-height:40px!important;margin:0;padding:8px 10px;border:0!important;border-radius:4px;background:transparent!important;color:#000;-webkit-text-fill-color:#000;font:inherit;font-size:14px;text-align:left!important;box-shadow:none;filter:none;-webkit-tap-highlight-color:transparent}
+ .app>.top.phone-menu-open>#headerActions.actions>button:enabled:is(:active,.phone-control-pressed){background:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+ #headerActions .header-submenu-arrow{float:right}
+}

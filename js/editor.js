@@ -1,3 +1,32 @@
+// PC popup navigation runs before mode-specific editing handlers.
+(()=>{
+ const visible=node=>node&&!node.hidden&&node.getClientRects().length>0;
+ const entries=menu=>[...menu.querySelectorAll('button,[role="menuitem"],[role="menuitemradio"],[role="menuitemcheckbox"]')].filter(node=>node.closest('[role="menu"]')===menu&&!node.disabled&&node.getAttribute('aria-disabled')!=='true'&&visible(node));
+ const trigger=menu=>[...document.querySelectorAll('[aria-controls]')].find(node=>node.getAttribute('aria-controls')===menu.id&&visible(node));
+ const focus=node=>{if(visible(node))node.focus({preventScroll:true})};
+ function close(menu){const opener=trigger(menu)||menu._openerResolver?.()||menu._opener||menu._keyboardOrigin;menu._keyboardClose();focus(opener)}
+ window.addEventListener('keydown',event=>{
+  if(!matchMedia('(min-width:851px)').matches||event.isComposing||!['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Home','End','Enter','Escape'].includes(event.key))return;
+  const modal=[...document.querySelectorAll('dialog[open]')].filter(node=>node.matches(':modal')).at(-1);
+  const menus=[...document.querySelectorAll('[role="menu"]')].filter(menu=>visible(menu)&&menu._keyboardClose&&(!modal||modal.contains(menu)));
+  if(!menus.length)return;
+  const menu=menus.sort((a,b)=>(a._keyboardOrder||0)-(b._keyboardOrder||0)).at(-1),buttons=entries(menu),at=buttons.indexOf(document.activeElement),key=event.key;
+  if(menu.contains(event.target)&&event.target.closest?.('input,select,textarea,[contenteditable="true"]'))return;
+  for(let host=menu;host;host=host._keyboardParent||host.parentElement.closest('[role="menu"]'))host._cancelSubmenuHover?.();
+  event.preventDefault();event.stopImmediatePropagation();
+  if(key==='Escape'){close(menu);return}
+  if(key==='ArrowLeft'){if(menu.parentElement.closest('[role="menu"]')||menu._keyboardParent)close(menu);return}
+  if(key==='ArrowRight'){
+   const button=buttons[at],child=button?.getAttribute('aria-haspopup')==='menu'&&document.getElementById(button.getAttribute('aria-controls'));
+   if(child){if(child.hidden)button.click();if(visible(child))focus(entries(child)[0])}return;
+  }
+  if(!buttons.length)return;
+  if(key==='Enter'){buttons[at<0?0:at].click();return}
+  const next=key==='Home'?0:key==='End'?buttons.length-1:at<0?(key==='ArrowUp'?buttons.length-1:0):(at+(key==='ArrowDown'?1:buttons.length-1))%buttons.length;
+  focus(buttons[next]);
+ },true);
+})();
+
 // ===== Initialization =====
 // ===== js/runtime/interaction-guards.js =====
 // Initialization stage: interaction-guards. Load order is owned by bolxiv.js.
@@ -14,11 +43,11 @@
   openedBoard=data;openedPhase=current();menu.replaceChildren();const editing=!boardReadOnly&&!phaseComparisonActive();
   for(const [action,label] of [['paste','貼り付け'],['select-all','全選択'],['center','表示を中央に戻す'],['fit','全体が収まる倍率にする']]){
    if(action==='center'){const separator=document.createElement('div');separator.className='context-separator';separator.setAttribute('role','separator');menu.append(separator)}
-   const button=document.createElement('button');button.type='button';button.textContent=label;button.dataset.action=action;button.setAttribute('role','menuitem');
+   const button=document.createElement('button');button.type='button';button.textContent=label;button.dataset.action=action;if(action==='paste')button.dataset.shortcut='Ctrl+V';if(action==='select-all')button.dataset.shortcut='Ctrl+A';button.setAttribute('role','menuitem');
    button.disabled=action==='paste'? !editing||!clipboardObjects.length:action==='select-all'? !editing||!current().length:false;
    button.onclick=()=>{if(button.disabled)return;const valid=openedBoard===data&&openedPhase===current();close();if(!valid)return;
     if(action==='paste')pasteClipboardObjects();
-    else if(action==='select-all'){if(boardReadOnly||phaseComparisonActive())return;selectedIds=current().map(item=>item.id);selected=selectedIds[selectedIds.length-1]||null;renderSelectionOnly()}
+    else if(action==='select-all')selectAllObjects()
     else if(action==='center')setBoardDisplayZoom(boardDisplayZoom,false);
     else fitBoardDisplayZoom();
    };menu.append(button);
@@ -151,6 +180,7 @@ document.getElementById('exitPhaseComparison').onclick=()=>selectPhase(data.page
 ;
 // ===== js/runtime/help-setup.js =====
 // Initialization stage: help-setup. Load order is owned by bolxiv.js.
+const shortcutDialog=document.getElementById('shortcutDialog');
 const operationGuide=document.getElementById('operationGuideDialog'),aboutTool=document.getElementById('aboutToolDialog');
 
 const changeLog=document.createElement('dialog');
@@ -161,7 +191,7 @@ changeLog.className='operation-guide';
 
 changeLog.setAttribute('aria-labelledby','changeLogTitle');
 
-changeLog.innerHTML='<div class="operation-guide-heading"><h2 id="changeLogTitle">更新履歴</h2><button type="button" class="btn" autofocus>閉じる</button></div><div class="operation-guide-body"><p><span class="change-log-version">2026/11/01　Ver.0.9.0</span><span class="change-log-description">画像読み込み機能追加</span></p><p><span class="change-log-version">2026/10/31　Ver.0.8.2</span><span class="change-log-description">不具合修正</span></p><p><span class="change-log-version">2026/10/31　Ver.0.8.1</span><span class="change-log-description">UI等もろもろ調整</span></p><p><span class="change-log-version">2026/10/30　Ver.0.8.0</span><span class="change-log-description">キャンバスのガイド機能正式実装、印刷機能をスマホ版も拡充、フィールド設定コピー機能追加、UI調整</span></p><p><span class="change-log-version">2026/10/28　Ver.0.7.1</span><span class="change-log-description">印刷機能拡充(PC版のみ)、キャンバスのガイド機能仮実装、UI調整</span></p><p><span class="change-log-version">2026/10/26　Ver.0.7.0</span><span class="change-log-description">プリセット機能正式追加、UI調整</span></p><p><span class="change-log-version">2026/10/25　Ver.0.6.2</span><span class="change-log-description">オブジェクト追加、画像・印刷機能にノート表示追加</span></p><p><span class="change-log-version">2026/10/25　Ver.0.6.1</span><span class="change-log-description">UI調整</span></p><p><span class="change-log-version">2026/10/25　Ver.0.6.0</span><span class="change-log-description">オブジェクトのグループ化対応、印刷機能追加(PNG生成と統合)、プリセット機能仮実装</span></p><p><span class="change-log-version">2026/10/23　Ver.0.5.2</span><span class="change-log-description">UI調整</span></p><p><span class="change-log-version">2026/10/22　Ver.0.5.1</span><span class="change-log-description">UI調整</span></p><p><span class="change-log-version">2026/10/19　Ver.0.5.0</span><span class="change-log-description">コンテンツを履歴操作に追加、PNG生成モード追加、レイアウト少し見直し、その他修正</span></p><p><span class="change-log-version">2026/10/18　Ver.0.4.1</span><span class="change-log-description">ツールの内部構成変更、その他修正</span></p><p><span class="change-log-version">2026/10/18　Ver.0.4.0</span><span class="change-log-description">チュートリアル追加、フェーズグループ化機能追加、メモリ使用量削減、JSONファイルサイズ削減</span></p><p><span class="change-log-version">2026/10/17　Ver.0.3.0</span><span class="change-log-description">コンテンツ間フェーズコピー機能追加、右クリック・長押し操作メニュー各種追加、文字サイズ変更、処理負荷改善</span></p><p><span class="change-log-version">2026/10/15　Ver.0.2.0</span><span class="change-log-description">フェーズノート追加、構成見直し、その他修正&amp;見直し</span></p><p><span class="change-log-version">2026/10/14　Ver.0.1.1</span><span class="change-log-description">見た目見直し</span></p><p><span class="change-log-version">2026/10/12　Ver.0.1.0</span><span class="change-log-description">初版</span></p></div>';
+changeLog.innerHTML='<div class="operation-guide-heading"><h2 id="changeLogTitle">更新履歴</h2><button type="button" class="btn" autofocus>閉じる</button></div><div class="operation-guide-body"><p><span class="change-log-version">2026/11/01　Ver.0.9.0</span><span class="change-log-description">画像読み込み機能追加、オブジェクトガイド強化、メニュー強化</span></p><p><span class="change-log-version">2026/10/31　Ver.0.8.2</span><span class="change-log-description">不具合修正</span></p><p><span class="change-log-version">2026/10/31　Ver.0.8.1</span><span class="change-log-description">UI等もろもろ調整</span></p><p><span class="change-log-version">2026/10/30　Ver.0.8.0</span><span class="change-log-description">キャンバスのガイド機能正式実装、印刷機能をスマホ版も拡充、フィールド設定コピー機能追加、UI調整</span></p><p><span class="change-log-version">2026/10/28　Ver.0.7.1</span><span class="change-log-description">印刷機能拡充(PC版のみ)、キャンバスのガイド機能仮実装、UI調整</span></p><p><span class="change-log-version">2026/10/26　Ver.0.7.0</span><span class="change-log-description">プリセット機能正式追加、UI調整</span></p><p><span class="change-log-version">2026/10/25　Ver.0.6.2</span><span class="change-log-description">オブジェクト追加、画像・印刷機能にノート表示追加</span></p><p><span class="change-log-version">2026/10/25　Ver.0.6.1</span><span class="change-log-description">UI調整</span></p><p><span class="change-log-version">2026/10/25　Ver.0.6.0</span><span class="change-log-description">オブジェクトのグループ化対応、印刷機能追加(PNG生成と統合)、プリセット機能仮実装</span></p><p><span class="change-log-version">2026/10/23　Ver.0.5.2</span><span class="change-log-description">UI調整</span></p><p><span class="change-log-version">2026/10/22　Ver.0.5.1</span><span class="change-log-description">UI調整</span></p><p><span class="change-log-version">2026/10/19　Ver.0.5.0</span><span class="change-log-description">コンテンツを履歴操作に追加、PNG生成モード追加、レイアウト少し見直し、その他修正</span></p><p><span class="change-log-version">2026/10/18　Ver.0.4.1</span><span class="change-log-description">ツールの内部構成変更、その他修正</span></p><p><span class="change-log-version">2026/10/18　Ver.0.4.0</span><span class="change-log-description">チュートリアル追加、フェーズグループ化機能追加、メモリ使用量削減、JSONファイルサイズ削減</span></p><p><span class="change-log-version">2026/10/17　Ver.0.3.0</span><span class="change-log-description">コンテンツ間フェーズコピー機能追加、右クリック・長押し操作メニュー各種追加、文字サイズ変更、処理負荷改善</span></p><p><span class="change-log-version">2026/10/15　Ver.0.2.0</span><span class="change-log-description">フェーズノート追加、構成見直し、その他修正&amp;見直し</span></p><p><span class="change-log-version">2026/10/14　Ver.0.1.1</span><span class="change-log-description">見た目見直し</span></p><p><span class="change-log-version">2026/10/12　Ver.0.1.0</span><span class="change-log-description">初版</span></p></div>';
 
 document.body.append(changeLog);
 
@@ -179,7 +209,7 @@ helpMenu.setAttribute('role','menu');
 
 helpMenu.hidden=true;
 
-helpMenu.innerHTML='<button type="button" role="menuitem" data-help-action="guide">操作ガイド</button><button type="button" role="menuitem" data-help-action="history">更新履歴</button><button type="button" role="menuitem" data-help-action="about">ツールについて</button>';
+helpMenu.innerHTML='<button type="button" role="menuitem" data-help-action="guide">操作ガイド</button><button type="button" role="menuitem" data-help-action="shortcuts">ショートカット一覧</button><button type="button" role="menuitem" data-help-action="history">更新履歴</button><button type="button" role="menuitem" data-help-action="about">ツールについて</button>';
 
 document.body.appendChild(helpMenu);
 
@@ -191,15 +221,17 @@ window.addEventListener('resize',()=>closeHelpMenu());
 
 helpMenu.addEventListener('keydown',e=>{const items=Array.from(helpMenu.querySelectorAll('button')),index=items.indexOf(document.activeElement);if(e.key==='Escape'){e.preventDefault();closeHelpMenu(true)}else if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();items[(index+(e.key==='ArrowDown'?1:items.length-1))%items.length].focus()}else if(e.key==='Tab')closeHelpMenu()});
 
-helpMenu.addEventListener('click',e=>{const item=e.target.closest('[data-help-action]');if(!item)return;closeHelpMenu(true);const dialog=item.dataset.helpAction==='guide'?operationGuide:item.dataset.helpAction==='history'?changeLog:aboutTool;dialog.querySelector('.operation-guide-body').scrollTop=0;dialog.showModal()});
+helpMenu.addEventListener('click',e=>{const item=e.target.closest('[data-help-action]');if(!item)return;closeHelpMenu(true);const dialog=item.dataset.helpAction==='shortcuts'?shortcutDialog:item.dataset.helpAction==='guide'?operationGuide:item.dataset.helpAction==='history'?changeLog:aboutTool;dialog.querySelector('.operation-guide-body').scrollTop=0;dialog.showModal()});
 
+document.getElementById('closeShortcuts').onclick=()=>shortcutDialog.close();
+shortcutDialog.addEventListener('close',()=>{const help=document.getElementById('operationGuideBtn');(help.getClientRects().length?help:document.querySelector('.phone-menu-toggle'))?.focus({preventScroll:true})});
 document.getElementById('closeOperationGuide').onclick=()=>operationGuide.close();
 
 document.getElementById('closeAboutTool').onclick=()=>aboutTool.close();
 
-for(const dialog of [operationGuide,aboutTool])dialog.addEventListener('close',()=>document.getElementById('operationGuideBtn').focus());
+for(const dialog of [operationGuide,aboutTool,shortcutDialog])dialog.addEventListener('close',()=>document.getElementById('operationGuideBtn').focus());
 
-document.addEventListener('keydown',e=>{const dialog=operationGuide.open?operationGuide:aboutTool.open?aboutTool:changeLog.open?changeLog:null;if(!dialog)return;if(e.key==='Escape'){e.preventDefault();dialog.close()}e.stopImmediatePropagation()},true);
+document.addEventListener('keydown',e=>{const dialog=operationGuide.open?operationGuide:aboutTool.open?aboutTool:changeLog.open?changeLog:shortcutDialog.open?shortcutDialog:null;if(!dialog)return;if(e.key==='Escape'){e.preventDefault();dialog.close()}e.stopImmediatePropagation()},true);
 
 ;
 // ===== js/runtime/canvas-pan.js =====
@@ -307,7 +339,7 @@ $('#contextPaste').onclick=()=>{closeObjectContextMenu();pasteClipboardObjects()
 function swapObjectPositions(ids){if(ids.length!==2)return;let items=ids.map(id=>current().find(o=>o.id===id));if(boardReadOnly||phaseComparisonActive()||items.some(item=>!item||item.locked))return;recordHistory();let x=items[0].x,y=items[0].y;items[0].x=items[1].x;items[0].y=items[1].y;items[1].x=x;items[1].y=y;renderAndSave()}
 $('#contextSwapPosition').onclick=()=>{const ids=JSON.parse($('#objectContextMenu').dataset.ids||'[]');closeObjectContextMenu();swapObjectPositions(ids)};
 
-$('#contextDuplicate').onclick=()=>{let menu=$('#objectContextMenu'),ids=JSON.parse(menu.dataset.ids||'[]'),sources=current().filter(o=>ids.includes(o.id));closeObjectContextMenu();if(!sources.length)return;recordHistory();let copies=sources.map(source=>{let copy=JSON.parse(JSON.stringify(source));copy.id=createObjectId();return copy});remapCopiedObjectGroups(copies);current().push(...copies);selectedIds=copies.map(copy=>copy.id);selected=selectedIds[selectedIds.length-1]||null;renderAndSave();revealMovedLayers(selectedIds)};
+$('#contextDuplicate').onclick=()=>{const ids=JSON.parse($('#objectContextMenu').dataset.ids||'[]');closeObjectContextMenu();duplicateObjects(ids)};
 
 $('#contextDelete').onclick=()=>{let menu=$('#objectContextMenu'),ids=JSON.parse(menu.dataset.ids||'[]');closeObjectContextMenu();let deletable=ids.filter(id=>!current().find(o=>o.id===id)?.locked);if(!deletable.length)return;recordHistory();data.pages[data.page]=current().filter(o=>!deletable.includes(o.id));selectedIds=selectedIds.filter(id=>!deletable.includes(id));selected=selectedIds[selectedIds.length-1]||null;renderAndSave()};
 
@@ -452,9 +484,19 @@ document.addEventListener('pointerdown',finishKeyboardNudge,true);
 
 window.addEventListener('blur',finishKeyboardNudge);
 
-document.addEventListener('keydown',e=>{if(e.defaultPrevented||e.ctrlKey||e.metaKey||e.altKey||e.target.isContentEditable||e.target.closest('input,select,textarea,button,dialog,[role="separator"],[role="menu"],#pages')||document.querySelector('.comparison-pan-enabled'))return;if(nudgeSelectedObjects(e.key,e.repeat)){e.preventDefault();e.stopImmediatePropagation()}});
+// Object-only shortcuts yield to inputs, other panes, dialogs and dedicated editors.
+document.addEventListener('keydown',event=>{
+ if(event.defaultPrevented||event.isComposing||event.altKey||!(event.ctrlKey||event.metaKey)||event.target.isContentEditable||event.target.closest('input,select,textarea,dialog,#pages,#contentOptions,.left,#userPresetManager,[role="separator"]'))return;
+ const key=event.key.toLowerCase();if(!['a','d','g'].includes(key)||key!=='g'&&event.shiftKey)return;
+ if(boardReadOnly||phaseComparisonActive()||drag||window.Bolxiv?.pngPreview?.active||window.Bolxiv?.fieldGuideEditor?.active)return;
+ if(event.target.closest('[role="menu"]')&&!event.target.closest('#objectContextMenu,#canvasContextMenu'))return;
+ event.preventDefault();event.stopImmediatePropagation();finishKeyboardNudge();closeObjectContextMenu();
+ if(key==='a')selectAllObjects();else if(key==='d')duplicateObjects(selectedIds);else changeObjectGrouping(selectedIds,event.shiftKey);
+});
 
-document.addEventListener('keydown',e=>{if(e.target.matches('input,select,textarea')||e.target.isContentEditable)return;if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='c'){if(selectedIds.length){e.preventDefault();copyObjectsToClipboard(selectedIds)}}else if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='v'){if(clipboardObjects.length){e.preventDefault();pasteClipboardObjects()}}if((e.key==='ArrowUp'||e.key==='ArrowDown')&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&e.target.closest('#pages')){let next=data.page+(e.key==='ArrowUp'?-1:1);if(next>=0&&next<data.pages.length){e.preventDefault();selectPhase(next);document.querySelector('#pages .page-tab.active')?.focus()}}if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();undo()}else if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='y'){e.preventDefault();redo()}else if(e.key==='Delete'||e.key==='Backspace')deleteSelected();else if(e.key==='Escape'){cancelObjectDrag();pendingImage=null;tool='select';document.querySelectorAll('.tool').forEach(x=>x.classList.remove('active'));stage.style.removeProperty('cursor')}});
+document.addEventListener('keydown',e=>{if(e.defaultPrevented||e.ctrlKey||e.metaKey||e.altKey||e.target.isContentEditable||e.target.closest('input,select,textarea,button,dialog,[role="separator"],[role="menu"],#pages')||document.querySelector('.comparison-pan-enabled'))return;if(nudgeSelectedObjects(e.key,e.repeat,e.shiftKey?10:1)){e.preventDefault();e.stopImmediatePropagation()}});
+
+document.addEventListener('keydown',e=>{if(e.target.matches('input,select,textarea')||e.target.isContentEditable)return;if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='c'){if(selectedIds.length){e.preventDefault();copyObjectsToClipboard(selectedIds)}}else if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='v'){if(clipboardObjects.length){e.preventDefault();pasteClipboardObjects()}}if((e.key==='ArrowUp'||e.key==='ArrowDown')&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&e.target.closest('#pages')){let next=data.page+(e.key==='ArrowUp'?-1:1);if(next>=0&&next<data.pages.length){e.preventDefault();selectPhase(next);document.querySelector('#pages .page-tab.active')?.focus()}}if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();if(e.shiftKey)redo();else undo()}else if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='y'){e.preventDefault();redo()}else if(e.key==='Delete'||e.key==='Backspace')deleteSelected();else if(e.key==='Escape'){cancelObjectDrag();pendingImage=null;tool='select';document.querySelectorAll('.tool').forEach(x=>x.classList.remove('active'));stage.style.removeProperty('cursor')}});
 
 $('#undo').onclick=undo;
 

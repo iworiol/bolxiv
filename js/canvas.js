@@ -255,13 +255,13 @@ function fieldGuides(board,index){
  const groupCounts=new Map();for(const item of shapes)if(item.objectGroupId)groupCounts.set(item.objectGroupId,(groupCounts.get(item.objectGroupId)||0)+1);for(const item of shapes)if(item.objectGroupId&&groupCounts.get(item.objectGroupId)<2)delete item.objectGroupId;
  const source=value.reference&&typeof value.reference==='object'?value.reference:value.circles||value.rays||shapes.length?fieldGuideReference(board,index):null;
  const reference=source?{width:Number.isFinite(source.width)?Math.max(64,Math.min(960,source.width)):538,height:Number.isFinite(source.height)?Math.max(64,Math.min(960,source.height)):538,shape:['circle','image4'].includes(source.shape)?source.shape:'rect'}:null;
- return {reference,circles:value.circles===true,outerRing:value.outerRing!==false,rays:value.rays===true,rings:integer('rings',3,2,12),ringScale:integer('ringScale',100,1,200),sectors:integer('sectors',8,2,32),rayLength:integer('rayLength',100,0,100),rayBoundary:value.rayBoundary==='circle'?'circle':'field',rayScale:Number.isFinite(value.rayScale)?Math.max(0,Math.min(32,value.rayScale)):null,rotation:integer('rotation',0,0,359),color:/^#[0-9a-f]{6}$/i.test(value.color)?value.color:'#ffffff',opacity:integer('opacity',50,0,100),shapes};
+ return {...(['field','circle'].includes(value.rayMode)?{rayMode:value.rayMode,fieldRayLength:integer('fieldRayLength',100,0,100),circleRayLength:integer('circleRayLength',100,0,3200)}:{}),reference,circles:value.circles===true,outerRing:value.outerRing!==false,rays:value.rays===true,rings:integer('rings',3,2,12),ringScale:integer('ringScale',100,1,200),sectors:integer('sectors',8,2,32),rayLength:integer('rayLength',100,0,100),rayBoundary:value.rayBoundary==='circle'?'circle':'field',rayScale:Number.isFinite(value.rayScale)?Math.max(0,Math.min(32,value.rayScale)):null,rotation:integer('rotation',0,0,359),color:/^#[0-9a-f]{6}$/i.test(value.color)?value.color:'#ffffff',opacity:integer('opacity',50,0,100),shapes};
 }
 function fieldGuideRayMetrics(board=data,index=board.page){
  const size=fieldGuideReference(board,index),tiled=size.shape==='image4',rx=Math.min(size.width/2,tiled?160:Infinity),ry=Math.min(size.height/2,tiled?160:Infinity),circle=Math.min(rx,ry),square=Math.hypot(rx,ry);return {circle,square,maximum:square/circle};
 }
 function fieldGuideRayScale(settings,metrics){return Math.min(metrics.maximum,settings.rayScale??settings.rayLength/100*(settings.rayBoundary==='circle'?1:metrics.maximum))}
-function fieldGuideRayValues(settings,metrics){const scale=fieldGuideRayScale(settings,metrics);return {fieldRayLength:Math.round(scale/metrics.maximum*100),circleRayLength:Math.round(scale*100)}}
+function fieldGuideRayValues(settings,metrics){const scale=fieldGuideRayScale(settings,metrics);return settings.rayMode?{fieldRayLength:settings.fieldRayLength,circleRayLength:settings.circleRayLength}:{fieldRayLength:Math.round(scale/metrics.maximum*100),circleRayLength:Math.round(scale*100)}}
 function createFieldGuideShape(shape){
  const node=document.createElementNS('http://www.w3.org/2000/svg',shape.type==='line'?'line':shape.type==='circle'?'ellipse':['triangle','diamond'].includes(shape.type)?'polygon':'rect');
  const attributes=shape.type==='line'?{x1:-shape.width/2,y1:0,x2:shape.width/2,y2:0}:shape.type==='circle'?{cx:0,cy:0,rx:shape.width/2,ry:shape.height/2}:shape.type==='diamond'?{points:'0,'+(-shape.height/2)+' '+shape.width/2+',0 0,'+shape.height/2+' '+(-shape.width/2)+',0'}:shape.type==='triangle'?{points:'0,'+(-shape.height/2)+' '+shape.width/2+','+shape.height/2+' '+(-shape.width/2)+','+shape.height/2}:{x:-shape.width/2,y:-shape.height/2,width:shape.width,height:shape.height};
@@ -285,7 +285,7 @@ function renderFieldGuides(){
   group.setAttribute('fill','none');group.setAttribute('stroke',settings.color);group.setAttribute('stroke-width','1.5');group.setAttribute('opacity',settings.opacity/100);
   if(shape==='image4'){const cellClip=document.createElementNS(ns,'clipPath'),rect=document.createElementNS(ns,'rect');cellClip.id=clipId+'-cell';for(const [key,value] of Object.entries({x:cx-160,y:cy-160,width:320,height:320}))rect.setAttribute(key,value);cellClip.append(rect);defs.append(cellClip);const cell=document.createElementNS(ns,'g');cell.setAttribute('clip-path','url(#'+cellClip.id+')');cell.append(group);svg.append(cell)}else svg.append(group);
   if(settings.circles)for(let i=1;i<settings.rings+(settings.outerRing?1:0);i++){const circle=document.createElementNS(ns,'circle');for(const [key,value] of Object.entries({cx,cy,r:Math.max(0,fieldGuideRayMetrics().circle*settings.ringScale/100*i/settings.rings-(i===settings.rings ? .75 : 0))}))circle.setAttribute(key,value);group.append(circle)}
-  if(settings.rays)for(let i=0;i<settings.sectors;i++){const angle=(settings.rotation+i*360/settings.sectors-90)*Math.PI/180,metrics=fieldGuideRayMetrics(),length=metrics.circle*fieldGuideRayScale(settings,metrics),line=document.createElementNS(ns,'line');for(const [key,value] of Object.entries({x1:cx,y1:cy,x2:cx+Math.cos(angle)*length,y2:cy+Math.sin(angle)*length}))line.setAttribute(key,value);group.append(line)}
+  if(settings.rays)for(let i=0;i<settings.sectors;i++){const angle=(settings.rotation+i*360/settings.sectors-90)*Math.PI/180,metrics=fieldGuideRayMetrics(),length=settings.rayMode==='field'?Math.min(Math.min(size.width/2,shape==='image4'?160:Infinity)/Math.max(Math.abs(Math.cos(angle)),1e-12),Math.min(size.height/2,shape==='image4'?160:Infinity)/Math.max(Math.abs(Math.sin(angle)),1e-12))*settings.fieldRayLength/100:settings.rayMode==='circle'?metrics.circle*Math.min(metrics.maximum,settings.circleRayLength/100):metrics.circle*fieldGuideRayScale(settings,metrics),line=document.createElementNS(ns,'line');for(const [key,value] of Object.entries({x1:cx,y1:cy,x2:cx+Math.cos(angle)*length,y2:cy+Math.sin(angle)*length}))line.setAttribute(key,value);group.append(line)}
  });
  if(settings.shapes.length){const group=document.createElementNS(ns,'g');group.setAttribute('class','field-guide-shapes');group.setAttribute('color',settings.color);group.setAttribute('fill','none');group.setAttribute('stroke',settings.color);group.setAttribute('stroke-width','1.5');group.setAttribute('opacity',settings.opacity/100);const individual=settings.reference||reference;if(individual.shape!=='image4'){const clip=document.createElementNS(ns,'clipPath'),boundary=document.createElementNS(ns,individual.shape==='circle'?'ellipse':'rect');clip.id='field-guide-shape-clip';const attrs=individual.shape==='circle'?{cx:320,cy:320,rx:individual.width/2,ry:individual.height/2}:{x:320-individual.width/2,y:320-individual.height/2,width:individual.width,height:individual.height};for(const [key,value] of Object.entries(attrs))boundary.setAttribute(key,value);clip.append(boundary);defs.append(clip);group.setAttribute('clip-path','url(#field-guide-shape-clip)')}for(const item of settings.shapes)group.append(createFieldGuideShape(item));svg.append(group)}
  stage.insertBefore(svg,objectClip);
@@ -844,7 +844,28 @@ function movementAlignmentItems(items,movingIds){
  return result;
 }
 
-function objectAlignmentGuides(items,movingIds){items=movementAlignmentItems(items,movingIds);let moving=new Set(movingIds),guides=[],seen=new Set();for(let item of items){if(!moving.has(item.id)||item.visible===false||!item.bounds)continue;for(let edge of ['left','right','top','bottom']){let vertical=edge==='left'||edge==='right';for(let other of items){if(moving.has(other.id)||other.visible===false||!other.bounds)continue;for(let targetEdge of vertical?['left','right']:['top','bottom']){let bounds=item.bounds,target=other.bounds;if(Math.abs(bounds[edge]-target[targetEdge])>0.000001)continue;let guide=vertical?{axis:'x',edge,x:target[targetEdge],y:Math.min(bounds.top,target.top),length:Math.max(bounds.bottom,target.bottom)-Math.min(bounds.top,target.top)}:{axis:'y',edge,x:Math.min(bounds.left,target.left),y:target[targetEdge],length:Math.max(bounds.right,target.right)-Math.min(bounds.left,target.left)},key=JSON.stringify(guide);if(!seen.has(key)){seen.add(key);guides.push(guide)}}}}}return guides}
+function objectAlignmentGuides(items,movingIds){
+ items=movementAlignmentItems(items,movingIds);const moving=new Set(movingIds),guides=[],seen=new Set();
+ const add=guide=>{const key=JSON.stringify(guide);if(!seen.has(key)){seen.add(key);guides.push(guide)}};
+ for(const item of items){
+  if(!moving.has(item.id)||item.visible===false||!item.bounds)continue;
+  const bounds=item.bounds,cx=(bounds.left+bounds.right)/2,cy=(bounds.top+bounds.bottom)/2,nearest={x:null,y:null};
+  for(const other of items){
+   if(moving.has(other.id)||other.visible===false||!other.bounds)continue;
+   const target=other.bounds,tx=(target.left+target.right)/2,ty=(target.top+target.bottom)/2;
+   for(const axis of ['x','y']){
+    const centered=Math.abs(axis==='x'?cx-tx:cy-ty)<=.05;
+    if(centered){const distance=Math.abs(axis==='x'?cy-ty:cx-tx);if(!nearest[axis]||distance<nearest[axis].distance)nearest[axis]={distance,guide:{axis,centerMatch:true,x:axis==='x'?cx:Math.min(cx,tx),y:axis==='x'?Math.min(cy,ty):cy,length:distance}};continue}
+    for(const edge of axis==='x'?['left','right']:['top','bottom'])for(const targetEdge of axis==='x'?['left','right']:['top','bottom']){
+     if(Math.abs(bounds[edge]-target[targetEdge])>.000001)continue;
+     add(axis==='x'?{axis,edge,x:target[targetEdge],y:Math.min(bounds.top,target.top),length:Math.max(bounds.bottom,target.bottom)-Math.min(bounds.top,target.top)}:{axis,edge,x:Math.min(bounds.left,target.left),y:target[targetEdge],length:Math.max(bounds.right,target.right)-Math.min(bounds.left,target.left)});
+    }
+   }
+  }
+  for(const axis of ['x','y'])if(nearest[axis])add(nearest[axis].guide);
+ }
+ return guides;
+}
 
 function clearAlignmentGuides(){controls.querySelectorAll('.alignment-guide').forEach(node=>node.remove());if(stage.classList.contains('center-align-x')||stage.classList.contains('center-align-y'))stage.classList.remove('center-align-x','center-align-y')}
 
@@ -856,11 +877,37 @@ function boardCenterGuides(items,movingIds,previous,width,height){items=movement
 
 function updateAlignmentGuides(ids){if(drag?.shiftGuidesDisabled){clearAlignmentGuides();return}let width=stage.clientWidth,height=stage.clientHeight;if(!width||!height){clearAlignmentGuides();return}let items=alignmentSnapshot(),previous=drag?.alignmentPrevious||[],guides=objectAlignmentGuides(items,ids,previous);if(drag?.mode==='move')guides.push(...boardCenterGuides(items,ids,previous,width,height).map(guide=>({...guide,centerLine:true})));if(drag)drag.alignmentPrevious=items;clearAlignmentGuides();if(!guides.length)return;drawAlignmentGuides(guides,width,height)}
 
-function mergedAlignmentGuides(guides){const lines=new Map(),centers=[];for(const guide of guides){if(guide.centerLine){centers.push(guide);continue}if(!guide.length)continue;const key=guide.axis+':'+(guide.axis==='x'?guide.x:guide.y),previous=lines.get(key);if(!previous){lines.set(key,{...guide});continue}const start=guide.axis==='x'?'y':'x',end=Math.max(previous[start]+previous.length,guide[start]+guide.length);previous[start]=Math.min(previous[start],guide[start]);previous.length=end-previous[start]}return [...lines.values(),...centers]}
+function mergedAlignmentGuides(guides){const lines=new Map(),centers=[];for(const guide of guides){if(guide.centerLine||guide.centerMatch){centers.push(guide);continue}if(!guide.length)continue;const key=guide.axis+':'+(guide.axis==='x'?guide.x:guide.y),previous=lines.get(key);if(!previous){lines.set(key,{...guide});continue}const start=guide.axis==='x'?'y':'x',end=Math.max(previous[start]+previous.length,guide[start]+guide.length);previous[start]=Math.min(previous[start],guide[start]);previous.length=end-previous[start]}return [...lines.values(),...centers]}
 
-function drawAlignmentGuides(guides,width,height){for(let guide of mergedAlignmentGuides(guides)){if(guide.centerLine){stage.classList.add('center-align-'+guide.axis);continue}if(!guide.length)continue;let node=document.createElement('div');node.className='alignment-guide alignment-guide-'+guide.axis;node.style.left=guide.x/width*100+'%';node.style.top=guide.y/height*100+'%';node.style[guide.axis==='x'?'height':'width']=guide.length/(guide.axis==='x'?height:width)*100+'%';controls.appendChild(node)}}
+function drawAlignmentGuides(guides,width,height){
+ for(const guide of mergedAlignmentGuides(guides)){
+  if(guide.centerLine){stage.classList.add('center-align-'+guide.axis);continue}
+  if(!guide.length&&!guide.centerMatch)continue;
+  const node=document.createElement('div');node.className='alignment-guide alignment-guide-'+guide.axis+(guide.centerMatch?' alignment-guide-center':'');
+  node.style.left=guide.x/width*100+'%';node.style.top=guide.y/height*100+'%';node.style[guide.axis==='x'?'height':'width']=guide.length/(guide.axis==='x'?height:width)*100+'%';controls.appendChild(node);
+ }
+}
 
-function snappedObjectMove(items,starts,dx,dy,width,height,minX,maxX,minY,maxY){items=movementAlignmentItems(items,starts.map(o=>o.id));let moving=new Map(starts.map(item=>[item.id,item])),bestX=Infinity,bestY=Infinity,snapX=dx,snapY=dy;for(let item of items){let start=moving.get(item.id);if(!start||!item.bounds||item.visible===false)continue;let shiftX=dx-(item.x-start.x)/100*width,shiftY=dy-(item.y-start.y)/100*height;for(let edge of [item.bounds.left,(item.bounds.left+item.bounds.right)/2,item.bounds.right]){let correction=width/2-(edge+shiftX),distance=Math.abs(correction),candidate=dx+correction;if(distance<=3&&distance<bestX&&candidate>=minX&&candidate<=maxX){bestX=distance;snapX=candidate}}for(let edge of [item.bounds.top,(item.bounds.top+item.bounds.bottom)/2,item.bounds.bottom]){let correction=height/2-(edge+shiftY),distance=Math.abs(correction),candidate=dy+correction;if(distance<=3&&distance<bestY&&candidate>=minY&&candidate<=maxY){bestY=distance;snapY=candidate}}for(let other of items){if(moving.has(other.id)||other.visible===false||!other.bounds)continue;for(let edge of ['left','right'])for(let target of ['left','right']){let correction=other.bounds[target]-(item.bounds[edge]+shiftX),distance=Math.abs(correction),candidate=dx+correction;if(distance<=3&&distance<bestX&&candidate>=minX&&candidate<=maxX){bestX=distance;snapX=candidate}}for(let edge of ['top','bottom'])for(let target of ['top','bottom']){let correction=other.bounds[target]-(item.bounds[edge]+shiftY),distance=Math.abs(correction),candidate=dy+correction;if(distance<=3&&distance<bestY&&candidate>=minY&&candidate<=maxY){bestY=distance;snapY=candidate}}}}return {dx:snapX,dy:snapY}}
+function snappedObjectMove(items,starts,dx,dy,width,height,minX,maxX,minY,maxY){
+ items=movementAlignmentItems(items,starts.map(o=>o.id));const moving=new Map(starts.map(item=>[item.id,item])),best={x:{distance:Infinity,rank:Infinity,value:dx},y:{distance:Infinity,rank:Infinity,value:dy}};
+ const consider=(axis,correction,rank)=>{const distance=Math.abs(correction),candidate=(axis==='x'?dx:dy)+correction,previous=best[axis],min=axis==='x'?minX:minY,max=axis==='x'?maxX:maxY;
+  if(distance<=3&&candidate>=min&&candidate<=max&&(distance<previous.distance-.000001||Math.abs(distance-previous.distance)<=.000001&&rank<previous.rank))best[axis]={distance,rank,value:candidate};
+ };
+ for(const item of items){
+  const start=moving.get(item.id);if(!start||!item.bounds||item.visible===false)continue;
+  const bounds=item.bounds,shiftX=dx-(item.x-start.x)/100*width,shiftY=dy-(item.y-start.y)/100*height,cx=(bounds.left+bounds.right)/2,cy=(bounds.top+bounds.bottom)/2;
+  consider('x',width/2-(cx+shiftX),0);consider('y',height/2-(cy+shiftY),0);
+  for(const edge of [bounds.left,bounds.right])consider('x',width/2-(edge+shiftX),2);
+  for(const edge of [bounds.top,bounds.bottom])consider('y',height/2-(edge+shiftY),2);
+  for(const other of items){
+   if(moving.has(other.id)||other.visible===false||!other.bounds)continue;const target=other.bounds;
+   consider('x',(target.left+target.right)/2-(cx+shiftX),1);consider('y',(target.top+target.bottom)/2-(cy+shiftY),1);
+   for(const edge of ['left','right'])for(const targetEdge of ['left','right'])consider('x',target[targetEdge]-(bounds[edge]+shiftX),3);
+   for(const edge of ['top','bottom'])for(const targetEdge of ['top','bottom'])consider('y',target[targetEdge]-(bounds[edge]+shiftY),3);
+  }
+ }
+ return {dx:best.x.value,dy:best.y.value};
+}
 
 function placementAlignment(payload,clientX,clientY,disabled=false,includeGuides=true){const rect=stage.getBoundingClientRect(),width=stage.clientWidth,height=stage.clientHeight,x=(clientX-rect.left)/rect.width*100,y=(clientY-rect.top)/rect.height*100;if(disabled||!width||!height)return {x,y,guides:[]};const item=createPlacementObject(payload,x,y),cx=x/100*width,cy=y/100*height;item.id='placement-preview';item.bounds={left:cx-item.width/2,right:cx+item.width/2,top:cy-item.height/2,bottom:cy+item.height/2};const items=[...placementAlignmentSnapshot(rect,width,height),item],snap=snappedObjectMove(items,[item],0,0,width,height,-Infinity,Infinity,-Infinity,Infinity);item.x+=snap.dx/width*100;item.y+=snap.dy/height*100;item.bounds={left:item.bounds.left+snap.dx,right:item.bounds.right+snap.dx,top:item.bounds.top+snap.dy,bottom:item.bounds.bottom+snap.dy};return {x:item.x,y:item.y,guides:includeGuides?[...objectAlignmentGuides(items,[item.id]),...boardCenterGuides(items,[item.id],[],width,height).map(guide=>({...guide,centerLine:true}))]:[]}}
 
@@ -889,7 +936,7 @@ function finishKeyboardNudge(){
  if(session.board===data&&session.page===current()){updateHistoryButtons();renderInspector()}
 }
 
-function nudgeSelectedObjects(key,repeat=false){
+function nudgeSelectedObjects(key,repeat=false,step=1){
  if(boardReadOnly||phaseComparisonActive()||drag)return false;if(!individualGroupSelectionActive()&&current().some(o=>selectedIds.includes(o.id)&&o.objectGroupId&&o.locked))return false;
  const direction={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]}[key];if(!direction)return false;
  const selection=JSON.stringify(selectedIds);let session=keyboardNudgeSession;
@@ -897,12 +944,22 @@ function nudgeSelectedObjects(key,repeat=false){
   finishKeyboardNudge();const selectedSet=new Set(selectedIds),items=current().filter(o=>selectedSet.has(o.id)&&!o.locked);if(!items.length)return false;
   session={board:data,page:current(),selection,items,width:stage.clientWidth||640,height:stage.clientHeight||640,nodes:new Map([...layer.children].map(node=>[node.dataset.id,node])),boxes:new Map([...controls.querySelectorAll('.controlbox')].map(node=>[node.dataset.id,node])),started:false};keyboardNudgeSession=session;
  }
- const items=session.items;let dx=direction[0]*100/session.width,dy=direction[1]*100/session.height;
+ const items=session.items;let dx=direction[0]*step*100/session.width,dy=direction[1]*step*100/session.height;
  dx=Math.max(-Math.min(...items.map(o=>o.x)),Math.min(100-Math.max(...items.map(o=>o.x)),dx));dy=Math.max(-Math.min(...items.map(o=>o.y)),Math.min(100-Math.max(...items.map(o=>o.y)),dy));if(!dx&&!dy)return true;
  if(!session.started){recordHistory();session.started=true;clearAlignmentGuides()}
  for(const item of items){item.x+=dx;item.y+=dy}
  if(keyboardNudgeFrame===null)keyboardNudgeFrame=requestAnimationFrame(paintKeyboardNudge);
  scheduleObjectPropertySave();return true;
+}
+
+function selectAllObjects(){if(boardReadOnly||phaseComparisonActive()||window.Bolxiv?.pngPreview?.active||window.Bolxiv?.fieldGuideEditor?.active)return;selectedIds=current().map(item=>item.id);selected=selectedIds.at(-1)||null;normalizeObjectSelection();renderSelectionOnly()}
+function duplicateObjects(ids){if(boardReadOnly||phaseComparisonActive()||window.Bolxiv?.pngPreview?.active||window.Bolxiv?.fieldGuideEditor?.active)return;const sources=current().filter(o=>ids.includes(o.id));if(!sources.length)return;recordHistory();const copies=sources.map(source=>{const copy=JSON.parse(JSON.stringify(source));copy.id=createObjectId();return copy});remapCopiedObjectGroups(copies);current().push(...copies);selectedIds=copies.map(o=>o.id);selected=selectedIds.at(-1)||null;renderAndSave();revealMovedLayers(selectedIds)}
+function changeObjectGrouping(ids,ungroup=false){
+ if(boardReadOnly||phaseComparisonActive()||window.Bolxiv?.pngPreview?.active||window.Bolxiv?.fieldGuideEditor?.active||individualGroupSelectionActive())return;
+ const expanded=expandObjectGroups(ids),items=current().filter(o=>expanded.includes(o.id));
+ if(ungroup?!items.some(o=>o.objectGroupId):items.length<2||selectedObjectGroup().length>0)return;
+ recordHistory();const groupId=createObjectId();for(const item of items){if(ungroup){delete item.objectGroupId;delete item.objectGroupName}else{item.objectGroupId=groupId;item.objectGroupName='グループ'}}
+ selectedIds=expanded;selected=expanded.at(-1)||null;renderAndSave();if(!ungroup)revealCreatedObjectGroup(groupId);
 }
 
 function copyObjectsToClipboard(ids){const selectedSet=new Set(expandObjectGroups(ids)),sources=current().filter(o=>selectedSet.has(o.id));if(!sources.length)return;clipboardObjects=sources.map(o=>JSON.parse(JSON.stringify(o)));clipboardSourcePage=current()}
@@ -933,8 +990,47 @@ function fitBoardDisplayZoom(remember=true){const space=document.getElementById(
 function setBoardDisplayZoom(value,remember=true,recenter=true){const preview=matchMedia('(max-width:850px)').matches&&document.querySelector('.layout').classList.contains('phone-content-open'),step=preview?1:5;boardDisplayZoom=Math.max(5,Math.min(200,Math.round((Number(value)||0)/step)*step));stage.style.setProperty('--board-display-scale',String(boardDisplayZoom/100));document.getElementById('boardZoomSpace').style.setProperty('--board-display-scale',String(boardDisplayZoom/100));const comparison=document.querySelector('.phase-comparison-grid');if(comparison)comparison.style.transform='translate(-50%,-50%) scale('+boardDisplayZoom/100+')';let space=document.getElementById('boardZoomSpace'),viewport=space.parentElement;const width=((comparison?comparison.offsetWidth:640)*boardDisplayZoom/100+40)+'px',height=((comparison?comparison.offsetHeight:640)*boardDisplayZoom/100+40)+'px',sizeChanged=space.style.width!==width||space.style.height!==height;space.style.width=width;space.style.height=height;if(recenter||sizeChanged){viewport.scrollLeft=Math.max(0,(viewport.scrollWidth-viewport.clientWidth)/2);viewport.scrollTop=Math.max(0,(viewport.scrollHeight-viewport.clientHeight)/2);}document.getElementById('boardZoomValue').textContent=boardDisplayZoom;document.getElementById('zoomOut').disabled=boardDisplayZoom===5;document.getElementById('zoomIn').disabled=boardDisplayZoom===200;if(remember)rememberViewSetting('boardDisplayZoom',boardDisplayZoom)}
 
 ;
-// Add before measuring a popup so the mobile close row fits its placement.
+// Hover is restricted to a desktop mouse; touch and keyboard retain explicit activation.
+function bindSubmenuHover(toggle,submenu,open,close){
+ const root=toggle.closest('[role="menu"]');
+ if(!root._submenuHover){
+  const state={items:[],openTimer:null,closeTimer:null};root._submenuHover=state;
+  const desktop=()=>matchMedia('(min-width:851px) and (hover:hover) and (pointer:fine)').matches;
+  const cancel=()=>{clearTimeout(state.openTimer);clearTimeout(state.closeTimer);state.openTimer=state.closeTimer=null};root._cancelSubmenuHover=cancel;
+  const closeAll=()=>state.items.forEach(item=>item.close());
+  const laterClose=()=>{cancel();state.closeTimer=setTimeout(()=>{state.closeTimer=null;closeAll()},280)};state.cancel=cancel;state.laterClose=laterClose;state.desktop=desktop;
+  root.addEventListener('pointerover',event=>{
+   if(event.pointerType!=='mouse'||!desktop()||root.hidden)return;
+   const child=state.items.find(item=>item.submenu.contains(event.target));
+   if(child){cancel();return}
+   const item=state.items.find(item=>item.toggle.contains(event.target));
+   if(!item){laterClose();return}
+   cancel();if(item.toggle.disabled)return;
+   state.openTimer=setTimeout(()=>{state.openTimer=null;if(root.hidden||!desktop()||!item.toggle.getClientRects().length)return;state.items.filter(other=>other!==item).forEach(other=>other.close());const wasHidden=item.submenu.hidden;item.open(true);if(wasHidden&&!item.submenu.hidden)item.submenu._openedByHover=true},140);
+  });
+  root.addEventListener('pointerout',event=>{if(event.pointerType==='mouse'&&desktop()&&!root.contains(event.relatedTarget))laterClose()});
+  root.addEventListener('pointerdown',cancel,true);
+  new MutationObserver(()=>{if(root.hidden)cancel()}).observe(root,{attributes:true,attributeFilter:['hidden']});
+  window.addEventListener('blur',cancel);window.addEventListener('resize',()=>{cancel();if(!desktop())closeAll()});
+ }
+ toggle.addEventListener('click',event=>{
+  if(event.detail>0&&matchMedia('(min-width:851px) and (hover:hover) and (pointer:fine)').matches&&submenu._openedByHover&&!submenu.hidden){
+   submenu._openedByHover=false;root._cancelSubmenuHover();event.preventDefault();event.stopImmediatePropagation();submenu.querySelector('button:not(:disabled)')?.focus({preventScroll:true});
+  }
+ },true);
+ if(!root.contains(submenu)){
+  submenu.addEventListener('pointerover',event=>{if(event.pointerType==='mouse'&&root._submenuHover.desktop())root._submenuHover.cancel()});
+  submenu.addEventListener('pointerout',event=>{if(event.pointerType==='mouse'&&root._submenuHover.desktop()&&!submenu.contains(event.relatedTarget)&&!root.contains(event.relatedTarget))root._submenuHover.laterClose()});
+ }
+ root._submenuHover.items.push({toggle,submenu,open,close});
+}
+
+// Track popup cleanup on every device; add the mobile close row before measuring.
+let menuKeyboardOrder=0;
 function addPhoneMenuClose(menu,close){
+ // Keep each popup's own cleanup, including private selection/gesture state.
+ menu._keyboardClose=close;menu._keyboardOrder=++menuKeyboardOrder;
+ if(!menu.contains(document.activeElement))menu._keyboardOrigin=document.activeElement;
  if(!matchMedia('(max-width:850px)').matches)return;
  let button=menu.querySelector('[data-phone-menu-close]');
  if(!button){
