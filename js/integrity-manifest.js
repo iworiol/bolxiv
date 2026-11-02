@@ -13,7 +13,7 @@ window.BolxivIntegrity = {
     "js/application.js": "sha384-/tYEoMT6EkzVAemDJnPrqKFDwhKljDwVa0tuwZfMor5Nkmt0XGEdNpdEm6uASjMR",
     "js/canvas.js": "sha384-avh4wu2KIVEXaaCHJTw+7c8WnEZhQtD8ybX7+RKurS73496pXv0Iupan8IekcplF",
     "js/data-io.js": "sha384-mwnAQZx5Ldn3i+fZBSNYNm6/vF0CfpfxYxmPs2cnap2lSZuZdin5++5uFs0pig8t",
-    "js/editor.js": "sha384-OnXnI50IiT/RkTojhUQlGrkwSHSJhovfmTx2DxFKdG1MgsIa4EdkykRXCwpGuBpV",
+    "js/editor.js": "sha384-V9mKzOzSvyLB624V22TfCHx3+xhBjXAi4Wu99EUYtuRB2iyRIQxFxRMo1R6Zj02o",
     "js/embedded-images.js": "sha384-jQFRmMmtEuZeOKN7KZLnSlhgSl5Ls9zE0uXsuUYGoPDGUUjcx2wFaQuxZB6QcWWP",
     "js/integrity-loader.js": "sha384-s/dll0D6xB/NG9GyR3BM00Q67EXg0Cbu2DD8mFXB8JF+ILadWJUMd1DqSg79/mOf",
     "js/interface.js": "sha384-E58v2Mxp4BOm+wRZPYV81NSZIFucBpdFu+ym7Qv96+G+7cGmTfjonlR8o67KMr8s",
