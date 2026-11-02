@@ -9,6 +9,7 @@
  const dialog=document.createElement('dialog');dialog.id='fieldGuideEditor';dialog.className='guide-editor-dialog';dialog.setAttribute('aria-labelledby','guideEditorTitle');
  dialog.innerHTML='<header class="guide-editor-heading"><h2 id="guideEditorTitle">キャンバス</h2><select id="guideEditorPhase" aria-label="フェーズを変更してガイド編集を終了"></select><button class="btn primary" type="button" id="finishFieldGuides">完了</button></header><div class="guide-editor-content"><main class="guide-editor-preview"><div class="guide-editor-tools" role="toolbar" aria-label="ガイドを描く"><button class="btn" type="button" data-guide-tool="line">直線</button><button class="btn" type="button" data-guide-tool="circle">円</button><button class="btn" type="button" data-guide-tool="rect">四角形</button><button class="btn" type="button" id="guideUndo" aria-label="ガイドの編集を元に戻す">↶</button><button class="btn" type="button" id="guideRedo" aria-label="ガイドの編集をやり直す">↷</button></div><div class="guide-editor-viewport"><div class="guide-editor-canvas"><div class="guide-editor-art"></div><svg class="guide-editor-overlay" viewBox="0 0 640 640" aria-label="ガイドの描画領域"></svg></div></div><p class="guide-editor-hint" role="status">図形を選んで追加します。追加したガイドはクリック／タップで選択できます。</p></main><aside class="guide-editor-properties"><div class="guide-properties-title" role="heading" aria-level="3">フェーズプロパティ：ガイド</div><label class="field-guide-check guide-hide-objects"><input type="checkbox" id="guideHideObjects"> オブジェクトを隠す</label><section id="guideShapeProperties"><h3>ガイド（個別）</h3><p id="guideNoSelection">線・図形を選ぶと位置や大きさを変更できます。</p><div id="guideShapeFields" hidden></div><div class="guide-shape-actions"><button type="button" class="btn" id="duplicateGuideShape">複製</button><button type="button" class="btn" id="deleteGuideShape">削除</button></div></section></aside></div>';
  document.body.append(dialog);const propertyPane=dialog.querySelector('.guide-editor-properties'),propertyBody=document.createElement('div');propertyBody.className='guide-properties-body';for(const node of [...propertyPane.children])if(!node.classList.contains('guide-properties-title'))propertyBody.append(node);propertyBody.append(settings);propertyPane.append(propertyBody);propertyPane.querySelector('.guide-properties-title').append(dialog.querySelector('#finishFieldGuides'));const zoomToolbar=document.createElement('div');zoomToolbar.className='board-display-toolbar guide-zoom-toolbar';const zoomGroup=document.querySelector('.board-display-toolbar .board-zoom-group').cloneNode(true);for(const node of zoomGroup.querySelectorAll('[id]')){node.dataset.sourceId=node.id;node.id='guide-'+node.id}zoomToolbar.append(zoomGroup);const guideHeading=dialog.querySelector('.guide-editor-heading');guideHeading.classList.add('board-title-row');guideHeading.append(zoomToolbar);
+ const displayButtons=['gridToggle','fieldToggle','clipToggle'].map(id=>{const source=document.getElementById(id),button=source.cloneNode(true);button.id='guide-'+id;button.dataset.sourceId=id;button.onclick=()=>source.click();const sync=()=>{for(const attribute of ['aria-pressed','aria-label','title'])button.setAttribute(attribute,source.getAttribute(attribute)||'');button.innerHTML=source.innerHTML;button.disabled=source.disabled};new MutationObserver(sync).observe(source,{attributes:true,childList:true,subtree:true,attributeFilter:['aria-pressed','aria-label','title','disabled']});sync();zoomToolbar.insertBefore(button,zoomGroup);source.addEventListener('click',()=>{if(dialog.open&&!dialog.classList.contains('guide-editor-phone'))updateArtwork(true)});return button});
  const zoomTrigger=zoomGroup.querySelector('[data-source-id="resetBoardZoom"]'),zoomValue=zoomGroup.querySelector('[data-source-id="boardZoomValue"]'),zoomMenu=document.getElementById('boardZoomMenu').cloneNode(true);zoomMenu.id='guideZoomMenu';dialog.append(zoomMenu);zoomTrigger.setAttribute('aria-controls',zoomMenu.id);const zoomItems=[...zoomMenu.querySelectorAll('[data-zoom]')];
  function closeZoomMenu(focus=false){zoomMenu.hidden=true;zoomTrigger.setAttribute('aria-expanded','false');if(focus)zoomTrigger.focus({preventScroll:true})}
  function openZoomMenu(){if(!dialog.open)return;addPhoneMenuClose(zoomMenu,()=>closeZoomMenu(true));for(const item of zoomItems)item.setAttribute('aria-checked',String(Number(item.dataset.zoom)===guideZoom));zoomMenu.hidden=false;zoomTrigger.setAttribute('aria-expanded','true');const r=zoomTrigger.getBoundingClientRect();zoomMenu.style.left=Math.max(8,Math.min(r.right-zoomMenu.offsetWidth,innerWidth-zoomMenu.offsetWidth-8))+'px';zoomMenu.style.top=Math.max(8,Math.min(r.bottom+4,innerHeight-zoomMenu.offsetHeight-8))+'px';(zoomItems.find(item=>item.getAttribute('aria-checked')==='true')||zoomItems[0]).focus({preventScroll:true})}
@@ -19,15 +20,17 @@
  propertyBody.prepend(dialog.querySelector('.guide-editor-tools'));dialog.querySelector('.guide-editor-tools').after(dialog.querySelector('.guide-editor-hint'));
  const shapeHeading=dialog.querySelector('#guideShapeProperties>h3'),shapeActions=dialog.querySelector('.guide-shape-actions');shapeHeading.append(shapeActions);
  for(const [id,label,markup] of [['duplicateGuideShape','選択したガイドを複製','⧉'],['deleteGuideShape','選択したガイドを削除','<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M9 6V3h6v3M6 6l1 15h10l1-15M10 10v7M14 10v7"/></svg>']]){const button=dialog.querySelector('#'+id);button.innerHTML=markup;button.title=label;button.setAttribute('aria-label',label)}
+ dialog.querySelector('#guideShapeProperties').classList.add('guide-property-frame','guide-property-group');
  for(const [index,section] of [...dialog.querySelectorAll('.guide-property-frame')].entries()){
   const heading=section.querySelector(':scope>h3'),content=document.createElement('div'),toggle=document.createElement('button'),title=document.createElement('span'),mark=document.createElement('span');
   content.id='guideSectionBody-'+index;content.className='guide-section-body';for(const node of [...section.children])if(node!==heading)content.append(node);section.append(content);
-  title.textContent=heading.textContent;mark.className='guide-section-mark';mark.textContent='−';mark.setAttribute('aria-hidden','true');toggle.type='button';toggle.className='guide-section-toggle';toggle.setAttribute('aria-expanded','true');toggle.setAttribute('aria-controls',content.id);toggle.append(title,mark);heading.replaceChildren(toggle);
+  title.textContent=section.id==='guideShapeProperties'?'ガイド（個別）':heading.textContent;mark.className='guide-section-mark';mark.textContent='−';mark.setAttribute('aria-hidden','true');toggle.type='button';toggle.className='guide-section-toggle';toggle.setAttribute('aria-expanded','true');toggle.setAttribute('aria-controls',content.id);toggle.append(title,mark);heading.replaceChildren(toggle);if(section.id==='guideShapeProperties')heading.append(shapeActions);
   toggle.onclick=()=>{content.hidden=!content.hidden;toggle.setAttribute('aria-expanded',String(!content.hidden));mark.textContent=content.hidden?'＋':'−'};
  }
  const drawingTools=dialog.querySelector('.guide-editor-tools');for(const type of ['triangle','diamond']){const button=document.createElement('button');button.type='button';button.className='btn';button.dataset.guideTool=type;drawingTools.insertBefore(button,dialog.querySelector('#guideUndo'))}
  for(const [type,label,artwork] of [['line','直線','<path d="M4 20L20 4"/>'],['circle','円','<circle cx="12" cy="12" r="8"/>'],['rect','四角形','<rect x="4" y="4" width="16" height="16"/>'],['triangle','三角形','<path d="M12 3L22 21H2Z"/>'],['diamond','ひし形','<path d="M12 3L21 12L12 21L3 12Z"/>']]){const button=drawingTools.querySelector('[data-guide-tool="'+type+'"]');button.setAttribute('aria-label',label+'を追加');button.title=label+'を追加';button.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">'+artwork+'</svg>'}
  dialog.querySelector('.guide-editor-hint').remove();
+ dialog.querySelector('#guideShapeProperties>.guide-section-body').prepend(drawingTools);
  
  let owner=null,ownerPage=-1,ownerContent=-1,activeTool='select',shapeId=null,gesture=null,lastCommitted='',ownHistory=false,guideZoom=100,embeddedHost=null,hiddenSiblings=[];
  const desktopEditor=matchMedia('(min-width:851px)');
@@ -77,7 +80,7 @@
  function guideBounds(s){const a=s.rotation*Math.PI/180,w=Math.abs(Math.cos(a))*s.width+Math.abs(Math.sin(a))*(s.type==='line'?1:s.height),h=Math.abs(Math.sin(a))*s.width+Math.abs(Math.cos(a))*(s.type==='line'?1:s.height);return {left:s.x-w/2,right:s.x+w/2,top:s.y-h/2,bottom:s.y+h/2}}
  function selectionShape(items){if(items.length===1)return items[0];const bounds=items.map(guideBounds),left=Math.min(...bounds.map(b=>b.left)),right=Math.max(...bounds.map(b=>b.right)),top=Math.min(...bounds.map(b=>b.top)),bottom=Math.max(...bounds.map(b=>b.bottom));return {id:'selection',type:'group',x:(left+right)/2,y:(top+bottom)/2,width:right-left,height:bottom-top,rotation:0}}
  function changeShapes(patches){const value=currentGuide(),map=new Map(patches.map(item=>[item.id,item]));value.shapes=value.shapes.map(shape=>map.has(shape.id)?{...shape,...map.get(shape.id)}:shape);data.pageFieldGuides[data.page]=fieldGuides({pageFieldGuides:[value]},0);renderFieldGuides();updateArtwork();sync()}
- function allowed(){return !boardReadOnly&&!phaseComparisonActive()&&!data.activePhaseGroup&&!window.Bolxiv?.pngPreview?.active&&activeBoardShape()!=='none'}
+ function allowed(){return !boardReadOnly&&!phaseComparisonActive()&&!data.activePhaseGroup&&!window.Bolxiv?.pngPreview?.active&&(window.Bolxiv?.phaseMasters?.active||activeBoardShape()!=='none')}
  function finishEdit(){if(!dialog.open)return;const next=JSON.stringify(currentGuide());if(next!==lastCommitted){commitPendingHistory();lastCommitted=next}sync()}
  function refreshFieldArtwork(){
   const clone=art.firstElementChild;if(!clone)return;
@@ -97,7 +100,7 @@
  function updateArtwork(full=false){
   if(!dialog.open)return;
   if(dialog.classList.contains('guide-editor-phone')){stage.append(overlay,guideControls);drawOverlay();return}
-  if(full||!art.firstElementChild){let clone;artworkObserver.disconnect();try{clone=clonePngStage()}finally{observeArtwork()}for(const [key,value] of Object.entries({position:'absolute',left:'0',top:'0',right:'auto',bottom:'auto',width:'640px',height:'640px',margin:'0',transform:'none',zoom:'1',visibility:'visible',boxShadow:'none'}))clone.style.setProperty(key.replace(/[A-Z]/g,c=>'-'+c.toLowerCase()),value,'important');clone.classList.remove('selected');art.replaceChildren(clone)}
+  if(full||!art.firstElementChild){let clone;artworkObserver.disconnect();try{clone=clonePngStage({preserveDisplay:true})}finally{observeArtwork()}for(const [key,value] of Object.entries({position:'absolute',left:'0',top:'0',right:'auto',bottom:'auto',width:'640px',height:'640px',margin:'0',transform:'none',zoom:'1',visibility:'visible',boxShadow:'none'}))clone.style.setProperty(key.replace(/[A-Z]/g,c=>'-'+c.toLowerCase()),value,'important');clone.classList.remove('selected');art.replaceChildren(clone)}
   else{art.firstElementChild.querySelector('.field-guides')?.remove();const guides=stage.querySelector('.field-guides');if(guides)art.firstElementChild.insertBefore(guides.cloneNode(true),art.firstElementChild.querySelector('.object-clip'))}
   if(dialog.classList.contains('guide-editor-phone'))stage.append(overlay);drawOverlay();fit();
  }
@@ -120,7 +123,7 @@
   if(!desktopEditor.matches)handle('move',0,0,'move-handle','ドラッグで移動').innerHTML=moveHandleMarkup();
  }
  function changeShape(patch){const value=currentGuide();value.shapes=value.shapes.map(shape=>shape.id===shapeId?{...shape,...patch}:shape);data.pageFieldGuides[data.page]=fieldGuides({pageFieldGuides:[value]},0);renderFieldGuides();updateArtwork();sync()}
- function transact(change){if(!dialog.open||!allowed())return;endSession();recordHistory();change();renderFieldGuides();save();finishEdit();updateArtwork();sync()}
+ function transact(change){if(window.Bolxiv?.phaseMasters?.locked)return;if(!dialog.open||!allowed())return;endSession();recordHistory();change();renderFieldGuides();save();finishEdit();updateArtwork();sync()}
  function duplicateShape(){const shapes=selectedGuides();if(!shapes.length)return;pasteGuides(shapes)}
  function pasteGuides(shapes=guideClipboard){if(!shapes.length||currentGuide().shapes.length+shapes.length>500)return;transact(()=>{const value=currentGuide(),dx=Math.min(12,640-Math.max(...shapes.map(s=>s.x))),dy=Math.min(12,640-Math.max(...shapes.map(s=>s.y))),copies=remapCopiedObjectGroups(shapes.map(shape=>({...shape,id:createObjectId(),x:shape.x+dx,y:shape.y+dy})));value.shapes.push(...copies);data.pageFieldGuides[data.page]=fieldGuides({pageFieldGuides:[value]},0);selectGuides(copies.map(shape=>shape.id))})}
  function deleteShape(){const ids=selectedGuides().map(s=>s.id);if(!ids.length)return;transact(()=>{const value=currentGuide();value.shapes=value.shapes.filter(shape=>!ids.includes(shape.id));data.pageFieldGuides[data.page]=value;selectGuides([])})}
@@ -131,7 +134,7 @@
   actions.push(['グループ化',groupGuides,picked.length<2||!!individualGuideGroup||!!group.length],['グループ解除',ungroupGuides,!picked.some(s=>s.objectGroupId)||!!individualGuideGroup]);
   if(individualGuideGroup)actions.push(['個別編集を終了',finishGuideMemberEdit,false]);else if(member?.objectGroupId)actions.push(['個別編集',()=>editGuideMember(hit),false]);
   actions.push(['コピー',()=>guideClipboard=JSON.parse(JSON.stringify(selectedGuides())),!picked.length],['貼り付け',()=>pasteGuides(),!guideClipboard.length],['複製',duplicateShape,!picked.length],['削除',deleteShape,!picked.length]);
-  for(const [label,action,disabled] of actions){const button=document.createElement('button');button.type='button';button.textContent=label;button.setAttribute('role','menuitem');button.disabled=disabled;button.onclick=()=>{closeGuideMenu();action()};guideMenu.append(button)}addPhoneMenuClose(guideMenu,closeGuideMenu);guideMenu.hidden=false;guideMenu.style.left=Math.max(4,Math.min(event.clientX,innerWidth-guideMenu.offsetWidth-4))+'px';guideMenu.style.top=Math.max(4,Math.min(event.clientY,innerHeight-guideMenu.offsetHeight-4))+'px';guideMenu.querySelector('button:not(:disabled)')?.focus({preventScroll:true});
+  for(const [label,action,disabled] of actions){const button=document.createElement('button');button.type='button';button.textContent=label;if(label==='削除')button.classList.add('context-delete');button.setAttribute('role','menuitem');const shortcut={'グループ化':'Ctrl+G','グループ解除':'Ctrl+Shift+G','コピー':'Ctrl+C','貼り付け':'Ctrl+V','複製':'Ctrl+D','削除':'Delete'}[label];if(shortcut)button.dataset.shortcut=shortcut;button.disabled=disabled;button.onclick=()=>{closeGuideMenu();action()};guideMenu.append(button)}addPhoneMenuClose(guideMenu,closeGuideMenu);guideMenu.hidden=false;guideMenu.style.left=Math.max(4,Math.min(event.clientX,innerWidth-guideMenu.offsetWidth-4))+'px';guideMenu.style.top=Math.max(4,Math.min(event.clientY,innerHeight-guideMenu.offsetHeight-4))+'px';guideMenu.querySelector('button:not(:disabled)')?.focus({preventScroll:true});
  }
  window.addEventListener('pointerdown',event=>{if(!guideMenu.contains(event.target))closeGuideMenu()},true);
  guideMenu.onkeydown=event=>{const buttons=[...guideMenu.querySelectorAll('button:not(:disabled)')],index=buttons.indexOf(document.activeElement);if(['ArrowUp','ArrowDown'].includes(event.key)){event.preventDefault();event.stopPropagation();buttons[(index+(event.key==='ArrowDown'?1:buttons.length-1))%buttons.length]?.focus()}};
@@ -150,7 +153,7 @@
   }
   data.pageFieldGuides[data.page]=value;selectGuides(g.items.map(s=>s.id),!enabled&&!!individualGuideGroup);
  }
- function startPointer(event){
+ function startPointer(event){if(window.Bolxiv?.phaseMasters?.locked)return;
   if(event.button!==0||!allowed())return;event.preventDefault();event.stopPropagation();endSession();
   if(event.isPrimary===false){cancelPointer();return}const start=point(event),handleNode=event.target.closest?.('[data-guide-handle]'),handle=handleNode?.dataset.guideHandle,hit=event.target.dataset.guideHit,before=JSON.stringify(currentGuide()),priorSelection=selectedGuides().map(s=>s.id),memberOnClick=hit&&!handle&&!event.ctrlKey&&!event.metaKey&&!event.shiftKey&&selectedGuideGroup().some(s=>s.id===hit)?hit:null;
   if(activeTool==='select'||hit||handle){if(hit){const ids=selectedGuides().map(s=>s.id),member=currentGuide().shapes.find(s=>s.id===hit),individual=!!individualGuideGroup&&member?.objectGroupId===individualGuideGroup,unit=individual?[hit]:guideMemberIds(hit);selectGuides(event.shiftKey?(ids.includes(hit)?ids.filter(id=>!unit.includes(id)):[...ids,...unit]):ids.includes(hit)?ids:unit,individual);if(!guideIds.includes(hit)){drawOverlay();sync();return}}else if(!handle)selectGuides([]);const items=selectedGuides(),shape=items.length?selectionShape(items):null;if(!shape){gesture={id:event.pointerId,start,before,action:'marquee',initialIds:event.shiftKey?priorSelection:[],recorded:false,scrollHost:dialog.classList.contains('guide-editor-phone')?document.querySelector('.object-layout-rect'):viewport};gesture.history=history.slice();gesture.future=future.slice();gesture.board=data;gesture.page=data.page;gesture.scrollLeft=gesture.scrollHost.scrollLeft;gesture.scrollTop=gesture.scrollHost.scrollTop;gesture.screenX=event.clientX;gesture.screenY=event.clientY;overlay.setPointerCapture(event.pointerId);drawOverlay();sync();return}gesture={id:event.pointerId,start,before,shape:{...shape},items:items.map(s=>({...s})),originalIds:items.map(s=>s.id),copy:false,action:handle||'move',sx:Number(handleNode?.dataset.sx||0),sy:Number(handleNode?.dataset.sy||0),pointerType:event.pointerType,recorded:false}}
@@ -172,12 +175,12 @@
  function finishPointer(event,cancel=false){const g=gesture;if(!g||event.pointerId!==g.id)return;clearTimeout(g.pressTimer);event.preventDefault();event.stopPropagation();if(!cancel)movePointer(event);gesture=null;if(overlay.hasPointerCapture(g.id))overlay.releasePointerCapture(g.id);if(cancel){g.board.pageFieldGuides[g.page]=JSON.parse(g.before);if(g.board===data){pendingHistoryState=null;pendingHistoryOwner=null;if(g.history){history=g.history;future=g.future}}if(g.originalIds){individualGuideGroup=g.individualGroup||null;selectGuides(g.originalIds,!!individualGuideGroup)}renderFieldGuides()}else if(g.action==='place'){placeGuide(g.type,point(event));return}else if(g.action==='marquee'){const a=g.start,b=g.position||a,left=Math.min(a.x,b.x),right=Math.max(a.x,b.x),top=Math.min(a.y,b.y),bottom=Math.max(a.y,b.y),ids=currentGuide().shapes.filter(s=>{const r=guideBounds(s);return r.left>=left&&r.right<=right&&r.top>=top&&r.bottom<=bottom}).map(s=>s.id);selectGuides([...new Set([...g.initialIds,...ids])])}else if(g.recorded){save();finishEdit()}else if(g.memberOnClick){editGuideMember(g.memberOnClick);return}updateArtwork();sync()}
  function cancelPointer(){if(gesture)finishPointer({pointerId:gesture.id,preventDefault(){},stopPropagation(){}},true)}
  function openEditor(){
-  if(dialog.open||!allowed())return;commitPendingHistory();closeColorPopovers();drag=null;tapPlacementArmed=false;owner=data;ownerPage=data.page;ownerContent=activeContent;lastCommitted=JSON.stringify(currentGuide());selectGuides([]);activeTool='select';guideZoom=Math.max(5,Math.min(200,boardDisplayZoom));
+  if(dialog.open||!allowed())return;commitPendingHistory();closeColorPopovers();drag=null;setTapPlacementArmed(false);owner=data;ownerPage=data.page;ownerContent=activeContent;lastCommitted=JSON.stringify(currentGuide());selectGuides([]);activeTool='select';guideZoom=Math.max(5,Math.min(200,boardDisplayZoom));
   phaseSelect.replaceChildren(...data.pages.map((_,index)=>{const option=document.createElement('option');option.value=index;option.textContent=String(index+1).padStart(2,'0')+' '+data.pageNames[index];return option}));phaseSelect.value=data.page;
   dialog.querySelector('#guideHideObjects').checked=true;dialog.classList.add('guide-objects-hidden');mountEditor();placeEntry();document.body.classList.add('field-guide-editing');updateModeStatus();updateArtwork(true);sync();if(!desktopEditor.matches&&document.querySelector('.layout').classList.contains('phone-content-open'))entryButton.focus({preventScroll:true});else entryButton.focus({preventScroll:true});
  }
  function closeEditor(){if(!dialog.open)return;cancelPalette();closeGuideMenu();cancelPointer();endSession();closeColorPopovers();closeZoomMenu();dialog.close();unmountEditor();placeEntry();document.body.append(dialog);document.body.classList.remove('field-guide-editing');owner=null;shapeId=null;updateModeStatus();updateHistoryButtons();entryButton.focus({preventScroll:true})}
- function historyAction(forward){endSession();cancelPointer();commitPendingHistory();if(forward?!future.length:!history.length)return;ownHistory=true;try{if(forward)redo();else undo();owner=data;ownerPage=data.page;lastCommitted=JSON.stringify(currentGuide())}finally{ownHistory=false}updateArtwork(true);sync()}
+ function historyAction(forward){if(window.Bolxiv?.phaseMasters?.active){window.Bolxiv.phaseMasters.history(forward);return}endSession();cancelPointer();commitPendingHistory();if(forward?!future.length:!history.length)return;ownHistory=true;try{if(forward)redo();else undo();owner=data;ownerPage=data.page;lastCommitted=JSON.stringify(currentGuide())}finally{ownHistory=false}updateArtwork(true);sync()}
  entryButton.onclick=event=>{event.stopPropagation();if(entryButton.disabled)return;if(dialog.open)closeEditor();else openEditor()};dialog.querySelector('#finishFieldGuides').onclick=closeEditor;
  phaseSelect.onchange=()=>{const index=Number(phaseSelect.value);closeEditor();selectPhase(index)};
  dialog.addEventListener('cancel',event=>{event.preventDefault();if(gesture)cancelPointer();else closeEditor()});
@@ -192,8 +195,8 @@
   button.draggable=desktopEditor.matches;desktopEditor.addEventListener('change',()=>button.draggable=desktopEditor.matches);button.ondragstart=event=>{if(event.dataTransfer){event.dataTransfer.setData('application/x-bolxiv-guide',button.dataset.guideTool);event.dataTransfer.effectAllowed='copy';const preview=guidePlacementPreview(button);preview.style.cssText='position:fixed;left:-10000px;top:0;pointer-events:none';document.body.append(preview);event.dataTransfer.setDragImage(preview,26,26);setTimeout(()=>preview.remove(),0)}};
   const click=button.onclick;let suppress=false;button.onclick=event=>{if(suppress){suppress=false;event.preventDefault();return}click()};button.oncontextmenu=event=>event.preventDefault();
   button.addEventListener('pointerdown',event=>{if(event.pointerType!=='touch')return;cancelPalette();paletteGesture={id:event.pointerId,x:event.clientX,y:event.clientY,button,type:button.dataset.guideTool,reset:()=>suppress=false};const g=paletteGesture;g.timer=setTimeout(()=>{if(paletteGesture!==g)return;g.preview=guidePlacementPreview(button);g.preview.classList.add('touch-placement-preview');document.body.append(g.preview);g.preview.style.left=g.x+'px';g.preview.style.top=(g.y-96)+'px';button.setPointerCapture(g.id);suppress=true},480)});
-  button.addEventListener('pointermove',event=>{const g=paletteGesture;if(!g||g.id!==event.pointerId)return;if(!g.preview){if(Math.hypot(event.clientX-g.x,event.clientY-g.y)>6){suppress=true;cancelPalette()}return}g.x=event.clientX;g.y=event.clientY;g.preview.style.left=g.x+'px';g.preview.style.top=(g.y-96)+'px'});
-  button.addEventListener('pointerup',event=>{const g=paletteGesture;if(!g||g.id!==event.pointerId){setTimeout(()=>suppress=false,0);return}const held=!!g.preview;cancelPalette();if(held){suppress=true;setTimeout(()=>suppress=false,0);event.preventDefault();const r=overlay.getBoundingClientRect(),x=event.clientX,y=event.clientY-96;if(x>=r.left&&x<=r.right&&y>=r.top&&y<=r.bottom)placeGuide(g.type,point({clientX:x,clientY:y}))}});button.addEventListener('pointercancel',cancelPalette);
+  button.addEventListener('pointermove',event=>{const g=paletteGesture;if(!g||g.id!==event.pointerId)return;if(!g.preview){if(Math.hypot(event.clientX-g.x,event.clientY-g.y)>6){cancelPalette();suppress=true}return}g.x=event.clientX;g.y=event.clientY;g.preview.style.left=g.x+'px';g.preview.style.top=(g.y-96)+'px'});
+  button.addEventListener('pointerup',event=>{const g=paletteGesture;if(!g||g.id!==event.pointerId){setTimeout(()=>suppress=false,0);return}const held=!!g.preview;cancelPalette();if(held){suppress=true;setTimeout(()=>suppress=false,0);event.preventDefault();const r=overlay.getBoundingClientRect(),x=event.clientX,y=event.clientY-96;if(x>=r.left&&x<=r.right&&y>=r.top&&y<=r.bottom)placeGuide(g.type,point({clientX:x,clientY:y}))}});button.addEventListener('pointercancel',cancelPalette);button.addEventListener('touchmove',event=>{if(paletteGesture?.preview&&event.cancelable)event.preventDefault()},{passive:false});
  }
  for(const type of ['dragover','drop'])overlay.addEventListener(type,event=>{if(!event.dataTransfer?.types.includes('application/x-bolxiv-guide'))return;event.preventDefault();event.stopPropagation();if(type==='drop')placeGuide(event.dataTransfer.getData('application/x-bolxiv-guide'),point(event))});
  for(const input of properties.querySelectorAll('input[data-guide-shape-key]')){
@@ -201,11 +204,13 @@
   for(const event of ['change','blur','pointercancel'])input.addEventListener(event,()=>{endSession();sync()});
  }
  // Capture before normal canvas gestures and document shortcuts can see these events.
- for(const type of ['pointerdown','pointermove','pointerup','pointercancel','click','dblclick','contextmenu','dragstart','drop'])window.addEventListener(type,event=>{if(!dialog.open||!overlay.contains(event.target)&&event.target!==overlay&&!guideControls.contains(event.target)&&!(gesture&&gesture.id===event.pointerId))return;if(type==='contextmenu'){event.preventDefault();event.stopImmediatePropagation();showGuideMenu(event);return}if(type==='drop'&&event.dataTransfer?.types.includes('application/x-bolxiv-guide')){event.preventDefault();event.stopImmediatePropagation();placeGuide(event.dataTransfer.getData('application/x-bolxiv-guide'),point(event));return}if(type==='pointerdown')startPointer(event);else if(type==='pointermove')movePointer(event);else if(type==='pointerup'||type==='pointercancel')finishPointer(event,type==='pointercancel');else event.preventDefault();event.stopImmediatePropagation()},true);
+ // Keep document capture listeners (outside-menu dismissal) running while blocking canvas handlers below.
+ for(const type of ['pointerdown','pointermove','pointerup','pointercancel','click','dblclick','contextmenu','dragstart','drop'])document.addEventListener(type,event=>{if(!dialog.open||!overlay.contains(event.target)&&event.target!==overlay&&!guideControls.contains(event.target)&&!(gesture&&gesture.id===event.pointerId))return;if(type==='contextmenu'){event.preventDefault();event.stopPropagation();showGuideMenu(event);return}if(type==='drop'&&event.dataTransfer?.types.includes('application/x-bolxiv-guide')){event.preventDefault();event.stopPropagation();placeGuide(event.dataTransfer.getData('application/x-bolxiv-guide'),point(event));return}if(type==='pointerdown')startPointer(event);else if(type==='pointermove')movePointer(event);else if(type==='pointerup'||type==='pointercancel')finishPointer(event,type==='pointercancel');else event.preventDefault();event.stopPropagation()},true);
  for(const type of ['pointerdown','click','dblclick','contextmenu','dragstart','dragover','drop'])window.addEventListener(type,event=>{if(dialog.open&&event.target.closest?.('.left .tool,.left .icon-choice'))blockReadOnlyEvent(event)},true);
  window.addEventListener('click',event=>{if(!dialog.open)return;const button=event.target.closest?.('#undo,#redo');if(!button)return;event.preventDefault();event.stopImmediatePropagation();historyAction(button.id==='redo')},true);
  window.addEventListener('keydown',event=>{
-  if(!dialog.open||event.target.closest?.('#phoneIconHelp,#operationGuideDialog,#changeLogDialog,#aboutToolDialog'))return;
+  if(event.target.closest?.('dialog.confirm-dialog'))return;
+  if(!dialog.open||event.target.closest?.('#phaseMasters,#phoneIconHelp,#operationGuideDialog,#changeLogDialog,#aboutToolDialog,#shortcutDialog'))return;
   if(event.key==='Control'){guideControlPressed=true;if(gesture?.action==='move'){gesture.memberOnClick=null;if(gesture.recorded)movePointer({pointerId:gesture.id,clientX:gesture.lastClientX,clientY:gesture.lastClientY,ctrlKey:true,shiftKey:event.shiftKey,preventDefault(){},stopPropagation(){}})}return}
   if(event.target.closest?.('.guide-section-toggle')&&event.key===' '){event.preventDefault();event.stopImmediatePropagation();if(!event.repeat)event.target.closest('.guide-section-toggle').click();return}
   if(event.key==='Escape'&&event.target.closest?.('input,select,textarea')&&!gesture&&guideMenu.hidden&&zoomMenu.hidden&&!dialog.querySelector('.color-popover:not([hidden])')){if(properties.contains(event.target)){event.preventDefault();event.stopImmediatePropagation();const shape=currentShape();if(shape&&event.target.dataset.guideShapeKey)event.target.value=Math.round(shape[event.target.dataset.guideShapeKey]);sync()}return}
@@ -225,7 +230,7 @@
  desktopEditor.addEventListener('change',()=>{if(!dialog.open)return;cancelPalette();cancelPointer();closeColorPopovers();dialog.close();mountEditor();updateArtwork(true);sync()});
  window.addEventListener('keyup',event=>{if(event.key!=='Control')return;guideControlPressed=false;if(gesture?.action==='move'&&gesture.recorded)movePointer({pointerId:gesture.id,clientX:gesture.lastClientX,clientY:gesture.lastClientY,ctrlKey:false,shiftKey:event.shiftKey,preventDefault(){},stopPropagation(){}})},true);
  window.addEventListener('blur',()=>{guideControlPressed=false;cancelPointer();cancelPalette();closeGuideMenu()});
- window.Bolxiv.fieldGuideEditor={open:openEditor,close:closeEditor,get active(){return dialog.open}};
+ window.Bolxiv.fieldGuideEditor={open:openEditor,close:closeEditor,get active(){return dialog.open},refresh:()=>{updateArtwork(true);sync()},captureSelection:()=>({ids:selectedGuides().map(shape=>shape.id),individualGroup:individualGuideGroup}),restoreSelection:value=>{const shapes=currentGuide().shapes,ids=(value?.ids||[]).filter(id=>shapes.some(shape=>shape.id===id));individualGuideGroup=value?.individualGroup&&ids.some(id=>shapes.find(shape=>shape.id===id)?.objectGroupId===value.individualGroup)?value.individualGroup:null;selectGuides(ids,!!individualGuideGroup);drawOverlay();sync()}};
  const color=document.getElementById('fieldGuideColorControl');let session=null;
  for(const group of settings.querySelectorAll('.coordinate-control')){
   const range=group.querySelector('input[type="range"]'),buttons=document.createElement('span');buttons.className='phone-number-step-buttons';
@@ -252,20 +257,20 @@
   dialog.querySelector('#duplicateGuideShape').disabled=dialog.querySelector('#deleteGuideShape').disabled=!picked.length;
   updateHistoryButtons();dialog.querySelector('#guideUndo').disabled=document.getElementById('undo').disabled;dialog.querySelector('#guideRedo').disabled=document.getElementById('redo').disabled;
   for(const button of dialog.querySelectorAll('[data-guide-tool]'))button.setAttribute('aria-pressed',String(activeTool===button.dataset.guideTool));
-  overlay.style.cursor=activeTool==='select'?'default':'crosshair';
+  overlay.style.cursor=activeTool==='select'?'default':'crosshair';window.Bolxiv.phaseMasters?.paint?.();
  }
  for(const input of settings.querySelectorAll('[data-guide-key]')){
   input.addEventListener(input.type==='checkbox'?'change':'input',()=>{
    if(input.disabled||input.value==='')return;
-   const uiKey=input.dataset.guideKey,linked=['fieldRayLength','circleRayLength'].includes(uiKey),key=linked?'rayScale':uiKey,before=currentGuide(),metrics=fieldGuideRayMetrics(),patch={[key]:input.type==='checkbox'?input.checked:Number(input.value)};
-   if(linked){if(Number(input.value)===fieldGuideRayValues(before,metrics)[uiKey])return;patch.rayScale=Math.min(metrics.maximum,Math.max(0,Number(input.value)/100*(uiKey==='fieldRayLength'?metrics.maximum:1)))}
+   const uiKey=input.dataset.guideKey,linked=['fieldRayLength','circleRayLength'].includes(uiKey),key=uiKey,before=currentGuide(),metrics=fieldGuideRayMetrics(),patch={[key]:input.type==='checkbox'?input.checked:Number(input.value)};
+   if(linked){const lengths=fieldGuideRayValues(before,metrics);Object.assign(patch,lengths,{[uiKey]:Number(input.value),rayMode:uiKey==='fieldRayLength'?'field':'circle'})}
    const next=fieldGuides({pageFieldGuides:[{...before,...patch}]},0);
-   if(JSON.stringify(next[key])===JSON.stringify(before[key])&&next.rayBoundary===before.rayBoundary)return;
+   if(JSON.stringify(next)===JSON.stringify(before))return;
    if(!session||session.board!==data||session.page!==data.page){recordHistory();session={board:data,page:data.page}}
    data.pageFieldGuides[data.page]=next;renderFieldGuides();save();updateArtwork();sync();
    if(input.type==='checkbox')endSession();
   });
-  for(const name of ['change','blur','pointercancel'])input.addEventListener(name,()=>{endSession();sync()});
+  for(const name of ['change','blur','pointercancel'])input.addEventListener(name,()=>{if(name==='change'&&['fieldRayLength','circleRayLength'].includes(input.dataset.guideKey))input.dispatchEvent(new Event('input',{bubbles:true}));endSession();sync()});
  }
  const previousRender=render;render=function(){previousRender();if(dialog.open&&!ownHistory){if(owner!==data||ownerPage!==data.page||ownerContent!==activeContent||!allowed()){session=null;closeEditor()}else{if(!session&&!gesture)finishEdit();updateArtwork(true)}}sync()};new MutationObserver(sync).observe(document.body,{attributes:true,attributeFilter:['class']});sync();
 })();
@@ -283,7 +288,7 @@
   const selectedGroup=sourceGroup?sourceBoard.phaseGroups?.find(group=>group.id===sourceGroup):null;
   if(sourceGroup&&(!selectedGroup||data.activePhaseGroup!==sourceGroup)){close();return}
   if(!sourceGroup&&!sourceBoard.pages[sourcePage]){close();return}
-  const fields=['pageNames','pageNotes','pageColors','pageBoardShapes','pageFieldBackgroundColors','pageFieldImageIds','pageFieldImageTints','pageFieldGuides','pageFieldSizes'];
+  const fields=['pageNames','pageNotes','pageColors','pageBoardShapes','pageFieldBackgroundColors','pageFieldImageIds','pageFieldImageTints','pageFieldGuides','pageFieldSizes','pageMasterIds'];
   const indexes=selectedGroup?sourceBoard.pages.flatMap((_,i)=>sourceBoard.pageGroupIds[i]===sourceGroup?[i]:[]):[sourcePage];
   const before=JSON.stringify(destination);
   normalizePhaseGroups(destination);destination.pageFieldGuides=destination.pages.map((_,i)=>fieldGuides(destination,i));destination.pageFieldImageTints=destination.pages.map((_,i)=>fieldImageTint(destination,i));
@@ -372,7 +377,7 @@
   const current=data.pages[data.page],selected=selectedPhaseIndexes.map(index=>data.pages[index]);recordHistory();
   if(ownGroup&&targetGroup!==ownGroup){data.pageGroupIds[from]=null;to=from}
   else if(!ownGroup&&targetGroup){const group=data.phaseGroups.find(item=>item.id===targetGroup);if(group?.collapsed)to=direction>0?data.pageGroupIds.lastIndexOf(targetGroup):data.pageGroupIds.indexOf(targetGroup);else data.pageGroupIds[from]=targetGroup}
-  for(const key of ['pageGroupIds','pages','pageNames','pageNotes','pageColors','pageBoardShapes','pageFieldBackgroundColors','pageFieldImageIds','pageFieldImageTints','pageFieldGuides','pageFieldSizes']){const [value]=data[key].splice(from,1);data[key].splice(to,0,value)}
+  for(const key of ['pageGroupIds','pages','pageNames','pageNotes','pageColors','pageBoardShapes','pageFieldBackgroundColors','pageFieldImageIds','pageFieldImageTints','pageFieldGuides','pageFieldSizes','pageMasterIds']){const [value]=data[key].splice(from,1);data[key].splice(to,0,value)}
   data.page=data.pages.indexOf(current);selectedPhaseIndexes=selected.map(page=>data.pages.indexOf(page));renderAndSave();revealMovedPhase(to);
  }
  function open(row,x,y){
@@ -380,14 +385,14 @@
   document.getElementById('phaseContentCopyMenu').hidden=true;document.getElementById('copyPageToContent').setAttribute('aria-expanded','false');
   closeObjectContextMenu();closeColorPopovers();closeJsonImportMenu();closeJsonExportMenu();closeHelpMenu();
   targetBoard=data;targetPhase=data.pages[index];menu._opener=row.querySelector('.phone-row-actions');menu._openerResolver=()=>targetBoard===data?list.querySelectorAll('.page-tab')[data.pages.indexOf(targetPhase)]?.querySelector('.phone-row-actions'):null;menu.replaceChildren();
-  const actions=[['rename','名前変更'],['copy','コピー'],['cross-copy','別コンテンツへコピー'],['field-copy','フィールド設定をコピー'],['field-paste','フィールド設定を貼り付け'],['previous','前へ移動'],['next','後ろへ移動'],['delete','削除']];
+  const actions=[['rename','名前変更'],['copy','コピー'],['cross-copy','別コンテンツへコピー'],['previous','前へ移動'],['next','後ろへ移動'],['delete','削除']];
   for(const [action,label] of actions){
    if(action==='copy'||action==='field-copy'||action==='previous'||action==='delete'){const separator=document.createElement('div');separator.className='context-separator';separator.setAttribute('role','separator');menu.append(separator)}
-   const button=document.createElement('button');button.type='button';button.textContent=label;button.dataset.action=action;button.setAttribute('role','menuitem');
-   button.disabled=boardReadOnly||phaseComparisonActive()||(action==='field-paste'&&!fieldClipboard)||(action==='previous'&&index===0&&!data.pageGroupIds[index])||(action==='next'&&index===data.pages.length-1&&!data.pageGroupIds[index]);
+   const button=document.createElement('button');button.type='button';button.textContent=label;button.dataset.action=action;if(action==='rename')button.dataset.shortcut='F2';button.setAttribute('role','menuitem');
+   button.disabled=boardReadOnly||phaseComparisonActive()||!!window.Bolxiv.pngPreview?.active||(action==='field-paste'&&!fieldClipboard)||(action==='previous'&&index===0&&!data.pageGroupIds[index])||(action==='next'&&index===data.pages.length-1&&!data.pageGroupIds[index]);
    if(action==='delete')button.className='context-delete';
    button.onclick=()=>{
-    if(button.disabled||boardReadOnly||phaseComparisonActive()||targetBoard!==data)return;
+    if(button.disabled||boardReadOnly||phaseComparisonActive()||window.Bolxiv.pngPreview?.active||targetBoard!==data)return;
     const at=data.pages.indexOf(targetPhase),tab=list.querySelectorAll('.page-tab')[at];if(at<0||!tab){close();return}close();
     if(action==='field-copy')copyField(at);
     else if(action==='field-paste')pasteField(at);
@@ -476,7 +481,7 @@
    const bounds=row.getBoundingClientRect(),press=lastPress?.row===row?lastPress:{x:event.clientX,y:event.clientY};event.dataTransfer.setDragImage(row,press.x-bounds.left,bounds.height+press.y-bounds.top-bounds.height/2);
   },true);
   function updateDragTarget(next,x,y){const bounds=scrollHost().getBoundingClientRect();
-   const hit=document.elementFromPoint(x,y);const target=hit?.closest(id==='pages'?'.page-tab,.phase-group-heading':rowSelector)||(id==='pages'&&(hit===list||(y>=bounds.bottom-8&&y<=bounds.bottom+20&&x>=bounds.left&&x<=bounds.right))?list:id==='objectList'&&(hit===list||y>=bounds.bottom-8&&y<=bounds.bottom+20&&x>=bounds.left&&x<=bounds.right)?list:null);
+   const hit=document.elementFromPoint(x,y);const target=hit?.closest(id==='pages'?'.page-tab,.phase-group-heading':rowSelector)||(['pages','phaseMasters'].includes(id)&&(hit===list||(y>=bounds.bottom-8&&y<=bounds.bottom+20&&x>=bounds.left&&x<=bounds.right))?list:id==='objectList'&&(hit===list||y>=bounds.bottom-8&&y<=bounds.bottom+20&&x>=bounds.left&&x<=bounds.right)?list:null);
    for(const row of rows())row.classList.remove('drag-over','drop-before','drop-after');next.target=target&&list.contains(target)&&target!==next.row?target:null;
    if(next.target)next.target.dispatchEvent(new DragEvent('dragover',{bubbles:true,cancelable:true,dataTransfer:next.transfer,clientX:x,clientY:y}));
   }
@@ -485,7 +490,7 @@
   list.addEventListener('pointerdown',event=>{
    if(event.pointerType!=='touch'||!event.target.closest(handleSelector)||boardReadOnly||phaseComparisonActive()||(id==='contentOptions'&&editingContentIndex>=0))return;
    clear();const row=event.target.closest(rowSelector);if(!row||event.target.closest('[data-cancel-group-addition]'))return;event.preventDefault();event.stopImmediatePropagation();
-   const transfer=new DataTransfer();if(id==='pages'&&row.classList.contains('phase-group-heading'))transfer.setData('application/x-tactica-phase-group',row.dataset.groupId);else transfer.setData(id==='objectList'&&row.classList.contains('object-group-member')?'application/x-tactica-group-member':mime,id==='userPresetManager'?row.dataset.presetId:id==='objectList'?row.dataset.id:String(id==='pages'?[...list.querySelectorAll('.page-tab')].indexOf(row):rows().indexOf(row)));transfer.effectAllowed='move';
+   const transfer=new DataTransfer();if(id==='phaseMasters'&&row.dataset.masterGroupId)transfer.setData('application/x-phase-master-group',row.dataset.masterGroupId);else if(id==='pages'&&row.classList.contains('phase-group-heading'))transfer.setData('application/x-tactica-phase-group',row.dataset.groupId);else transfer.setData(id==='objectList'&&row.classList.contains('object-group-member')?'application/x-tactica-group-member':mime,id==='phaseMasters'?row.dataset.masterId:id==='userPresetManager'?row.dataset.presetId:id==='objectList'?row.dataset.id:String(id==='pages'?[...list.querySelectorAll('.page-tab')].indexOf(row):rows().indexOf(row)));transfer.effectAllowed='move';
    gesture={id:event.pointerId,row,menuButton:event.target.closest('.list-drag-grip')?null:event.target.closest('.phone-row-actions,.phase-group-menu-trigger,.object-group-disclosure,.preset-manager-menu'),armed:false,draggable:row.draggable,transfer,x:event.clientX,y:event.clientY,sourceLeft:row.getBoundingClientRect().left,sourceTop:row.getBoundingClientRect().top,sourceHeight:row.getBoundingClientRect().height,moved:false,target:null,board:data,phase:current()};row.draggable=false;list.setPointerCapture(event.pointerId);
    const next=gesture;next.timer=setTimeout(()=>{
     if(gesture!==next||!row.isConnected||next.board!==data||next.phase!==current()||boardReadOnly||phaseComparisonActive())return;
@@ -634,12 +639,15 @@
   if(!data.activePhaseGroup||event.target.closest('input,textarea,select,[contenteditable="true"]'))return;
   if((event.ctrlKey||event.metaKey)&&['v','x'].includes(event.key.toLowerCase())){event.preventDefault();event.stopImmediatePropagation()}
  },true);
- function drawGroupArtwork(){
-  if(!overview.firstElementChild){
+ function drawGroupArtwork(target=overview){
+  if(!target.firstElementChild){
    const canvas=document.createElement('div');canvas.className='phase-group-artwork';canvas.inert=true;canvas.setAttribute('aria-label','ChatGPT');canvas.style.background=artwork.pageColor;
-   artwork.objects.forEach((original,index)=>{if(original.visible===false)return;const object={...original,id:'group-art-'+original.id};canvas.append(createCanvasObjectVisual(object,index,[]))});overview.append(canvas);
+   artwork.objects.forEach((original,index)=>{if(original.visible===false)return;const object={...original,id:(target.id||'phaseGroupPreview')+'-art-'+original.id};canvas.append(createCanvasObjectVisual(object,index,[]))});target.append(canvas);
   }
  }
+ window.Bolxiv.drawGroupPreview=(target,name,label='フェーズグループ')=>{
+  drawGroupArtwork(target);let caption=target.querySelector('.phase-group-caption');if(!caption){caption=document.createElement('p');caption.className='phase-group-caption';for(const part of ['prefix','name','suffix']){const span=document.createElement('span');span.className='phase-group-caption-'+part;caption.append(span)}target.append(caption)}caption.querySelector('.phase-group-caption-prefix').textContent='そう、'+label+'：';caption.querySelector('.phase-group-caption-name').textContent=name;caption.querySelector('.phase-group-caption-suffix').textContent='よ。';caption.title='そう、'+label+'：'+name+'よ。';
+ };
  function showGroup(id,keepContentOpen=false){data.activePhaseGroup=id;selectedPhaseIndexes=[];selected=null;selectedIds=[];renderAndSave();if(!boardReadOnly)openGroupProperties();if(!keepContentOpen&&matchMedia('(max-width:850px)').matches&&document.querySelector('.layout').classList.contains('phone-content-open'))document.querySelector('.phone-content-close').click()}
  function selectPage(index,keepContentOpen=false){data.activePhaseGroup=null;selectPhase(index);renderAndSave();if(!keepContentOpen&&matchMedia('(max-width:850px)').matches&&document.querySelector('.layout').classList.contains('phone-content-open'))document.querySelector('.phone-content-close').click()}
  add.onclick=()=>{if(boardReadOnly||phaseComparisonActive())return;commitPendingHistory();const owner=data,before=JSON.parse(JSON.stringify(data)),beforeHistory=history.slice(),beforeFuture=future.slice();recordHistory();const item={id:createObjectId(),name:'新規グループ',note:'',collapsed:false};data.phaseGroups.push(item);openPhaseListForCreation();renderAndSave();renameGroupInList(data.phaseGroups.find(group=>group.id===item.id),()=>{if(data!==owner)return;Object.assign(data,before);history=beforeHistory;future=beforeFuture;pendingHistoryState=null;pendingHistoryOwner=null;renderAndSave()})};
@@ -680,8 +688,7 @@
   const phoneTitle=document.querySelector('.phone-phase-switch-title');if(item&&phoneTitle)phoneTitle.innerHTML='<strong>グループプロパティ</strong>';
   if(!item)return;
   const selectedLabel=document.getElementById('selectionTitle');selectedLabel.textContent='グループ：'+item.name;selectedLabel.title=selectedLabel.textContent;document.getElementById('clearBtn').disabled=true;for(const id of ['copyPage','copyPageToContent'])document.getElementById(id).disabled=boardReadOnly||phaseComparisonActive();
-  drawGroupArtwork();
-  let caption=overview.querySelector('.phase-group-caption');if(!caption){caption=document.createElement('p');caption.className='phase-group-caption';for(const [part,text] of [['prefix','そう、フェーズグループ：'],['name',''],['suffix','よ。']]){const span=document.createElement('span');span.className='phase-group-caption-'+part;span.textContent=text;caption.append(span)}overview.append(caption)}caption.querySelector('.phase-group-caption-name').textContent=item.name;caption.title='そう、フェーズグループ：'+item.name+'よ。';
+  window.Bolxiv.drawGroupPreview(overview,item.name);
   if(groupProperties.dataset.group===item.id&&groupProperties.contains(document.activeElement))return;
   groupProperties.dataset.group=item.id;groupProperties.replaceChildren();
   const nameField=document.createElement('div');nameField.className='field';const label=document.createElement('label');label.htmlFor='phaseGroupNameInput';label.textContent='グループ名';const name=document.createElement('input');name.id='phaseGroupNameInput';name.type='text';name.value=item.name;name.readOnly=boardReadOnly;name.maxLength=120;nameField.append(label,name);groupProperties.append(nameField);
@@ -705,19 +712,20 @@
  function groupUnits(){return [...list.children].filter(row=>row.classList.contains('phase-group-heading')||(row.classList.contains('page-tab')&&!row.classList.contains('group-member')))}
  function ungroupPhaseGroup(id){if(boardReadOnly||phaseComparisonActive()||!data.phaseGroups.some(g=>g.id===id))return;recordHistory();data.pageGroupIds=data.pageGroupIds.map(groupId=>groupId===id?null:groupId);data.phaseGroups=data.phaseGroups.filter(g=>g.id!==id);if(data.activePhaseGroup===id)data.activePhaseGroup=null;renderAndSave();notify('グループを解除しました。フェーズは残しています')}
  function openGroupMenu(id,x,y){
+  if(window.Bolxiv.pngPreview?.active&&matchMedia('(max-width:850px)').matches)return;
   const item=data.phaseGroups.find(g=>g.id===id);if(!item)return;
   for(const menuId of ['phaseItemMenu','contentItemMenu','phaseContentCopyMenu']){const menu=document.getElementById(menuId);if(menu)menu.hidden=true}
   closeHelpMenu();groupMenu.replaceChildren();const owner=data,units=groupUnits(),at=units.findIndex(row=>row.dataset.groupId===id);
   for(const [action,label] of [['rename','名前変更'],['previous','前へ移動'],['next','後ろへ移動'],['delete','グループ解除']]){
    if(action==='previous'||action==='delete'){const separator=document.createElement('div');separator.className='context-separator';separator.setAttribute('role','separator');groupMenu.append(separator)}
    const entry=button(label,()=>{
-    if(boardReadOnly||phaseComparisonActive()||data!==owner)return;closeGroupMenu();
+    if(boardReadOnly||phaseComparisonActive()||window.Bolxiv.pngPreview?.active||data!==owner)return;closeGroupMenu();
     if(action==='rename'){renameGroupInList(item);return}
     if(action==='delete'){ungroupPhaseGroup(id);return}
     const next=units[at+(action==='previous'?-1:1)];if(!next)return;
     const transfer=new DataTransfer();transfer.setData('application/x-tactica-phase-group',id);const rect=next.getBoundingClientRect();
     next.dispatchEvent(new DragEvent('drop',{bubbles:true,cancelable:true,dataTransfer:transfer,clientX:rect.left+Math.max(40,rect.width/2),clientY:action==='previous'?rect.top+2:rect.bottom-2}));
-   });entry.dataset.action=action;entry.setAttribute('role','menuitem');entry.disabled=boardReadOnly||phaseComparisonActive()||(action==='previous'&&at<=0)||(action==='next'&&at>=units.length-1);if(action==='delete')entry.className='context-delete';groupMenu.append(entry);
+   });entry.dataset.action=action;if(action==='rename')entry.dataset.shortcut='F2';entry.setAttribute('role','menuitem');entry.disabled=boardReadOnly||phaseComparisonActive()||!!window.Bolxiv.pngPreview?.active||(action==='previous'&&at<=0)||(action==='next'&&at>=units.length-1);groupMenu.append(entry);
   }
   addPhoneMenuClose(groupMenu,closeGroupMenu);groupMenu.hidden=false;groupMenu.style.left=Math.max(8,Math.min(x,innerWidth-groupMenu.offsetWidth-8))+'px';groupMenu.style.top=Math.max(8,Math.min(y,innerHeight-groupMenu.offsetHeight-8))+'px';
  }
@@ -749,7 +757,7 @@
   data.pages.forEach((_,i)=>{const id=data.pageGroupIds[i];if(!id)order.push(i);else if(!seen.has(id)){seen.add(id);data.pageGroupIds.forEach((g,j)=>{if(g===id)order.push(j)})}});
   if(order.every((value,i)=>value===i))return;
   const at=data.page,comparisons=selectedPhaseIndexes.slice();
-  for(const key of ['pageGroupIds','pages','pageNames','pageNotes','pageColors','pageBoardShapes','pageFieldBackgroundColors','pageFieldImageIds','pageFieldImageTints','pageFieldGuides','pageFieldSizes']){const previous=data[key];if(Array.isArray(previous))data[key]=order.map(i=>previous[i])}
+  for(const key of ['pageGroupIds','pages','pageNames','pageNotes','pageColors','pageBoardShapes','pageFieldBackgroundColors','pageFieldImageIds','pageFieldImageTints','pageFieldGuides','pageFieldSizes','pageMasterIds']){const previous=data[key];if(Array.isArray(previous))data[key]=order.map(i=>previous[i])}
   data.page=order.indexOf(at);selectedPhaseIndexes=comparisons.map(i=>order.indexOf(i));
  }
  const beforePages=renderPages;renderPages=function(){
@@ -781,7 +789,7 @@
     for(const item of data.phaseGroups){if(!data.pageGroupIds.includes(item.id)){const slot=item.position??data.pages.length,boundary=remaining.filter(i=>i<slot).length;item.position=boundary+(at<boundary||(at===boundary&&item.id===beforeEmpty)?moving.length:0)}}
     group.position=at;
     if(!moving.length){const target=data.phaseGroups.find(item=>item.id===groupId);data.phaseGroups=data.phaseGroups.filter(item=>item!==group);const index=target?data.phaseGroups.indexOf(target):data.phaseGroups.length;data.phaseGroups.splice(index<0?data.phaseGroups.length:index,0,group)}
-    for(const key of ['pages','pageGroupIds','pageNames','pageNotes','pageColors','pageBoardShapes','pageFieldBackgroundColors','pageFieldImageIds','pageFieldImageTints','pageFieldGuides','pageFieldSizes']){const previous=data[key];data[key]=order.map(i=>previous[i])}
+    for(const key of ['pages','pageGroupIds','pageNames','pageNotes','pageColors','pageBoardShapes','pageFieldBackgroundColors','pageFieldImageIds','pageFieldImageTints','pageFieldGuides','pageFieldSizes','pageMasterIds']){const previous=data[key];data[key]=order.map(i=>previous[i])}
     data.page=data.pages.indexOf(active);selectedPhaseIndexes=comparison.map(page=>data.pages.indexOf(page));renderAndSave();return;
    }
    const raw=event.dataTransfer?.getData('application/x-tactica-page');if(!raw)return;const from=Number(raw);
@@ -790,7 +798,7 @@
    recordHistory();data.pageGroupIds[from]=groupId;
    const at=Math.max(0,Math.min(data.pages.length-1,position-(from<position?1:0)));
    for(const empty of data.phaseGroups.filter(g=>!data.pageGroupIds.includes(g.id))){let slot=Number.isInteger(empty.position)?empty.position:data.pages.length;if(from<slot)slot--;const targetGroup=event.target.closest('.phase-group-heading')?.dataset.groupId;if(at<slot||(at===slot&&groupId===null&&targetGroup===empty.id))slot++;empty.position=slot}
-   for(const key of ['pages','pageGroupIds','pageNames','pageNotes','pageColors','pageBoardShapes','pageFieldBackgroundColors','pageFieldImageIds','pageFieldImageTints','pageFieldGuides','pageFieldSizes']){const [value]=data[key].splice(from,1);data[key].splice(at,0,value)}
+   for(const key of ['pages','pageGroupIds','pageNames','pageNotes','pageColors','pageBoardShapes','pageFieldBackgroundColors','pageFieldImageIds','pageFieldImageTints','pageFieldGuides','pageFieldSizes','pageMasterIds']){const [value]=data[key].splice(from,1);data[key].splice(at,0,value)}
    const group=data.phaseGroups.find(g=>g.id===groupId);if(group)group.collapsed=false;
    data.page=data.pages.indexOf(active);selectedPhaseIndexes=comparison.map(page=>data.pages.indexOf(page));renderAndSave();revealMovedPhase(data.pages.indexOf(moving));
   }
@@ -822,7 +830,7 @@
   list.ondrop=event=>{const target=dropTarget(event);clearDropGuide();if(event.target!==list)return;if(target===list)movePhase(event,null,data.pages.length);else target.dispatchEvent(new DragEvent('drop',{bubbles:true,cancelable:true,dataTransfer:event.dataTransfer,clientX:event.clientX,clientY:event.clientY}))};
   // Keep phase rows in their original order: existing selection and reorder code uses this order.
   for(const item of data.phaseGroups){
-   const row=document.createElement('div');row.className='phase-group-heading'+(item.id===data.activePhaseGroup?' active':'');row.dataset.groupId=item.id;
+   const row=document.createElement('div');row.className='phase-group-heading'+(item.id===data.activePhaseGroup?' active':'');row.dataset.groupId=item.id;row.addEventListener('rename-item',()=>renameGroupInList(item));
    row.classList.toggle('contains-active-phase',!data.activePhaseGroup&&data.pageGroupIds[data.page]===item.id);
    row.draggable=!boardReadOnly&&!phaseComparisonActive();row.onpointerdown=event=>{row.draggable=!boardReadOnly&&!phaseComparisonActive()&&!event.target.closest('.phase-group-toggle,.phase-group-menu-trigger,.phase-group-ungroup')};
    row.ondragstart=event=>{if(!row.draggable){event.preventDefault();return}event.dataTransfer.setData('application/x-tactica-phase-group',item.id);event.dataTransfer.effectAllowed='move';row.classList.add('dragging')};row.ondragend=()=>{row.classList.remove('dragging');clearDropGuide()};
@@ -977,3 +985,5 @@ if(matchMedia('(max-width:850px)').matches&&!Number.isFinite(viewSettings.boardD
  function sync(){for(const target of document.querySelectorAll(targets)){if(target.querySelector('.list-drag-grip'))continue;const grip=document.createElement('span');grip.className='list-drag-grip';grip.setAttribute('aria-hidden','true');grip.innerHTML=artwork;target.prepend(grip)}}
  const observer=new MutationObserver(sync);for(const id of ['pages','objectList','contentOptions'])observer.observe(document.getElementById(id),{childList:true,subtree:true});sync();
 })();
+
+window.Bolxiv.initializePhaseMasterUI();

@@ -1099,7 +1099,7 @@ input[type=file] {
   box-shadow:inset 0 0 0 3px #4769b333!important;
 }
 /* Keep the phase name and controls in place; edit in a second row. */
-.battle #pages .page-tab.renaming {
+.battle :is(#pages,#phaseMasters) .page-tab.renaming {
   display:flex;
   flex-wrap:wrap;
   row-gap:6px;
@@ -1108,7 +1108,7 @@ input[type=file] {
   padding-top:4px;
   padding-bottom:4px;
 }
-.battle #pages .page-tab.renaming .page-tab-input {
+.battle :is(#pages,#phaseMasters) .page-tab.renaming .page-tab-input {
   flex:1 0 100%;
   width:100%;
   min-width:0;
@@ -1142,7 +1142,7 @@ input[type=file] {
     overflow-wrap:anywhere;
     line-height:23px;
   }
-  .battle #pages .page-tab.renaming {
+  .battle :is(#pages,#phaseMasters) .page-tab.renaming {
     padding-top:6px;
     padding-bottom:6px;
   }

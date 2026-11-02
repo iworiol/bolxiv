@@ -1173,7 +1173,7 @@
 @media(max-width:850px) {
   .app>.top>.brand {
     display:grid;
-    grid-template-columns:30px minmax(0,max-content) auto;
+    grid-template-columns:30px minmax(0,1fr) auto;
     grid-template-rows:auto auto;
     column-gap:7px;
     row-gap:2px;
@@ -2253,3 +2253,5 @@ body:not(.board-read-only) .page-list-box>.page-tab-actions {
 @media(max-width:850px){.app>.layout.phone-materials-open>.left #enemyPanel:not([hidden]):not(.hidden){display:grid!important}}
 
 @media(max-width:850px){#objectControls .controlbox .move-handle[data-edge-placement]::before{left:50%;top:50%;bottom:auto;height:var(--move-connector-length);transform-origin:0 0;transform:translate(var(--move-connector-x),var(--move-connector-y)) rotate(var(--move-connector-angle))}}
+
+@media(max-width:850px){.app>.top>.brand strong{overflow:hidden;text-overflow:ellipsis}}

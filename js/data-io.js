@@ -8,6 +8,50 @@ function fieldImageSource(board=data,index=board.page){return boardImageLibrary.
 
 function objectImageSource(object){return object.imageId?boardImageLibrary.get(object.imageId):embeddedPngs[object.src]||object.src}
 
+// Original bytes belong to the image library; decoded stills are a memory-only cache.
+const importedImageCache=new Map();
+const emptyImportedImage='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="1" height="1"/%3E';
+async function decodeImportedImage(source){
+ const image=new Image();image.src=source;await image.decode();
+ const width=image.naturalWidth,height=image.naturalHeight;if(!width||!height)throw new Error('画像の大きさを取得できませんでした');
+ const blob=await (await fetch(source)).blob();let frame=null,decoder=null;
+ let freeze=/image\/(gif|svg\+xml)/i.test(blob.type);
+ try{
+  if(typeof ImageDecoder!=='undefined'&&await ImageDecoder.isTypeSupported(blob.type)){
+   decoder=new ImageDecoder({data:await blob.arrayBuffer(),type:blob.type,preferAnimation:true});await decoder.tracks.ready;
+   if(decoder.tracks.selectedTrack?.animated){freeze=true;frame=(await decoder.decode({frameIndex:0})).image}
+  }else if(/image\/(png|webp|avif)/i.test(blob.type)){
+   const bytes=new Uint8Array(await blob.arrayBuffer()),tag=(offset,count)=>String.fromCharCode(...bytes.subarray(offset,offset+count));
+   if(/png/i.test(blob.type)){for(let offset=8;offset+12<=bytes.length;){const size=new DataView(bytes.buffer).getUint32(offset);if(tag(offset+4,4)==='acTL'){freeze=true;break}offset+=size+12}}
+   else if(/webp/i.test(blob.type)){for(let offset=12;offset+8<=bytes.length;){const size=new DataView(bytes.buffer).getUint32(offset+4,true);if(tag(offset,4)==='ANIM'){freeze=true;break}offset+=8+size+(size%2)}}
+   else freeze=tag(0,Math.min(64,bytes.length)).includes('avis');
+  }
+  if(!freeze)return {width,height,preview:source};
+  const canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;
+  const context=canvas.getContext('2d');if(!context)throw new Error('画像を静止画として読み込めませんでした');
+  context.drawImage(frame||image,0,0,width,height);const preview=canvas.toDataURL('image/png');
+  if(!preview.startsWith('data:image/png'))throw new Error('画像を静止画として読み込めませんでした');
+  return {width,height,preview};
+ }finally{frame?.close();decoder?.close()}
+}
+function importedImageRecord(source){
+ let record=importedImageCache.get(source);if(record)return record;
+ record={value:null,promise:null};record.promise=decodeImportedImage(source).then(value=>(record.value=value));
+ importedImageCache.set(source,record);record.promise.catch(()=>{if(importedImageCache.get(source)===record)importedImageCache.delete(source)});return record;
+}
+function bindImportedImage(image,object){
+ image.dataset.importedImageId=object.imageId;const record=importedImageRecord(boardImageLibrary.requireImage(object.imageId));
+ image.src=record.value?.preview||emptyImportedImage;
+ record.promise.then(value=>{if(image.dataset.importedImageId===object.imageId)image.src=value.preview}).catch(()=>{image.alt='画像を読み込めませんでした';if(!record.notified){record.notified=true;notify('配置した画像を読み込めませんでした')}});
+}
+async function prepareImportedImageElements(root){
+ await Promise.all([...root.querySelectorAll('img[data-imported-image-id]')].map(async image=>{
+  const value=await importedImageRecord(boardImageLibrary.requireImage(image.dataset.importedImageId)).promise;
+  image.src=value.preview;await image.decode();
+ }));
+}
+function selectionHasImportedImages(items=current().filter(o=>selectedIds.includes(o.id))){return items.some(o=>o.type==='image')}
+
 function migrateBoardImages(board,externalLibrary){
  const resolve=id=>{
   if(!id)return '';
@@ -85,7 +129,7 @@ function phaseComparisonBlocksTarget(target){return !!target.closest('#objects,#
 
 function renderPages(){updateSelectionLabel();document.getElementById('activePhaseIndex').textContent=String(data.page+1).padStart(2,'0');document.getElementById('activePhaseLabel').textContent=data.pageNames[data.page]||'';document.getElementById('activePhaseLabel').title=data.pageNames[data.page]||'';let box=$('#pages');box.innerHTML='';data.pages.forEach((_,i)=>{let b=document.createElement('div');b.className='page page-tab'+(i===data.page?' active':'')+(!data.activePhaseGroup&&(selectedPhaseIndexes.length?selectedPhaseIndexes.includes(i):i===data.page)?' selected':'');b.setAttribute('role','button');b.tabIndex=0;b.title=(data.pageNames[i]||'フェーズ'+(i+1))+'\nクリックで単独選択、Shift＋クリックで範囲選択、Ctrl＋クリックで追加・解除（最大12個）。チェックでも追加・解除\n右クリック／長押しで操作メニュー';let check=document.createElement('input');check.type='checkbox';check.className='phase-select-check';check.checked=selectedPhaseIndexes.includes(i);check.title=check.checked?'このフェーズを表示対象から外す':'このフェーズを表示対象にする';check.setAttribute('aria-label','フェーズ'+(i+1)+(check.checked?'を表示対象から外す':'を表示対象にする'));check.onclick=e=>{e.stopPropagation();selectPhase(i,true)};let index=document.createElement('span');index.className='page-index';index.textContent=String(i+1).padStart(2,'0');b.appendChild(index);b.appendChild(check);let label=document.createElement('span');label.className='page-tab-name';label.textContent=data.pageNames[i];b.appendChild(label);let del=document.createElement('button');del.className='page-tab-x';del.type='button';del.textContent='×';del.title='このフェーズを削除';del.onclick=e=>{e.stopPropagation();deleteCurrentPage(i)};b.appendChild(del);b.draggable=true;b.onclick=e=>{selectPhaseFromList(i,e);document.querySelector('#pages .page-tab.active')?.focus()};b.ondblclick=null;b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();selectPhaseFromList(i,e)}};b.ondragstart=e=>{e.dataTransfer.setData('application/x-tactica-page',String(i));e.dataTransfer.effectAllowed='move';b.classList.add('dragging')};b.ondragend=()=>b.classList.remove('dragging');b.ondragover=e=>{if(!Array.from(e.dataTransfer.types).includes('application/x-tactica-page')){b.classList.remove('drag-over','drop-before','drop-after');return}e.preventDefault();let after=e.clientY>b.getBoundingClientRect().top+b.offsetHeight/2;b.classList.add('drag-over');b.classList.toggle('drop-after',after);b.classList.toggle('drop-before',!after);e.dataTransfer.dropEffect='move'};b.ondragleave=()=>b.classList.remove('drag-over','drop-before','drop-after');b.ondrop=e=>{if(!Array.from(e.dataTransfer.types).includes('application/x-tactica-page')){b.classList.remove('drag-over','drop-before','drop-after');return}e.preventDefault();b.classList.remove('drag-over','drop-before','drop-after');let from=Number(e.dataTransfer.getData('application/x-tactica-page')),to=i;if(!Number.isInteger(from)||from===to)return;let groupMap=new Map(data.pages.map((page,index)=>[page,data.pageGroupIds[index]]));let comparisonPages=selectedPhaseIndexes.map(index=>data.pages[index]);let currentPage=data.pages[data.page],pages=data.pages.slice(),names=data.pageNames.slice(),notes=data.pageNotes.slice(),colors=data.pageColors.slice(),shapes=data.pageBoardShapes.slice(),fieldBackgrounds=data.pageFieldBackgroundColors.slice(),fieldImages=data.pageFieldImageIds.slice(),fieldImageTints=data.pageFieldImageTints.slice(),fieldSizes=data.pageFieldSizes.slice(),moving=pages[from],movingName=names[from],movingNote=notes[from],movingColor=colors[from],movingShape=shapes[from],movingFieldBackground=fieldBackgrounds[from],movingFieldImage=fieldImages[from],movingFieldImageTint=fieldImageTints[from],movingFieldSize=fieldSizes[from];recordHistory();pages.splice(from,1);names.splice(from,1);notes.splice(from,1);colors.splice(from,1);shapes.splice(from,1);fieldBackgrounds.splice(from,1);fieldImages.splice(from,1);fieldImageTints.splice(from,1);fieldSizes.splice(from,1);let at=pages.indexOf(data.pages[to])+(e.clientY>b.getBoundingClientRect().top+b.offsetHeight/2?1:0);pages.splice(at,0,moving);names.splice(at,0,movingName);notes.splice(at,0,movingNote);colors.splice(at,0,movingColor);shapes.splice(at,0,movingShape);fieldBackgrounds.splice(at,0,movingFieldBackground);fieldImages.splice(at,0,movingFieldImage);fieldImageTints.splice(at,0,movingFieldImageTint);fieldSizes.splice(at,0,movingFieldSize);data.pages=pages;data.pageGroupIds=pages.map(page=>groupMap.get(page)||null);data.pageNames=names;data.pageNotes=notes;data.pageColors=colors;data.pageBoardShapes=shapes;data.pageFieldBackgroundColors=fieldBackgrounds;data.pageFieldImageIds=fieldImages;data.pageFieldImageTints=fieldImageTints;data.pageFieldSizes=fieldSizes;data.page=data.pages.indexOf(currentPage);selectedPhaseIndexes=comparisonPages.map(page=>data.pages.indexOf(page));openPhaseListForCreation(at);renderAndSave();revealCreatedPhase(at)};box.appendChild(b)})}
 
-function deleteCurrentPage(index=data.page){if(phaseComparisonActive())return;recordHistory();selectedPhaseIndexes=[];data.pages.splice(index,1);data.pageGroupIds.splice(index,1);data.pageNames.splice(index,1);data.pageNotes.splice(index,1);data.pageColors.splice(index,1);data.pageBoardShapes.splice(index,1);data.pageFieldBackgroundColors.splice(index,1);data.pageFieldImageIds.splice(index,1);data.pageFieldImageTints.splice(index,1);data.pageFieldGuides.splice(index,1);data.pageFieldSizes.splice(index,1);if(!data.pages.length){data.pageGroupIds=[null];data.pages=[[]];data.pageFieldGuides=[fieldGuides({},0)];data.pageNames=['新規フェーズ'];data.pageNotes=[''];data.pageColors=['#ffffff'];data.pageBoardShapes=['square'];data.pageFieldBackgroundColors=['#17212c'];data.page=0}else data.page=Math.min(index,data.pages.length-1);selected=null;selectedIds=[];renderAndSave();notify('フェーズを削除しました')}
+function deleteCurrentPage(index=data.page){if(phaseComparisonActive())return;recordHistory();selectedPhaseIndexes=[];data.pages.splice(index,1);data.pageMasterIds?.splice(index,1);data.pageGroupIds.splice(index,1);data.pageNames.splice(index,1);data.pageNotes.splice(index,1);data.pageColors.splice(index,1);data.pageBoardShapes.splice(index,1);data.pageFieldBackgroundColors.splice(index,1);data.pageFieldImageIds.splice(index,1);data.pageFieldImageTints.splice(index,1);data.pageFieldGuides.splice(index,1);data.pageFieldSizes.splice(index,1);if(!data.pages.length){data.pageMasterIds=['initial'];data.pageGroupIds=[null];data.pages=[[]];data.pageFieldGuides=[fieldGuides({},0)];data.pageNames=['新規フェーズ'];data.pageNotes=[''];data.pageColors=['#ffffff'];data.pageBoardShapes=['square'];data.pageFieldBackgroundColors=['#17212c'];data.page=0}else data.page=Math.min(index,data.pages.length-1);selected=null;selectedIds=[];renderAndSave();notify('フェーズを削除しました')}
 
 function normalizePhaseGroups(board){
  if(!Array.isArray(board.phaseGroups))board.phaseGroups=[];
@@ -114,7 +158,7 @@ function beginPageRename(tab,cancelAddition=null){
  input.className='page-tab-input';input.rows=1;input.value=oldName;input.setAttribute('aria-label','フェーズ名');input.draggable=false;
  tab.classList.add('renaming');tab.appendChild(input);tab.draggable=false;
  const resize=()=>{input.style.height='auto';input.style.height=(Math.max(23,input.scrollHeight)+input.offsetHeight-input.clientHeight)+'px'};
- let finish=commit=>{if(finished)return;finished=true;if(!commit&&cancelAddition){cancelAddition();return}let name=input.value.replace(/[\r\n]+/g,' ').trim();if(commit&&name&&name!==oldName){if(!cancelAddition)recordHistory();data.pageNames[index]=name;save()}else if(commit&&!name)notify('フェーズ名を入力してください');if(cancelAddition)renderAndSave();else renderPages()};
+ let finish=commit=>{if(finished)return;finished=true;if(!commit&&cancelAddition){cancelAddition();return}let name=input.value.replace(/[\r\n]+/g,' ').trim();if(commit&&name&&name!==oldName){if(!cancelAddition)recordHistory();data.pageNames[index]=name;save()}else if(commit&&!name)notify('フェーズ名を入力してください');if(cancelAddition)renderAndSave();else{renderPages();window.Bolxiv?.phaseMasters?.paint()}};
  if(cancelAddition){
   const confirm=document.createElement('button');confirm.type='button';confirm.className='addition-confirm';confirm.textContent='✓';confirm.title='フェーズ追加を確定';confirm.setAttribute('aria-label',confirm.title);confirm.dataset.confirmAddition='true';confirm.onpointerdown=e=>{e.preventDefault();e.stopPropagation()};confirm.onclick=e=>{e.preventDefault();e.stopPropagation();finish(true)};tab.insertBefore(confirm,tab.querySelector('.page-tab-x'));
   const cancel=tab.querySelector('.page-tab-x');cancel.textContent='↶';cancel.title='フェーズ追加を取り消す';cancel.setAttribute('aria-label',cancel.title);
@@ -134,7 +178,7 @@ function nextCopiedPhaseName(name,names){
  let candidate=base+'（'+number+'）';while(names.includes(candidate)){number++;candidate=base+'（'+number+'）'}return candidate
 }
 
-function copyPhaseAt(from=data.page){if(boardReadOnly||phaseComparisonActive()||!Number.isInteger(from)||!data.pages[from])return;let at=from+1,copied=data.pages[from].map(o=>{let item=JSON.parse(JSON.stringify(o));item.id=createObjectId();return item});snapshot();selectedPhaseIndexes=[];data.pageGroupIds.splice(at,0,data.pageGroupIds[from]||null);data.pages.splice(at,0,copied);data.pageNames.splice(at,0,nextCopiedPhaseName(data.pageNames[from],data.pageNames));data.pageNotes.splice(at,0,data.pageNotes[from]||'');data.pageColors.splice(at,0,data.pageColors[from]);data.pageBoardShapes.splice(at,0,data.pageBoardShapes[from]);data.pageFieldBackgroundColors.splice(at,0,data.pageFieldBackgroundColors[from]);data.pageFieldImageIds.splice(at,0,data.pageFieldImageIds[from]);data.pageFieldImageTints.splice(at,0,fieldImageTint(data,from));data.pageFieldGuides.splice(at,0,fieldGuides(data,from));data.pageFieldSizes.splice(at,0,JSON.parse(JSON.stringify(data.pageFieldSizes[from])));data.page=at;selected=null;selectedIds=[];openPhaseListForCreation(at);renderAndSave();revealCreatedPhase(at)}
+function copyPhaseAt(from=data.page){if(boardReadOnly||phaseComparisonActive()||!Number.isInteger(from)||!data.pages[from])return;let at=from+1,copied=data.pages[from].map(o=>{let item=JSON.parse(JSON.stringify(o));item.id=createObjectId();return item});snapshot();selectedPhaseIndexes=[];data.pageGroupIds.splice(at,0,data.pageGroupIds[from]||null);data.pages.splice(at,0,copied);data.pageMasterIds?.splice(at,0,data.pageMasterIds[from]);data.pageNames.splice(at,0,nextCopiedPhaseName(data.pageNames[from],data.pageNames));data.pageNotes.splice(at,0,data.pageNotes[from]||'');data.pageColors.splice(at,0,data.pageColors[from]);data.pageBoardShapes.splice(at,0,data.pageBoardShapes[from]);data.pageFieldBackgroundColors.splice(at,0,data.pageFieldBackgroundColors[from]);data.pageFieldImageIds.splice(at,0,data.pageFieldImageIds[from]);data.pageFieldImageTints.splice(at,0,fieldImageTint(data,from));data.pageFieldGuides.splice(at,0,fieldGuides(data,from));data.pageFieldSizes.splice(at,0,JSON.parse(JSON.stringify(data.pageFieldSizes[from])));data.page=at;selected=null;selectedIds=[];openPhaseListForCreation(at);renderAndSave();revealCreatedPhase(at)}
 
 ;
 // ===== js/help.js =====
@@ -207,7 +251,7 @@ function startNumericHistoryGesture(spin,kind,id){
  finishNumericHistoryGesture();numericHistoryGesture={spin,kind,id,board:data,recorded:false};
 }
 
-function recordHistory(state){
+function recordHistory(state){if(window.Bolxiv?.phaseMasters?.active){window.Bolxiv.phaseMasters.record();return}
  const gesture=numericHistoryGesture;
  if(gesture?.board===data&&gesture.recorded)return;
  state??=JSON.stringify(data);if(gesture?.board===data)gesture.recorded=true;
@@ -274,7 +318,7 @@ function applyOutputNoteHistory(forward=false){
  if(focused&&input.isConnected){input.focus({preventScroll:true});input.setSelectionRange(Math.min(caret[0],input.value.length),Math.min(caret[1],input.value.length))}
 }
 
-function updateHistoryButtons(state=JSON.stringify(data)){commitPendingHistory(state);let undoButton=document.getElementById('undo'),redoButton=document.getElementById('redo');if(!undoButton||!redoButton)return;const output=!!window.Bolxiv?.pngPreview?.active;undoButton.disabled=output?!outputNoteHistoryTarget(false):phaseComparisonActive()||history.length===0;redoButton.disabled=output?!outputNoteHistoryTarget(true):phaseComparisonActive()||future.length===0;undoButton.setAttribute('aria-disabled',String(undoButton.disabled));redoButton.setAttribute('aria-disabled',String(redoButton.disabled));let undoState;for(let i=history.length-1;i>=0;i--){if(!sameHistoryState(history[i],state)){undoState=history[i];break}}const redoState=future[future.length-1];const comparison=phaseComparisonActive()&&!output;undoButton.title=comparison?'並列表示中は元に戻せません':undoState?'このコンテンツの操作を元に戻す (Ctrl+Z)\n対象：'+historyActionLabel(undoState,state):'このコンテンツに元に戻せる操作はありません';redoButton.title=comparison?'並列表示中はやり直せません':redoState?'このコンテンツの操作をやり直す (Ctrl+Y)\n対象：'+historyActionLabel(state,redoState):'このコンテンツにやり直せる操作はありません';undoButton.setAttribute('aria-label',undoButton.title);redoButton.setAttribute('aria-label',redoButton.title)}
+function updateHistoryButtons(state=JSON.stringify(data)){const pm=window.Bolxiv?.phaseMasters;if(pm?.active){for(const [id,available,action,key]of [['undo',pm.canUndo,'元に戻す','Ctrl+Z'],['redo',pm.canRedo,'やり直す','Ctrl+Y']]){const button=document.getElementById(id);if(!button)continue;button.disabled=!available;button.setAttribute('aria-disabled',String(!available));button.title=available?'フィールドの操作を'+action+' ('+key+')':'フィールドに'+(id==='undo'?'元に戻せる':'やり直せる')+'操作はありません';button.setAttribute('aria-label',button.title)}return}commitPendingHistory(state);let undoButton=document.getElementById('undo'),redoButton=document.getElementById('redo');if(!undoButton||!redoButton)return;const output=!!window.Bolxiv?.pngPreview?.active;undoButton.disabled=output?!outputNoteHistoryTarget(false):phaseComparisonActive()||history.length===0;redoButton.disabled=output?!outputNoteHistoryTarget(true):phaseComparisonActive()||future.length===0;undoButton.setAttribute('aria-disabled',String(undoButton.disabled));redoButton.setAttribute('aria-disabled',String(redoButton.disabled));let undoState;for(let i=history.length-1;i>=0;i--){if(!sameHistoryState(history[i],state)){undoState=history[i];break}}const redoState=future[future.length-1];const comparison=phaseComparisonActive()&&!output;undoButton.title=comparison?'並列表示中は元に戻せません':undoState?'このコンテンツの操作を元に戻す (Ctrl+Z)\n対象：'+historyActionLabel(undoState,state):'このコンテンツに元に戻せる操作はありません';redoButton.title=comparison?'並列表示中はやり直せません':redoState?'このコンテンツの操作をやり直す (Ctrl+Y)\n対象：'+historyActionLabel(state,redoState):'このコンテンツにやり直せる操作はありません';undoButton.setAttribute('aria-label',undoButton.title);redoButton.setAttribute('aria-label',redoButton.title)}
 
 // Keep the mobile inspector on surviving objects when applying history.
 function restoreHistorySelection(){
@@ -287,16 +331,16 @@ function restoreHistorySelection(){
  }else{selected=null;selectedIds=[]}
 }
 
-function undo(){if(window.Bolxiv?.pngPreview?.active){applyOutputNoteHistory(false);return}if(boardReadOnly)return;if(phaseComparisonActive())return;commitPendingHistory();pendingHistoryState=null;pendingHistoryOwner=null;let page=data.page,currentState=JSON.stringify(data);while(history.length&&history[history.length-1]===currentState)history.pop();if(!history.length)return;future.push(currentState);const restoredState=history.pop(),message=historyResultMessage(restoredState,currentState,'元に戻しました');const previousBoard=data;data=cloneBoardSaveState(historySnapshot(restoredState));data.title=previousBoard.title;replaceContentHistoryBoard(previousBoard,data);data.page=Math.max(0,Math.min(page,data.pages.length-1));restoreHistorySelection();contentBoards[activeContent]=data;render();scheduleObjectPropertySave();notify(message)}
+function undo(){if(window.Bolxiv?.phaseMasters?.active){window.Bolxiv.phaseMasters.history(false);return}if(window.Bolxiv?.pngPreview?.active){applyOutputNoteHistory(false);return}if(boardReadOnly)return;if(phaseComparisonActive())return;commitPendingHistory();pendingHistoryState=null;pendingHistoryOwner=null;let page=data.page,currentState=JSON.stringify(data);while(history.length&&history[history.length-1]===currentState)history.pop();if(!history.length)return;future.push(currentState);const restoredState=history.pop(),message=historyResultMessage(restoredState,currentState,'元に戻しました');const previousBoard=data;data=cloneBoardSaveState(historySnapshot(restoredState));data.title=previousBoard.title;replaceContentHistoryBoard(previousBoard,data);data.page=Math.max(0,Math.min(page,data.pages.length-1));restoreHistorySelection();contentBoards[activeContent]=data;render();scheduleObjectPropertySave();notify(message)}
 
-function redo(){if(window.Bolxiv?.pngPreview?.active){applyOutputNoteHistory(true);return}if(boardReadOnly)return;if(phaseComparisonActive())return;commitPendingHistory();pendingHistoryState=null;pendingHistoryOwner=null;if(!future.length)return;let page=data.page;const previousState=JSON.stringify(data),restoredState=future.pop(),message=historyResultMessage(previousState,restoredState,'やり直しました');history.push(previousState);const previousBoard=data;data=cloneBoardSaveState(historySnapshot(restoredState));data.title=previousBoard.title;replaceContentHistoryBoard(previousBoard,data);data.page=Math.max(0,Math.min(page,data.pages.length-1));restoreHistorySelection();contentBoards[activeContent]=data;render();scheduleObjectPropertySave();notify(message)}
+function redo(){if(window.Bolxiv?.phaseMasters?.active){window.Bolxiv.phaseMasters.history(true);return}if(window.Bolxiv?.pngPreview?.active){applyOutputNoteHistory(true);return}if(boardReadOnly)return;if(phaseComparisonActive())return;commitPendingHistory();pendingHistoryState=null;pendingHistoryOwner=null;if(!future.length)return;let page=data.page;const previousState=JSON.stringify(data),restoredState=future.pop(),message=historyResultMessage(previousState,restoredState,'やり直しました');history.push(previousState);const previousBoard=data;data=cloneBoardSaveState(historySnapshot(restoredState));data.title=previousBoard.title;replaceContentHistoryBoard(previousBoard,data);data.page=Math.max(0,Math.min(page,data.pages.length-1));restoreHistorySelection();contentBoards[activeContent]=data;render();scheduleObjectPropertySave();notify(message)}
 
 ;
 // ===== js/contents.js =====
 // contents: shared function declarations; initialized by bolxiv.js in the documented order.
 // List history keeps board references, not copies of every canvas. Content edits
 // remain in their own history and survive removing/restoring a content item.
-function captureContentList(){return {boards:contentBoards.slice(),active:data}}
+function captureContentList(){return {boards:contentBoards.slice(),active:data,phaseMasters:window.Bolxiv?.phaseMasters?.records(),phaseMasterGroups:window.Bolxiv?.phaseMasters?.groupRecords()}}
 function recordContentListChange(label,before,rename=null){
  contentListHistory.push({label,before,after:captureContentList(),rename});
  if(contentListHistory.length>100)contentListHistory.shift();contentListFuture.length=0;contentSelectorCache=null;
@@ -313,7 +357,7 @@ function restoreContentList(redo=false){
  const source=redo?contentListFuture:contentListHistory,target=redo?contentListHistory:contentListFuture,entry=source.pop();if(!entry)return;
  flushScheduledBoardSave();storeContentHistory();contentBoards[activeContent]=data;
  const state=redo?entry.after:entry.before,active=data;
- contentBoards=state.boards.slice();
+ contentBoards=state.boards.slice();if(state.phaseMasters&&entry.label.startsWith('JSON'))window.Bolxiv?.phaseMasters?.restoreRecords(state.phaseMasters,state.phaseMasterGroups);
  if(entry.rename)entry.rename.board.title=redo?entry.rename.after:entry.rename.before;
  activeContent=contentBoards.indexOf(active);if(activeContent<0)activeContent=Math.max(0,contentBoards.indexOf(state.active));
  data=contentBoards[activeContent];restoreContentHistory();selected=null;selectedIds=[];selectedPhaseIndexes=[];phaseSelectionOwner=data;
@@ -343,14 +387,14 @@ function finishContentRename(i,commit){if(i!==editingContentIndex)return;const a
 
 function deleteContentBoard(index){if(!Number.isInteger(index)||index<0||index>=contentBoards.length)return;storeContentHistory();contentBoards[activeContent]=data;const before=captureContentList();contentBoards.splice(index,1);if(!contentBoards.length)contentBoards=[{title:'新規コンテンツ1',layout:'square',boardShape:'square',pageBoardShapes:['square'],layoutColor:'#ffffff',fieldBackgroundColor:'#17212c',pageFieldBackgroundColors:['#17212c'],pageFieldImageIds:[''],pageFieldImageTints:[{color:"#000000",strength:0}],pageFieldSizes:[{width:538,height:538}],pageColors:['#ffffff'],pages:[[]],pageNames:['新規フェーズ'],pageNotes:[''],page:0}];if(index<activeContent)activeContent--;else if(index===activeContent)activeContent=Math.min(index,contentBoards.length-1);data=contentBoards[activeContent];restoreContentHistory();selected=null;selectedIds=[];editingContentIndex=-1;$('#contentOptions').hidden=false;$('#contentSelect').setAttribute('aria-expanded','true');recordContentListChange('削除',before);renderAndSave();notify('コンテンツを削除しました')}
 
-function addContentBoard(){if(editingContentIndex>=0){finishContentRename(editingContentIndex,true);if(editingContentIndex>=0)return}const before=captureContentList(),previousIndex=activeContent,previousSelected=selected,previousSelectedIds=selectedIds.slice(),previousPhases=selectedPhaseIndexes.slice();storeContentHistory();contentBoards[activeContent]=data;let n=contentBoards.length+1;data={title:`新規コンテンツ${n}`,layout:'square',boardShape:'square',pageBoardShapes:['square'],layoutColor:'#ffffff',fieldBackgroundColor:'#17212c',pageFieldBackgroundColors:['#17212c'],pageFieldImageIds:[''],pageFieldImageTints:[{color:"#000000",strength:0}],pageFieldSizes:[{width:538,height:538}],pageColors:['#ffffff'],pages:[[]],pageNames:['新規フェーズ'],pageNotes:[''],page:0};contentBoards.push(data);activeContent=contentBoards.length-1;restoreContentHistory();selected=null;selectedIds=[];pendingContentAddition={before,index:activeContent,board:data,previousIndex,selected:previousSelected,selectedIds:previousSelectedIds,phases:previousPhases};editingContentIndex=activeContent;contentEditDraft=data.title;selectedPhaseIndexes=[];phaseSelectionOwner=data;$('#contentOptions').hidden=false;$('#contentSelect').setAttribute('aria-expanded','true');renderAndSave();const input=document.querySelector('#contentOptions input');if(input){input.focus();input.select();revealContentRow(activeContent)}}
+function addContentBoard(){if(editingContentIndex>=0){finishContentRename(editingContentIndex,true);if(editingContentIndex>=0)return}const before=captureContentList(),previousIndex=activeContent,previousSelected=selected,previousSelectedIds=selectedIds.slice(),previousPhases=selectedPhaseIndexes.slice();storeContentHistory();contentBoards[activeContent]=data;let n=contentBoards.length+1;data={title:`新規コンテンツ${n}`,pageMasterIds:['initial'],layout:'square',boardShape:'square',pageBoardShapes:['square'],layoutColor:'#ffffff',fieldBackgroundColor:'#17212c',pageFieldBackgroundColors:['#17212c'],pageFieldImageIds:[''],pageFieldImageTints:[{color:"#000000",strength:0}],pageFieldSizes:[{width:538,height:538}],pageColors:['#ffffff'],pages:[[]],pageNames:['新規フェーズ'],pageNotes:[''],page:0};contentBoards.push(data);activeContent=contentBoards.length-1;restoreContentHistory();selected=null;selectedIds=[];pendingContentAddition={before,index:activeContent,board:data,previousIndex,selected:previousSelected,selectedIds:previousSelectedIds,phases:previousPhases};editingContentIndex=activeContent;contentEditDraft=data.title;selectedPhaseIndexes=[];phaseSelectionOwner=data;$('#contentOptions').hidden=false;$('#contentSelect').setAttribute('aria-expanded','true');renderAndSave();const input=document.querySelector('#contentOptions input');if(input){input.focus();input.select();revealContentRow(activeContent)}}
 
 ;
 // ===== js/storage.js =====
 // storage: shared function declarations; initialized by bolxiv.js in the documented order.
-function persistBoardSafely(value,navigationOnly=false){if(boardSaveSuspended)return false;return window.boardStorage.save(value,{navigationOnly,imageAssets:boardImageLibrary.entries(contentBoards)})}
+function persistBoardSafely(value,navigationOnly=false){if(boardSaveSuspended)return false;return window.boardStorage.save(value,{navigationOnly,imageAssets:boardImageLibrary.entries(window.Bolxiv?.phaseMasters?window.Bolxiv.phaseMasters.imageBoards(contentBoards):contentBoards)})}
 
-function renderAndSave(){contentBoards[activeContent]=data;render();save(false,true)}
+function renderAndSave(){if(window.Bolxiv?.phaseMasters?.active){render();window.Bolxiv.phaseMasters.commit();return}contentBoards[activeContent]=data;render();save(false,true)}
 
 function cloneBoardSaveState(value){if(!value||typeof value!=='object')return value;if(Array.isArray(value))return value.map(cloneBoardSaveState);const copy={};for(const key of Object.keys(value))copy[key]=cloneBoardSaveState(value[key]);return copy}
 
@@ -361,7 +405,7 @@ function sameBoardSaveState(left,right){
  return keys.every(key=>Object.hasOwn(right,key)&&sameBoardSaveState(left[key],right[key]));
 }
 
-function boardSaveState(){contentBoards[activeContent]=data;return {version:4,activeContent,contents:contentBoards}}
+function boardSaveState(){if(window.Bolxiv?.phaseMasters)return window.Bolxiv.phaseMasters.state();contentBoards[activeContent]=data;return {version:4,activeContent,contents:contentBoards}}
 
 function cancelScheduledBoardSave(){clearTimeout(boardSaveDelayTimer);clearTimeout(boardSaveMaxTimer);boardSaveDelayTimer=boardSaveMaxTimer=null;boardSavePending=false;boardSaveNavigationOnly=false;boardSaveNoteOnly=false;boardSavePropertyOnly=false;}
 
@@ -424,7 +468,7 @@ function scheduleNoteSave(){
  if(boardSaveMaxTimer===null)boardSaveMaxTimer=setTimeout(flushScheduledBoardSave,noteSaveMaxWait);
 }
 
-function save(navigationOnly=false,historyFresh=false){if(phaseComparisonRendering)return;if(objectPropertyInputActive&&!navigationOnly){scheduleObjectPropertySave();return}if(!historyFresh)updateHistoryButtons();for(let o of current()){if(o.type==='targetcircle'){let el=Array.from(layer.children).find(node=>node.dataset.id===o.id);if(el)refreshTargetCircleTriangle(o,el)}}contentBoards[activeContent]=data;updateContentSelector();scheduleBoardSave(navigationOnly)}
+function save(navigationOnly=false,historyFresh=false){if(window.Bolxiv?.phaseMasters?.active){window.Bolxiv.phaseMasters.commit();return}if(phaseComparisonRendering)return;if(objectPropertyInputActive&&!navigationOnly){scheduleObjectPropertySave();return}if(!historyFresh)updateHistoryButtons();for(let o of current()){if(o.type==='targetcircle'){let el=Array.from(layer.children).find(node=>node.dataset.id===o.id);if(el)refreshTargetCircleTriangle(o,el)}}contentBoards[activeContent]=data;updateContentSelector();scheduleBoardSave(navigationOnly)}
 
 function rememberViewSetting(key,value){viewSettings[key]=value;try{localStorage.setItem(viewSettingsKey,JSON.stringify(viewSettings))}catch{}}
 
@@ -437,7 +481,8 @@ function exportPickerOptions(filename,mime,description){return {suggestedName:fi
 
 async function saveExportBlob(blob,filename,mime,description,handlePromise){let handle=null;if(handlePromise){try{handle=await handlePromise}catch(error){if(error?.name==='AbortError')return false;throw error}}else if(window.showSaveFilePicker){try{handle=await window.showSaveFilePicker(exportPickerOptions(filename,mime,description))}catch(error){if(error?.name==='AbortError')return false;throw error}}if(handle){let writable=await handle.createWritable();try{await writable.write(new Uint8Array(await blob.arrayBuffer()));await writable.close()}catch(error){try{await writable.abort()}catch{}throw error}}else{let url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}notify(handle?(description||'ファイル')+'を保存しました':(description||'ファイル')+'のダウンロードを開始しました');return handle?'saved':'download'}
 
-function jsonExportPayload(boards){
+function jsonExportPayload(boards,includeUnused=false){
+ if(window.Bolxiv?.phaseMasters)return window.Bolxiv.phaseMasters.exportPayload(boards,includeUnused);
  const contents=boards.map(board=>{const {page,...content}=board;return content});
  return {version:4,imageLibrary:Object.fromEntries(boardImageLibrary.entries(boards)),contents};
 }
@@ -451,12 +496,12 @@ function importedFieldImage(image,assets){
  return typeof image==='string'?image:'';
 }
 
-async function exportJson(scope){
+async function exportJson(scope){if(window.Bolxiv?.phaseMasters?.active)window.Bolxiv.phaseMasters.leave();
  save();flushScheduledBoardSave();
  const contents=(scope==='selected'?[data]:contentBoards).map(board=>{
   const {page,...content}=board;return content;
  });
- const snapshot=JSON.stringify(jsonExportPayload(contents)),contentName=data.title||'名称未設定';
+ const snapshot=JSON.stringify(jsonExportPayload(contents,scope!=='selected')),contentName=data.title||'名称未設定';
  const blob=new Blob([JSON.stringify(JSON.parse(snapshot),null,2)],{type:'application/json'});
  const delivery=await saveExportBlob(blob,safeExportName('.json'),'application/json','JSONファイル');
  if(delivery)await rememberJsonBackup(scope,snapshot,contentName,delivery);
@@ -466,7 +511,7 @@ function loadJsonBackupRecords(){try{return JSON.parse(localStorage.getItem(json
 
 function jsonBackupSnapshot(scope){
  const boards=scope==='selected'?[data]:contentBoards.map((board,i)=>i===activeContent?data:board);
- return JSON.stringify(jsonExportPayload(boards));
+ return JSON.stringify(jsonExportPayload(boards,scope!=='selected'));
 }
 
 async function jsonBackupFingerprint(snapshot){
@@ -509,7 +554,7 @@ function parseImportedBoards(text){
  const source=Array.isArray(value.contents)?value.contents:[value];
  const boards=source.filter(board=>board&&Array.isArray(board.pages)&&board.pages.length);
  if(!boards.length)throw new Error('コンテンツまたはフェーズのデータがありません');
- return boards.map(board=>migrateBoardImages({
+ const imported=boards.map(board=>migrateBoardImages({
   ...board,title:String(board.title||'Imported Strategy'),page:0,
   pages:board.pages.map(page=>Array.isArray(page)?page:[]),
   pageNotes:Array.from({length:board.pages.length},(_,i)=>typeof board.pageNotes?.[i]==='string'?board.pageNotes[i]:''),
@@ -521,11 +566,12 @@ function parseImportedBoards(text){
   pageFieldBackgroundColors:Array.from({length:board.pages.length},(_,i)=>board.pageFieldBackgroundColors?.[i]||board.fieldBackgroundColor||'#17212c'),
   pageColors:Array.from({length:board.pages.length},(_,i)=>board.pageColors?.[i]||board.layoutColor||'#808080')
  },value.version>=4?(value.imageLibrary||{}):null));
+ return window.Bolxiv?.phaseMasters?window.Bolxiv.phaseMasters.prepareImport(imported,value):imported;
 }
 
-function applyImportedBoards(imported,mode){if(boardReadOnly)throw new Error("閲覧中はインポートできません");
+function applyImportedBoards(imported,mode){if(window.Bolxiv?.phaseMasters?.active)window.Bolxiv.phaseMasters.leave();if(boardReadOnly)throw new Error("閲覧中はインポートできません");
  flushScheduledBoardSave();storeContentHistory();contentBoards[activeContent]=data;
- const before=captureContentList();if(mode==='append'){contentBoards=[...contentBoards,...imported]}
+ const before=captureContentList();window.Bolxiv?.phaseMasters?.acceptImport(imported,mode);if(mode==='append'){contentBoards=[...contentBoards,...imported]}
  else{contentBoards=imported;activeContent=0;data=contentBoards[0];restoreContentHistory()}
  selected=null;selectedIds=[];selectedPhaseIndexes=[];phaseSelectionOwner=data;
  recordContentListChange(mode==='append'?'JSONによる追加':'JSONによる置換',before);
@@ -559,10 +605,10 @@ function copyPngStyle(source,target,pseudo){
 
 function clonePngNode(source){if(source.nodeType===Node.TEXT_NODE)return source.cloneNode();if(source.nodeType!==Node.ELEMENT_NODE)return null;if(source.id==='objectControls'||source.classList.contains('selection-marquee')||source.classList.contains('guide-selection-controls')||source.classList.contains('guide-editor-overlay'))return null;let target=source.cloneNode(false);copyPngStyle(source,target);if(source.namespaceURI!=='http://www.w3.org/2000/svg')target.removeAttribute('id');if(source.classList.contains('selected')){target.classList.remove('selected');target.style.filter='none';target.style.outline='none'}if(source instanceof HTMLImageElement){let src=source.getAttribute('src');target.src=embeddedPngs[src]||source.currentSrc||source.src;if(!target.src.startsWith('data:'))throw new Error('画像を埋め込めません：'+(source.alt||src));target.removeAttribute('srcset');target.loading='eager'}let appendPseudo=pseudo=>{let style=getComputedStyle(source,pseudo);if(style.content==='none'||style.content==='normal'||style.display==='none')return;let node=document.createElement('span');copyPngStyle(source,node,pseudo);node.style.setProperty('content','normal');if(style.content!=='""'&&style.content!=="''")node.textContent=style.content.replace(/^['"]|['"]$/g,'');target.appendChild(node)};if(source.namespaceURI==='http://www.w3.org/1999/xhtml')appendPseudo('::before');for(let child of source.childNodes){let cloned=clonePngNode(child);if(cloned)target.appendChild(cloned)}if(source.namespaceURI==='http://www.w3.org/1999/xhtml')appendPseudo('::after');return target}
 
-function clonePngStage(){let originalClass=stage.className,originalClip=objectClip.style.getPropertyValue('clip-path'),originalPriority=objectClip.style.getPropertyPriority('clip-path');try{stage.classList.add('grid-hidden');stage.classList.remove('field-hidden');objectClip.style.setProperty('clip-path','none','important');return clonePngNode(stage)}finally{stage.className=originalClass;if(originalClip)objectClip.style.setProperty('clip-path',originalClip,originalPriority);else objectClip.style.removeProperty('clip-path')}}
+function clonePngStage({preserveDisplay=false}={}){let originalClass=stage.className,originalClip=objectClip.style.getPropertyValue('clip-path'),originalPriority=objectClip.style.getPropertyPriority('clip-path');try{if(!preserveDisplay){stage.classList.add('grid-hidden');stage.classList.remove('field-hidden');objectClip.style.setProperty('clip-path','none','important')}return clonePngNode(stage)}finally{stage.className=originalClass;if(originalClip)objectClip.style.setProperty('clip-path',originalClip,originalPriority);else objectClip.style.removeProperty('clip-path')}}
 
 const phasePngCaches=new WeakMap();
-async function rasterizePngSource(source,scale=1,stageSource=false,readable=false){
+async function rasterizePngSource(source,scale=1,stageSource=false,readable=false){await prepareImportedImageElements(source);
  for(const image of source.querySelectorAll('img')){if(!image.complete)await image.decode();if(!image.naturalWidth)throw new Error('画像を読み込めません：'+(image.alt||'アイコン'))}
  const width=source.offsetWidth,height=source.offsetHeight,clone=stageSource?clonePngStage():clonePngNode(source);
  if(readable)enhancePrintReadability(clone);

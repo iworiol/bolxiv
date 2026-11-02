@@ -1,3 +1,32 @@
+// PC popup navigation runs before mode-specific editing handlers.
+(()=>{
+ const visible=node=>node&&!node.hidden&&node.getClientRects().length>0;
+ const entries=menu=>[...menu.querySelectorAll('button,[role="menuitem"],[role="menuitemradio"],[role="menuitemcheckbox"]')].filter(node=>node.closest('[role="menu"]')===menu&&!node.disabled&&node.getAttribute('aria-disabled')!=='true'&&visible(node));
+ const trigger=menu=>[...document.querySelectorAll('[aria-controls]')].find(node=>node.getAttribute('aria-controls')===menu.id&&visible(node));
+ const focus=node=>{if(visible(node))node.focus({preventScroll:true})};
+ function close(menu){const opener=trigger(menu)||menu._openerResolver?.()||menu._opener||menu._keyboardOrigin;menu._keyboardClose();focus(opener)}
+ window.addEventListener('keydown',event=>{
+  if(!matchMedia('(min-width:851px)').matches||event.isComposing||!['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Home','End','Enter','Escape'].includes(event.key))return;
+  const modal=[...document.querySelectorAll('dialog[open]')].filter(node=>node.matches(':modal')).at(-1);
+  const menus=[...document.querySelectorAll('[role="menu"]')].filter(menu=>visible(menu)&&menu._keyboardClose&&(!modal||modal.contains(menu)));
+  if(!menus.length)return;
+  const menu=menus.sort((a,b)=>(a._keyboardOrder||0)-(b._keyboardOrder||0)).at(-1),buttons=entries(menu),at=buttons.indexOf(document.activeElement),key=event.key;
+  if(menu.contains(event.target)&&event.target.closest?.('input,select,textarea,[contenteditable="true"]'))return;
+  for(let host=menu;host;host=host._keyboardParent||host.parentElement.closest('[role="menu"]'))host._cancelSubmenuHover?.();
+  event.preventDefault();event.stopImmediatePropagation();
+  if(key==='Escape'){close(menu);return}
+  if(key==='ArrowLeft'){if(menu.parentElement.closest('[role="menu"]')||menu._keyboardParent)close(menu);return}
+  if(key==='ArrowRight'){
+   const button=buttons[at],child=button?.getAttribute('aria-haspopup')==='menu'&&document.getElementById(button.getAttribute('aria-controls'));
+   if(child){if(child.hidden)button.click();if(visible(child))focus(entries(child)[0])}return;
+  }
+  if(!buttons.length)return;
+  if(key==='Enter'){buttons[at<0?0:at].click();return}
+  const next=key==='Home'?0:key==='End'?buttons.length-1:at<0?(key==='ArrowUp'?buttons.length-1:0):(at+(key==='ArrowDown'?1:buttons.length-1))%buttons.length;
+  focus(buttons[next]);
+ },true);
+})();
+
 // ===== Initialization =====
 // ===== js/runtime/interaction-guards.js =====
 // Initialization stage: interaction-guards. Load order is owned by bolxiv.js.
@@ -14,11 +43,11 @@
   openedBoard=data;openedPhase=current();menu.replaceChildren();const editing=!boardReadOnly&&!phaseComparisonActive();
   for(const [action,label] of [['paste','貼り付け'],['select-all','全選択'],['center','表示を中央に戻す'],['fit','全体が収まる倍率にする']]){
    if(action==='center'){const separator=document.createElement('div');separator.className='context-separator';separator.setAttribute('role','separator');menu.append(separator)}
-   const button=document.createElement('button');button.type='button';button.textContent=label;button.dataset.action=action;button.setAttribute('role','menuitem');
+   const button=document.createElement('button');button.type='button';button.textContent=label;button.dataset.action=action;if(action==='paste')button.dataset.shortcut='Ctrl+V';if(action==='select-all')button.dataset.shortcut='Ctrl+A';button.setAttribute('role','menuitem');
    button.disabled=action==='paste'? !editing||!clipboardObjects.length:action==='select-all'? !editing||!current().length:false;
    button.onclick=()=>{if(button.disabled)return;const valid=openedBoard===data&&openedPhase===current();close();if(!valid)return;
     if(action==='paste')pasteClipboardObjects();
-    else if(action==='select-all'){if(boardReadOnly||phaseComparisonActive())return;selectedIds=current().map(item=>item.id);selected=selectedIds[selectedIds.length-1]||null;renderSelectionOnly()}
+    else if(action==='select-all')selectAllObjects()
     else if(action==='center')setBoardDisplayZoom(boardDisplayZoom,false);
     else fitBoardDisplayZoom();
    };menu.append(button);
@@ -122,7 +151,21 @@ let history=[],future=[],deleteContentIndex=null;
 
 const iconFiles={role:[['タンク1','00_ROLE','TankRole','1'],['タンク2','00_ROLE','TankRole','2'],['ヒーラー1','00_ROLE','HealerRole','1'],['ヒーラー2','00_ROLE','HealerRole','2'],...['DPS1','DPS2','DPS3','DPS4'].map((n,i)=>[n,'00_ROLE','DPSRole',String(i+1)]),['タンク','00_ROLE','TankRole',''],['ヒーラー','00_ROLE','HealerRole',''],['近接DPS','00_ROLE','MeleeDPS',''],['遠隔DPS','00_ROLE','RangedDPS','']],tank:[['Gladiator','01_TANK/Class','Gladiator'],['Marauder','01_TANK/Class','Marauder'],...['DarkKnight','Gunbreaker','Paladin','Warrior'].map(n=>[n,'01_TANK/Job',n])],healer:[['Conjurer','02_HEALER/Class','Conjurer'],...['Astrologian','Sage','Scholar','WhiteMage'].map(n=>[n,'02_HEALER/Job',n])],dps:[...['Arcanist','Archer','Lancer','Pugilist','Rogue','Thaumaturge'].map(n=>[n,'03_DPS/Class',n]),...['Bard','BlackMage','Dancer','Dragoon','Machinist','Monk','Ninja','Pictomancer','Reaper','RedMage','Samurai','Summoner','Viper'].map(n=>[n,'03_DPS/Job',n])],crafter:['Alchemist','Armorer','Blacksmith','Carpenter','Culinarian','Goldsmith','Leatherworker','Weaver'].map(n=>[n,'04_CRAFTER',n]),gatherer:['Botanist','Fisher','Miner'].map(n=>[n,'05_GATHERER',n]),limited:[['BlueMage','06_LIMITED','BlueMage']]};
 
-let activeIcon=null;
+let activeIcon=null,pendingImage=null,objectImageReadRevision=0;
+// File selection is transactional: only a successfully placed image enters the library.
+async function chooseObjectImage(file){
+ if(!file)return;
+ if(!file.type.startsWith('image/')){notify('画像ファイルを選択してください');return}
+ const board=data,page=data.page,revision=++objectImageReadRevision,previousTool=tool,previousIcon=activeIcon,previousImage=pendingImage;
+ try{
+  const source=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=()=>reject(reader.error);reader.readAsDataURL(file)});
+  const decoded=await decodeImportedImage(source);
+  if(revision!==objectImageReadRevision||tool!==previousTool||activeIcon!==previousIcon||pendingImage!==previousImage||data!==board||data.page!==page||boardReadOnly||phaseComparisonActive()||window.Bolxiv?.fieldGuideEditor?.active||window.Bolxiv?.pngPreview?.active||data.activePhaseGroup)return;
+  selectPlacementTool('image');pendingImage={type:'image',originalSource:source,nativeSize:{width:decoded.width,height:decoded.height},previewSource:decoded.preview};setTapPlacementArmed(true);
+  document.getElementById('importObjectImage').classList.add('active');
+  document.dispatchEvent(new Event('close-material-pane'));notify('画像を読み込みました。盤面をクリック／タップして配置してください');
+ }catch{if(revision===objectImageReadRevision)notify('画像を読み込めませんでした。別の画像を選択してください')}
+}
 
 iconFiles.targetMarker=Object.entries({attack1:'攻撃1',attack2:'攻撃2',attack3:'攻撃3',attack4:'攻撃4',attack5:'攻撃5',attack6:'攻撃6',attack7:'攻撃7',attack8:'攻撃8',bind1:'バインド1',bind2:'バインド2',bind3:'バインド3',circle:'円',cross:'×',ignore1:'無視1',ignore2:'無視2',square:'四角',triangle:'三角'}).map(([file,name])=>[name,'target-marker',file]);
 
@@ -137,6 +180,7 @@ document.getElementById('exitPhaseComparison').onclick=()=>selectPhase(data.page
 ;
 // ===== js/runtime/help-setup.js =====
 // Initialization stage: help-setup. Load order is owned by bolxiv.js.
+const shortcutDialog=document.getElementById('shortcutDialog');
 const operationGuide=document.getElementById('operationGuideDialog'),aboutTool=document.getElementById('aboutToolDialog');
 
 const changeLog=document.createElement('dialog');
@@ -147,7 +191,7 @@ changeLog.className='operation-guide';
 
 changeLog.setAttribute('aria-labelledby','changeLogTitle');
 
-changeLog.innerHTML='<div class="operation-guide-heading"><h2 id="changeLogTitle">更新履歴</h2><button type="button" class="btn" autofocus>閉じる</button></div><div class="operation-guide-body"><p><span class="change-log-version">2026/10/31　Ver.0.8.2</span><span class="change-log-description">不具合修正</span></p><p><span class="change-log-version">2026/10/31　Ver.0.8.1</span><span class="change-log-description">UI等もろもろ調整</span></p><p><span class="change-log-version">2026/10/30　Ver.0.8.0</span><span class="change-log-description">キャンバスのガイド機能正式実装、印刷機能をスマホ版も拡充、フィールド設定コピー機能追加、UI調整</span></p><p><span class="change-log-version">2026/10/28　Ver.0.7.1</span><span class="change-log-description">印刷機能拡充(PC版のみ)、キャンバスのガイド機能仮実装、UI調整</span></p><p><span class="change-log-version">2026/10/26　Ver.0.7.0</span><span class="change-log-description">プリセット機能正式追加、UI調整</span></p><p><span class="change-log-version">2026/10/25　Ver.0.6.2</span><span class="change-log-description">オブジェクト追加、画像・印刷機能にノート表示追加</span></p><p><span class="change-log-version">2026/10/25　Ver.0.6.1</span><span class="change-log-description">UI調整</span></p><p><span class="change-log-version">2026/10/25　Ver.0.6.0</span><span class="change-log-description">オブジェクトのグループ化対応、印刷機能追加(PNG生成と統合)、プリセット機能仮実装</span></p><p><span class="change-log-version">2026/10/23　Ver.0.5.2</span><span class="change-log-description">UI調整</span></p><p><span class="change-log-version">2026/10/22　Ver.0.5.1</span><span class="change-log-description">UI調整</span></p><p><span class="change-log-version">2026/10/19　Ver.0.5.0</span><span class="change-log-description">コンテンツを履歴操作に追加、PNG生成モード追加、レイアウト少し見直し、その他修正</span></p><p><span class="change-log-version">2026/10/18　Ver.0.4.1</span><span class="change-log-description">ツールの内部構成変更、その他修正</span></p><p><span class="change-log-version">2026/10/18　Ver.0.4.0</span><span class="change-log-description">チュートリアル追加、フェーズグループ化機能追加、メモリ使用量削減、JSONファイルサイズ削減</span></p><p><span class="change-log-version">2026/10/17　Ver.0.3.0</span><span class="change-log-description">コンテンツ間フェーズコピー機能追加、右クリック・長押し操作メニュー各種追加、文字サイズ変更、処理負荷改善</span></p><p><span class="change-log-version">2026/10/15　Ver.0.2.0</span><span class="change-log-description">フェーズノート追加、構成見直し、その他修正&amp;見直し</span></p><p><span class="change-log-version">2026/10/14　Ver.0.1.1</span><span class="change-log-description">見た目見直し</span></p><p><span class="change-log-version">2026/10/12　Ver.0.1.0</span><span class="change-log-description">初版</span></p></div>';
+changeLog.innerHTML='<div class="operation-guide-heading"><h2 id="changeLogTitle">更新履歴</h2><button type="button" class="btn" autofocus>閉じる</button></div><div class="operation-guide-body"><p><span class="change-log-version">2026/11/02　Ver.0.9.0</span><span class="change-log-description">画像読み込み機能追加、フィールド機能追加(ガイド統合)、メニュー強化</span></p><p><span class="change-log-version">2026/10/31　Ver.0.8.2</span><span class="change-log-description">不具合修正</span></p><p><span class="change-log-version">2026/10/31　Ver.0.8.1</span><span class="change-log-description">UI等もろもろ調整</span></p><p><span class="change-log-version">2026/10/30　Ver.0.8.0</span><span class="change-log-description">キャンバスのガイド機能正式実装、印刷機能をスマホ版も拡充、フィールド設定コピー機能追加、UI調整</span></p><p><span class="change-log-version">2026/10/28　Ver.0.7.1</span><span class="change-log-description">印刷機能拡充(PC版のみ)、キャンバスのガイド機能仮実装、UI調整</span></p><p><span class="change-log-version">2026/10/26　Ver.0.7.0</span><span class="change-log-description">プリセット機能正式追加、UI調整</span></p><p><span class="change-log-version">2026/10/25　Ver.0.6.2</span><span class="change-log-description">オブジェクト追加、画像・印刷機能にノート表示追加</span></p><p><span class="change-log-version">2026/10/25　Ver.0.6.1</span><span class="change-log-description">UI調整</span></p><p><span class="change-log-version">2026/10/25　Ver.0.6.0</span><span class="change-log-description">オブジェクトのグループ化対応、印刷機能追加(PNG生成と統合)、プリセット機能仮実装</span></p><p><span class="change-log-version">2026/10/23　Ver.0.5.2</span><span class="change-log-description">UI調整</span></p><p><span class="change-log-version">2026/10/22　Ver.0.5.1</span><span class="change-log-description">UI調整</span></p><p><span class="change-log-version">2026/10/19　Ver.0.5.0</span><span class="change-log-description">コンテンツを履歴操作に追加、PNG生成モード追加、レイアウト少し見直し、その他修正</span></p><p><span class="change-log-version">2026/10/18　Ver.0.4.1</span><span class="change-log-description">ツールの内部構成変更、その他修正</span></p><p><span class="change-log-version">2026/10/18　Ver.0.4.0</span><span class="change-log-description">チュートリアル追加、フェーズグループ化機能追加、メモリ使用量削減、JSONファイルサイズ削減</span></p><p><span class="change-log-version">2026/10/17　Ver.0.3.0</span><span class="change-log-description">コンテンツ間フェーズコピー機能追加、右クリック・長押し操作メニュー各種追加、文字サイズ変更、処理負荷改善</span></p><p><span class="change-log-version">2026/10/15　Ver.0.2.0</span><span class="change-log-description">フェーズノート追加、構成見直し、その他修正&amp;見直し</span></p><p><span class="change-log-version">2026/10/14　Ver.0.1.1</span><span class="change-log-description">見た目見直し</span></p><p><span class="change-log-version">2026/10/12　Ver.0.1.0</span><span class="change-log-description">初版</span></p></div>';
 
 document.body.append(changeLog);
 
@@ -165,7 +209,7 @@ helpMenu.setAttribute('role','menu');
 
 helpMenu.hidden=true;
 
-helpMenu.innerHTML='<button type="button" role="menuitem" data-help-action="guide">操作ガイド</button><button type="button" role="menuitem" data-help-action="history">更新履歴</button><button type="button" role="menuitem" data-help-action="about">ツールについて</button>';
+helpMenu.innerHTML='<button type="button" role="menuitem" data-help-action="guide">操作ガイド</button><button type="button" role="menuitem" data-help-action="shortcuts">ショートカット一覧</button><button type="button" role="menuitem" data-help-action="history">更新履歴</button><button type="button" role="menuitem" data-help-action="about">ツールについて</button>';
 
 document.body.appendChild(helpMenu);
 
@@ -177,15 +221,17 @@ window.addEventListener('resize',()=>closeHelpMenu());
 
 helpMenu.addEventListener('keydown',e=>{const items=Array.from(helpMenu.querySelectorAll('button')),index=items.indexOf(document.activeElement);if(e.key==='Escape'){e.preventDefault();closeHelpMenu(true)}else if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();items[(index+(e.key==='ArrowDown'?1:items.length-1))%items.length].focus()}else if(e.key==='Tab')closeHelpMenu()});
 
-helpMenu.addEventListener('click',e=>{const item=e.target.closest('[data-help-action]');if(!item)return;closeHelpMenu(true);const dialog=item.dataset.helpAction==='guide'?operationGuide:item.dataset.helpAction==='history'?changeLog:aboutTool;dialog.querySelector('.operation-guide-body').scrollTop=0;dialog.showModal()});
+helpMenu.addEventListener('click',e=>{const item=e.target.closest('[data-help-action]');if(!item)return;closeHelpMenu(true);const dialog=item.dataset.helpAction==='shortcuts'?shortcutDialog:item.dataset.helpAction==='guide'?operationGuide:item.dataset.helpAction==='history'?changeLog:aboutTool;dialog.querySelector('.operation-guide-body').scrollTop=0;dialog.showModal()});
 
+document.getElementById('closeShortcuts').onclick=()=>shortcutDialog.close();
+shortcutDialog.addEventListener('close',()=>{const help=document.getElementById('operationGuideBtn');(help.getClientRects().length?help:document.querySelector('.phone-menu-toggle'))?.focus({preventScroll:true})});
 document.getElementById('closeOperationGuide').onclick=()=>operationGuide.close();
 
 document.getElementById('closeAboutTool').onclick=()=>aboutTool.close();
 
-for(const dialog of [operationGuide,aboutTool])dialog.addEventListener('close',()=>document.getElementById('operationGuideBtn').focus());
+for(const dialog of [operationGuide,aboutTool,shortcutDialog])dialog.addEventListener('close',()=>document.getElementById('operationGuideBtn').focus());
 
-document.addEventListener('keydown',e=>{const dialog=operationGuide.open?operationGuide:aboutTool.open?aboutTool:changeLog.open?changeLog:null;if(!dialog)return;if(e.key==='Escape'){e.preventDefault();dialog.close()}e.stopImmediatePropagation()},true);
+document.addEventListener('keydown',e=>{const dialog=operationGuide.open?operationGuide:aboutTool.open?aboutTool:changeLog.open?changeLog:shortcutDialog.open?shortcutDialog:null;if(!dialog)return;if(e.key==='Escape'){e.preventDefault();dialog.close()}e.stopImmediatePropagation()},true);
 
 ;
 // ===== js/runtime/canvas-pan.js =====
@@ -293,7 +339,7 @@ $('#contextPaste').onclick=()=>{closeObjectContextMenu();pasteClipboardObjects()
 function swapObjectPositions(ids){if(ids.length!==2)return;let items=ids.map(id=>current().find(o=>o.id===id));if(boardReadOnly||phaseComparisonActive()||items.some(item=>!item||item.locked))return;recordHistory();let x=items[0].x,y=items[0].y;items[0].x=items[1].x;items[0].y=items[1].y;items[1].x=x;items[1].y=y;renderAndSave()}
 $('#contextSwapPosition').onclick=()=>{const ids=JSON.parse($('#objectContextMenu').dataset.ids||'[]');closeObjectContextMenu();swapObjectPositions(ids)};
 
-$('#contextDuplicate').onclick=()=>{let menu=$('#objectContextMenu'),ids=JSON.parse(menu.dataset.ids||'[]'),sources=current().filter(o=>ids.includes(o.id));closeObjectContextMenu();if(!sources.length)return;recordHistory();let copies=sources.map(source=>{let copy=JSON.parse(JSON.stringify(source));copy.id=createObjectId();return copy});remapCopiedObjectGroups(copies);current().push(...copies);selectedIds=copies.map(copy=>copy.id);selected=selectedIds[selectedIds.length-1]||null;renderAndSave();revealMovedLayers(selectedIds)};
+$('#contextDuplicate').onclick=()=>{const ids=JSON.parse($('#objectContextMenu').dataset.ids||'[]');closeObjectContextMenu();duplicateObjects(ids)};
 
 $('#contextDelete').onclick=()=>{let menu=$('#objectContextMenu'),ids=JSON.parse(menu.dataset.ids||'[]');closeObjectContextMenu();let deletable=ids.filter(id=>!current().find(o=>o.id===id)?.locked);if(!deletable.length)return;recordHistory();data.pages[data.page]=current().filter(o=>!deletable.includes(o.id));selectedIds=selectedIds.filter(id=>!deletable.includes(id));selected=selectedIds[selectedIds.length-1]||null;renderAndSave()};
 
@@ -338,14 +384,22 @@ let placementDragPayload=null,placementShiftDisabled=false;
 let touchPlacementPreview=null;
 
 let tapPlacementArmed=false,tapPlacementGesture=null;
+function setTapPlacementArmed(armed){tapPlacementArmed=armed;syncPlacementCursor()}
+function syncPlacementCursor(){
+ const waiting=tapPlacementArmed&&tool!=='select'&&!boardReadOnly&&!phaseComparisonActive()&&!data.activePhaseGroup&&!window.Bolxiv?.pngPreview?.active&&!window.Bolxiv?.fieldGuideEditor?.active;
+ stage.classList.toggle('placement-waiting',!!waiting);
+}
+stage.addEventListener('pointerover',syncPlacementCursor);
+document.addEventListener('board-view-mode-changed',syncPlacementCursor);
 
-document.querySelector('.left').addEventListener('click',e=>{if(e.target.closest('.tool[data-tool],.icon-choice'))tapPlacementArmed=true});
 
-document.addEventListener('dragstart',e=>{if(e.target.closest('.left'))tapPlacementArmed=false});
+document.querySelector('.left').addEventListener('click',e=>{if(e.target.closest('.tool[data-tool],.icon-choice'))setTapPlacementArmed(true)});
+
+document.addEventListener('dragstart',e=>{if(e.target.closest('.left'))setTapPlacementArmed(false)});
 
 document.addEventListener('pointerdown',e=>{
  if(!tapPlacementArmed||phaseComparisonActive()||e.button!==0||!stage.contains(e.target)||e.target.closest('.obj,.controlbox')||e.target.closest('input,button,textarea'))return;
- e.preventDefault();e.stopImmediatePropagation();tapPlacementGesture={id:e.pointerId,x:e.clientX,y:e.clientY,touch:e.pointerType==='touch'};if(tapPlacementGesture.touch)showTouchPlacementPreview(tool==='icon'&&activeIcon?{type:'icon',...activeIcon}:{type:tool},e.clientX,e.clientY,0);stage.setPointerCapture(e.pointerId);
+ e.preventDefault();e.stopImmediatePropagation();tapPlacementGesture={id:e.pointerId,x:e.clientX,y:e.clientY,touch:e.pointerType==='touch'};if(tapPlacementGesture.touch)showTouchPlacementPreview(placementToolPayload(),e.clientX,e.clientY,0);stage.setPointerCapture(e.pointerId);
 },true);
 
 document.addEventListener('pointermove',e=>{if(!tapPlacementGesture||tapPlacementGesture.id!==e.pointerId)return;moveTouchPlacementPreview(e.clientX,e.clientY,0);e.preventDefault();e.stopImmediatePropagation()},true);
@@ -354,7 +408,7 @@ document.addEventListener('pointerup',finishTapPlacement,true);
 
 document.addEventListener('pointercancel',finishTapPlacement,true);
 
-document.addEventListener('keydown',e=>{if(e.key==='Escape')tapPlacementArmed=false});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')setTapPlacementArmed(false)});
 
 document.addEventListener('dragstart',e=>{if(!e.target.closest('.left'))return;endPlacementGuides();try{placementDragPayload=JSON.parse(e.dataTransfer.getData('application/x-tactica'))}catch{placementDragPayload=null}});
 
@@ -368,7 +422,7 @@ stage.addEventListener('drop',e=>{if(!Array.from(e.dataTransfer.types).includes(
 
 document.querySelector('.object-layout-rect').addEventListener('pointerdown',e=>{if(data.activePhaseGroup||e.button!==0||![stage,objectClip,layer,document.getElementById('boardZoomSpace'),e.currentTarget].includes(e.target)&&e.target.className!=='axis'&&e.target.className!=='centerpoint')return;e.preventDefault();let additive=e.shiftKey;if(!additive){selected=null;selectedIds=[];renderSelectionOnly()}let box=document.createElement('div');box.className='selection-marquee';let surface=document.getElementById('boardZoomSpace');surface.appendChild(box);drag={mode:'marquee',surface,startX:e.clientX,startY:e.clientY,lastX:e.clientX,lastY:e.clientY,additive,initialIds:selectedIds.slice(),box,moved:false}});
 
-document.addEventListener('pointerdown',e=>{if((window.Bolxiv?.pngPreview?.active||matchMedia('(max-width:850px)').matches&&document.getElementById('objectLayerPanel')?.dataset.objectTab==='properties')&&e.target.closest('#undo,#redo'))return;if(e.target.closest('#editModeToggle,#objectContextMenu,#layerContextMenu,#presetPanel,#userPresetManager,.left .object-pane-actions,.preset-manage,[aria-controls="presetPanel"],.phone-material-toggle,.right,.battle,.phone-view-content,dialog,[role="menu"],.obj,.controlbox,.color-popover,.color-picker,.native-color-picker,.phone-phase-navigation')||!selectedIds.length)return;if(stage.contains(e.target)){let r=stage.getBoundingClientRect(),shape=activeBoardShape(),fw=data.pageFieldSizes?.[data.page]?.width||538,fh=data.pageFieldSizes?.[data.page]?.height||(shape==='landscape'?320:538),dx=(e.clientX-r.left-r.width/2)/(r.width*fw/1280),dy=(e.clientY-r.top-r.height/2)/(r.height*fh/1280);if(shape==='none'||(shape==='circle'?dx*dx+dy*dy<=1:Math.abs(dx)<=1&&Math.abs(dy)<=1))return}selected=null;selectedIds=[];renderSelectionOnly()},true);
+document.addEventListener('pointerdown',e=>{if((window.Bolxiv?.pngPreview?.active||matchMedia('(max-width:850px)').matches&&document.getElementById('objectLayerPanel')?.dataset.objectTab==='properties')&&e.target.closest('#undo,#redo'))return;if(e.target.closest('#importObjectImage,#editModeToggle,#objectContextMenu,#layerContextMenu,#presetPanel,#userPresetManager,.left .object-pane-actions,.preset-manage,[aria-controls="presetPanel"],.phone-material-toggle,.right,.battle,.phone-view-content,dialog,[role="menu"],.obj,.controlbox,.color-popover,.color-picker,.native-color-picker,.phone-phase-navigation')||!selectedIds.length)return;if(stage.contains(e.target)){let r=stage.getBoundingClientRect(),shape=activeBoardShape(),fw=data.pageFieldSizes?.[data.page]?.width||538,fh=data.pageFieldSizes?.[data.page]?.height||(shape==='landscape'?320:538),dx=(e.clientX-r.left-r.width/2)/(r.width*fw/1280),dy=(e.clientY-r.top-r.height/2)/(r.height*fh/1280);if(shape==='none'||(shape==='circle'?dx*dx+dy*dy<=1:Math.abs(dx)<=1&&Math.abs(dy)<=1))return}selected=null;selectedIds=[];renderSelectionOnly()},true);
 
 document.addEventListener('pointerdown',e=>{if(drag&&(drag.mode==='move'||drag.mode.startsWith('resize-'))){drag.shiftGuidesDisabled=e.shiftKey;clearAlignmentGuides();drag.alignmentPrevious=alignmentSnapshot()}});
 
@@ -412,7 +466,7 @@ document.addEventListener('pointermove',e=>{if(!drag||drag.pointerId!==undefined
  const radius=Math.hypot((e.clientX-cx)/scaleX,(e.clientY-cy)/scaleY);
  setDonutInnerDiameter(o,radius*2);syncDonutInnerInputs(o);
 }
-if(drag.mode==='resize-angle'){let rot=(o.rotation||0)*Math.PI/180,cx=r.left+o.x/100*r.width,cy=r.top+o.y/100*r.height,dx=e.clientX-cx,dy=e.clientY-cy,lx=dx*Math.cos(rot)+dy*Math.sin(rot),ly=-dx*Math.sin(rot)+dy*Math.cos(rot),apexY=-(o.height||100)/2+(o.height||100)*.05;o.angle=Math.max(5,Math.min(179.5,Math.round(Math.atan2(Math.abs(lx),ly-apexY)*180/Math.PI)));updateShapeFromData(o)}if(drag.mode==='resize-icon'){let size=Math.max(24,Math.min(640,Math.round(drag.width+(mdx+mdy)/2)));o.width=o.height=size;let el=Array.from(layer.children).find(x=>x.dataset.id===o.id);if(el){el.style.width=size+'px';el.style.height=size+'px';let badge=el.querySelector('.role-badge');if(badge){badge.style.setProperty('font-size',Math.max(8,size*.36)+'px','important');badge.style.right=(size*.06)+'px';badge.style.bottom=(size*.06)+'px';badge.style.webkitTextStroke=(size*.03)+'px #111'}}let box=controls.querySelector('.controlbox');if(box){box.style.width=size+'px';box.style.height=size+'px'}}if(drag.mode==='resize-x'||drag.mode==='resize-y'){let a=(o.rotation||0)*Math.PI/180;if(o.type==='aoe'||o.type==='circle'||o.type==='donut'||(['knockback','lineknockback'].includes(o.type))||o.type==='gaze'||['stack','linestack'].includes(o.type)||o.type==='targetcircle'||(o.type==='icon'&&['距離減衰','フレア','ターゲット青','ロックオン赤','ロックオン紫','ダイブボム','ターゲット赤','ターゲット紫'].includes(o.iconName))){let resizeSign=drag.resizeSign||1,desired=drag.mode==='resize-x'?drag.width+2*resizeSign*(mdx*Math.cos(a)+mdy*Math.sin(a)):drag.height+2*resizeSign*(-mdx*Math.sin(a)+mdy*Math.cos(a)),base=drag.mode==='resize-x'?drag.width:drag.height,factor=desired/base,minSize=o.type==='icon'?24:20,maxSize=o.type==='icon'?640:960,minFactor=Math.max(minSize/drag.width,minSize/drag.height),maxFactor=Math.min(maxSize/drag.width,maxSize/drag.height);factor=Math.max(minFactor,Math.min(maxFactor,factor));o.width=Math.round(drag.width*factor);o.height=Math.round(drag.height*factor)}else if(o.type==='segment'&&drag.mode==='resize-x'){let baseAngle=drag.rotation*Math.PI/180,anchorX=r.left+drag.ox/100*r.width-drag.width/2*Math.cos(baseAngle),anchorY=r.top+drag.oy/100*r.height-drag.width/2*Math.sin(baseAngle),dx=e.clientX-anchorX,dy=e.clientY-anchorY,newWidth=Math.max(20,Math.min(960,Math.round(Math.hypot(dx,dy)))),newAngle=Math.atan2(dy,dx);o.width=newWidth;o.rotation=Math.round(newAngle*180/Math.PI);o.x=(anchorX-r.left+newWidth/2*Math.cos(newAngle))/r.width*100;o.y=(anchorY-r.top+newWidth/2*Math.sin(newAngle))/r.height*100;let el=Array.from(layer.children).find(node=>node.dataset.id===o.id),box=controls.querySelector('.controlbox');if(el){el.style.left=o.x+'%';el.style.top=o.y+'%'}if(box){box.style.left=o.x+'%';box.style.top=o.y+'%'}}else if(o.type==='line'){let boardWidth=layer.clientWidth||stage.clientWidth,boardHeight=layer.clientHeight||stage.clientHeight,localDx=mdx/(r.width/stage.offsetWidth),localDy=mdy/(r.height/stage.offsetHeight),sign=drag.resizeSign||1,delta=drag.mode==='resize-x'?localDx*Math.cos(a)+localDy*Math.sin(a):-localDx*Math.sin(a)+localDy*Math.cos(a),base=drag.mode==='resize-x'?drag.width:drag.height,next=Math.max(20,Math.min(960,Math.round(base+sign*delta))),shift=sign*(next-base)/2;if(drag.mode==='resize-x'){o.width=next;o.x=(drag.ox+shift*Math.cos(a)/boardWidth*100);o.y=(drag.oy+shift*Math.sin(a)/boardHeight*100)}else{o.height=next;o.x=(drag.ox-shift*Math.sin(a)/boardWidth*100);o.y=(drag.oy+shift*Math.cos(a)/boardHeight*100)}}else if(o.type==='text'&&drag.mode==='resize-x'){const scaleX=r.width/stage.offsetWidth;o.width=Math.max(20,Math.min(960,Math.round(drag.width+mdx/scaleX)))}else if(drag.mode==='resize-x')o.width=Math.max(20,Math.min(960,Math.round(drag.width+2*(mdx*Math.cos(a)+mdy*Math.sin(a)))));else o.height=Math.max(20,Math.min(960,Math.round(drag.height+2*(-mdx*Math.sin(a)+mdy*Math.cos(a))))) }if(drag.mode==='rotate')o.rotation=Math.round(Math.atan2(dy,dx)*180/Math.PI+90);updateShapeFromData(o);if(['resize-x','resize-y','resize-icon','resize-angle','resize-aoe-box'].includes(drag.mode))updateAlignmentGuides([o.id])}});
+if(drag.mode==='resize-angle'){let rot=(o.rotation||0)*Math.PI/180,cx=r.left+o.x/100*r.width,cy=r.top+o.y/100*r.height,dx=e.clientX-cx,dy=e.clientY-cy,lx=dx*Math.cos(rot)+dy*Math.sin(rot),ly=-dx*Math.sin(rot)+dy*Math.cos(rot),apexY=-(o.height||100)/2+(o.height||100)*.05;o.angle=Math.max(5,Math.min(179.5,Math.round(Math.atan2(Math.abs(lx),ly-apexY)*180/Math.PI)));updateShapeFromData(o)}if(drag.mode==='resize-icon'){let size=Math.max(24,Math.min(640,Math.round(drag.width+(mdx+mdy)/2)));o.width=o.height=size;let el=Array.from(layer.children).find(x=>x.dataset.id===o.id);if(el){el.style.width=size+'px';el.style.height=size+'px';let badge=el.querySelector('.role-badge');if(badge){badge.style.setProperty('font-size',Math.max(8,size*.36)+'px','important');badge.style.right=(size*.06)+'px';badge.style.bottom=(size*.06)+'px';badge.style.webkitTextStroke=(size*.03)+'px #111'}}let box=controls.querySelector('.controlbox');if(box){box.style.width=size+'px';box.style.height=size+'px'}}if(drag.mode==='resize-x'||drag.mode==='resize-y'){let a=(o.rotation||0)*Math.PI/180;if(o.type==='aoe'||o.type==='circle'||o.type==='donut'||(['knockback','lineknockback'].includes(o.type))||o.type==='gaze'||['stack','linestack'].includes(o.type)||o.type==='targetcircle'||(o.type==='icon'&&['距離減衰','フレア','ロックオン青','ターゲット青','ロックオン赤','ロックオン緑','ロックオン紫','ダイブボム','ターゲット赤','ターゲット紫'].includes(o.iconName))){let resizeSign=drag.resizeSign||1,desired=drag.mode==='resize-x'?drag.width+2*resizeSign*(mdx*Math.cos(a)+mdy*Math.sin(a)):drag.height+2*resizeSign*(-mdx*Math.sin(a)+mdy*Math.cos(a)),base=drag.mode==='resize-x'?drag.width:drag.height,factor=desired/base,minSize=o.type==='icon'?24:20,maxSize=o.type==='icon'?640:960,minFactor=Math.max(minSize/drag.width,minSize/drag.height),maxFactor=Math.min(maxSize/drag.width,maxSize/drag.height);factor=Math.max(minFactor,Math.min(maxFactor,factor));o.width=Math.round(drag.width*factor);o.height=Math.round(drag.height*factor)}else if(o.type==='segment'&&drag.mode==='resize-x'){let baseAngle=drag.rotation*Math.PI/180,anchorX=r.left+drag.ox/100*r.width-drag.width/2*Math.cos(baseAngle),anchorY=r.top+drag.oy/100*r.height-drag.width/2*Math.sin(baseAngle),dx=e.clientX-anchorX,dy=e.clientY-anchorY,newWidth=Math.max(20,Math.min(960,Math.round(Math.hypot(dx,dy)))),newAngle=Math.atan2(dy,dx);o.width=newWidth;o.rotation=Math.round(newAngle*180/Math.PI);o.x=(anchorX-r.left+newWidth/2*Math.cos(newAngle))/r.width*100;o.y=(anchorY-r.top+newWidth/2*Math.sin(newAngle))/r.height*100;let el=Array.from(layer.children).find(node=>node.dataset.id===o.id),box=controls.querySelector('.controlbox');if(el){el.style.left=o.x+'%';el.style.top=o.y+'%'}if(box){box.style.left=o.x+'%';box.style.top=o.y+'%'}}else if(o.type==='line'){let boardWidth=layer.clientWidth||stage.clientWidth,boardHeight=layer.clientHeight||stage.clientHeight,localDx=mdx/(r.width/stage.offsetWidth),localDy=mdy/(r.height/stage.offsetHeight),sign=drag.resizeSign||1,delta=drag.mode==='resize-x'?localDx*Math.cos(a)+localDy*Math.sin(a):-localDx*Math.sin(a)+localDy*Math.cos(a),base=drag.mode==='resize-x'?drag.width:drag.height,next=Math.max(20,Math.min(960,Math.round(base+sign*delta))),shift=sign*(next-base)/2;if(drag.mode==='resize-x'){o.width=next;o.x=(drag.ox+shift*Math.cos(a)/boardWidth*100);o.y=(drag.oy+shift*Math.sin(a)/boardHeight*100)}else{o.height=next;o.x=(drag.ox-shift*Math.sin(a)/boardWidth*100);o.y=(drag.oy+shift*Math.cos(a)/boardHeight*100)}}else if(o.type==='text'&&drag.mode==='resize-x'){const scaleX=r.width/stage.offsetWidth;o.width=Math.max(20,Math.min(960,Math.round(drag.width+mdx/scaleX)))}else if(drag.mode==='resize-x')o.width=Math.max(20,Math.min(960,Math.round(drag.width+2*(mdx*Math.cos(a)+mdy*Math.sin(a)))));else o.height=Math.max(20,Math.min(960,Math.round(drag.height+2*(-mdx*Math.sin(a)+mdy*Math.cos(a))))) }if(drag.mode==='rotate')o.rotation=Math.round(Math.atan2(dy,dx)*180/Math.PI+90);updateShapeFromData(o);if(['resize-x','resize-y','resize-icon','resize-angle','resize-aoe-box'].includes(drag.mode))updateAlignmentGuides([o.id])}});
 
 document.addEventListener('keydown',e=>{if(e.key==='Control')setMoveCopyMode(true)});
 
@@ -430,9 +484,19 @@ document.addEventListener('pointerdown',finishKeyboardNudge,true);
 
 window.addEventListener('blur',finishKeyboardNudge);
 
-document.addEventListener('keydown',e=>{if(e.defaultPrevented||e.ctrlKey||e.metaKey||e.altKey||e.target.isContentEditable||e.target.closest('input,select,textarea,button,dialog,[role="separator"],[role="menu"],#pages')||document.querySelector('.comparison-pan-enabled'))return;if(nudgeSelectedObjects(e.key,e.repeat)){e.preventDefault();e.stopImmediatePropagation()}});
+// Object-only shortcuts yield to inputs, other panes, dialogs and dedicated editors.
+document.addEventListener('keydown',event=>{
+ if(event.defaultPrevented||event.isComposing||event.altKey||!(event.ctrlKey||event.metaKey)||event.target.isContentEditable||event.target.closest('input,select,textarea,dialog,#pages,#contentOptions,.left,#userPresetManager,[role="separator"]'))return;
+ const key=event.key.toLowerCase();if(!['a','d','g'].includes(key)||key!=='g'&&event.shiftKey)return;
+ if(boardReadOnly||phaseComparisonActive()||drag||window.Bolxiv?.pngPreview?.active||window.Bolxiv?.fieldGuideEditor?.active)return;
+ if(event.target.closest('[role="menu"]')&&!event.target.closest('#objectContextMenu,#canvasContextMenu'))return;
+ event.preventDefault();event.stopImmediatePropagation();finishKeyboardNudge();closeObjectContextMenu();
+ if(key==='a')selectAllObjects();else if(key==='d')duplicateObjects(selectedIds);else changeObjectGrouping(selectedIds,event.shiftKey);
+});
 
-document.addEventListener('keydown',e=>{if(e.target.matches('input,select,textarea')||e.target.isContentEditable)return;if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='c'){if(selectedIds.length){e.preventDefault();copyObjectsToClipboard(selectedIds)}}else if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='v'){if(clipboardObjects.length){e.preventDefault();pasteClipboardObjects()}}if((e.key==='ArrowUp'||e.key==='ArrowDown')&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&e.target.closest('#pages')){let next=data.page+(e.key==='ArrowUp'?-1:1);if(next>=0&&next<data.pages.length){e.preventDefault();selectPhase(next);document.querySelector('#pages .page-tab.active')?.focus()}}if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();undo()}else if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='y'){e.preventDefault();redo()}else if(e.key==='Delete'||e.key==='Backspace')deleteSelected();else if(e.key==='Escape'){cancelObjectDrag();tool='select';document.querySelectorAll('.tool').forEach(x=>x.classList.remove('active'));stage.style.cursor='default'}});
+document.addEventListener('keydown',e=>{if(e.defaultPrevented||e.ctrlKey||e.metaKey||e.altKey||e.target.isContentEditable||e.target.closest('input,select,textarea,button,dialog,[role="separator"],[role="menu"],#pages')||document.querySelector('.comparison-pan-enabled'))return;if(nudgeSelectedObjects(e.key,e.repeat,e.shiftKey?10:1)){e.preventDefault();e.stopImmediatePropagation()}});
+
+document.addEventListener('keydown',e=>{if(e.target.matches('input,select,textarea')||e.target.isContentEditable)return;if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='c'){if(selectedIds.length){e.preventDefault();copyObjectsToClipboard(selectedIds)}}else if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='v'){if(clipboardObjects.length){e.preventDefault();pasteClipboardObjects()}}if((e.key==='ArrowUp'||e.key==='ArrowDown')&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&e.target.closest('#pages')){let next=data.page+(e.key==='ArrowUp'?-1:1);if(next>=0&&next<data.pages.length){e.preventDefault();selectPhase(next);document.querySelector('#pages .page-tab.active')?.focus()}}if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();if(e.shiftKey)redo();else undo()}else if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='y'){e.preventDefault();redo()}else if(e.key==='Delete'||e.key==='Backspace')deleteSelected();else if(e.key==='Escape'){cancelObjectDrag();pendingImage=null;tool='select';document.querySelectorAll('.tool').forEach(x=>x.classList.remove('active'));stage.style.removeProperty('cursor')}});
 
 $('#undo').onclick=undo;
 
@@ -450,7 +514,7 @@ updateGridToggle();
 
 updateClipToggle();
 
-$('#addPage').onclick=()=>{commitPendingHistory();const owner=data,before=JSON.parse(JSON.stringify(data)),beforeHistory=history.slice(),beforeFuture=future.slice(),beforeSelected=selected,beforeSelectedIds=selectedIds.slice(),beforePhases=selectedPhaseIndexes.slice();snapshot();selectedPhaseIndexes=[];data.pages.push([]);data.pageNames.push('新規フェーズ');data.pageGroupIds.push(data.activePhaseGroup||null);data.pageNotes.push('');data.pageColors.push('#ffffff');data.pageBoardShapes.push('square');data.pageFieldBackgroundColors.push(activeFieldBackground());data.pageFieldImageIds.push('');data.pageFieldImageTints.push({color:"#000000",strength:0});data.pageFieldGuides.push(fieldGuides({},0));data.pageFieldSizes.push({width:538,height:538});data.page=data.pages.length-1;openPhaseListForCreation(data.page);data.activePhaseGroup=null;selected=null;selectedIds=[];renderAndSave();revealCreatedPhase(data.page);const tab=$('#pages').querySelectorAll('.page-tab')[data.page];if(tab){beginPageRename(tab,()=>{if(data!==owner)return;Object.assign(data,before);history=beforeHistory;future=beforeFuture;pendingHistoryState=null;pendingHistoryOwner=null;selected=beforeSelected;selectedIds=beforeSelectedIds;selectedPhaseIndexes=beforePhases;phaseSelectionOwner=data;renderAndSave()});const input=tab.querySelector('.page-tab-input');if(input)revealMovedListItems($('#pages'),[input])}};
+$('#addPage').onclick=()=>{commitPendingHistory();const owner=data,before=JSON.parse(JSON.stringify(data)),beforeHistory=history.slice(),beforeFuture=future.slice(),beforeSelected=selected,beforeSelectedIds=selectedIds.slice(),beforePhases=selectedPhaseIndexes.slice();snapshot();selectedPhaseIndexes=[];data.pages.push([]);data.pageMasterIds??=[];data.pageMasterIds.push('initial');data.pageNames.push('新規フェーズ');data.pageGroupIds.push(data.activePhaseGroup||null);data.pageNotes.push('');data.pageColors.push('#ffffff');data.pageBoardShapes.push('square');data.pageFieldBackgroundColors.push(activeFieldBackground());data.pageFieldImageIds.push('');data.pageFieldImageTints.push({color:"#000000",strength:0});data.pageFieldGuides.push(fieldGuides({},0));data.pageFieldSizes.push({width:538,height:538});data.page=data.pages.length-1;openPhaseListForCreation(data.page);data.activePhaseGroup=null;selected=null;selectedIds=[];renderAndSave();revealCreatedPhase(data.page);const tab=$('#pages').querySelectorAll('.page-tab')[data.page];if(tab){beginPageRename(tab,()=>{if(data!==owner)return;Object.assign(data,before);history=beforeHistory;future=beforeFuture;pendingHistoryState=null;pendingHistoryOwner=null;selected=beforeSelected;selectedIds=beforeSelectedIds;selectedPhaseIndexes=beforePhases;phaseSelectionOwner=data;renderAndSave()});const input=tab.querySelector('.page-tab-input');if(input)revealMovedListItems($('#pages'),[input])}};
 
 
 
@@ -561,10 +625,10 @@ $('#fileInput').onchange=e=>{
   let imported;
   try{await yieldDesktopBusyPaint();imported=parseImportedBoards(reader.result)}catch(error){notify('JSONを読み込めませんでした：'+(error?.message||String(error)));e.target.value='';return}finally{finishReading()}
   if(mode==='replace'&&!await confirmReplaceImport(imported)){e.target.value='';return}
-  const previous={data,contentBoards,activeContent,listHistory:contentListHistory.slice(),listFuture:contentListFuture.slice(),history:history.slice(),future:future.slice(),selected,selectedIds:selectedIds.slice(),selectedPhaseIndexes:selectedPhaseIndexes.slice(),phaseSelectionOwner};
+  const previous={phaseMasters:window.Bolxiv.phaseMasters?.records(),phaseMasterGroups:window.Bolxiv.phaseMasters?.groupRecords(),data,contentBoards,activeContent,listHistory:contentListHistory.slice(),listFuture:contentListFuture.slice(),history:history.slice(),future:future.slice(),selected,selectedIds:selectedIds.slice(),selectedPhaseIndexes:selectedPhaseIndexes.slice(),phaseSelectionOwner};
   try{await withDesktopDisplayBusy(()=>applyImportedBoards(imported,mode));notify(mode==='append'?imported.length+' 件のコンテンツを末尾に追加しました':'全コンテンツを読み込みデータに置き換えました')}
   catch(error){
-   contentListHistory.splice(0,contentListHistory.length,...previous.listHistory);contentListFuture.splice(0,contentListFuture.length,...previous.listFuture);contentSelectorCache=null;data=previous.data;contentBoards=previous.contentBoards;activeContent=previous.activeContent;history=previous.history;future=previous.future;selected=previous.selected;selectedIds=previous.selectedIds;selectedPhaseIndexes=previous.selectedPhaseIndexes;phaseSelectionOwner=previous.phaseSelectionOwner;
+   if(previous.phaseMasters)window.Bolxiv.phaseMasters.restoreRecords(previous.phaseMasters,previous.phaseMasterGroups);contentListHistory.splice(0,contentListHistory.length,...previous.listHistory);contentListFuture.splice(0,contentListFuture.length,...previous.listFuture);contentSelectorCache=null;data=previous.data;contentBoards=previous.contentBoards;activeContent=previous.activeContent;history=previous.history;future=previous.future;selected=previous.selected;selectedIds=previous.selectedIds;selectedPhaseIndexes=previous.selectedPhaseIndexes;phaseSelectionOwner=previous.phaseSelectionOwner;
    try{renderAndSave()}catch(recoveryError){console.error('Import recovery failed',recoveryError)}
    console.error('Board import failed',error);notify('JSONを読み込めませんでした：'+(error?.message||String(error)));clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').classList.remove('show'),15000);
   }
@@ -583,6 +647,8 @@ let firstRun=true;
 try{let saved=window.boardInitialState??localStorage.getItem('tactica-board-v1');if(saved){let v=JSON.parse(saved);if(Array.isArray(v.contents)&&v.contents.length){contentBoards=v.contents.filter(board=>board&&Array.isArray(board.pages)&&board.pages.length).map(board=>({...board,pages:board.pages.map(page=>Array.isArray(page)?page:[]),
   pageNotes:Array.from({length:board.pages.length},(_,i)=>typeof board.pageNotes?.[i]==='string'?board.pageNotes[i]:''),page:Math.max(0,Math.min(Number(board.page)||0,board.pages.length-1))}));if(!contentBoards.length)contentBoards=[data];activeContent=Math.max(0,Math.min(Number(v.activeContent)||0,contentBoards.length-1));data=contentBoards[activeContent];firstRun=false}else if(v.pages?.length){data={...data,...v};contentBoards=[data];activeContent=0;firstRun=false}}}catch{}
 
+window.boardPhaseMastersInitial=(()=>{try{return JSON.parse(window.boardInitialState??localStorage.getItem('tactica-board-v1')??'{}').phaseMasters||[]}catch{return []}})();
+window.boardPhaseMasterGroupsInitial=(()=>{try{return JSON.parse(window.boardInitialState??localStorage.getItem('tactica-board-v1')??'{}').phaseMasterGroups||[]}catch{return []}})();
 window.boardInitialState=null;
 
 for(const board of contentBoards)migrateBoardImages(board);
@@ -686,3 +752,10 @@ for(const id of ['gridToggle','fieldToggle','clipToggle'])document.getElementByI
 revealRestoredApp();
 
 ;
+
+(()=>{
+ const button=document.getElementById('importObjectImage'),input=document.getElementById('objectImageInput');
+ input.accept=document.getElementById('fieldImageInput').accept;
+ button.onclick=()=>{if(button.disabled||boardReadOnly)return;input.value='';input.click()};
+ input.onchange=()=>chooseObjectImage(input.files?.[0]);
+})();
