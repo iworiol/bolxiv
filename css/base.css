@@ -1127,7 +1127,7 @@ input[type=file] {
 }
 @media(max-width:850px) {
   /* Expand the active phase for wrapped names in both editing and viewing. */
-  :is(.battle,.phone-view-content) #pages .page-tab.active {
+  :is(.battle,.phone-view-content) :is(#pages,#phaseMasters) .page-tab.active {
     align-items:center;
     flex:0 0 auto;
     height:auto;
@@ -1135,7 +1135,7 @@ input[type=file] {
     padding-top:0;
     padding-bottom:0;
   }
-  :is(.battle,.phone-view-content) #pages .page-tab.active .page-tab-name {
+  :is(.battle,.phone-view-content) :is(#pages,#phaseMasters) .page-tab.active .page-tab-name {
     white-space:normal;
     overflow:visible;
     text-overflow:clip;

@@ -1403,17 +1403,17 @@
   font-variant-numeric:tabular-nums;
   white-space:nowrap;
 }
-.battle #pages .page-tab>.page-index,.battle #pages .page-tab>.phase-select-check {
+.battle :is(#pages,#phaseMasters) .page-tab>.page-index,.battle :is(#pages,#phaseMasters) .page-tab>.phase-select-check {
   margin-right:-4px;
 }
-.battle #pages .page-tab>.page-index {
+.battle :is(#pages,#phaseMasters) .page-tab>.page-index {
   flex:0 0 16px;
   width:16px;
   min-width:16px;
   text-align:left;
   margin-right:-6px;
 }
-.battle #pages .page-tab {
+.battle :is(#pages,#phaseMasters) .page-tab {
   padding-left:4px!important;
 }
 .app .layout .left .accordion-group:has(>.accordion-toggle[aria-expanded="false"]) {

@@ -251,7 +251,7 @@
   box-sizing:border-box;
   min-height:34px!important;
  }
- .app .layout :is(#pages,#objectList){row-gap:4px!important}
+ .app .layout :is(#pages,#phaseMasters,#objectList){row-gap:4px!important}
  .app>.layout #contentOptions .content-option-row.active,
  .app>.layout #objectList .object-row.selected{
   background:#eaf3ff!important;
@@ -457,7 +457,7 @@
   margin-right:0!important;
   align-self:stretch!important;
  }
- .app>.layout.phone-content-open .battle #pageListPanel,
+ .app>.layout.phone-content-open .battle :is(#pageListPanel,#phaseMasterRowsPanel),
  .app>.layout.phone-content-open .battle #layoutPropertiesPanel{
   box-sizing:border-box!important;
   width:100%!important;
@@ -466,7 +466,7 @@
   padding:8px!important;
  }
  .app>.layout.phone-content-open .battle .page-list-box,
- .app>.layout.phone-content-open .battle #pages{
+ .app>.layout.phone-content-open .battle :is(#pages,#phaseMasters){
   box-sizing:border-box!important;
   width:100%!important;
   min-width:0!important;
@@ -1134,7 +1134,7 @@
  body.phone-touch-mode .phase-group-heading:is(:hover,:has(:focus-visible)){background:#f0f4fa}
  body.phone-touch-mode .phase-group-heading:is(.active,.contains-active-phase):is(:hover,:has(:focus-visible)){background:#eaf3ff}
  body .app .layout :is(:is(#pages,#phaseMasters),#objectList,#contentOptions) :is(.phone-row-actions,.phase-group-menu-trigger),body .app .layout :is(:is(#pages,#phaseMasters),#objectList,#contentOptions) :is(.phone-row-actions,.phase-group-menu-trigger):is(:hover,:focus,:focus-visible,:active,.phone-control-pressed){background:transparent!important;color:#33445f!important;-webkit-text-fill-color:#33445f!important;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;filter:none!important}
- .app .layout :is(#pages,#objectList,#contentOptions) .phone-row-actions{display:grid!important;place-items:center;flex:0 0 28px;width:28px;height:28px;padding:4px;border:0!important;border-radius:4px;background:transparent!important;color:#33445f!important}
+ .app .layout :is(#pages,#phaseMasters,#objectList,#contentOptions) .phone-row-actions{display:grid!important;place-items:center;flex:0 0 28px;width:28px;height:28px;padding:4px;border:0!important;border-radius:4px;background:transparent!important;color:#33445f!important}
  .app .layout .phone-row-actions[hidden]{display:none!important}
  .phone-row-actions svg{display:block;width:18px;height:18px;pointer-events:none}
  .app .layout :is(#pages,#phaseMasters) .page-tab:not(.renaming) :is(.page-tab-edit,.page-tab-x),.app .layout #objectList .object-row .object-delete,.app .layout #contentOptions .content-option-row:not(:has(input))>.content-row-action{display:none!important}
@@ -2039,9 +2039,7 @@ body .app .layout #fieldGuideEditor .guide-section-toggle[aria-expanded="true"]{
 #phaseMasterListPanel{min-height:0;flex:1;display:flex;flex-direction:column}
 #phaseMasterListPanel .page-list-box{min-height:0;flex:1;display:flex;flex-direction:column}
 #phaseMasters{min-height:0;overflow:auto;flex:1}
-#phaseMasters .page-tab{display:flex;align-items:center;gap:4px}
 #phaseMasters .page-tab-name{min-width:0;flex:1;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border:0;background:transparent;color:inherit;font:inherit}
-#phaseMasters .list-drag-grip{border:0;background:transparent;color:inherit;cursor:grab;font:inherit}
 :is(#phaseMasterAssignment,#phaseMasterGroupProperties){display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden}
 .phase-master-phase-body{padding:8px;display:flex;flex-direction:column;gap:8px}
 .phase-master-phase-body[hidden]{display:none}
@@ -2070,9 +2068,7 @@ body .app .layout #fieldGuideEditor .guide-section-toggle[aria-expanded="true"]{
 .phase-master-editing .guide-properties-body #layoutPropertiesPanel>.field[hidden]{display:none!important}
 .phase-master-editing .guide-properties-body #layoutPropertiesPanel .field>label{font-size:12px;color:#33445f}
 
-#phaseMasters .list-drag-grip{font-size:12px;min-width:22px;min-height:28px}
 
-#phaseMasters .list-drag-grip[draggable="true"]{touch-action:none}
 #contentPanel>#phaseMasterGroupProperties{display:flex!important;min-height:0;flex-direction:column;overflow:auto}
 #contentPanel>#phaseMasterGroupProperties[hidden],:is(#phaseMasterAssignment,#phaseMasterGroupProperties)[hidden]{display:none!important}
 #phaseMasterGroupProperties #phaseGroupProperties{display:flex}
@@ -2132,8 +2128,8 @@ body.phase-master-editing .app .layout.desktop-phase-tools .battle #contentPanel
 #phaseMasterListPanel #phaseMasters{padding-right:calc(15px + var(--desktop-scroll-clearance,8px))!important;scrollbar-gutter:stable;margin:0}
 #phaseMasters .page-tab-name{padding:0;min-height:0;cursor:pointer}
 #phaseMasters .page-tab-x{flex:none}
-#phaseMasters .list-drag-grip{min-width:26px;padding:0;cursor:grab}
-#phaseMasters .list-drag-grip[draggable="false"]{cursor:default}
+#phaseMasters .page-index{padding:0;cursor:grab}
+#phaseMasters .page-index[draggable="false"]{cursor:default}
 
 #phaseMasterListPanel .phase-heading-actions{right:38px}
 #phaseMasterListPanel .master-list-heading{box-sizing:border-box;display:flex;align-items:center;flex:1;width:100%;height:36px;min-height:36px;padding:0 104px 0 10px;background:#eef2f7;color:#33445f;font-size:14px;font-weight:700;cursor:default}
@@ -2151,7 +2147,7 @@ body.phase-master-editing .app .layout.desktop-phase-tools .battle #contentPanel
 #phaseMasters .page-tab.renaming{height:auto!important;min-height:68px!important;max-height:none!important;flex:0 0 auto!important;flex-wrap:wrap;row-gap:6px;overflow:visible!important}
 #phaseMasters .page-tab.renaming .page-tab-input{flex:1 0 100%;box-sizing:border-box}
 
-#phaseMasters .page-tab.renaming>.list-drag-grip{height:28px!important;min-height:28px;align-self:center}
+#phaseMasters .page-tab.renaming>.page-index{height:28px!important;min-height:28px;align-self:center}
 
 
 .phase-master-editing #masterFieldSettings #layoutPropertiesPanel{padding:0!important;margin:0!important;border:0!important}
@@ -2259,3 +2255,8 @@ body.phase-master-editing .app .layout :is(.content-heading-row,.right .board-ti
 body.phase-master-editing .app .layout :is(.phone-content-icon,.phone-content-close){--press-bg:#8ec6ec;--press-fg:#183149}
 
 body.phase-master-editing .app .layout :is(.content-heading-row,.right .board-title-row,#fieldGuideEditor .guide-editor-heading) button:not(:where([role="menu"] *)),body.phase-master-editing .app .layout :is(.phone-content-icon,.phone-content-close){filter:none!important}
+
+@media(max-width:850px){
+ .app>.layout.phone-content-open .battle #phaseMasterListPanel #phaseMasterRowsPanel{padding:8px!important}
+ .app>.layout.phone-content-open .battle #phaseMasterListPanel #phaseMasters{padding:0!important;scrollbar-gutter:auto}
+}
