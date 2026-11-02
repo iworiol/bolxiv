@@ -1464,8 +1464,8 @@ body.resizing-content-pane,body.resizing-content-pane * {
   filter:none;
 }
 .right .board-title-row>#toggleObjectList :is(#selectionTitle,#guideEditorTitle),.right .board-title-row>.board-zoom-value {
-  color:#fff!important;
-  -webkit-text-fill-color:#fff!important;
+  color:var(--board-header-text,#fff)!important;
+  -webkit-text-fill-color:var(--board-header-text,#fff)!important;
 }
 .board-title-row .board-zoom-in,.board-title-row .board-zoom-out {
   display:flex;

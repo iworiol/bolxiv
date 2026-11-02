@@ -126,9 +126,9 @@
 
 .phone-display-menu-separator{height:1px;margin:6px 4px;background:#d0d4da}
 
-@media(max-width:850px){.app>.top>.brand strong{grid-column:2/4}.app>.top>.brand{grid-template-columns:30px minmax(0,max-content) max-content}.app>.top>.brand>.brand-version{justify-self:start}}
+@media(max-width:850px){.app>.top>.brand strong{grid-column:2/4}.app>.top>.brand{grid-template-columns:30px minmax(0,1fr) max-content}.app>.top>.brand>.brand-version{justify-self:start}}
 
-@media(max-width:850px){.app>.top>.brand{grid-template-columns:30px max-content max-content}.board-read-only .app>.top .header-history-actions{display:none!important}}
+@media(max-width:850px){.app>.top>.brand{grid-template-columns:30px minmax(0,1fr) max-content}.board-read-only .app>.top .header-history-actions{display:none!important}}
 
 @media(max-width:850px){.board-read-only .app .layout .right .board-display-toolbar>#clearBtn+.board-toolbar-separator{display:none!important}}
 
@@ -801,11 +801,11 @@
  .app .layout .phone-object-tabs button{background:#eef2f7!important;color:#33445f!important;-webkit-text-fill-color:#33445f!important}
  .app .layout .phone-object-tabs button:active{background:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
  .phone-object-tabs-title{cursor:pointer;-webkit-tap-highlight-color:transparent}
- body .app .layout .phone-object-tabs:has(:is(.phone-object-tabs-title,.phone-object-collapse):is(:active,.phone-control-pressed)){background:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+ body .app .layout .phone-object-tabs:has(:is(.phone-object-tabs-title,.phone-object-collapse):is(:active,.phone-control-pressed)){background:var(--press-bg,var(--blue))!important;color:var(--press-fg,#fff)!important;-webkit-text-fill-color:var(--press-fg,#fff)!important}
  body .app .layout .phone-object-tabs,body .app .layout .phone-object-tabs button,body .app .layout .phone-object-tabs button:is(:hover,:focus,:focus-visible,:active,.phone-control-pressed){background:#eef2f7!important;color:#33445f!important;-webkit-text-fill-color:#33445f!important;-webkit-tap-highlight-color:transparent}
  body .app .layout .phone-object-tabs *,body .app .layout .phone-object-tabs button:is(:active,.phone-control-pressed) *{color:#33445f!important;-webkit-text-fill-color:#33445f!important}
- body .app .layout .phone-object-tabs:has(:is(.phone-object-tabs-title,.phone-object-collapse):is(:active,.phone-control-pressed)) :is(.phone-object-tabs-title,.phone-object-tabs-title *,.phone-object-collapse){background:transparent!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
- body .app .layout .phone-object-tabs button:is(:active,.phone-control-pressed){background:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+ body .app .layout .phone-object-tabs:has(:is(.phone-object-tabs-title,.phone-object-collapse):is(:active,.phone-control-pressed)) :is(.phone-object-tabs-title,.phone-object-tabs-title *,.phone-object-collapse){background:transparent!important;color:var(--press-fg,#fff)!important;-webkit-text-fill-color:var(--press-fg,#fff)!important}
+ body .app .layout .phone-object-tabs button:is(:active,.phone-control-pressed){background:var(--press-bg,var(--blue))!important;color:var(--press-fg,#fff)!important;-webkit-text-fill-color:var(--press-fg,#fff)!important}
 
  .app .layout[data-phone-pane="canvas"] #objectLayerPanel#objectLayerPanel#objectLayerPanel.phone-object-tabbed[data-object-expanded="false"]{grid-template-rows:minmax(0,1fr) 38px!important;align-content:stretch!important}
  .app .layout[data-phone-pane="canvas"] #objectLayerPanel#objectLayerPanel#objectLayerPanel.phone-object-tabbed[data-object-expanded="false"]>.property-group{box-sizing:border-box!important;height:38px!important;min-height:38px!important;max-height:38px!important;border:1px solid #d0d4da!important;padding:0!important;gap:0!important;background:#eef2f7!important;box-shadow:none!important}
@@ -839,8 +839,8 @@
  .app>.layout.phone-content-open .battle #contentPanel.phone-phase-tabbed:has(#toggleBattlePages[aria-expanded="true"])>.phone-phase-shared.is-collapsed{margin-top:auto}
  .app>.layout.phone-content-open .battle #contentPanel.phone-phase-tabbed>.phone-phase-shared.is-collapsed>:is(.content-properties,.phase-memo){display:none!important}
  .phone-phase-tabs>#phonePhaseSectionToggle{border:0!important;background:transparent!important;font-size:14px}
- .phone-phase-shared>.phone-phase-tabs:has(:is(#phonePhaseSectionToggle,.phone-phase-switch-title):is(:active,.phone-control-pressed)){background:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
- .phone-phase-shared>.phone-phase-tabs:has(:is(#phonePhaseSectionToggle,.phone-phase-switch-title):is(:active,.phone-control-pressed))>#phonePhaseSectionToggle{color:#fff!important;-webkit-text-fill-color:#fff!important}
+ .phone-phase-shared>.phone-phase-tabs:has(:is(#phonePhaseSectionToggle,.phone-phase-switch-title):is(:active,.phone-control-pressed)){background:var(--press-bg,var(--blue))!important;color:var(--press-fg,#fff)!important;-webkit-text-fill-color:var(--press-fg,#fff)!important}
+ .phone-phase-shared>.phone-phase-tabs:has(:is(#phonePhaseSectionToggle,.phone-phase-switch-title):is(:active,.phone-control-pressed))>#phonePhaseSectionToggle{color:var(--press-fg,#fff)!important;-webkit-text-fill-color:var(--press-fg,#fff)!important}
  .phone-phase-tabs{display:flex;align-items:center;flex:none;gap:6px;order:0;min-height:36px;padding:0 6px 0 11px;box-sizing:border-box;border:0;border-radius:0;margin:0;background:#eef2f7;color:#33445f}
  .app>.layout.phone-content-open .battle #contentPanel.phone-phase-tabbed>#phasePropertyResize{order:3;position:relative;flex:0 0 20px;height:20px;touch-action:none!important;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;background:transparent!important}
  .app>.layout.phone-content-open .battle #contentPanel.phone-phase-tabbed>#phasePropertyResize::before{content:'';position:absolute;left:0;right:0;top:7px;height:6px;border-radius:3px;background:#ddd;pointer-events:none}
@@ -853,7 +853,7 @@
  .app>.layout.phone-content-open .battle #contentPanel.phone-phase-tabbed>.phone-content-preview{order:0;flex:0 0 clamp(140px,36dvh,360px);height:clamp(140px,36dvh,360px);min-height:0;max-height:none}
  .app>.layout.phone-content-open .battle #contentPanel.phone-phase-tabbed>.content-select-row{order:1}
  .app>.layout.phone-content-open .battle #contentPanel.phone-phase-tabbed>.page-controls{order:2;flex:1 1 0!important;min-height:72px!important}
- .board-read-only .battle #contentPanel>.content-properties{display:none!important}
+ .board-read-only:not(.png-preview-active) .battle #contentPanel>.content-properties{display:none!important}
 }
 
 /* ===== css/pc-tutorial.css ===== */
@@ -906,22 +906,22 @@
   -webkit-tap-highlight-color:transparent;
  }
  body .app .layout.phone-materials-open>.left .accordion-toggle:not(.rail-toggle)[aria-controls][aria-expanded]:not(:active):not(.phone-control-pressed)::after{background:transparent!important;color:#33445f!important;-webkit-text-fill-color:#33445f!important}
- body .app .layout.phone-materials-open>.left :is(#phoneCategoryFeedback,.accordion-toggle):is(#phoneCategoryFeedback,.accordion-toggle):not(.rail-toggle)[aria-controls][aria-expanded]:is(:active,.phone-control-pressed){transition:none!important;background:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+ body .app .layout.phone-materials-open>.left :is(#phoneCategoryFeedback,.accordion-toggle):is(#phoneCategoryFeedback,.accordion-toggle):not(.rail-toggle)[aria-controls][aria-expanded]:is(:active,.phone-control-pressed){transition:none!important;background:var(--press-bg,var(--blue))!important;color:var(--press-fg,#fff)!important;-webkit-text-fill-color:var(--press-fg,#fff)!important}
 
  .app .layout :is(.accordion-toggle:not(#toggleObjectList):not(#toggleContent),.phase-memo>summary,#contentSelect,.content-object-pin,.content-history-button,.board-grid-toggle,.phone-content-close,.phone-material-toggle):not(:disabled):is(:active,.phone-control-pressed),
  .app .layout #toggleBattlePages#toggleBattlePages:not(:disabled):is(:active,.phone-control-pressed),
  .app .layout #objectLayerPanel#objectLayerPanel#objectLayerPanel>.property-group>:is(#toggleLayers,#toggleInspector):not(:disabled):is(:active,.phone-control-pressed){
-  background:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important;
+  background:var(--press-bg,var(--blue))!important;color:var(--press-fg,#fff)!important;-webkit-text-fill-color:var(--press-fg,#fff)!important;
  }
  body .app .layout.phone-materials-open>.left :is(#phoneCategoryFeedback,.accordion-toggle):is(#phoneCategoryFeedback,.accordion-toggle):not(.rail-toggle)[aria-controls][aria-expanded]:is(:active,.phone-control-pressed) *,
- body .app .layout.phone-materials-open>.left :is(#phoneCategoryFeedback,.accordion-toggle):is(#phoneCategoryFeedback,.accordion-toggle):not(.rail-toggle)[aria-controls][aria-expanded]:is(:active,.phone-control-pressed)::after{background:transparent!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+ body .app .layout.phone-materials-open>.left :is(#phoneCategoryFeedback,.accordion-toggle):is(#phoneCategoryFeedback,.accordion-toggle):not(.rail-toggle)[aria-controls][aria-expanded]:is(:active,.phone-control-pressed)::after{background:transparent!important;color:var(--press-fg,#fff)!important;-webkit-text-fill-color:var(--press-fg,#fff)!important}
  .app .layout :is(.accordion-toggle:not(#toggleObjectList):not(#toggleContent),.phase-memo>summary,#contentSelect):not(:disabled):is(:active,.phone-control-pressed) *,
  .app .layout :is(.accordion-toggle:not(#toggleObjectList):not(#toggleContent),.phase-memo>summary,#contentSelect):not(:disabled):is(:active,.phone-control-pressed)::after,
  .app .layout #toggleBattlePages#toggleBattlePages:not(:disabled):is(:active,.phone-control-pressed) *,
  .app .layout #toggleBattlePages#toggleBattlePages:not(:disabled):is(:active,.phone-control-pressed)::after,
  .app .layout #objectLayerPanel#objectLayerPanel#objectLayerPanel>.property-group>:is(#toggleLayers,#toggleInspector):not(:disabled):is(:active,.phone-control-pressed) *,
  .app .layout #objectLayerPanel#objectLayerPanel#objectLayerPanel>.property-group>:is(#toggleLayers,#toggleInspector):not(:disabled):is(:active,.phone-control-pressed)::after{
-  color:#fff!important;-webkit-text-fill-color:#fff!important;
+  color:var(--press-fg,#fff)!important;-webkit-text-fill-color:var(--press-fg,#fff)!important;
  }
 }
 
@@ -939,7 +939,7 @@
 /* ===== css/phase-heading-actions.css ===== */
 .phase-heading-actions{position:absolute;right:var(--panel-action-inset,38px);top:5px;height:26px;display:flex;align-items:center;gap:var(--panel-action-gap,6px);z-index:1}
  .app .layout .phase-heading-actions>:is(#addPage,#copyPage,#copyPageToContent,#addPhaseGroup,#addPhaseMaster,#duplicatePhaseMaster){display:grid;place-items:center;box-sizing:border-box;flex:none;width:26px!important;min-width:26px!important;height:26px!important;min-height:26px!important;margin:0!important;padding:3px!important;border:1px solid #d0d4da!important;border-radius:5px;background:#eef2f7!important;color:#33445f!important;-webkit-text-fill-color:#33445f!important;font-size:18px;line-height:1;filter:none!important;transition:none!important;-webkit-tap-highlight-color:transparent;}
- .app .layout .phase-heading-actions>:is(#addPage,#copyPage,#copyPageToContent,#addPhaseGroup,#addPhaseMaster,#duplicatePhaseMaster):enabled:is(:hover:not(:where(.phone-touch-mode *)),:active,:focus-visible,.phone-control-pressed){background:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important;filter:none!important}
+ .app .layout .phase-heading-actions>:is(#addPage,#copyPage,#copyPageToContent,#addPhaseGroup,#addPhaseMaster,#duplicatePhaseMaster):enabled:is(:hover:not(:where(.phone-touch-mode *)),:active,:focus-visible,.phone-control-pressed){background:var(--press-bg,var(--blue))!important;color:var(--press-fg,#fff)!important;-webkit-text-fill-color:var(--press-fg,#fff)!important;filter:none!important}
  .app .layout .page-tab-actions:has(>#phaseComparisonStatus[hidden]):not(:has(>#addPage)){display:none!important}
  @media(max-width:850px){.board-read-only .phase-heading-actions{display:none!important}}
  .app .layout :is(#undo,#redo,#contentObjectPin,#addPage,#copyPage,#copyPageToContent,#addPhaseMaster,#duplicatePhaseMaster){display:grid!important;place-items:center!important;box-sizing:border-box;padding:0!important;line-height:1}
@@ -1109,8 +1109,8 @@
 @media(max-width:850px){
 
  body button:not(.handle):not(.color-swatch):not([data-color-value]):not(#toggleObjectList):not(#toggleContent):not(.phone-content-backdrop):not(:where(.page-tab,.page-tab *,.object-row,.object-row *,.content-option-row:not(.content-option-add-row),.content-option-row:not(.content-option-add-row) *,.phase-group-heading,.phase-group-heading *)){-webkit-tap-highlight-color:transparent}
- .app>.top #editModeToggle:enabled:is(:active:not(:where([role="menu"] *,.color-trigger,.color-custom-trigger,.phone-number-step-buttons *)),.phone-control-pressed),body button:not(.handle):not(.color-swatch):not([data-color-value]):not(#toggleObjectList):not(#toggleContent):not(.phone-content-backdrop):not(:where(.page-tab,.page-tab *,.object-row,.object-row *,.content-option-row:not(.content-option-add-row),.content-option-row:not(.content-option-add-row) *,.phase-group-heading,.phase-group-heading *)):enabled:is(:active:not(:where([role="menu"] *,.color-trigger,.color-custom-trigger,.phone-number-step-buttons *)),.phone-control-pressed){background:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important;filter:none!important;transition:none!important}
- body button:not(.handle):not(.color-swatch):not([data-color-value]):not(#toggleObjectList):not(#toggleContent):not(.phone-content-backdrop):not(:where(.page-tab,.page-tab *,.object-row,.object-row *,.content-option-row:not(.content-option-add-row),.content-option-row:not(.content-option-add-row) *,.phase-group-heading,.phase-group-heading *)):enabled:is(:active:not(:where([role="menu"] *,.color-trigger,.color-custom-trigger,.phone-number-step-buttons *)),.phone-control-pressed) :not(.color-preview):not(img){color:#fff!important;-webkit-text-fill-color:#fff!important}
+ .app>.top #editModeToggle:enabled:is(:active:not(:where([role="menu"] *,.color-trigger,.color-custom-trigger,.phone-number-step-buttons *)),.phone-control-pressed),body button:not(.handle):not(.color-swatch):not([data-color-value]):not(#toggleObjectList):not(#toggleContent):not(.phone-content-backdrop):not(:where(.page-tab,.page-tab *,.object-row,.object-row *,.content-option-row:not(.content-option-add-row),.content-option-row:not(.content-option-add-row) *,.phase-group-heading,.phase-group-heading *)):enabled:is(:active:not(:where([role="menu"] *,.color-trigger,.color-custom-trigger,.phone-number-step-buttons *)),.phone-control-pressed){background:var(--press-bg,var(--blue))!important;color:var(--press-fg,#fff)!important;-webkit-text-fill-color:var(--press-fg,#fff)!important;filter:none!important;transition:none!important}
+ body button:not(.handle):not(.color-swatch):not([data-color-value]):not(#toggleObjectList):not(#toggleContent):not(.phone-content-backdrop):not(:where(.page-tab,.page-tab *,.object-row,.object-row *,.content-option-row:not(.content-option-add-row),.content-option-row:not(.content-option-add-row) *,.phase-group-heading,.phase-group-heading *)):enabled:is(:active:not(:where([role="menu"] *,.color-trigger,.color-custom-trigger,.phone-number-step-buttons *)),.phone-control-pressed) :not(.color-preview):not(img){color:var(--press-fg,#fff)!important;-webkit-text-fill-color:var(--press-fg,#fff)!important}
 }
 
 /* ===== css/phone-row-actions.css ===== */
@@ -1237,8 +1237,8 @@ body .app .layout #contentSelect::after{
  body .app .layout .phone-reader-tabs .phone-reader-title{background:transparent!important}
  body .app .layout .phone-reader-tabs .phone-reader-switch{border:1px solid #d0d4da!important;border-radius:6px!important}
  body .app .layout .phone-reader-tabs .phone-reader-collapse{border:0!important;box-shadow:none!important}
- body .app .layout .phone-reader-tabs button:is(:active,.phone-control-pressed){background:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
- body .app .layout .phone-reader-tabs .phone-reader-title:is(:active,.phone-control-pressed){background:var(--blue)!important}
+ body .app .layout .phone-reader-tabs button:is(:active,.phone-control-pressed){background:var(--press-bg,var(--blue))!important;color:var(--press-fg,#fff)!important;-webkit-text-fill-color:var(--press-fg,#fff)!important}
+ body .app .layout .phone-reader-tabs .phone-reader-title:is(:active,.phone-control-pressed){background:var(--press-bg,var(--blue))!important}
 }
 #phoneIconHelp::backdrop{background:rgb(0 0 0 / 20%)}
 #phoneIconHelp:not([open]){display:none!important}
@@ -1263,8 +1263,8 @@ body .app .layout #contentSelect::after{
 #phoneIconHelp .phone-icon-help-text>p{margin:0;font-size:13px;line-height:1.6;color:#33445f}
 /* Reader and PNG disclosures highlight their entire shared heading. */
 @media(max-width:850px){
- body .app .layout .phone-reader-tabs:has(:is(.phone-reader-title,.phone-reader-collapse):is(:active,.phone-control-pressed)){background:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
- body .app .layout .phone-reader-tabs:has(:is(.phone-reader-title,.phone-reader-collapse):is(:active,.phone-control-pressed)) :is(.phone-reader-title,.phone-reader-collapse,.phone-reader-title *, .phone-reader-collapse *){background:transparent!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+ body .app .layout .phone-reader-tabs:has(:is(.phone-reader-title,.phone-reader-collapse):is(:active,.phone-control-pressed)){background:var(--press-bg,var(--blue))!important;color:var(--press-fg,#fff)!important;-webkit-text-fill-color:var(--press-fg,#fff)!important}
+ body .app .layout .phone-reader-tabs:has(:is(.phone-reader-title,.phone-reader-collapse):is(:active,.phone-control-pressed)) :is(.phone-reader-title,.phone-reader-collapse,.phone-reader-title *, .phone-reader-collapse *){background:transparent!important;color:var(--press-fg,#fff)!important;-webkit-text-fill-color:var(--press-fg,#fff)!important}
  body .app .layout .phone-reader-tabs:has(:is(.phone-reader-title,.phone-reader-collapse):is(:active,.phone-control-pressed)) .phone-reader-switch{background:#eef2f7!important;color:#33445f!important;-webkit-text-fill-color:#33445f!important;border-color:#d0d4da!important}
 }
 /* Distinguish the selected tab with text weight and color, without adding a fill. */
@@ -1305,8 +1305,7 @@ body .app .layout #contentSelect::after{
 /* Property spacing trial: remove this block to restore the previous density. */
 .app .layout #propertyPanel,
 .app .layout #layoutPropertiesPanel:not([hidden]):not(.hidden){padding-top:8px!important;padding-bottom:8px!important;padding-left:8px!important}
-.app .layout #inspector,
-.app .layout #layoutPropertiesPanel:not([hidden]):not(.hidden){gap:8px!important}
+.app .layout :is(#inspector,#layoutPropertiesPanel){gap:8px!important}
 .app .layout :is(#inspector,#layoutPropertiesPanel) .field{margin:0!important}
 .app .layout :is(#inspector,#layoutPropertiesPanel) .field>label:not(.property-icon-toggle),
 .app .layout #inspector .coordinate-fields>div>label{margin-top:0!important;margin-bottom:4px!important}
@@ -1419,7 +1418,7 @@ body .app .layout #objectList>.object-group-row>.object-delete{grid-column:5;gri
 .right #inspector .property-swap-button{box-sizing:border-box;display:grid;place-items:center;flex:0 0 26px;width:26px;height:26px;min-width:26px;padding:3px;border:1px solid #d5dce6;border-radius:4px;background:#fff;color:#000}.property-swap-button svg{width:18px;height:18px}.property-swap-button:disabled{opacity:.4}
 .left .accordion-group:has(#presetPanel){position:relative}.left .preset-manage{position:absolute;right:38px;top:5px;display:grid;place-items:center;box-sizing:border-box;width:26px;min-width:26px;height:26px;min-height:26px;margin:0;padding:3px;border:1px solid #d0d4da;border-radius:5px;background:#eef2f7;color:#33445f;-webkit-text-fill-color:#33445f;filter:none;transition:none;-webkit-tap-highlight-color:transparent}.left .preset-manage svg{width:18px;height:18px}.left .preset-manage:enabled:is(:hover:not(:where(.phone-touch-mode *)),:active,:focus-visible,.phone-control-pressed){background:var(--blue);color:#fff;-webkit-text-fill-color:#fff;filter:none}@media(max-width:850px){.left .preset-manage{top:4px;width:28px;min-width:28px;height:28px;min-height:28px}}.left .preset-section-separator{border-top:1px solid #e5e9ef;margin:8px 0}.left #userPresetGrid:empty{display:none}.left .preset-empty{font-size:11px;color:#64748b;padding:4px 0 8px}.left .user-preset .preset-thumbnail,.touch-placement-preview>.preset-thumbnail{position:relative;display:block;width:26px;height:26px;overflow:hidden}.user-preset-scene{pointer-events:none}.preset-name-dialog{border:1px solid #d5dce6;border-radius:8px;padding:16px;max-width:calc(100vw - 32px)}.preset-name-dialog form{display:flex;flex-direction:column;gap:10px}.preset-name-dialog input{width:260px;max-width:100%;box-sizing:border-box}.preset-dialog-actions{display:flex;justify-content:flex-end;gap:8px}
 .left:not(.palette-hover-open):not(:focus-within):not(.pinned) .preset-manage{display:none}
-.app .layout .left .preset-manage{background:#eef2f7!important;color:#33445f!important;-webkit-text-fill-color:#33445f!important;border:1px solid #d0d4da!important}.app .layout .left .preset-manage:enabled:is(:hover:not(:where(.phone-touch-mode *)),:active,:focus-visible,.phone-control-pressed){background:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important;filter:none!important}
+.app .layout .left .preset-manage{background:#eef2f7!important;color:#33445f!important;-webkit-text-fill-color:#33445f!important;border:1px solid #d0d4da!important}.app .layout .left .preset-manage:enabled:is(:hover:not(:where(.phone-touch-mode *)),:active,:focus-visible,.phone-control-pressed){background:var(--press-bg,var(--blue))!important;color:var(--press-fg,#fff)!important;-webkit-text-fill-color:var(--press-fg,#fff)!important;filter:none!important}
 
 .header-mode-menu{display:none}@media(min-width:851px){.app>.top{grid-template-columns:minmax(max-content,var(--phase-pane-header-left,336px)) auto minmax(0,1fr) auto}.app>.top>.header-mode-menu{display:flex;align-items:center;grid-column:3;grid-row:1;justify-self:end;margin-left:12px}.app>.top>.phone-menu-toggle{grid-column:4}.app>.top>.header-mode-status{gap:8px}}
 
@@ -1467,8 +1466,8 @@ body .app .layout #objectList>.object-group-row>.object-delete{grid-column:5;gri
 @media(min-width:851px){.desktop-phase-panel-title>span{grid-area:1/1;white-space:nowrap}.desktop-phase-panel-title>.desktop-phase-label-measure{visibility:hidden;pointer-events:none}}
 
 @media(max-width:850px){
- body .app .layout :is(.phone-object-tabs,.phone-phase-tabs,.phone-reader-tabs).phone-control-pressed{background:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
- body .app .layout :is(.phone-object-tabs,.phone-phase-tabs,.phone-reader-tabs).phone-control-pressed :is(.phone-object-tabs-title,.phone-object-tabs-title *,.phone-object-collapse,.phone-phase-switch-title,.phone-phase-switch-title *,#phonePhaseSectionToggle,.phone-reader-title,.phone-reader-title *,.phone-reader-collapse){background:transparent!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+ body .app .layout :is(.phone-object-tabs,.phone-phase-tabs,.phone-reader-tabs).phone-control-pressed{background:var(--press-bg,var(--blue))!important;color:var(--press-fg,#fff)!important;-webkit-text-fill-color:var(--press-fg,#fff)!important}
+ body .app .layout :is(.phone-object-tabs,.phone-phase-tabs,.phone-reader-tabs).phone-control-pressed :is(.phone-object-tabs-title,.phone-object-tabs-title *,.phone-object-collapse,.phone-phase-switch-title,.phone-phase-switch-title *,#phonePhaseSectionToggle,.phone-reader-title,.phone-reader-title *,.phone-reader-collapse){background:transparent!important;color:var(--press-fg,#fff)!important;-webkit-text-fill-color:var(--press-fg,#fff)!important}
 }
 
 /* Desktop phase selection matches object-list row selection. */
@@ -1568,7 +1567,7 @@ body .app .layout #objectList>.object-group-row>.object-delete{grid-column:5;gri
 @media(max-width:850px){.app .layout.phone-materials-open>.left.preset-managing{display:flex!important;flex-direction:column;overflow:hidden!important}.left>#userPresetManager:not([hidden]){border-radius:6px}}
 
 /* The same material toolbar remains available in placement and management. */
-.app .layout>.left>.object-pane-actions>.preset-manage{position:static;display:grid;place-items:center;box-sizing:border-box;flex:0 0 34px;width:34px;min-width:34px;max-width:34px;height:34px;min-height:34px;margin:0;padding:3px;border:1px solid #999!important;border-radius:6px;background:#fff!important;color:#000!important;-webkit-text-fill-color:#000!important}.app .layout>.left>.object-pane-actions>.preset-manage svg{width:24px;height:24px}.app .layout>.left>.object-pane-actions>.preset-manage:is(:hover:not(:where(.phone-touch-mode *)),:active,.phone-control-pressed,:focus-visible){background:var(--blue)!important;border-color:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important}.left.preset-managing>.object-pane-actions #clearBtn{display:none!important}.left.preset-managing #categoryModeToggle:disabled{opacity:.45;cursor:default;filter:none!important;background:#fff!important;color:#000!important;border-color:#999!important}.left:not(.pinned):not(.palette-hover-open):not(:focus-within):not(.preset-managing)>.object-pane-actions>.preset-manage{display:none}.left>#userPresetManager .preset-manager-heading{padding-left:8px}@media(max-width:850px){.app>.layout.phone-materials-open>.left>.object-pane-actions{display:flex!important;flex:none}}
+.app .layout>.left>.object-pane-actions>.preset-manage{position:static;display:grid;place-items:center;box-sizing:border-box;flex:0 0 34px;width:34px;min-width:34px;max-width:34px;height:34px;min-height:34px;margin:0;padding:3px;border:1px solid #999!important;border-radius:6px;background:#fff!important;color:#000!important;-webkit-text-fill-color:#000!important}.app .layout>.left>.object-pane-actions>.preset-manage svg{width:24px;height:24px}.app .layout>.left>.object-pane-actions>.preset-manage:is(:hover:not(:where(.phone-touch-mode *)),:active,.phone-control-pressed,:focus-visible){background:var(--press-bg,var(--blue))!important;border-color:var(--blue)!important;color:var(--press-fg,#fff)!important;-webkit-text-fill-color:var(--press-fg,#fff)!important}.left.preset-managing>.object-pane-actions #clearBtn{display:none!important}.left.preset-managing #categoryModeToggle:disabled{opacity:.45;cursor:default;filter:none!important;background:#fff!important;color:#000!important;border-color:#999!important}.left:not(.pinned):not(.palette-hover-open):not(:focus-within):not(.preset-managing)>.object-pane-actions>.preset-manage{display:none}.left>#userPresetManager .preset-manager-heading{padding-left:8px}@media(max-width:850px){.app>.layout.phone-materials-open>.left>.object-pane-actions{display:flex!important;flex:none}}
 
 .app .layout :is(#pages,#phaseMasters) .phase-group-heading.renaming>[data-cancel-group-addition]{display:grid!important;grid-column:3;grid-row:1;color:inherit}
 
@@ -1788,7 +1787,7 @@ body .app .layout #objectList>.object-group-row>.object-delete{grid-column:5;gri
 #fieldGuideEditor #guideShapeProperties>h3>.guide-shape-actions{flex:none;gap:4px;margin:0 28px 0 auto;padding-left:6px}
 #fieldGuideEditor .guide-shape-actions>.btn{box-sizing:border-box;display:grid;place-items:center;flex:none;width:26px;min-width:26px;height:26px;min-height:26px;padding:3px;border:1px solid #d0d4da;border-radius:5px;background:#eef2f7;color:#33445f;-webkit-text-fill-color:currentColor;font-size:18px;line-height:1;filter:none;-webkit-tap-highlight-color:transparent}
 #fieldGuideEditor .guide-shape-actions>.btn svg{display:block;width:18px;height:18px;pointer-events:none}
-#fieldGuideEditor .guide-shape-actions>.btn:enabled:is(:hover:not(:where(.phone-touch-mode *)),:active,:focus-visible,.phone-control-pressed){background:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important;border-color:var(--blue)}
+#fieldGuideEditor .guide-shape-actions>.btn:enabled:is(:hover:not(:where(.phone-touch-mode *)),:active,:focus-visible,.phone-control-pressed){background:var(--press-bg,var(--blue))!important;color:var(--press-fg,#fff)!important;-webkit-text-fill-color:var(--press-fg,#fff)!important;border-color:var(--blue)}
 #fieldGuideEditor .guide-shape-actions>.btn:disabled{opacity:.4;cursor:default}
 .guide-editor-properties .field-guide-check{display:flex;align-items:center;gap:5px;font:inherit;cursor:pointer}
 .guide-editor-properties .field-guide-check input{margin:0;accent-color:var(--blue,#3182ce)}
@@ -1829,13 +1828,15 @@ body .app .layout #objectList>.object-group-row>.object-delete{grid-column:5;gri
 /* Match the ordinary phase property labels and native input appearance. */
 #fieldGuideEditor .guide-properties-body .field{margin:0;gap:0}
 #fieldGuideEditor .guide-properties-body .field>label{font-family:inherit;font-size:12px;font-weight:400;line-height:1.2;margin:0 0 4px;color:#000}
+#fieldGuideEditor .guide-properties-body .field>label:has(+.coordinate-control){line-height:12px;margin-bottom:0}
 #fieldGuideEditor .guide-property-group{display:flex;flex-direction:column;gap:10px}
 #fieldGuideEditor .field-guide-check{font-family:inherit;font-size:12px;font-weight:400;line-height:1.2;margin:0}
 #fieldGuideEditor .guide-hide-objects{box-sizing:border-box;width:100%;border-top:1px solid #d0d4da;padding-top:10px}
 #fieldGuideEditor #fieldGuideSettings .field-guide-number{margin:0}
 #fieldGuideEditor #fieldGuideSettings .field-guide-check input,#fieldGuideEditor .guide-hide-objects input,#fieldGuideEditor input[type="range"]{accent-color:auto}
-#fieldGuideEditor .guide-properties-body input[type="number"]{box-sizing:border-box;font-family:inherit;font-size:14px;font-weight:400;line-height:normal;height:24px;padding:4px;border:1px solid #d5dce6!important;border-radius:5px;background:#f8fafc!important;color:#000!important;-webkit-text-fill-color:#000!important}
+#fieldGuideEditor .guide-properties-body :is(input[type="number"],input[type="text"],select){box-sizing:border-box;font-family:inherit;font-size:14px;font-weight:400;line-height:normal;height:24px;padding:4px;border:1px solid #d5dce6!important;border-radius:5px;background:#f8fafc!important;color:#000!important;-webkit-text-fill-color:#000!important}
 #fieldGuideEditor .guide-properties-body .color-trigger{font-family:inherit;font-size:14px;font-weight:400;border:1px solid #d5dce6!important;background:#f8fafc!important;color:#000!important;-webkit-text-fill-color:#000!important}
+#fieldGuideEditor .guide-properties-body .layout-background-colors .color-trigger{padding-left:4px;padding-right:4px;gap:4px}
 #fieldGuideEditor .guide-properties-body .color-trigger:enabled:is(:hover:not(:where(.phone-touch-mode *)),:active){background:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
 .field-guide-editing #editModeToggle:disabled{opacity:.45;cursor:default}
 .field-guide-editing .phone-phase-navigation{display:none!important}
@@ -1965,14 +1966,14 @@ body .app .layout #fieldGuideEditor .guide-section-toggle[aria-expanded="true"]{
 
 /* Desktop property controls share a compact height; touch controls retain their sizing. */
 @media(min-width:851px){
- .app .layout :is(#inspector,#layoutPropertiesPanel,#phaseGroupProperties,#fieldGuideEditor .guide-editor-properties,#pngPreview .png-preview-settings) :is(input[type="number"],select){box-sizing:border-box;height:28px!important;min-height:28px!important;max-height:28px!important;padding-top:3px!important;padding-bottom:3px!important;line-height:normal!important}
+ .app .layout :is(#inspector,#layoutPropertiesPanel,#phaseGroupProperties,#phaseMasterAssignment,#phaseMasterGroupProperties,#fieldGuideEditor .guide-editor-properties,#pngPreview .png-preview-settings) :is(input[type="number"],input[type="text"],input:not([type]),select){box-sizing:border-box;height:28px!important;min-height:28px!important;max-height:28px!important;padding-top:3px!important;padding-bottom:3px!important;line-height:normal!important}
  .app .layout :is(#inspector,#layoutPropertiesPanel,#phaseGroupProperties,#fieldGuideEditor .guide-editor-properties) .coordinate-control:has(input[type="number"]){height:28px;min-height:28px}
 }
 @media(min-width:851px){.app .layout :is(#inspector,#layoutPropertiesPanel,#phaseGroupProperties,#fieldGuideEditor .guide-editor-properties) .color-trigger{box-sizing:border-box;height:28px!important;min-height:28px!important;max-height:28px!important;padding-top:3px!important;padding-bottom:3px!important}}
 
 /* Touch-sized controls only inside property panels. */
 @media(max-width:850px){
- .app .layout :is(#inspector,#layoutPropertiesPanel,#phaseGroupProperties,#fieldGuideEditor .guide-editor-properties,#pngPreview .png-preview-settings) :is(select,input[type="number"],input[type="text"],input:not([type]),.color-trigger,.phone-number-step-buttons button){box-sizing:border-box;height:40px!important;min-height:40px!important;max-height:40px!important;padding-top:4px!important;padding-bottom:4px!important;line-height:normal!important}
+ .app .layout :is(#inspector,#layoutPropertiesPanel,#phaseGroupProperties,#phaseMasterAssignment,#phaseMasterGroupProperties,#fieldGuideEditor .guide-editor-properties,#pngPreview .png-preview-settings) :is(select,input[type="number"],input[type="text"],input:not([type]),.color-trigger,.phone-number-step-buttons button){box-sizing:border-box;height:40px!important;min-height:40px!important;max-height:40px!important;padding-top:4px!important;padding-bottom:4px!important;line-height:normal!important}
  .app .layout :is(#inspector,#layoutPropertiesPanel,#phaseGroupProperties,#fieldGuideEditor .guide-editor-properties,#pngPreview .png-preview-settings) .phone-number-step-buttons button{min-width:40px!important}
  .app .layout :is(#inspector,#layoutPropertiesPanel,#phaseGroupProperties,#fieldGuideEditor .guide-editor-properties,#pngPreview .png-preview-settings) .coordinate-control:has(.phone-number-step-buttons){height:40px;min-height:40px}
 }
@@ -2029,7 +2030,7 @@ body .app .layout #fieldGuideEditor .guide-section-toggle[aria-expanded="true"]{
 @media(max-width:850px){
  .app>.top.phone-menu-open>#headerActions{gap:0;padding:5px;border-radius:6px;box-shadow:0 5px 14px #0003}
  .app>.top.phone-menu-open>#headerActions.actions>button{box-sizing:border-box;display:block;width:100%;min-height:40px!important;margin:0;padding:8px 10px;border:0!important;border-radius:4px;background:transparent!important;color:#000;-webkit-text-fill-color:#000;font:inherit;font-size:14px;text-align:left!important;box-shadow:none;filter:none;-webkit-tap-highlight-color:transparent}
- .app>.top.phone-menu-open>#headerActions.actions>button:enabled:is(:active,.phone-control-pressed){background:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+ .app>.top.phone-menu-open>#headerActions.actions>button:enabled:is(:active,.phone-control-pressed){background:var(--press-bg,var(--blue))!important;color:var(--press-fg,#fff)!important;-webkit-text-fill-color:var(--press-fg,#fff)!important}
  #headerActions .header-submenu-arrow{float:right}
 }
 /* Phase masters reuse the existing field, list and guide controls. */
@@ -2054,7 +2055,7 @@ body .app .layout #fieldGuideEditor .guide-section-toggle[aria-expanded="true"]{
 
 .phase-master-editing .guide-hide-objects{display:none!important}
 .phase-master-editing .guide-properties-title{font-size:14px;font-weight:700}
-.phase-master-editing .guide-properties-body #layoutPropertiesPanel{display:block!important;height:auto!important;flex:none!important;padding:0 0 12px;overflow:visible!important;border-bottom:1px solid #c7cdd5;margin-bottom:8px}
+.phase-master-editing .guide-properties-body #layoutPropertiesPanel{display:flex!important;flex-direction:column;height:auto!important;flex:none!important;padding:0 0 12px;overflow:visible!important;border-bottom:1px solid #c7cdd5;margin-bottom:8px}
 .phase-master-editing .guide-properties-body.phase-master-locked{opacity:.6}
 .phase-master-editing .guide-editor-phase,.phase-master-editing #guideEditorPhase{display:none!important}
 .phase-master-editing #objects,.phase-master-editing #objectControls,.phase-master-editing .object-group-context{visibility:hidden!important}
@@ -2079,13 +2080,13 @@ body .app .layout #fieldGuideEditor .guide-section-toggle[aria-expanded="true"]{
 :is(#phaseMasterAssignment,#phaseMasterGroupProperties)>.accordion-toggle,#phaseMasterGroupProperties>.accordion-toggle{background:#eef2f7!important;color:#33445f!important;font-size:14px;font-weight:600;border:0;min-height:36px;padding:7px 10px}
 :is(#phaseMasterAssignment,#phaseMasterGroupProperties)>.accordion-toggle:hover,#phaseMasterGroupProperties>.accordion-toggle:hover{background:#e2e9f3!important}
 :is(#phaseMasterAssignment,#phaseMasterGroupProperties) .phase-master-phase-body>.field{display:flex;flex-direction:column;flex:none;gap:4px;margin:0}
-:is(#phaseMasterAssignment,#phaseMasterGroupProperties) input[type=text],:is(#phaseMasterAssignment,#phaseMasterGroupProperties) select{background:#f7f9fc!important;color:#22344f!important;border:1px solid #ccd3df;border-radius:4px;padding:5px 8px;min-height:30px}
+:is(#phaseMasterAssignment,#phaseMasterGroupProperties) input[type=text],:is(#phaseMasterAssignment,#phaseMasterGroupProperties) select{background:#f7f9fc!important;color:#22344f!important;border:1px solid #ccd3df;border-radius:4px;padding:5px 8px}
 :is(#phaseMasterAssignment,#phaseMasterGroupProperties) input:focus,:is(#phaseMasterAssignment,#phaseMasterGroupProperties) select:focus{outline:2px solid #4769b3;outline-offset:-1px}
 :is(#phaseMasterAssignment,#phaseMasterGroupProperties) #phaseMemo>.phase-memo-body{display:flex!important;flex-direction:column;flex:1;min-height:100px;height:auto!important;padding:0}
 :is(#phaseMasterAssignment,#phaseMasterGroupProperties) #phaseMemo textarea{display:block!important;background:#fff;color:#22344f;box-sizing:border-box;flex:1;height:auto!important;min-height:100px;resize:none;border:1px solid #ccd3df;border-radius:4px;padding:6px}
 :is(#phaseMasterAssignment,#phaseMasterGroupProperties) #phaseMemo .phase-memo-reading{display:none!important}
 :is(#phaseMasterAssignment,#phaseMasterGroupProperties) #phaseMemo>summary{background:transparent;border:0;padding:4px 0}
-@media(max-width:850px){:is(#phaseMasterAssignment,#phaseMasterGroupProperties) input[type=text],:is(#phaseMasterAssignment,#phaseMasterGroupProperties) select{min-height:38px}}
+
 
 :is(#phaseMasterAssignment,#phaseMasterGroupProperties),#phaseMasterGroupProperties{order:10}
 #phaseMasterListPanel{order:2}
@@ -2165,9 +2166,9 @@ body.phase-master-editing .app .layout.desktop-phase-tools .battle #contentPanel
 
 .phase-master-name input{background:#f7f9fc!important;color:#22344f!important;border:1px solid #ccd3df;border-radius:4px;padding:5px 8px;min-height:30px}
 .phase-master-name input:focus{outline:2px solid #4769b3;outline-offset:-1px}
-@media(max-width:850px){.phase-master-name input{min-height:38px}}
 
-#fieldGuideEditor .phase-master-name input{border:1px solid #ccd3df!important}
+
+
 
 .phase-master-editing #fieldGuideEditor .guide-properties-body{margin:8px 0 8px 8px;padding:0 12px 0 0}
 @media(min-width:851px){.phase-master-editing #fieldGuideEditor .guide-properties-body{padding-right:calc(12px + var(--desktop-scroll-clearance,8px))}}
@@ -2220,3 +2221,41 @@ body.master-group-selected .app .layout #contentPanel>#phaseMasterGroupPropertie
 body.master-group-selected #phaseMasterGroupProperties>.phase-master-phase-body{flex:0 0 auto;min-height:0;height:auto!important}
 
 #masterGroupPreview.master-preview-embedded{visibility:visible;left:0;top:0;transform:scale(var(--master-preview-scale,1));transform-origin:top left}
+
+body .app .layout .content-heading-row>#toggleContent{white-space:nowrap}
+
+body .app .layout .content-heading-row>#phaseMasterModeToggle{margin-left:6px}
+
+@media(max-width:850px){body .app .layout .content-heading-row>#phaseMasterModeToggle{margin-left:12px}}
+
+.phase-field-selection{display:flex;align-items:center;gap:6px;min-width:0}
+.phase-field-selection>select{flex:1;min-width:0;width:0}
+#phaseMasterAssignment #editUsedField{box-sizing:border-box;display:grid;place-items:center;flex:0 0 28px;width:28px;min-width:28px;height:28px;min-height:28px;padding:4px;border:1px solid #ccd3df;border-radius:4px;background:#eef2f7;color:#33445f}
+#editUsedField svg{width:18px;height:18px;pointer-events:none}
+#editUsedField:disabled{cursor:not-allowed;opacity:.45}
+#phaseMasterAssignment #editUsedField:enabled:is(:hover:not(:where(.phone-touch-mode *)),:focus-visible){background:var(--blue);color:#fff}
+@media(max-width:850px){#phaseMasterAssignment #editUsedField{flex-basis:40px;width:40px;min-width:40px;height:40px;min-height:40px}}
+
+/* Destructive menu actions share normal, highlighted and disabled colors. */
+.object-context-menu .context-delete:enabled{color:#c62828!important;-webkit-text-fill-color:#c62828!important}
+[role="menu"].object-context-menu>.context-delete:enabled:is(:hover:not(:where(.phone-touch-mode *)),:focus-visible,:active){background:#feecec!important;color:#b42318!important;-webkit-text-fill-color:#b42318!important}
+.object-context-menu .context-delete:disabled{color:#8b949e!important;-webkit-text-fill-color:#8b949e!important}
+
+#fieldUsageNote{margin:4px 0 0;font-size:12px;font-weight:400;line-height:1.5;color:#60718c;overflow-wrap:anywhere}
+
+/* Field-mode headers use the crystal palette for every interaction state. */
+body.phase-master-editing .app .layout :is(.content-heading-row,.right .board-title-row,#fieldGuideEditor .guide-editor-heading){--accent:#a8d8f5;--board-header-text:#183149;--press-bg:#8ec6ec;--press-fg:#183149;background:var(--accent)!important;color:#183149!important;box-shadow:inset 0 -1px #72a9ce}
+body.phase-master-editing .app .layout :is(#toggleContent,#selectionTitle,#guideEditorTitle){color:#183149!important;-webkit-text-fill-color:#183149!important}
+body.phase-master-editing .app .layout :is(.content-heading-row,.right .board-title-row,#fieldGuideEditor .guide-editor-heading) :is(button,.board-zoom-group):not(:where([role="menu"] *)){color:#183149!important;-webkit-text-fill-color:#183149!important;border-color:#6585a3!important;background:transparent!important}
+body.phase-master-editing .app .layout :is(.content-heading-row,.right .board-title-row,#fieldGuideEditor .guide-editor-heading) button:enabled:not(:where([role="menu"] *)):is(:hover:not(:where(.phone-touch-mode *)),:focus-visible,:active,.phone-control-pressed,[aria-haspopup="menu"][aria-expanded="true"]){background:#8ec6ec!important;color:#183149!important;-webkit-text-fill-color:#183149!important}
+
+body.phase-master-editing .app .layout .right .board-title-row #toggleObjectList,body.phase-master-editing .app .layout .right .board-title-row #toggleObjectList *{color:#183149!important;-webkit-text-fill-color:#183149!important;border-color:#6585a3!important}
+
+@media(max-width:850px){body.phase-master-editing .app .layout :is(.phone-content-icon,.phone-content-close),body.phase-master-editing .app .layout :is(.phone-content-icon,.phone-content-close) svg{color:#183149!important;-webkit-text-fill-color:#183149!important;border-color:#6585a3!important}body.phase-master-editing .app .layout .phone-content-icon[aria-expanded="true"]{background:#8ec6ec!important}}
+
+body.phase-master-editing .app .layout :is(.phone-content-icon,.phone-content-close):enabled:is(:hover:not(:where(.phone-touch-mode *)),:focus-visible,:active,.phone-control-pressed){background:#8ec6ec!important;color:#183149!important;-webkit-text-fill-color:#183149!important}
+body.phase-master-editing .app .layout :is(.content-heading-row,.right .board-title-row,#fieldGuideEditor .guide-editor-heading) button:not(:where([role="menu"] *)) :not(img){color:inherit!important;-webkit-text-fill-color:inherit!important}
+
+body.phase-master-editing .app .layout :is(.phone-content-icon,.phone-content-close){--press-bg:#8ec6ec;--press-fg:#183149}
+
+body.phase-master-editing .app .layout :is(.content-heading-row,.right .board-title-row,#fieldGuideEditor .guide-editor-heading) button:not(:where([role="menu"] *)),body.phase-master-editing .app .layout :is(.phone-content-icon,.phone-content-close){filter:none!important}

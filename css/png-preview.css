@@ -172,7 +172,7 @@
  .png-preview-active .app>.top>.header-mode-status>.header-history-actions{display:none!important}
  .png-preview-active .app .top #editModeToggle{width:auto!important;min-width:40px!important;height:36px!important;padding:0 7px!important}
  .png-preview-active .app .top #editModeToggle .mode-label{display:none!important;font-size:11px}
- .phone-canvas-mode-status{display:block;position:absolute;left:44px;top:36px;max-width:calc(100% - 196px);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:#fff;font-size:12px;line-height:20px;pointer-events:none}
+ .phone-canvas-mode-status{display:block;position:absolute;left:44px;top:36px;max-width:calc(100% - 196px);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:var(--board-header-text,#fff);font-size:12px;line-height:20px;pointer-events:none}
  .png-preview-heading{position:relative}
  .phone-canvas-mode-status:empty{display:none}
 }

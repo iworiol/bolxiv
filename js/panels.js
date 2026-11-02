@@ -565,7 +565,7 @@ function phoneReaderLayoutMetrics(panel,footerHeight,rowHeight,zoom=boardDisplay
   if(enabled){if(propertyGroup.parentElement!==shared)shared.append(propertyGroup);const unifiedMemo=document.querySelector('#phaseMasterAssignment .phase-master-phase-body')||shared;if(memo.parentElement!==unifiedMemo&&!memo.closest('#pngPreview'))unifiedMemo.append(memo)}
   else{
    if(propertyGroup.parentElement===shared||propertyGroup.parentElement===document.querySelector('.phone-view-content'))host.append(propertyGroup);
-   if(mobile.matches){const target=document.querySelector('#phaseMasterAssignment .phase-master-phase-body')||(boardReadOnly?document.querySelector('.phone-view-content'):host);if(target&&memo.parentElement!==target&&!memo.closest('#pngPreview'))target.append(memo)}
+   if(mobile.matches){const target=boardReadOnly?document.querySelector('.phone-view-content'):(document.querySelector('#phaseMasterAssignment .phase-master-phase-body')||host);if(target&&memo.parentElement!==target&&!memo.closest('#pngPreview'))target.append(memo)}
   }
   const prefix=data.activePhaseGroup?'グループ':'フェーズ';
   const titleMarkup=data.activePhaseGroup?'<strong>グループプロパティ</strong>':selected==='properties'?'<strong>'+prefix+' プロパティ</strong> / ノート':'<strong>'+prefix+'</strong> プロパティ / <strong>ノート</strong>';

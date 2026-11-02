@@ -476,13 +476,14 @@ phoneLayerDeleteDialog.addEventListener('close',()=>{pendingPhoneLayerDeletion=n
     ".phone-material-pin",
     "素材の一覧を開閉します。"
   ],
+  ["#phaseMasterModeToggle","コンテンツ／フィールドを切り替えます。フィールドへ移るときは、選択中フェーズの使用フィールドを表示します。"],
+  ["#editUsedField","使用中のフィールドを選択して編集画面へ移動します。"],
+  ["#addPhaseMaster","フィールド／グループの追加や、同じ設定のフィールドの統合を選びます。"],
+  ["#duplicatePhaseMaster","選択中のフィールドを複製します。フェーズの使用先は変わりません。"],
+  ["#phaseMasterSelect","このフェーズで使用するフィールドを選びます。"],
   [
     "#addPage",
     "フェーズ／グループの追加を選びます。Enter・✓で確定、Esc・↶で取消。"
-  ],
-  [
-    "#addPhaseMaster",
-    "マスター／グループの追加を選びます。Enter・✓で確定、Esc・↶で取消。"
   ],
   [
     "#copyPage",
@@ -735,10 +736,10 @@ phoneLayerDeleteDialog.addEventListener('close',()=>{pendingPhoneLayerDeletion=n
  function close(){if(panel.open)panel.close();for(const node of document.querySelectorAll('.phone-icon-help-toggle'))if(node.getAttribute('aria-expanded')!=='false')node.setAttribute('aria-expanded','false')}
  function openHelp(source=button){
   if(panel.open){close();return}opener=source;
-  const png=!!window.Bolxiv?.pngPreview?.active,guides=!!window.Bolxiv?.fieldGuideEditor?.active,content=source===contentButton,mode=guides?'ガイド編集':png?(window.Bolxiv.pngPreview.kind==='print'?'印刷':'画像生成'):boardReadOnly?'閲覧':'編集';
-  panel.querySelector('h2').textContent='アイコン説明 · '+mode+' · '+(content?'コンテンツ':'キャンバス');
+  const fieldMode=!!window.Bolxiv?.phaseMasters?.active,png=!!window.Bolxiv?.pngPreview?.active,guides=!!window.Bolxiv?.fieldGuideEditor?.active,content=source===contentButton,mode=fieldMode?'フィールド編集':guides?'ガイド編集':png?(window.Bolxiv.pngPreview.kind==='print'?'印刷':'画像生成'):boardReadOnly?'閲覧':'編集';
+  panel.querySelector('h2').textContent='アイコン説明 · '+mode+' · '+(content?(fieldMode?'フィールド':'コンテンツ'):'キャンバス');
   const list=panel.querySelector('.phone-icon-help-list');list.replaceChildren();
-  const intro=document.createElement('p');intro.className='phone-icon-help-intro';intro.textContent=png&&content?'出力モード中はノートを編集できます。ペインを閉じると出力プレビューへ戻ります。':png&&matchMedia('(min-width:851px)').matches?'拡大したプレビューは左ドラッグで移動できます。':'現在の画面で使える操作です。';list.append(intro);
+  const intro=document.createElement('p');intro.className='phone-icon-help-intro';intro.textContent=fieldMode?'フィールドとガイドは全コンテンツ共通です。変更は使用中のすべてのフェーズへ反映されます。見出し横の切替からコンテンツへ戻ります。':png&&content?'出力モード中はノートを編集できます。ペインを閉じると出力プレビューへ戻ります。':png&&matchMedia('(min-width:851px)').matches?'拡大したプレビューは左ドラッグで移動できます。':'現在の画面で使える操作です。';list.append(intro);
   const scope=content?document.querySelector('.battle'):png?document.getElementById('pngPreview'):document.querySelector('.right');
   const find=selector=>{try{return [...scope.querySelectorAll(selector),...document.querySelectorAll(selector)].find(node=>visible(node)&&!node.disabled&&(content?node.closest('.battle,.phone-content-close,.phone-phase-navigation,.header-mode-status'):!node.closest('.battle')))}catch{return null}};
   const outputProperties=mode+'プロパティ';
@@ -759,13 +760,13 @@ phoneLayerDeleteDialog.addEventListener('close',()=>{pendingPhoneLayerDeletion=n
     if(selector==='.phone-content-close'&&!content)continue;
     if(selector==='.phone-menu-toggle'&&content)continue;
     if(selector==='#toggleBattlePages'&&!content)continue;
-    const mapped=['#fitBoardZoom','#zoomOut','#resetBoardZoom','#zoomIn'].includes(selector)?png?'#png-'+selector.slice(1):guides&&matchMedia('(min-width:851px)').matches?'#guide-'+selector.slice(1):selector:selector;
+    const mapped=['#fitBoardZoom','#zoomOut','#resetBoardZoom','#zoomIn','#gridToggle','#fieldToggle','#clipToggle'].includes(selector)?png?'#png-'+selector.slice(1):guides&&matchMedia('(min-width:851px)').matches?'#guide-'+selector.slice(1):selector:selector;
     node=find(mapped);if(!node)continue;
     if(content&&!node.closest('.battle,.phone-content-close,.phone-phase-navigation,.header-mode-status'))continue;
     if(selector==='.phone-content-icon')description=png?'コンテンツペインを開き、盤面を確認しながらノートを編集できます。':'コンテンツ・フェーズ・設定・ノートを開きます。';
     if(selector==='#editFieldGuides')description=guides?'ボタンを押して通常編集へ戻ります。':'ボタンを押してガイド編集を始めます。';
-    if(guides&&selector==='.phone-content-icon')description='フィールド設定・ノートを開きます。フェーズ変更でガイド編集を終了します。';
-    if(guides&&selector==='#undo')description='ガイド・プロパティ・ノートの操作を元に戻します。';
+    if(fieldMode&&selector==='.phone-content-icon')description='フィールドペインを開き、フィールドやグループを選択・整理します。';if(fieldMode&&selector==='.phone-content-close')description='フィールドペインを閉じ、選択中のフィールドの編集画面へ戻ります。';
+    if(fieldMode&&selector==='#undo')description='フィールド・ガイドの編集や、フィールドの追加・整理を元に戻します。';
     if(guides&&selector==='#redo')description='元に戻した操作をやり直します。';
     if(selector==='#outputPrintButton')description='用紙プレビューの設定で印刷します。PDF保存は印刷画面で選びます。';
     if(selector==='#toggleBattlePages')description='フェーズリストを開閉します。';
@@ -782,8 +783,8 @@ phoneLayerDeleteDialog.addEventListener('close',()=>{pendingPhoneLayerDeletion=n
    ['.phone-object-collapse','オブジェクト欄を開閉します。'],
   ]){const node=find(selector);if(node)contextual.push({selector,description,node})}
   const helpTitles={
-   '#editModeToggle':'モード切替','help-png-mode':'モード切替',
-   '.phone-menu-toggle':'操作メニュー','.phone-content-icon':'コンテンツペインを開く','.phone-content-close':'コンテンツペインを閉じる','.phone-material-pin':'マテリアルを開閉',
+   '#phaseMasterModeToggle':'コンテンツ／フィールドの切り替え','#editUsedField':'使用フィールドを編集','#addPhaseMaster':'フィールドの追加・整理','#duplicatePhaseMaster':'フィールドを複製','#phaseMasterSelect':'使用フィールドの選択','#editModeToggle':'モード切替','help-png-mode':'モード切替',
+   '.phone-menu-toggle':'操作メニュー','.phone-content-icon':fieldMode?'フィールドペインを開く':'コンテンツペインを開く','.phone-content-close':fieldMode?'フィールドペインを閉じる':'コンテンツペインを閉じる','.phone-material-pin':'マテリアルを開閉',
    '.preset-manage':'配置・プリセット管理の切り替え','#addPage':'フェーズを追加','#addPhaseGroup':'フェーズグループを追加','#copyPage':'フェーズをコピー','#copyPageToContent':'別コンテンツへコピー',
    '#editFieldGuides':'ガイドの開始・終了','#phasePropertyResize':'ペインの高さ調整','#resetBoardZoom':'表示倍率を選ぶ','#guideHideObjects':'オブジェクトを一時的に隠す','#fieldGuide-ringScale':'同心円の大きさ','#fieldGuideOuterRing':'最外周を表示','#guideShapeFill':'ガイドの塗り','.guide-property-group[aria-label="線の見た目"]':'ガイド（共通）','.print-page-fields':'印刷の配置設定','#printSettingsReset':'印刷設定をリセット','#fieldGuideCircles':'同心円','#fieldGuideRays':'放射線','#duplicateGuideShape':'ガイドを複製','#deleteGuideShape':'ガイドを削除','.guide-selection-controls .aoe-box-handle':'サイズ変更ハンドル','#outputPrintReadability':'文字・線を強調','#outputPlainPaper':'普通紙向けの色調整','#outputPrintCutGuide':'切り取りガイド','#phonePhaseSwitch-toggle':'フェーズプロパティ・ノートの切り替え','#phonePhaseSectionToggle':'フェーズ設定・ノート欄を開閉','#toggleBattlePages':'フェーズリストを開閉',
    '.phone-phase-navigation>button:first-child':'前のフェーズへ','.phone-phase-navigation>button:last-child':'次のフェーズへ',
@@ -1007,7 +1008,7 @@ const userPresetLibrary=(()=>{
  function syncPresetHistory(){for(const [index,button] of historyButtons.entries()){const entries=index?presetFuture:presetHistory,action=index?'やり直す':'元に戻す';button.disabled=blocked()||!!editingPreset||!entries.length;button.title=entries.length?'プリセット：'+entries.at(-1).label+'を'+action:'プリセットに'+(index?'やり直せる':'元に戻せる')+'操作はありません';button.setAttribute('aria-label',button.title)}}
  function restorePresetHistory(redo=false){if(blocked()||editingPreset)return;const source=redo?presetFuture:presetHistory,target=redo?presetHistory:presetFuture,entry=source.at(-1);if(!entry)return;if(save(JSON.parse(redo?entry.after:entry.before),{record:false})){source.pop();target.push(entry);if(activeIcon?.userPresetId&&!presets.some(item=>item.id===activeIcon.userPresetId)){setTapPlacementArmed(false);selectPlacementTool('select')}syncPresetHistory();notify('プリセットの'+entry.label+'を'+(redo?'やり直しました':'元に戻しました'))}}
 
- function show(anchor,actions,point=null){close();menu._opener=anchor;menu.replaceChildren();for(const [label,action,disabled=false] of actions){const b=document.createElement('button');b.type='button';b.textContent=label;if(label==='名前変更')b.dataset.shortcut='F2';b.setAttribute('role','menuitem');b.disabled=disabled;b.onclick=()=>{close();action()};menu.append(b)}addPhoneMenuClose(menu,close);const r=point||anchor.getBoundingClientRect();menu.hidden=false;menu.style.left=Math.max(4,Math.min(r.left,innerWidth-menu.offsetWidth-4))+'px';menu.style.top=Math.max(4,Math.min(r.bottom+4,innerHeight-menu.offsetHeight-4))+'px';menu.querySelector('button:not(:disabled)')?.focus()}
+ function show(anchor,actions,point=null){close();menu._opener=anchor;menu.replaceChildren();for(const [label,action,disabled=false] of actions){const b=document.createElement('button');b.type='button';b.textContent=label;if(label==='削除')b.classList.add('context-delete');if(label==='名前変更')b.dataset.shortcut='F2';b.setAttribute('role','menuitem');b.disabled=disabled;b.onclick=()=>{close();action()};menu.append(b)}addPhoneMenuClose(menu,close);const r=point||anchor.getBoundingClientRect();menu.hidden=false;menu.style.left=Math.max(4,Math.min(r.left,innerWidth-menu.offsetWidth-4))+'px';menu.style.top=Math.max(4,Math.min(r.bottom+4,innerHeight-menu.offsetHeight-4))+'px';menu.querySelector('button:not(:disabled)')?.focus()}
  window.addEventListener('pointerdown',e=>{if(!menu.contains(e.target)&&!manage.contains(e.target))close()},true);window.addEventListener('keydown',e=>{if(e.key==='Escape'&&!menu.hidden){e.preventDefault();e.stopImmediatePropagation();const origin=menu._opener;close();(origin?.closest('.preset-manager-row')||origin)?.focus({preventScroll:true})}},true);window.addEventListener('resize',close);
  function liveThumbnail(items){const thumb=document.createElement('span');thumb.className='preset-thumbnail';thumb.setAttribute('aria-hidden','true');const scene=document.createElement('span');scene.className='user-preset-scene';
   const xs=items.map(o=>o.x/100*640),ys=items.map(o=>o.y/100*640),left=Math.min(...items.map((o,i)=>xs[i]-(o.width||32)/2)),top=Math.min(...items.map((o,i)=>ys[i]-(o.height||32)/2)),right=Math.max(...items.map((o,i)=>xs[i]+(o.width||32)/2)),bottom=Math.max(...items.map((o,i)=>ys[i]+(o.height||32)/2)),extent=Math.max(right-left,bottom-top,32),scale=18/extent;
@@ -1019,7 +1020,7 @@ const userPresetLibrary=(()=>{
  function scheduleThumbnail(){if(thumbnailRunning||!thumbnailJobs.length)return;thumbnailRunning=true;const run=async()=>{const job=thumbnailJobs.shift(),host=document.createElement('div');host.className='left pinned';host.setAttribute('aria-hidden','true');host.style.cssText='display:block!important;position:fixed!important;left:-10000px!important;top:0!important;width:26px!important;height:26px!important;padding:0!important;border:0!important;overflow:hidden!important;pointer-events:none!important';const source=liveThumbnail(job.items);source.style.cssText='display:block;position:relative;width:26px;height:26px;overflow:hidden';host.append(source);document.body.append(host);try{const bitmap=await rasterizePngSource(source,3);job.url=bitmap.toDataURL('image/png');for(const node of job.nodes)if(node.isConnected)node.replaceChildren(thumbnailImage(job.url))}catch{thumbnailCache.delete(job.key)}finally{host.remove();job.nodes.clear();thumbnailRunning=false;scheduleThumbnail()}};if(window.requestIdleCallback)requestIdleCallback(run,{timeout:1000});else setTimeout(run,0)}
  function thumbnail(items){if(matchMedia('(min-width:851px)').matches)return liveThumbnail(items);const key=JSON.stringify(items);let cached=thumbnailCache.get(key);if(cached?.url){const thumb=document.createElement('span');thumb.className='preset-thumbnail';thumb.setAttribute('aria-hidden','true');thumb.append(thumbnailImage(cached.url));return thumb}const thumb=liveThumbnail(items);if(!cached){cached={key,items:JSON.parse(key),nodes:new Set(),url:null};thumbnailCache.set(key,cached);thumbnailJobs.push(cached);if(thumbnailCache.size>200)thumbnailCache.delete(thumbnailCache.keys().next().value)}cached.nodes.add(thumb);scheduleThumbnail();return thumb}
  function render(){grid.replaceChildren();empty.hidden=presets.length>0;for(const preset of presets){const button=document.createElement('button');button.type='button';button.className='icon-choice user-preset';button.dataset.presetId=preset.id;button.title=preset.name;button.setAttribute('aria-label',preset.name);button.draggable=true;button.disabled=blocked();button.append(thumbnail(preset.items));const icon={name:preset.name,userPresetId:preset.id};button.onclick=()=>{if(!blocked())selectPlacementIcon(icon)};button.ondragstart=e=>{if(blocked()){e.preventDefault();return}selectPlacementIcon(icon,false);e.dataTransfer.setData('application/x-tactica',JSON.stringify({type:'icon',...icon}));e.dataTransfer.effectAllowed='copy'};
-  function actions(){show(button,[['名前を変更',()=>renamePreset(preset),blocked()],['削除',()=>deletePreset(preset.id),blocked()]])}
+  function actions(){show(button,[['名前変更',()=>renamePreset(preset),blocked()],['削除',()=>deletePreset(preset.id),blocked()]])}
   button.oncontextmenu=e=>{e.preventDefault();e.stopPropagation();if(!matchMedia('(max-width:850px)').matches)actions()};grid.append(button)}}
  let editingPreset=null,presetDraft=null;
  function renamePreset(preset,isNew=false,onFinish=null){
