@@ -5,7 +5,7 @@ window.BolxivIntegrity = {
   "files": {
     "bolxiv.js": "sha384-prtDObC30B0Q+8ZcW/zg+KREaoSEddnfa9RrWGZgDhjIIkqUSx6wZEDfD6awOzdI",
     "css/base.css": "sha384-3pdBl7pvJ/VQB4JdjNR0kL9zBf2UXhwrFXJo9u6g8iO7BqVNlCS2IpV+YbOG+lvr",
-    "css/interface.css": "sha384-1e5AjvV8xY7mMf79O0+zqu7IWlWrIkKXCIethRBZNRxRNZ18yDKgNROKO6goqc9Q",
+    "css/interface.css": "sha384-B7kU8sYAOGtCYD1LWwW9N9xB0T7tZNUzg5dn37FlMDBEVvvRi7kSxI2PfGeRUxsT",
     "css/mobile.css": "sha384-GprWICo6xZVWYvpxNJT2sCTjbrkjFx8QgXYYb4bukyQ05XgDg05rg6J/kYyaILe/",
     "css/panels.css": "sha384-ZOga3CHdA6zRu8t+StJHlVWGh5ESCpJ6XQYY/bcwkHMxN4SaLbhDlm4nRXf0LGsb",
     "css/png-preview.css": "sha384-F9X2/Q9+SivkWK204D8Z4wYCjp5Gr8YlokSGEQCfKYjLPjw5kCOe79dw7z10/a+i",
@@ -16,7 +16,7 @@ window.BolxivIntegrity = {
     "js/editor.js": "sha384-V9mKzOzSvyLB624V22TfCHx3+xhBjXAi4Wu99EUYtuRB2iyRIQxFxRMo1R6Zj02o",
     "js/embedded-images.js": "sha384-jQFRmMmtEuZeOKN7KZLnSlhgSl5Ls9zE0uXsuUYGoPDGUUjcx2wFaQuxZB6QcWWP",
     "js/integrity-loader.js": "sha384-s/dll0D6xB/NG9GyR3BM00Q67EXg0Cbu2DD8mFXB8JF+ILadWJUMd1DqSg79/mOf",
-    "js/interface.js": "sha384-E58v2Mxp4BOm+wRZPYV81NSZIFucBpdFu+ym7Qv96+G+7cGmTfjonlR8o67KMr8s",
+    "js/interface.js": "sha384-Rwl6epgx0PMlV/Fg+ShtXTILCwF+jHGzG0NC2eiFX8mue8TiTMSrqJjkwro8gcyC",
     "js/panels.js": "sha384-8Zy8u4eXMwmtZvQe9leILbNgTx+RYA0nSGyugDhWBFKeq+Fup2gY36HXqUXMvo9y",
     "js/phase-masters.js": "sha384-q8umEMWjAA744Zi9KOiFiWpf8RhgCASQ11JrNnMVH1anqad4Rezi6iFqXzGxfobo",
     "js/phase-tools.js": "sha384-RErB1pDkhufY0B09TnWFTBBK6YLuNNzUUy4QMLAKjqJfoTFRC+LbCm453337tJzG",
