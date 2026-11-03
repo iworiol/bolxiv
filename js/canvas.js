@@ -250,7 +250,7 @@ function fieldGuides(board,index){
  for(const item of (Array.isArray(value.shapes)?value.shapes:[]).slice(0,500)){
   if(!item||!['line','circle','rect','triangle','diamond'].includes(item.type)||!['x','y','width','height','rotation'].every(key=>Number.isFinite(item[key])))continue;
   const id=typeof item.id==='string'&&/^[\w-]{1,80}$/.test(item.id)?item.id:'guide-'+shapes.length;if(ids.has(id))continue;ids.add(id);
-  shapes.push({id,type:item.type,x:Math.max(0,Math.min(640,item.x)),y:Math.max(0,Math.min(640,item.y)),width:Math.max(1,Math.min(1280,item.width)),height:Math.max(1,Math.min(1280,item.height)),rotation:((item.rotation%360)+360)%360,...(item.type!=='line'&&(item.fill===true||item.fill==='solid')?{fill:item.fill}:{}),...(typeof item.objectGroupId==='string'&&/^[\w-]{1,80}$/.test(item.objectGroupId)?{objectGroupId:item.objectGroupId}:{})});
+  shapes.push({...(item.appearance&&/^#[0-9a-f]{6}$/i.test(item.appearance.color)&&Number.isFinite(item.appearance.opacity)?{appearance:{color:item.appearance.color.toLowerCase(),opacity:Math.max(0,Math.min(100,Math.round(item.appearance.opacity)))}}:{}),id,type:item.type,x:Math.max(0,Math.min(640,item.x)),y:Math.max(0,Math.min(640,item.y)),width:Math.max(1,Math.min(1280,item.width)),height:Math.max(1,Math.min(1280,item.height)),rotation:((item.rotation%360)+360)%360,...(item.type!=='line'&&(item.fill===true||item.fill==='solid')?{fill:item.fill}:{}),...(typeof item.objectGroupId==='string'&&/^[\w-]{1,80}$/.test(item.objectGroupId)?{objectGroupId:item.objectGroupId}:{})});
  }
  const groupCounts=new Map();for(const item of shapes)if(item.objectGroupId)groupCounts.set(item.objectGroupId,(groupCounts.get(item.objectGroupId)||0)+1);for(const item of shapes)if(item.objectGroupId&&groupCounts.get(item.objectGroupId)<2)delete item.objectGroupId;
  const source=value.reference&&typeof value.reference==='object'?value.reference:value.circles||value.rays||shapes.length?fieldGuideReference(board,index):null;
@@ -288,7 +288,7 @@ function renderFieldGuides(){
   if(settings.circles)for(let i=1;i<settings.rings+(settings.outerRing?1:0);i++){const circle=document.createElementNS(ns,'circle');for(const [key,value] of Object.entries({cx,cy,r:Math.max(0,fieldGuideRayMetrics().circle*settings.ringScale/100*i/settings.rings-(i===settings.rings ? .75 : 0))}))circle.setAttribute(key,value);group.append(circle)}
   if(settings.rays)for(let i=0;i<settings.sectors;i++){const angle=(settings.rotation+i*360/settings.sectors-90)*Math.PI/180,metrics=fieldGuideRayMetrics(),length=settings.rayMode==='field'?Math.min(Math.min(size.width/2,shape==='image4'?160:Infinity)/Math.max(Math.abs(Math.cos(angle)),1e-12),Math.min(size.height/2,shape==='image4'?160:Infinity)/Math.max(Math.abs(Math.sin(angle)),1e-12))*settings.fieldRayLength/100:settings.rayMode==='circle'?metrics.circle*Math.min(metrics.maximum,settings.circleRayLength/100):metrics.circle*fieldGuideRayScale(settings,metrics),line=document.createElementNS(ns,'line');for(const [key,value] of Object.entries({x1:cx,y1:cy,x2:cx+Math.cos(angle)*length,y2:cy+Math.sin(angle)*length}))line.setAttribute(key,value);group.append(line)}
  });
- if(settings.shapes.length){const group=document.createElementNS(ns,'g');group.setAttribute('class','field-guide-shapes');group.setAttribute('color',settings.color);group.setAttribute('fill','none');group.setAttribute('stroke',settings.color);group.setAttribute('stroke-width','1.5');group.setAttribute('opacity',settings.opacity/100);const individual=settings.reference||reference;if(individual.shape!=='image4'){const clip=document.createElementNS(ns,'clipPath'),boundary=document.createElementNS(ns,individual.shape==='circle'?'ellipse':'rect');clip.id='field-guide-shape-clip';const attrs=individual.shape==='circle'?{cx:320,cy:320,rx:individual.width/2,ry:individual.height/2}:{x:320-individual.width/2-1,y:320-individual.height/2-1,width:individual.width+2,height:individual.height+2};for(const [key,value] of Object.entries(attrs))boundary.setAttribute(key,value);clip.append(boundary);defs.append(clip);group.setAttribute('clip-path','url(#field-guide-shape-clip)')}for(const item of settings.shapes)group.append(createFieldGuideShape(item));svg.append(group)}
+ if(settings.shapes.length){const group=document.createElementNS(ns,'g');group.setAttribute('class','field-guide-shapes');group.setAttribute('color',settings.color);group.setAttribute('fill','none');group.setAttribute('stroke',settings.color);group.setAttribute('stroke-width','1.5');group.setAttribute('opacity',settings.opacity/100);const individual=settings.reference||reference;if(individual.shape!=='image4'){const clip=document.createElementNS(ns,'clipPath'),boundary=document.createElementNS(ns,individual.shape==='circle'?'ellipse':'rect');clip.id='field-guide-shape-clip';const attrs=individual.shape==='circle'?{cx:320,cy:320,rx:individual.width/2,ry:individual.height/2}:{x:320-individual.width/2-1,y:320-individual.height/2-1,width:individual.width+2,height:individual.height+2};for(const [key,value] of Object.entries(attrs))boundary.setAttribute(key,value);clip.append(boundary);defs.append(clip);group.setAttribute('clip-path','url(#field-guide-shape-clip)')}if(!settings.shapes.some(item=>item.appearance)){for(const item of settings.shapes)group.append(createFieldGuideShape(item))}else{group.removeAttribute('opacity');let run=null,key=null;for(const item of settings.shapes){const appearance=item.appearance||settings,next=appearance.color+':'+appearance.opacity;if(next!==key){run=document.createElementNS(ns,'g');run.setAttribute('color',appearance.color);run.setAttribute('stroke',appearance.color);run.setAttribute('opacity',appearance.opacity/100);group.append(run);key=next}run.append(createFieldGuideShape(item))}}svg.append(group)}
  stage.insertBefore(svg,objectClip);
 }
 
@@ -471,12 +471,59 @@ function colorPickerMarkup(kind,value,id=""){let valueMarkup=`<span>${value}</sp
 
 function closeColorPopovers(){document.querySelectorAll('.color-popover:not([hidden])').forEach(pop=>{pop.hidden=true;if(pop._colorPicker?.isConnected)pop._colorPicker.appendChild(pop);pop._colorPicker=null})}
 
+// One disclosure projection for headers and bodies. Layout-specific sizing stays outside.
+const panelScrollPositions=new WeakMap();
+function setPanelExpanded(heading,body,expanded,{display='flex',manageDisplay=true,hiddenClass=true,scroll=body,frame=null,collapsedClass=null}={}){
+ const open=!!expanded,wasOpen=heading.getAttribute('aria-expanded')==='true';
+ if(wasOpen&&!open&&scroll)panelScrollPositions.set(body,{node:scroll,left:scroll.scrollLeft,top:scroll.scrollTop});
+ if(frame&&collapsedClass)frame.classList.toggle(collapsedClass,!open);
+ heading.setAttribute('aria-expanded',String(open));body.hidden=!open;
+ if(hiddenClass)body.classList.toggle('hidden',!open);
+ if(manageDisplay)body.style.display=open?display:'none';
+ if(!wasOpen&&open){const saved=panelScrollPositions.get(body);if(saved&&body.contains(saved.node)){saved.node.scrollLeft=saved.left;saved.node.scrollTop=saved.top}}
+}
 // Shared phase/field list row structure; domain actions are bound by the caller.
 function createPhaseListRow({name,number,active=false,selected=false}){
  const row=document.createElement('div');row.className='page-tab'+(active?' active':'')+(selected?' selected':'');row.setAttribute('role','button');row.tabIndex=0;
  const index=document.createElement('span');index.className='page-index';index.textContent=String(number).padStart(2,'0');
  const label=document.createElement('span');label.className='page-tab-name';label.textContent=name;
  const action=document.createElement('button');action.type='button';action.className='page-tab-x';action.textContent='×';row.append(index,label,action);return {row,index,label,action};
+}
+
+// List views receive commands from their domain adapters; they never mutate saved data.
+function createPropertyTextField({id,label:caption,className='field',describedBy=null,onCommit}){
+ const field=document.createElement('div');field.className=className;const label=document.createElement('label');label.htmlFor=id;label.textContent=caption;const input=document.createElement('input');input.id=id;input.type='text';if(describedBy)input.setAttribute('aria-describedby',describedBy);input.onchange=event=>onCommit?.(input.value,event);field.append(label,input);return {field,label,input};
+}
+function createMenuAction({label,disabled=false,destructive=false,shortcut=null,onInvoke}){
+ const button=document.createElement('button');button.type='button';button.textContent=label;button.setAttribute('role','menuitem');button.disabled=disabled;if(destructive)button.classList.add('context-delete');if(shortcut)button.dataset.shortcut=shortcut;if(onInvoke)button.onclick=event=>{if(!button.disabled)onInvoke(event)};return button;
+}
+function bindConfirmationActions({dialog,cancel,confirm,takeValue=()=>undefined,onConfirm,onCancel}){
+ const cancelAction=()=>{const value=takeValue();dialog.close();onCancel?.(value)},confirmAction=()=>{const value=takeValue();dialog.close();onConfirm?.(value)};cancel.onclick=cancelAction;confirm.onclick=confirmAction;
+ return {dispose(){if(cancel.onclick===cancelAction)cancel.onclick=null;if(confirm.onclick===confirmAction)confirm.onclick=null}};
+}
+function createConfirmationView({id,messageId=null,cancelId,confirmId,autofocus=false,captureEscape=false,onConfirm}){
+ const dialog=document.createElement('dialog');dialog.id=id;dialog.className='confirm-dialog';const message=document.createElement('p');if(messageId){message.id=messageId;dialog.setAttribute('aria-labelledby',messageId)}
+ const actions=document.createElement('div');actions.className='confirm-actions';const cancel=document.createElement('button');cancel.id=cancelId;cancel.type='button';cancel.className='btn';cancel.textContent='キャンセル';cancel.autofocus=autofocus;const confirm=document.createElement('button');confirm.id=confirmId;confirm.type='button';confirm.className='btn primary';confirm.textContent='削除';actions.append(cancel,confirm);dialog.append(message,actions);document.body.append(dialog);
+ let pending=null;const close=()=>{pending=null;dialog.close()},escape=event=>{if(dialog.open&&event.key==='Escape'){event.preventDefault();event.stopImmediatePropagation();close()}},closed=()=>{if(!dialog.open)pending=null};const binding=bindConfirmationActions({dialog,cancel,confirm,takeValue(){const value=pending;pending=null;return value},onConfirm(value){if(value!==null)onConfirm(value)}});dialog.addEventListener('close',closed);if(captureEscape)window.addEventListener('keydown',escape,true);
+ return {dialog,show(text,value){pending=value;message.textContent=text;if(!dialog.open)dialog.showModal()},close,dispose(){close();dialog.removeEventListener('close',closed);if(captureEscape)window.removeEventListener('keydown',escape,true);binding.dispose();dialog.remove()}};
+}
+
+function createListItemView({model,select,activate=select,action,context,ignoreSelect='',keyboardTargetOnly=false,stopActionPropagation=true}){
+ const view=createPhaseListRow(model),{row}=view;
+ row.onclick=event=>{if(!ignoreSelect||!event.target.closest(ignoreSelect))select?.(event)};
+ row.onkeydown=event=>{if(keyboardTargetOnly&&event.target!==row)return;if(event.key==='Enter'||event.key===' '){event.preventDefault();activate?.(event)}};
+ if(action)view.action.onclick=event=>{if(stopActionPropagation)event.stopPropagation();action(event)};
+ if(context)row.oncontextmenu=context;
+ return view;
+}
+function createListGroupView({name:label,active=false,collapsed=false,onToggle,onSelect,onUngroup,ungroupTitle,ungroupLabel}){
+ const row=document.createElement('div');row.className='phase-group-heading'+(active?' active':'');
+ const leading=document.createElement('span');leading.className='phase-group-leading';
+ const grip=document.createElement('button');grip.type='button';grip.className='phase-group-range phase-group-drag';grip.title='ドラッグでグループ全体を並べ替え';
+ const toggle=document.createElement('button');toggle.type='button';toggle.className='phase-group-toggle';toggle.setAttribute('aria-expanded',String(!collapsed));toggle.setAttribute('aria-label',label+(collapsed?'を開く':'を閉じる'));toggle.innerHTML='<span class="phase-group-disclosure-text" aria-hidden="true">'+(collapsed?'▸':'▾')+'</span><svg class="phase-group-disclosure-arrow" viewBox="0 0 18 18" aria-hidden="true"><path d="'+(collapsed?'M6 3v12l7-6Z':'M3 6h12l-6 7Z')+'"/></svg>';toggle.onclick=onToggle;leading.append(grip,toggle);
+ const name=document.createElement('button');name.type='button';name.className='phase-group-name';name.title=label;name.onclick=onSelect;const title=document.createElement('span');title.className='phase-group-title';title.textContent=label;name.append(title);
+ const remove=document.createElement('button');remove.type='button';remove.className='phase-group-ungroup';remove.textContent='×';remove.title=ungroupTitle;remove.setAttribute('aria-label',ungroupLabel);remove.onclick=onUngroup;row.append(leading,name,remove);
+ return {row,leading,grip,toggle,name,title,remove};
 }
 
 // Shared list-name editing mechanics. Callers own data, validation and history.
@@ -902,6 +949,8 @@ function boardCenterGuides(items,movingIds,previous,width,height){items=movement
 function updateAlignmentGuides(ids){if(drag?.shiftGuidesDisabled){clearAlignmentGuides();return}let width=stage.clientWidth,height=stage.clientHeight;if(!width||!height){clearAlignmentGuides();return}let items=alignmentSnapshot(),previous=drag?.alignmentPrevious||[],guides=objectAlignmentGuides(items,ids,previous);if(drag?.mode==='move')guides.push(...boardCenterGuides(items,ids,previous,width,height).map(guide=>({...guide,centerLine:true})));if(drag)drag.alignmentPrevious=items;clearAlignmentGuides();if(!guides.length)return;drawAlignmentGuides(guides,width,height)}
 
 function mergedAlignmentGuides(guides){const lines=new Map(),centers=[];for(const guide of guides){if(guide.centerLine||guide.centerMatch){centers.push(guide);continue}if(!guide.length)continue;const key=guide.axis+':'+(guide.axis==='x'?guide.x:guide.y),previous=lines.get(key);if(!previous){lines.set(key,{...guide});continue}const start=guide.axis==='x'?'y':'x',end=Math.max(previous[start]+previous.length,guide[start]+guide.length);previous[start]=Math.min(previous[start],guide[start]);previous.length=end-previous[start]}return [...lines.values(),...centers]}
+
+function syncSvgAlignmentScale(svg){const width=parseFloat(getComputedStyle(svg).width),scale=width?svg.getBoundingClientRect().width/width:1;svg.style.setProperty('--alignment-svg-transform-scale',String(scale||1))}
 
 function drawAlignmentGuides(guides,width,height){
  for(const guide of mergedAlignmentGuides(guides)){

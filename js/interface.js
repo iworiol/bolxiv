@@ -20,7 +20,7 @@
  groupMenu.addEventListener('keydown',event=>{if(event.key==='Escape'||event.key==='ArrowLeft'){event.preventDefault();event.stopPropagation();closeGroupMenu();groupToggle.focus()}});
  const groupStart=document.createElement('div');groupStart.className='context-separator';groupStart.setAttribute('role','separator');menu.insertBefore(groupStart,groupToggle);
  for(const [id,label] of [['contextGroup','グループ化'],['contextUngroup','グループ解除'],['contextRenameObjectGroup','グループ名を変更']]){
-  const button=document.createElement('button');button.id=id;button.type='button';button.setAttribute('role','menuitem');button.textContent=label;
+  const button=createMenuAction({label});button.id=id;
   groupMenu.append(button);
   button.onclick=()=>{
    const ids=expandObjectGroups(JSON.parse(menu.dataset.ids||'[]')),items=current().filter(o=>ids.includes(o.id));closeObjectContextMenu();
@@ -29,7 +29,7 @@
   };
  }
  const groupEnd=document.createElement('div');groupEnd.className='context-separator';groupEnd.setAttribute('role','separator');menu.insertBefore(groupEnd,document.getElementById('contextCopy'));
- const register=document.createElement('button');register.id='contextRegisterPreset';register.type='button';register.textContent='プリセットに登録';register.setAttribute('role','menuitem');menu.insertBefore(register,document.getElementById('contextCopy'));register.onclick=()=>{if(register.disabled)return;selectedIds=JSON.parse(menu.dataset.ids||'[]').filter(id=>current().some(item=>item.id===id));selected=selectedIds.at(-1)||null;closeObjectContextMenu();userPresetLibrary.registerSelection()};
+ const register=createMenuAction({label:'プリセットに登録'});register.id='contextRegisterPreset';menu.insertBefore(register,document.getElementById('contextCopy'));register.onclick=()=>{if(register.disabled)return;selectedIds=JSON.parse(menu.dataset.ids||'[]').filter(id=>current().some(item=>item.id===id));selected=selectedIds.at(-1)||null;closeObjectContextMenu();userPresetLibrary.registerSelection()};
  document.addEventListener('pointermove',e=>{
   if(!['group-scale','group-rotate'].includes(drag?.mode)||drag.pointerId!==e.pointerId)return;e.preventDefault();e.stopImmediatePropagation();
   if(drag.mode==='group-rotate'){
@@ -328,23 +328,11 @@ function placeBuiltinFieldMarkers(cx,cy){
 
 ;
 // ===== js/mobile/mobile-delete-dialog.js =====
-let pendingPhoneLayerDeletion=null;
-const phoneLayerDeleteDialog=document.createElement('dialog');
-phoneLayerDeleteDialog.className='confirm-dialog';phoneLayerDeleteDialog.id='phoneLayerDeleteDialog';phoneLayerDeleteDialog.setAttribute('aria-labelledby','phoneLayerDeleteMessage');
-phoneLayerDeleteDialog.innerHTML='<p id="phoneLayerDeleteMessage"></p><div class="confirm-actions"><button type="button" class="btn" id="phoneLayerDeleteCancel" autofocus>キャンセル</button><button type="button" class="btn primary" id="phoneLayerDeleteConfirm">削除</button></div>';
-document.body.append(phoneLayerDeleteDialog);
+const phoneLayerDeletion=createConfirmationView({id:'phoneLayerDeleteDialog',messageId:'phoneLayerDeleteMessage',cancelId:'phoneLayerDeleteCancel',confirmId:'phoneLayerDeleteConfirm',autofocus:true,onConfirm(pending){if(data===pending.board&&current()===pending.page)removeObject(pending.id,pending.individual)}});
 function confirmPhoneLayerDeletion(id,individual=false){
  const object=current().find(item=>item.id===id);if(!object||object.locked)return;
- pendingPhoneLayerDeletion={id,individual,board:data,page:current()};
- phoneLayerDeleteDialog.querySelector('p').textContent='「'+(object.objectGroupId&&!individual?objectGroupName(current().filter(o=>o.objectGroupId===object.objectGroupId))+'（'+objectGroupIds(id).length+'個）':objectTitle(object))+'」を削除しますか？';
- if(!phoneLayerDeleteDialog.open)phoneLayerDeleteDialog.showModal();
+ phoneLayerDeletion.show('「'+(object.objectGroupId&&!individual?objectGroupName(current().filter(o=>o.objectGroupId===object.objectGroupId))+'（'+objectGroupIds(id).length+'個）':objectTitle(object))+'」を削除しますか？',{id,individual,board:data,page:current()});
 }
-document.getElementById('phoneLayerDeleteCancel').onclick=()=>{pendingPhoneLayerDeletion=null;phoneLayerDeleteDialog.close()};
-document.getElementById('phoneLayerDeleteConfirm').onclick=()=>{
- const pending=pendingPhoneLayerDeletion;pendingPhoneLayerDeletion=null;phoneLayerDeleteDialog.close();
- if(pending&&data===pending.board&&current()===pending.page)removeObject(pending.id,pending.individual);
-};
-phoneLayerDeleteDialog.addEventListener('close',()=>{pendingPhoneLayerDeletion=null});
 
 ;
 // ===== js/mobile/mobile-content-panel.js =====
@@ -923,10 +911,31 @@ phoneLayerDeleteDialog.addEventListener('close',()=>{pendingPhoneLayerDeletion=n
 })();
 
 ;
+// Single owner for the stateful selection DOM used by editing, reading and output.
+window.Bolxiv.selectionSurface=(()=>{
+ const mobile=matchMedia('(max-width:850px)'),records=new Map();let reader=null,output=null,generation=0,noteOwned=false,currentDestination=null;
+ function register(key,node){if(!records.has(key)){const home=document.createComment('selection surface '+key+' home');node.before(home);records.set(key,{node,home})}return records.get(key)}
+ function place(record,target){const {node}=record;if(!target){if(node.previousSibling===record.home)return;target={parent:record.home.parentNode,before:record.home.nextSibling}}if(!target.parent||node===target.before||node.parentNode===target.parent&&(target.before?node.nextSibling===target.before:node===target.parent.lastChild))return;
+  const focused=node.contains(document.activeElement)?document.activeElement:null,scrolls=[node,...node.querySelectorAll('textarea,#pages')].map(node=>({node,left:node.scrollLeft,top:node.scrollTop}));target.parent.insertBefore(node,target.before||null);focused?.focus({preventScroll:true});for(const item of scrolls){item.node.scrollLeft=item.left;item.node.scrollTop=item.top}
+ }
+ const row=register('content',document.querySelector('.content-select-row')),phases=register('phases',document.querySelector('.page-controls'));
+ function sync(){const exporting=mobile.matches&&!!output,reading=mobile.matches&&!output&&!window.Bolxiv.pngPreview?.active&&boardReadOnly&&!!reader;
+  const destination=exporting?output:reading?reader:null;
+  if(destination!==currentDestination){document.getElementById('contentOptions').hidden=true;document.getElementById('contentSelect').setAttribute('aria-expanded','false');currentDestination=destination}
+  const memo=document.getElementById('phaseMemo');if(memo&&(destination||noteOwned)){const record=register('note',memo);place(record,destination?{parent:destination.noteHost||destination.host}:null);noteOwned=!!destination}
+  const noteInHost=destination&&memo?.parentNode===destination.host?memo:null;
+  place(phases,destination?{parent:destination.host,before:destination.before||noteInHost}:null);
+  place(row,destination?{parent:destination.host,before:destination.between||phases.node}:null);
+  reader?.onChange(reading);
+ }
+ new MutationObserver(sync).observe(document.body,{attributes:true,attributeFilter:['class']});mobile.addEventListener('change',sync);
+ return {registerReader(config){reader=config;sync()},acquireOutput(config){const token=++generation;output=config;sync();return ()=>{if(token!==generation)return;output=null;sync()}},sync};
+})();
+
 // ===== js/mobile/phone-view-content.js =====
 (()=>{
- const mobile=matchMedia('(max-width:850px)'),row=document.querySelector('.content-select-row'),anchor=document.createComment('content selector home');row.before(anchor);
- const phases=document.querySelector('.page-controls'),phaseAnchor=document.createComment('phase selector home');phases.before(phaseAnchor);
+ const mobile=matchMedia('(max-width:850px)'),row=document.querySelector('.content-select-row');
+ const phases=document.querySelector('.page-controls');
  const host=document.createElement('div');host.className='phone-view-content';host.setAttribute('aria-label','閲覧用コンテンツ・フェーズ選択');document.getElementById('objectLayerPanel').append(host);
  let active=false;
  const phaseToggle=document.getElementById('toggleBattlePages');let phaseMode=false,editExpanded=phaseToggle.getAttribute('aria-expanded')==='true',viewExpanded=typeof viewSettings.viewPhasesExpanded==='boolean'?viewSettings.viewPhasesExpanded:true;
@@ -974,9 +983,8 @@ phoneLayerDeleteDialog.addEventListener('close',()=>{pendingPhoneLayerDeletion=n
  host.addEventListener('toggle',scheduleSize,true);
  new MutationObserver(records=>{if(records.some(record=>!tabs.contains(record.target)))scheduleSize()}).observe(host,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden']});
  new MutationObserver(scheduleSize).observe(space,{childList:true,attributes:true,attributeFilter:['style']});viewport.addEventListener('scroll',scheduleSize,{passive:true});
- function sync(forceOutput=false){syncPhaseMode();const next=forceOutput!==true&&mobile.matches&&boardReadOnly&&!window.Bolxiv?.pngPreview?.active;if(next===active)return;active=next;document.getElementById('contentOptions').hidden=true;document.getElementById('contentSelect').setAttribute('aria-expanded','false');if(active){host.append(row,tabs,phases);syncReaderTabs();const note=host.querySelector('.phase-memo');if(note)host.append(note)}else{anchor.after(row);phaseAnchor.after(phases)}}
- window.Bolxiv.prepareOutputSelection=()=>sync(true);
- new MutationObserver(()=>{sync();scheduleSize()}).observe(document.body,{attributes:true,attributeFilter:['class']});mobile.addEventListener('change',()=>{sync();scheduleSize()});sync();scheduleSize();
+ function sync(next){syncPhaseMode();active=next;if(active)syncReaderTabs();scheduleSize()}
+ window.Bolxiv.selectionSurface.registerReader({host,between:tabs,noteHost:host,onChange:sync});scheduleSize();
 })();
 
 ;
@@ -1016,7 +1024,7 @@ const userPresetLibrary=(()=>{
  function syncPresetHistory(){for(const [index,button] of historyButtons.entries()){const entries=index?presetFuture:presetHistory,action=index?'やり直す':'元に戻す';button.disabled=blocked()||!!editingPreset||!entries.length;button.title=entries.length?'プリセット：'+entries.at(-1).label+'を'+action:'プリセットに'+(index?'やり直せる':'元に戻せる')+'操作はありません';button.setAttribute('aria-label',button.title)}}
  function restorePresetHistory(redo=false){if(blocked()||editingPreset)return;const source=redo?presetFuture:presetHistory,target=redo?presetHistory:presetFuture,entry=source.at(-1);if(!entry)return;if(save(JSON.parse(redo?entry.after:entry.before),{record:false})){source.pop();target.push(entry);if(activeIcon?.userPresetId&&!presets.some(item=>item.id===activeIcon.userPresetId)){setTapPlacementArmed(false);selectPlacementTool('select')}syncPresetHistory();notify('プリセットの'+entry.label+'を'+(redo?'やり直しました':'元に戻しました'))}}
 
- function show(anchor,actions,point=null){close();menu._opener=anchor;menu.replaceChildren();for(const [label,action,disabled=false] of actions){const b=document.createElement('button');b.type='button';b.textContent=label;if(label==='削除')b.classList.add('context-delete');if(label==='名前変更')b.dataset.shortcut='F2';b.setAttribute('role','menuitem');b.disabled=disabled;b.onclick=()=>{close();action()};menu.append(b)}addPhoneMenuClose(menu,close);const r=point||anchor.getBoundingClientRect();menu.hidden=false;menu.style.left=Math.max(4,Math.min(r.left,innerWidth-menu.offsetWidth-4))+'px';menu.style.top=Math.max(4,Math.min(r.bottom+4,innerHeight-menu.offsetHeight-4))+'px';menu.querySelector('button:not(:disabled)')?.focus()}
+ function show(anchor,actions,point=null){close();menu._opener=anchor;menu.replaceChildren();for(const [label,action,disabled=false] of actions){menu.append(createMenuAction({label,disabled,destructive:label==='削除',shortcut:label==='名前変更'?'F2':null,onInvoke(){close();action()}}))}addPhoneMenuClose(menu,close);const r=point||anchor.getBoundingClientRect();menu.hidden=false;menu.style.left=Math.max(4,Math.min(r.left,innerWidth-menu.offsetWidth-4))+'px';menu.style.top=Math.max(4,Math.min(r.bottom+4,innerHeight-menu.offsetHeight-4))+'px';menu.querySelector('button:not(:disabled)')?.focus()}
  window.addEventListener('pointerdown',e=>{if(!menu.contains(e.target)&&!manage.contains(e.target))close()},true);window.addEventListener('keydown',e=>{if(e.key==='Escape'&&!menu.hidden){e.preventDefault();e.stopImmediatePropagation();const origin=menu._opener;close();(origin?.closest('.preset-manager-row')||origin)?.focus({preventScroll:true})}},true);window.addEventListener('resize',close);
  function liveThumbnail(items){const thumb=document.createElement('span');thumb.className='preset-thumbnail';thumb.setAttribute('aria-hidden','true');const scene=document.createElement('span');scene.className='user-preset-scene';
   const xs=items.map(o=>o.x/100*640),ys=items.map(o=>o.y/100*640),left=Math.min(...items.map((o,i)=>xs[i]-(o.width||32)/2)),top=Math.min(...items.map((o,i)=>ys[i]-(o.height||32)/2)),right=Math.max(...items.map((o,i)=>xs[i]+(o.width||32)/2)),bottom=Math.max(...items.map((o,i)=>ys[i]+(o.height||32)/2)),extent=Math.max(right-left,bottom-top,32),scale=18/extent;
@@ -1148,7 +1156,7 @@ const userPresetLibrary=(()=>{
  toggle.id='contextClipboardToggle';toggle.type='button';toggle.textContent='コピー・貼り付け ▸';toggle.setAttribute('role','menuitem');toggle.setAttribute('aria-haspopup','menu');toggle.setAttribute('aria-expanded','false');toggle.setAttribute('aria-controls','contextClipboardMenu');
  const copy=document.getElementById('contextCopy'),paste=document.getElementById('contextPaste');menu.insertBefore(toggle,copy);sub.id='contextClipboardMenu';sub.className='object-context-menu';sub.setAttribute('role','menu');sub.setAttribute('aria-label','コピー・貼り付け');sub.hidden=true;menu.append(sub);copy.textContent='オブジェクトをコピー';paste.textContent='オブジェクトを貼り付け';sub.append(copy,paste);
  const separator=document.createElement('div');separator.className='context-separator';separator.setAttribute('role','separator');sub.append(separator);
- const make=(id,label)=>{const b=document.createElement('button');b.id=id;b.type='button';b.textContent=label;b.setAttribute('role','menuitem');sub.append(b);return b},copyStyle=make('contextCopyAppearance','見た目をコピー'),pasteStyle=make('contextPasteAppearance','見た目を貼り付け');
+ const make=(id,label)=>{const b=createMenuAction({label});b.id=id;sub.append(b);return b},copyStyle=make('contextCopyAppearance','見た目をコピー'),pasteStyle=make('contextPasteAppearance','見た目を貼り付け');
  let clipboard=null;
  const fields=['color','strokeColor','opacity','width','height','gradient','fillType','innerSize','angle','fontSize','lineStyle','arrowEnds','arrowSize'];
  const kind=o=>JSON.stringify([objectCategory(o),o.type,o.type==='icon'?objectTitle(o):o.type==='segment'?objectTitle(o):'']);

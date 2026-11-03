@@ -136,7 +136,6 @@
 
 @media(max-width:850px){
  .png-preview-active .app .layout :is(#addPage,#copyPage,#copyPageToContent,#addPhaseGroup,.page-tab-edit,.page-tab-x,.phone-row-actions,.phase-group-menu-trigger){display:none!important}
- .png-preview-active .app :is(#addContent,.content-option-add-row,.content-option-add,.content-list-history-actions,.content-list-history-button,.content-row-action){display:none!important}
 }
 
 @media(max-width:850px){
@@ -392,8 +391,6 @@
  .app .layout .right #pngPreview .png-reader-controls>.page-controls{max-height:none;flex:1;min-height:0}
  .app .layout .right #pngPreview .png-preview-settings-body{display:flex;flex-direction:column;flex:1;min-height:0;overflow-y:auto;margin:8px 0;padding:0 8px;gap:8px}
  .app .layout .right #pngPreview .png-preview-settings-body>.output-section{flex:none}
- .output-selection-tabbed .phone-object-tabs-title{flex:0 1 auto}
- .output-selection-tabbed .phone-object-collapse{margin-left:auto}
 }
 
 .output-selection-tabbed>.output-tab-group>.output-switch-tabs{align-self:stretch;width:100%;box-sizing:border-box;flex-shrink:0;margin:0}

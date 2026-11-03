@@ -787,13 +787,13 @@
 @media(min-width:851px){.board-read-only .app .layout.desktop-phase-tools #desktopPhasePanelTitle:disabled{opacity:1!important;color:#33445f!important;-webkit-text-fill-color:#33445f!important}}
 
 /* ===== css/phone-object-tabs.css ===== */
-.phone-object-tabs{display:none}
+.panel-view-header{display:none}
 @media(max-width:850px){
  .app .layout[data-phone-pane="canvas"] #objectLayerPanel#objectLayerPanel#objectLayerPanel.phone-object-tabbed>.property-group{grid-column:1/3!important;grid-row:2!important;width:100%!important}
  .app .layout[data-phone-pane="canvas"] #objectLayerPanel#objectLayerPanel#objectLayerPanel.phone-object-tabbed[data-object-tab="list"]>.property-group:not(.layer-list-group),
  .app .layout[data-phone-pane="canvas"] #objectLayerPanel#objectLayerPanel#objectLayerPanel.phone-object-tabbed[data-object-tab="properties"]>.layer-list-group{display:none!important}
  .app .layout[data-phone-pane="canvas"] #objectLayerPanel#objectLayerPanel#objectLayerPanel#objectLayerPanel.phone-object-tabbed :is(#toggleLayers,#toggleInspector){display:none!important}
- .phone-object-tabbed>.property-group>.phone-object-tabs,.phone-phase-list-tabbed>.phone-list-property-group>.phone-object-tabs{display:flex;align-items:center;flex:0 0 auto;gap:6px;min-height:36px;padding:3px 6px 3px 11px;background:#eef2f7;color:#33445f}
+ .phone-object-tabbed>.property-group>.panel-view-header,.phone-phase-list-tabbed>.phone-list-property-group>.panel-view-header{display:flex;align-items:center;flex:0 0 auto;gap:6px;min-height:36px;padding:3px 6px 3px 11px;background:#eef2f7;color:#33445f}
  .phone-object-tabs-title{flex:1;min-width:0;font-size:14px;overflow-wrap:anywhere;line-height:1.4}
  .phone-object-tabs button{display:grid;place-items:center;flex:none;width:26px;height:26px;min-height:26px;border:1px solid #d0d4da;border-radius:6px;background:#eef2f7;color:#33445f;padding:3px;font-size:14px}
  .phone-object-tabs button svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
@@ -808,7 +808,7 @@
  body .app .layout .phone-object-tabs button:is(:active,.phone-control-pressed){background:var(--press-bg,var(--blue))!important;color:var(--press-fg,#fff)!important;-webkit-text-fill-color:var(--press-fg,#fff)!important}
 
  .app .layout[data-phone-pane="canvas"] #objectLayerPanel#objectLayerPanel#objectLayerPanel.phone-object-tabbed[data-object-expanded="false"]{grid-template-rows:minmax(0,1fr) 38px!important;align-content:stretch!important}
- .app .layout[data-phone-pane="canvas"] #objectLayerPanel#objectLayerPanel#objectLayerPanel.phone-object-tabbed[data-object-expanded="false"]>.property-group{box-sizing:border-box!important;height:38px!important;min-height:38px!important;max-height:38px!important;border:1px solid #d0d4da!important;padding:0!important;gap:0!important;background:#eef2f7!important;box-shadow:none!important}
+ .app .layout[data-phone-pane="canvas"] #objectLayerPanel#objectLayerPanel#objectLayerPanel.phone-object-tabbed[data-object-expanded="false"]>.property-group{border:1px solid #d0d4da!important;background:#eef2f7!important;box-shadow:none!important}
 
  .phone-object-tabbed[data-object-expanded="false"]>.property-group>.phone-object-tabs{box-sizing:border-box;flex:1 0 0;min-height:0;height:100%;border:0;box-shadow:none}
  .phone-object-tabs .phone-object-collapse{width:26px;padding:3px}
@@ -950,8 +950,11 @@
  .board-read-only .phase-heading-actions>:is(#addPage,#copyPage,#copyPageToContent,#addPhaseGroup,#addPhaseMaster,#duplicatePhaseMaster):disabled{opacity:.45;cursor:not-allowed}
 }
 @media(max-width:850px){
- .board-read-only .app .layout :is(#addContent,.content-option-add,.content-list-history-button,.content-row-action,#addPage,#copyPage,#copyPageToContent,#addPhaseGroup,#addPhaseMaster,#duplicatePhaseMaster,.page-tab-edit,.page-tab-x,.phone-row-actions,.phase-group-menu-trigger,#clearBtn){display:none!important}
+ .board-read-only .app .layout :is(#addPage,#copyPage,#copyPageToContent,#addPhaseGroup,#addPhaseMaster,#duplicatePhaseMaster,.page-tab-edit,.page-tab-x,.phone-row-actions,.phase-group-menu-trigger,#clearBtn){display:none!important}
 }
+
+/* The content list owns whether editing controls occupy space, across all modes. */
+@media(max-width:850px){.app .layout #contentOptions[data-content-editable="false"] :is(.content-option-add-row,.content-row-action){display:none!important}}
 
 /* ===== css/phase-item-menu.css ===== */
 .phase-item-menu{box-sizing:border-box;max-width:calc(100vw - 16px);overflow-y:auto}
@@ -2005,15 +2008,18 @@ body .app .layout :is(#fieldGuideEditor,#pngPreview) .guide-section-toggle[aria-
 .alignment-guide-center.alignment-guide-x::after{left:-.5px;top:100%}
 .alignment-guide-center.alignment-guide-y::before{left:0;top:-.5px}
 .alignment-guide-center.alignment-guide-y::after{left:100%;top:-.5px}
+:root{--alignment-line-width:2px;--alignment-edge-color:#ff9800;--alignment-center-color:#399bff;--alignment-dash-length:5px;--alignment-dash-period:9px}
 /* Keep temporary guides at 2 screen pixels, including fractional canvas zooms. */
-.alignment-guide-x{border-left-width:0;width:calc(2px / var(--board-display-scale,1));background:repeating-linear-gradient(to bottom,#ff9800 0 calc(5px / var(--board-display-scale,1)),transparent calc(5px / var(--board-display-scale,1)) calc(9px / var(--board-display-scale,1)))}
-.alignment-guide-y{border-top-width:0;height:calc(2px / var(--board-display-scale,1));background:repeating-linear-gradient(to right,#ff9800 0 calc(5px / var(--board-display-scale,1)),transparent calc(5px / var(--board-display-scale,1)) calc(9px / var(--board-display-scale,1)))}
-.alignment-guide-center{background:#399bff}
-.alignment-guide-center::before,.alignment-guide-center::after{width:calc(6px / var(--board-display-scale,1));height:calc(6px / var(--board-display-scale,1));border:0;box-shadow:inset 0 0 0 calc(1.5px / var(--board-display-scale,1)) #2585e6}
+.alignment-guide-x{border-left-width:0;width:calc(var(--alignment-line-width) / var(--board-display-scale,1));background:repeating-linear-gradient(to bottom,var(--alignment-edge-color) 0 calc(var(--alignment-dash-length) / var(--board-display-scale,1)),transparent calc(var(--alignment-dash-length) / var(--board-display-scale,1)) calc(var(--alignment-dash-period) / var(--board-display-scale,1)))}
+.alignment-guide-y{border-top-width:0;height:calc(var(--alignment-line-width) / var(--board-display-scale,1));background:repeating-linear-gradient(to right,var(--alignment-edge-color) 0 calc(var(--alignment-dash-length) / var(--board-display-scale,1)),transparent calc(var(--alignment-dash-length) / var(--board-display-scale,1)) calc(var(--alignment-dash-period) / var(--board-display-scale,1)))}
+.alignment-guide-center{background:var(--alignment-center-color)}
+.alignment-guide-center::before,.alignment-guide-center::after{width:calc(6px / var(--board-display-scale,1));height:calc(6px / var(--board-display-scale,1));border:0;box-shadow:inset 0 0 0 calc(1.var(--alignment-dash-length) / var(--board-display-scale,1)) #2585e6}
 .alignment-guide-center.alignment-guide-x::before,.alignment-guide-center.alignment-guide-x::after{left:50%}
 .alignment-guide-center.alignment-guide-y::before,.alignment-guide-center.alignment-guide-y::after{top:50%}
-.stage.center-align-x:after{border-left-width:0!important;width:calc(2px / var(--board-display-scale,1));background:repeating-linear-gradient(to bottom,#ff9800 0 calc(5px / var(--board-display-scale,1)),transparent calc(5px / var(--board-display-scale,1)) calc(9px / var(--board-display-scale,1)))}
-.stage.center-align-y>.axis{border-top-width:0!important;height:calc(2px / var(--board-display-scale,1));background:repeating-linear-gradient(to right,#ff9800 0 calc(5px / var(--board-display-scale,1)),transparent calc(5px / var(--board-display-scale,1)) calc(9px / var(--board-display-scale,1)))}
+.stage.center-align-x:after{border-left-width:0!important;width:calc(var(--alignment-line-width) / var(--board-display-scale,1));background:repeating-linear-gradient(to bottom,var(--alignment-edge-color) 0 calc(var(--alignment-dash-length) / var(--board-display-scale,1)),transparent calc(var(--alignment-dash-length) / var(--board-display-scale,1)) calc(var(--alignment-dash-period) / var(--board-display-scale,1)))}
+.stage.center-align-y>.axis{border-top-width:0!important;height:calc(var(--alignment-line-width) / var(--board-display-scale,1));background:repeating-linear-gradient(to right,var(--alignment-edge-color) 0 calc(var(--alignment-dash-length) / var(--board-display-scale,1)),transparent calc(var(--alignment-dash-length) / var(--board-display-scale,1)) calc(var(--alignment-dash-period) / var(--board-display-scale,1)))}
+.alignment-guide-svg{stroke:var(--alignment-edge-color);stroke-width:calc(var(--alignment-line-width) / var(--alignment-svg-transform-scale,1));stroke-dasharray:calc(var(--alignment-dash-length) / var(--alignment-svg-transform-scale,1)) calc((var(--alignment-dash-period) - var(--alignment-dash-length)) / var(--alignment-svg-transform-scale,1));vector-effect:non-scaling-stroke;pointer-events:none}
+.alignment-guide-svg-center{stroke:var(--alignment-center-color);stroke-dasharray:none}
 
 #contextClipboardToggle[aria-expanded="true"]{background:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
 
@@ -2271,7 +2277,12 @@ body.phase-master-editing .app .layout :is(.content-heading-row,.right .board-ti
  .phone-phase-list-tabbed .phone-object-tabs:has(.phase-heading-actions)>.phone-object-collapse{margin-left:0}
 }
 
-@media(max-width:850px){body .app .layout #contentPanel.phone-phase-list-tabbed>.phone-list-property-group[data-phone-tab-expanded="false"]{flex:0 0 38px!important;height:38px!important;min-height:38px!important}}
+/* Frame sizing belongs to the panel, not each screen's collapse handler. */
+@media(max-width:850px){
+ body .app .layout :is(#contentPanel.phone-phase-list-tabbed,#objectLayerPanel#objectLayerPanel#objectLayerPanel.phone-object-tabbed)>.panel-view-frame[data-panel-expanded="false"]{box-sizing:border-box!important;flex:0 0 38px!important;height:38px!important;min-height:38px!important;max-height:38px!important;padding:0!important;gap:0!important}
+ :is(.phone-phase-list-tabbed,.phone-object-tabbed,.output-selection-tabbed) .panel-view-body{min-height:0}
+ :is(.phone-phase-list-tabbed,.phone-object-tabbed,.output-selection-tabbed) [data-panel-scroll]{min-height:0;overflow-y:auto}
+}
 
 @media(max-width:850px){.output-selection-tabbed>.output-tab-group>.output-switch-tabs{display:flex;align-items:center;gap:6px;min-height:36px;padding:3px 6px 3px 11px;background:#eef2f7;color:#33445f}.output-selection-tabbed>.output-tab-inactive{display:none!important}}
 
