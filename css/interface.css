@@ -787,13 +787,13 @@
 @media(min-width:851px){.board-read-only .app .layout.desktop-phase-tools #desktopPhasePanelTitle:disabled{opacity:1!important;color:#33445f!important;-webkit-text-fill-color:#33445f!important}}
 
 /* ===== css/phone-object-tabs.css ===== */
-.phone-object-tabs{display:none}
+.panel-view-header{display:none}
 @media(max-width:850px){
  .app .layout[data-phone-pane="canvas"] #objectLayerPanel#objectLayerPanel#objectLayerPanel.phone-object-tabbed>.property-group{grid-column:1/3!important;grid-row:2!important;width:100%!important}
  .app .layout[data-phone-pane="canvas"] #objectLayerPanel#objectLayerPanel#objectLayerPanel.phone-object-tabbed[data-object-tab="list"]>.property-group:not(.layer-list-group),
  .app .layout[data-phone-pane="canvas"] #objectLayerPanel#objectLayerPanel#objectLayerPanel.phone-object-tabbed[data-object-tab="properties"]>.layer-list-group{display:none!important}
  .app .layout[data-phone-pane="canvas"] #objectLayerPanel#objectLayerPanel#objectLayerPanel#objectLayerPanel.phone-object-tabbed :is(#toggleLayers,#toggleInspector){display:none!important}
- .phone-object-tabbed>.property-group>.phone-object-tabs,.phone-phase-list-tabbed>.phone-list-property-group>.phone-object-tabs{display:flex;align-items:center;flex:0 0 auto;gap:6px;min-height:36px;padding:3px 6px 3px 11px;background:#eef2f7;color:#33445f}
+ .phone-object-tabbed>.property-group>.panel-view-header,.phone-phase-list-tabbed>.phone-list-property-group>.panel-view-header{display:flex;align-items:center;flex:0 0 auto;gap:6px;min-height:36px;padding:3px 6px 3px 11px;background:#eef2f7;color:#33445f}
  .phone-object-tabs-title{flex:1;min-width:0;font-size:14px;overflow-wrap:anywhere;line-height:1.4}
  .phone-object-tabs button{display:grid;place-items:center;flex:none;width:26px;height:26px;min-height:26px;border:1px solid #d0d4da;border-radius:6px;background:#eef2f7;color:#33445f;padding:3px;font-size:14px}
  .phone-object-tabs button svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
@@ -808,7 +808,7 @@
  body .app .layout .phone-object-tabs button:is(:active,.phone-control-pressed){background:var(--press-bg,var(--blue))!important;color:var(--press-fg,#fff)!important;-webkit-text-fill-color:var(--press-fg,#fff)!important}
 
  .app .layout[data-phone-pane="canvas"] #objectLayerPanel#objectLayerPanel#objectLayerPanel.phone-object-tabbed[data-object-expanded="false"]{grid-template-rows:minmax(0,1fr) 38px!important;align-content:stretch!important}
- .app .layout[data-phone-pane="canvas"] #objectLayerPanel#objectLayerPanel#objectLayerPanel.phone-object-tabbed[data-object-expanded="false"]>.property-group{box-sizing:border-box!important;height:38px!important;min-height:38px!important;max-height:38px!important;border:1px solid #d0d4da!important;padding:0!important;gap:0!important;background:#eef2f7!important;box-shadow:none!important}
+ .app .layout[data-phone-pane="canvas"] #objectLayerPanel#objectLayerPanel#objectLayerPanel.phone-object-tabbed[data-object-expanded="false"]>.property-group{border:1px solid #d0d4da!important;background:#eef2f7!important;box-shadow:none!important}
 
  .phone-object-tabbed[data-object-expanded="false"]>.property-group>.phone-object-tabs{box-sizing:border-box;flex:1 0 0;min-height:0;height:100%;border:0;box-shadow:none}
  .phone-object-tabs .phone-object-collapse{width:26px;padding:3px}
@@ -950,8 +950,11 @@
  .board-read-only .phase-heading-actions>:is(#addPage,#copyPage,#copyPageToContent,#addPhaseGroup,#addPhaseMaster,#duplicatePhaseMaster):disabled{opacity:.45;cursor:not-allowed}
 }
 @media(max-width:850px){
- .board-read-only .app .layout :is(#addContent,.content-option-add,.content-list-history-button,.content-row-action,#addPage,#copyPage,#copyPageToContent,#addPhaseGroup,#addPhaseMaster,#duplicatePhaseMaster,.page-tab-edit,.page-tab-x,.phone-row-actions,.phase-group-menu-trigger,#clearBtn){display:none!important}
+ .board-read-only .app .layout :is(#addPage,#copyPage,#copyPageToContent,#addPhaseGroup,#addPhaseMaster,#duplicatePhaseMaster,.page-tab-edit,.page-tab-x,.phone-row-actions,.phase-group-menu-trigger,#clearBtn){display:none!important}
 }
+
+/* The content list owns whether editing controls occupy space, across all modes. */
+@media(max-width:850px){.app .layout #contentOptions[data-content-editable="false"] :is(.content-option-add-row,.content-row-action){display:none!important}}
 
 /* ===== css/phase-item-menu.css ===== */
 .phase-item-menu{box-sizing:border-box;max-width:calc(100vw - 16px);overflow-y:auto}
@@ -1069,7 +1072,6 @@
 .phase-group-caption-prefix,.phase-group-caption-suffix{flex:none}
 .phase-group-caption-name{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .phase-group-selected #stage{visibility:hidden}
-
 
 :is(.phase-group-overview,.master-group-overview) h2{margin:0;font-size:20px;overflow-wrap:anywhere}
 :is(.phase-group-overview,.master-group-overview) label{display:flex;flex-direction:column;gap:8px}
@@ -1302,13 +1304,12 @@ body .app .layout #contentSelect::after{
  .app .layout .phase-heading-actions{height:28px;top:4px}
  .app .layout.phone-content-open .battle .phone-content-help{box-sizing:border-box;flex:0 0 24px;width:24px;min-width:24px;height:24px;min-height:24px}
 }
-/* Property spacing trial: remove this block to restore the previous density. */
+/* Shared property layout density; controls are styled in the common block below. */
 .app .layout #propertyPanel,
 .app .layout #layoutPropertiesPanel:not([hidden]):not(.hidden){padding-top:8px!important;padding-bottom:8px!important;padding-left:8px!important}
 .app .layout :is(#inspector,#layoutPropertiesPanel){gap:8px!important}
 .app .layout :is(#inspector,#layoutPropertiesPanel) .field{margin:0!important}
-.app .layout :is(#inspector,#layoutPropertiesPanel) .field>label:not(.property-icon-toggle),
-.app .layout #inspector .coordinate-fields>div>label{margin-top:0!important;margin-bottom:4px!important}
+
 .app .layout :is(#inspector,#layoutPropertiesPanel) :is(.coordinate-fields,.property-color-fill-row,.layout-background-colors){row-gap:8px!important;column-gap:8px!important}
 .app .layout #inspector>.inspector-section-start,
 .app .layout #inspector>.object-common-properties>.inspector-section-start,
@@ -1399,10 +1400,8 @@ body .app .layout #objectList>.object-group-row>.object-lock-toggle{grid-column:
 body .app .layout #objectList>.object-group-row>.object-delete{grid-column:5;grid-row:1}
 @media(max-width:850px){body .app .layout #objectList>.object-group-row>.object-visibility-toggle{grid-column:3}body .app .layout #objectList>.object-group-row>.object-lock-toggle{grid-column:4}body .app .layout #objectList>.object-group-row>.object-delete{grid-column:6}}
 
-
 .object-group-properties,.object-common-properties{display:flex;flex-direction:column;gap:inherit}
 .object-group-properties{padding:0;margin:0;border:0;border-radius:0;background:transparent}.object-group-properties h3,.object-common-heading{font-size:13px;margin:0 0 8px;color:#33445f}.object-group-properties .hint{margin:6px 0 0}.object-group-properties select{width:100%;margin-bottom:8px}
-
 
 .right #inspector>.object-common-properties>.hint{margin:0}
 
@@ -1415,7 +1414,7 @@ body .app .layout #objectList>.object-group-row>.object-delete{grid-column:5;gri
 /* Keep the full group form inside the inspector scroll range. */
 .right #inspector>.object-group-properties{flex:0 0 auto;padding-bottom:8px}
 .object-group-properties>.object-group-rotation{flex-shrink:0}
-.right #inspector .property-swap-button{box-sizing:border-box;display:grid;place-items:center;flex:0 0 26px;width:26px;height:26px;min-width:26px;padding:3px;border:1px solid #d5dce6;border-radius:4px;background:#fff;color:#000}.property-swap-button svg{width:18px;height:18px}.property-swap-button:disabled{opacity:.4}
+.right #inspector .property-swap-button{box-sizing:border-box;display:grid;place-items:center;flex:0 0 26px;width:26px;height:26px;min-width:26px;padding:3px;border:1px solid #d5dce6;border-radius:4px;background:#fff;color:#000}.property-swap-button svg{width:18px;height:18px}
 .left .accordion-group:has(#presetPanel){position:relative}.left .preset-manage{position:absolute;right:38px;top:5px;display:grid;place-items:center;box-sizing:border-box;width:26px;min-width:26px;height:26px;min-height:26px;margin:0;padding:3px;border:1px solid #d0d4da;border-radius:5px;background:#eef2f7;color:#33445f;-webkit-text-fill-color:#33445f;filter:none;transition:none;-webkit-tap-highlight-color:transparent}.left .preset-manage svg{width:18px;height:18px}.left .preset-manage:enabled:is(:hover:not(:where(.phone-touch-mode *)),:active,:focus-visible,.phone-control-pressed){background:var(--blue);color:#fff;-webkit-text-fill-color:#fff;filter:none}@media(max-width:850px){.left .preset-manage{top:4px;width:28px;min-width:28px;height:28px;min-height:28px}}.left .preset-section-separator{border-top:1px solid #e5e9ef;margin:8px 0}.left #userPresetGrid:empty{display:none}.left .preset-empty{font-size:11px;color:#64748b;padding:4px 0 8px}.left .user-preset .preset-thumbnail,.touch-placement-preview>.preset-thumbnail{position:relative;display:block;width:26px;height:26px;overflow:hidden}.user-preset-scene{pointer-events:none}.preset-name-dialog{border:1px solid #d5dce6;border-radius:8px;padding:16px;max-width:calc(100vw - 32px)}.preset-name-dialog form{display:flex;flex-direction:column;gap:10px}.preset-name-dialog input{width:260px;max-width:100%;box-sizing:border-box}.preset-dialog-actions{display:flex;justify-content:flex-end;gap:8px}
 .left:not(.palette-hover-open):not(:focus-within):not(.pinned) .preset-manage{display:none}
 .app .layout .left .preset-manage{background:#eef2f7!important;color:#33445f!important;-webkit-text-fill-color:#33445f!important;border:1px solid #d0d4da!important}.app .layout .left .preset-manage:enabled:is(:hover:not(:where(.phone-touch-mode *)),:active,:focus-visible,.phone-control-pressed){background:var(--press-bg,var(--blue))!important;color:var(--press-fg,#fff)!important;-webkit-text-fill-color:var(--press-fg,#fff)!important;filter:none!important}
@@ -1734,9 +1733,8 @@ body .app .layout #objectList>.object-group-row>.object-delete{grid-column:5;gri
 .guide-editor-heading h2{font-size:16px;margin:0;white-space:nowrap}
 .guide-editor-heading select{font:inherit;min-width:0;max-width:420px;flex:1;padding:5px;border:1px solid #cbd3df;border-radius:5px;background:#fff}
 .guide-editor-heading #finishFieldGuides{margin-left:auto}
-.guide-editor-dialog .btn{font:inherit;border:1px solid #cbd3df;border-radius:5px;padding:5px 10px;color:#33445f;background:#eef2f7;cursor:pointer;white-space:nowrap}
-.guide-editor-dialog .btn:enabled:is(:hover:not(:where(.phone-touch-mode *)),:active),.guide-editor-dialog .btn[aria-pressed="true"],.guide-editor-dialog .btn.primary{color:#fff;background:var(--blue,#3182ce);border-color:var(--blue,#3182ce)}
-.guide-editor-dialog .btn:disabled{opacity:.4;cursor:default}
+.guide-editor-dialog .btn{font:inherit;border-width:1px;border-style:solid;border-radius:5px;padding:5px 10px;cursor:pointer;white-space:nowrap}
+.guide-editor-dialog .btn:disabled:not(:where(.guide-editor-properties *)){opacity:.4;cursor:default}
 .guide-editor-dialog .btn:focus-visible,.guide-editor-dialog summary:focus-visible{outline:2px solid var(--blue,#3182ce);outline-offset:2px}
 .guide-editor-content{display:grid;grid-template-columns:minmax(0,1fr) 280px;flex:1;min-height:0;gap:12px;padding:12px}
 .guide-editor-preview{display:flex;flex-direction:column;min-width:0;min-height:0}
@@ -1769,14 +1767,13 @@ body .app .layout #objectList>.object-group-row>.object-delete{grid-column:5;gri
 #fieldGuideEditor #guideEditorZoom option{background:#fff;color:#17212c}
 .guide-properties-body{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding:12px;scrollbar-gutter:stable}
 .guide-editor-properties .field{display:flex;flex-direction:column;gap:4px;margin:8px 0}
-.guide-editor-properties label{font:inherit}
-.guide-editor-properties input[type="number"]{font:inherit;box-sizing:border-box;max-width:100%;min-width:0;padding:5px;border:1px solid #cbd3df;border-radius:5px;color:#17212c;background:#fff}
-.guide-editor-properties select{font:inherit;box-sizing:border-box;width:100%;min-width:0;min-height:32px;padding:4px 8px;border:1px solid #cbd3df;border-radius:5px;color:#17212c;background:#fff}
+
+.guide-editor-properties input[type="number"]{box-sizing:border-box;max-width:100%;min-width:0;padding:5px}
+.guide-editor-properties select{box-sizing:border-box;width:100%;min-width:0;padding:4px 8px}
 .guide-editor-properties .coordinate-control{display:flex;align-items:center;gap:6px;min-width:0}
 .guide-editor-properties input[type="range"]{min-width:0;flex:1;accent-color:var(--blue,#3182ce)}
 .guide-editor-properties .coordinate-control input[type="number"]{width:62px}
-.guide-editor-properties .color-trigger{font:inherit;background:#eef2f7;color:#33445f;border:1px solid #cbd3df;border-radius:5px;padding:5px 7px;display:flex;align-items:center;gap:7px;cursor:pointer}
-.guide-editor-properties .color-trigger:enabled:is(:hover:not(:where(.phone-touch-mode *)),:active){background:var(--blue,#3182ce);color:#fff}
+.guide-editor-properties .color-trigger{display:flex;align-items:center;gap:7px;cursor:pointer}
 .guide-editor-properties .color-preview{display:inline-block;flex:none;width:18px;height:18px;border:1px solid #cbd3df;border-radius:3px}
 .guide-editor-properties h3{font-size:14px;font-weight:600;margin:14px 0 8px}
 .guide-editor-properties #guideShapeFields{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
@@ -1785,10 +1782,8 @@ body .app .layout #objectList>.object-group-row>.object-delete{grid-column:5;gri
 .guide-group-actions{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
 .guide-group-actions[hidden],.guide-group-actions>.btn[hidden]{display:none!important}
 #fieldGuideEditor #guideShapeProperties>h3>.guide-shape-actions{flex:none;gap:4px;margin:0 28px 0 auto;padding-left:6px}
-#fieldGuideEditor .guide-shape-actions>.btn{box-sizing:border-box;display:grid;place-items:center;flex:none;width:26px;min-width:26px;height:26px;min-height:26px;padding:3px;border:1px solid #d0d4da;border-radius:5px;background:#eef2f7;color:#33445f;-webkit-text-fill-color:currentColor;font-size:18px;line-height:1;filter:none;-webkit-tap-highlight-color:transparent}
+#fieldGuideEditor .guide-shape-actions>.btn{box-sizing:border-box;display:grid;place-items:center;flex:none;width:26px;min-width:26px;height:26px;min-height:26px;padding:3px;border-width:1px;border-style:solid;border-radius:5px;font-size:18px;line-height:1;filter:none;-webkit-tap-highlight-color:transparent}
 #fieldGuideEditor .guide-shape-actions>.btn svg{display:block;width:18px;height:18px;pointer-events:none}
-#fieldGuideEditor .guide-shape-actions>.btn:enabled:is(:hover:not(:where(.phone-touch-mode *)),:active,:focus-visible,.phone-control-pressed){background:var(--press-bg,var(--blue))!important;color:var(--press-fg,#fff)!important;-webkit-text-fill-color:var(--press-fg,#fff)!important;border-color:var(--blue)}
-#fieldGuideEditor .guide-shape-actions>.btn:disabled{opacity:.4;cursor:default}
 .guide-editor-properties .field-guide-check{display:flex;align-items:center;gap:5px;font:inherit;cursor:pointer}
 .guide-editor-properties .field-guide-check input{margin:0;accent-color:var(--blue,#3182ce)}
 .guide-editor-properties #guideNoSelection{font-size:12px;line-height:1.5;color:#526176}
@@ -1827,22 +1822,16 @@ body .app .layout #objectList>.object-group-row>.object-delete{grid-column:5;gri
 #fieldGuideEditor .guide-properties-body>.guide-editor-hint{text-align:left;margin:0 0 12px}
 /* Match the ordinary phase property labels and native input appearance. */
 #fieldGuideEditor .guide-properties-body .field{margin:0;gap:0}
-#fieldGuideEditor .guide-properties-body .field>label{font-family:inherit;font-size:12px;font-weight:400;line-height:1.2;margin:0 0 4px;color:#000}
-#fieldGuideEditor .guide-properties-body .field>label:has(+.coordinate-control){line-height:12px;margin-bottom:0}
 #fieldGuideEditor .guide-property-group{display:flex;flex-direction:column;gap:10px}
-#fieldGuideEditor .field-guide-check{font-family:inherit;font-size:12px;font-weight:400;line-height:1.2;margin:0}
 #fieldGuideEditor .guide-hide-objects{box-sizing:border-box;width:100%;border-top:1px solid #d0d4da;padding-top:10px}
 #fieldGuideEditor #fieldGuideSettings .field-guide-number{margin:0}
 #fieldGuideEditor #fieldGuideSettings .field-guide-check input,#fieldGuideEditor .guide-hide-objects input,#fieldGuideEditor input[type="range"]{accent-color:auto}
-#fieldGuideEditor .guide-properties-body :is(input[type="number"],input[type="text"],select){box-sizing:border-box;font-family:inherit;font-size:14px;font-weight:400;line-height:normal;height:24px;padding:4px;border:1px solid #d5dce6!important;border-radius:5px;background:#f8fafc!important;color:#000!important;-webkit-text-fill-color:#000!important}
-#fieldGuideEditor .guide-properties-body .color-trigger{font-family:inherit;font-size:14px;font-weight:400;border:1px solid #d5dce6!important;background:#f8fafc!important;color:#000!important;-webkit-text-fill-color:#000!important}
 #fieldGuideEditor .guide-properties-body .layout-background-colors .color-trigger{padding-left:4px;padding-right:4px;gap:4px}
-#fieldGuideEditor .guide-properties-body .color-trigger:enabled:is(:hover:not(:where(.phone-touch-mode *)),:active){background:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
 .field-guide-editing #editModeToggle:disabled{opacity:.45;cursor:default}
 .field-guide-editing .phone-phase-navigation{display:none!important}
 .field-guide-editing .left :is(.tool,.icon-choice){opacity:.45;cursor:not-allowed}
-#fieldGuideEditor.guide-editor-dialog .btn{background:#eef2f7!important;color:#33445f!important;-webkit-text-fill-color:#33445f!important;border:1px solid #cbd3df!important}
-#fieldGuideEditor.guide-editor-dialog .btn.primary,#fieldGuideEditor.guide-editor-dialog .btn[aria-pressed="true"],#fieldGuideEditor.guide-editor-dialog .btn:enabled:is(:hover:not(:where(.phone-touch-mode *)),:active){background:var(--blue,#3182ce)!important;color:white!important;-webkit-text-fill-color:white!important;border-color:var(--blue,#3182ce)!important}
+#fieldGuideEditor.guide-editor-dialog .btn:not(:where(.guide-editor-properties *)){background:#eef2f7!important;color:#33445f!important;-webkit-text-fill-color:#33445f!important;border:1px solid #cbd3df!important}
+#fieldGuideEditor.guide-editor-dialog .btn.primary,#fieldGuideEditor.guide-editor-dialog .btn[aria-pressed="true"]:not(:where(.guide-editor-properties *)),#fieldGuideEditor.guide-editor-dialog .btn:not(:where(.guide-editor-properties *)):enabled:is(:hover:not(:where(.phone-touch-mode *)),:active){background:var(--blue,#3182ce)!important;color:white!important;-webkit-text-fill-color:white!important;border-color:var(--blue,#3182ce)!important}
 @media(min-width:851px){
  .guide-editor-host{position:relative!important}
  .guide-editor-host>:not(#fieldGuideEditor){opacity:0;pointer-events:none}
@@ -1869,7 +1858,7 @@ body .app .layout #objectList>.object-group-row>.object-delete{grid-column:5;gri
  .guide-editor-hint{font-size:11px;margin-top:4px}
  .guide-editor-properties .coordinate-control .phone-number-step-buttons{display:inline-flex;gap:5px}
  .guide-editor-properties .coordinate-control input[type="number"]{display:none}
- .guide-editor-properties .phone-number-step-buttons .btn{min-width:32px;min-height:32px;padding:4px}
+
 }
 
 /* Desktop title adjustments must not override the phone's two-row header. */
@@ -1941,7 +1930,6 @@ body .app .layout #contentPanel :is(.desktop-phase-shared-heading,.phone-phase-t
  .app .layout .right .board-title-row>#toggleObjectList{box-sizing:border-box;height:100%!important;min-height:0!important;max-height:100%;background:transparent!important}
 }
 
-
 body.phase-group-selected .app .layout #phaseMemo{display:none!important}
 body.phase-group-selected .app .layout :is(#phonePhaseSwitch-toggle,.phone-reader-switch){display:none!important}
 @media(max-width:850px){body.phase-group-selected .app .layout #editFieldGuides{display:none!important}}
@@ -1964,19 +1952,24 @@ body .app .layout :is(#fieldGuideEditor,#pngPreview) .guide-section-toggle[aria-
 @media(min-width:851px){#phaseMemo #outputNotePhase{box-sizing:border-box;flex:none;width:100%;min-width:0;max-width:100%;padding:6px;border:1px solid #d5dce6;border-radius:5px;background:#f8fafc;color:#17212c;font:inherit}#phaseMemo #outputNotePhase:focus{outline:2px solid var(--blue);outline-offset:-1px}}
 @media(min-width:851px){#desktopPhaseSwitch:disabled{opacity:.4;cursor:default}}
 
-/* Desktop property controls share a compact height; touch controls retain their sizing. */
-@media(min-width:851px){
- .app .layout :is(#inspector,#layoutPropertiesPanel,#phaseGroupProperties,#phaseMasterAssignment,#phaseMasterGroupProperties,#fieldGuideEditor .guide-editor-properties,#pngPreview .png-preview-settings) :is(input[type="number"],input[type="text"],input:not([type]),select){box-sizing:border-box;height:28px!important;min-height:28px!important;max-height:28px!important;padding-top:3px!important;padding-bottom:3px!important;line-height:normal!important}
- .app .layout :is(#inspector,#layoutPropertiesPanel,#phaseGroupProperties,#fieldGuideEditor .guide-editor-properties) .coordinate-control:has(input[type="number"]){height:28px;min-height:28px}
-}
-@media(min-width:851px){.app .layout :is(#inspector,#layoutPropertiesPanel,#phaseGroupProperties,#fieldGuideEditor .guide-editor-properties) .color-trigger{box-sizing:border-box;height:28px!important;min-height:28px!important;max-height:28px!important;padding-top:3px!important;padding-bottom:3px!important}}
-
-/* Touch-sized controls only inside property panels. */
+/* Shared property controls. Domain panels own placement, never a separate palette.
+   These rules also own normal/hover/pressed/disabled states for property buttons.
+   Guide/output toolbar fallbacks below and above exclude property descendants. */
+.app .layout{--property-input-bg:#f8fafc;--property-input-fg:#000;--property-input-border:#d5dce6;--property-input-radius:6px;--property-input-height:28px;--property-label-gap:4px;--property-button-bg:#eef2f7;--property-button-fg:#33445f;--property-button-border:#d0d4da}
+.app .layout :is(#inspector,#layoutPropertiesPanel,#phaseGroupProperties,#phaseMasterAssignment,#phaseMasterGroupProperties,#fieldGuideEditor .guide-editor-properties,#pngPreview .png-preview-settings) :is(.field>label:not(.property-icon-toggle),.coordinate-fields>div>label,.field-guide-check,.print-page-fields label,.print-page-fields legend,.output-note-row>label,.png-scale-field>label,.output-note-toggle,.phase-master-phase-body .phase-memo>summary){font-family:inherit!important;font-size:12px!important;font-weight:400!important;line-height:1.2!important;color:var(--property-input-fg)!important;-webkit-text-fill-color:var(--property-input-fg)!important}
+.app .layout :is(#inspector,#layoutPropertiesPanel,#phaseGroupProperties,#phaseMasterAssignment,#phaseMasterGroupProperties,#fieldGuideEditor .guide-editor-properties,#pngPreview .png-preview-settings) :is(.field>label:not(.property-icon-toggle):not(:has(input[type="checkbox"])),.coordinate-fields>div>label){margin-top:0!important;margin-bottom:var(--property-label-gap)!important}
+.app .layout :is(#inspector,#layoutPropertiesPanel,#phaseGroupProperties,#phaseMasterAssignment,#phaseMasterGroupProperties,#fieldGuideEditor .guide-editor-properties,#pngPreview .png-preview-settings) :is(input[type="number"],input[type="text"],input:not([type]),select,.color-trigger){box-sizing:border-box;font-family:inherit!important;font-size:14px!important;font-weight:400!important;line-height:normal!important;height:var(--property-input-height)!important;min-height:var(--property-input-height)!important;max-height:var(--property-input-height)!important;padding-top:3px!important;padding-bottom:3px!important;border:1px solid var(--property-input-border)!important;border-radius:var(--property-input-radius)!important;background:var(--property-input-bg)!important;color:var(--property-input-fg)!important;-webkit-text-fill-color:var(--property-input-fg)!important}
+.app .layout :is(#inspector,#layoutPropertiesPanel,#phaseGroupProperties,#phaseMasterAssignment,#phaseMasterGroupProperties,#fieldGuideEditor .guide-editor-properties,#pngPreview .png-preview-settings) .coordinate-control{height:var(--property-input-height);min-height:var(--property-input-height)}
+.app .layout :is(#inspector,#layoutPropertiesPanel,#phaseGroupProperties,#phaseMasterAssignment,#phaseMasterGroupProperties,#fieldGuideEditor .guide-editor-properties,#pngPreview .png-preview-settings) :is(input[type="number"],input[type="text"],input:not([type]),select,.color-trigger):focus-visible{outline:2px solid var(--blue)!important;outline-offset:1px}
+.app .layout :is(#inspector,#layoutPropertiesPanel,#phaseGroupProperties,#phaseMasterAssignment,#phaseMasterGroupProperties,#fieldGuideEditor .guide-editor-properties,#pngPreview .png-preview-settings) .btn:not(.primary){border-color:var(--property-button-border)!important;background:var(--property-button-bg)!important;color:var(--property-button-fg)!important;-webkit-text-fill-color:var(--property-button-fg)!important;filter:none!important}
+.app .layout :is(#inspector,#layoutPropertiesPanel,#phaseGroupProperties,#phaseMasterAssignment,#phaseMasterGroupProperties,#fieldGuideEditor .guide-editor-properties,#pngPreview .png-preview-settings) .phone-number-step-buttons>.btn{font-family:inherit!important;font-size:20px!important;font-weight:400!important;line-height:1!important;box-sizing:border-box;width:40px!important;min-width:40px!important;height:40px!important;min-height:40px!important;padding:0!important;border:1px solid var(--property-button-border)!important;border-radius:var(--property-input-radius)!important;background:var(--property-button-bg)!important;color:var(--property-button-fg)!important;-webkit-text-fill-color:var(--property-button-fg)!important;filter:none!important}
+.app .layout :is(#inspector,#layoutPropertiesPanel,#phaseGroupProperties,#phaseMasterAssignment,#phaseMasterGroupProperties,#fieldGuideEditor .guide-editor-properties,#pngPreview .png-preview-settings) :is(.color-trigger,.btn:not(.primary)):enabled:is([aria-pressed="true"],:hover:not(:where(.phone-touch-mode *)),:focus-visible,:active,.phone-control-pressed){background:var(--blue)!important;border-color:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important;filter:none!important}
+.app .layout :is(#inspector,#layoutPropertiesPanel,#phaseGroupProperties,#phaseMasterAssignment,#phaseMasterGroupProperties,#fieldGuideEditor .guide-editor-properties,#pngPreview .png-preview-settings) :is(button,input,select):disabled{opacity:.45!important;cursor:not-allowed!important}
 @media(max-width:850px){
- .app .layout :is(#inspector,#layoutPropertiesPanel,#phaseGroupProperties,#phaseMasterAssignment,#phaseMasterGroupProperties,#fieldGuideEditor .guide-editor-properties,#pngPreview .png-preview-settings) :is(select,input[type="number"],input[type="text"],input:not([type]),.color-trigger,.phone-number-step-buttons button){box-sizing:border-box;height:40px!important;min-height:40px!important;max-height:40px!important;padding-top:4px!important;padding-bottom:4px!important;line-height:normal!important}
- .app .layout :is(#inspector,#layoutPropertiesPanel,#phaseGroupProperties,#fieldGuideEditor .guide-editor-properties,#pngPreview .png-preview-settings) .phone-number-step-buttons button{min-width:40px!important}
- .app .layout :is(#inspector,#layoutPropertiesPanel,#phaseGroupProperties,#fieldGuideEditor .guide-editor-properties,#pngPreview .png-preview-settings) .coordinate-control:has(.phone-number-step-buttons){height:40px;min-height:40px}
+ .app .layout{--property-input-height:40px}
+ .app .layout :is(#inspector,#layoutPropertiesPanel,#phaseGroupProperties,#phaseMasterAssignment,#phaseMasterGroupProperties,#fieldGuideEditor .guide-editor-properties,#pngPreview .png-preview-settings) :is(input[type="number"],input[type="text"],input:not([type]),select,.color-trigger){padding-top:4px!important;padding-bottom:4px!important}
 }
+
 @media(max-width:850px){#phaseMemo #outputNotePhase{box-sizing:border-box;flex:none;width:100%;min-width:0;height:40px;min-height:40px;padding:4px 8px;border:1px solid #d5dce6;border-radius:6px;background:#f8fafc;color:#000;font:inherit;font-size:14px}#phaseMemo #outputNotePhase:focus-visible{outline:2px solid var(--blue);outline-offset:1px}}
 @media(max-width:850px){#phonePhaseSwitch-toggle:disabled{opacity:.4;cursor:default}}
 #phoneContentModeStatus{display:none}@media(max-width:850px){#phoneContentModeStatus{display:inline-block;margin-left:8px;font-size:12px;font-weight:400;line-height:1.2;white-space:nowrap;color:inherit}}
@@ -2005,15 +1998,18 @@ body .app .layout :is(#fieldGuideEditor,#pngPreview) .guide-section-toggle[aria-
 .alignment-guide-center.alignment-guide-x::after{left:-.5px;top:100%}
 .alignment-guide-center.alignment-guide-y::before{left:0;top:-.5px}
 .alignment-guide-center.alignment-guide-y::after{left:100%;top:-.5px}
+:root{--alignment-line-width:2px;--alignment-edge-color:#ff9800;--alignment-center-color:#399bff;--alignment-dash-length:5px;--alignment-dash-period:9px}
 /* Keep temporary guides at 2 screen pixels, including fractional canvas zooms. */
-.alignment-guide-x{border-left-width:0;width:calc(2px / var(--board-display-scale,1));background:repeating-linear-gradient(to bottom,#ff9800 0 calc(5px / var(--board-display-scale,1)),transparent calc(5px / var(--board-display-scale,1)) calc(9px / var(--board-display-scale,1)))}
-.alignment-guide-y{border-top-width:0;height:calc(2px / var(--board-display-scale,1));background:repeating-linear-gradient(to right,#ff9800 0 calc(5px / var(--board-display-scale,1)),transparent calc(5px / var(--board-display-scale,1)) calc(9px / var(--board-display-scale,1)))}
-.alignment-guide-center{background:#399bff}
-.alignment-guide-center::before,.alignment-guide-center::after{width:calc(6px / var(--board-display-scale,1));height:calc(6px / var(--board-display-scale,1));border:0;box-shadow:inset 0 0 0 calc(1.5px / var(--board-display-scale,1)) #2585e6}
+.alignment-guide-x{border-left-width:0;width:calc(var(--alignment-line-width) / var(--board-display-scale,1));background:repeating-linear-gradient(to bottom,var(--alignment-edge-color) 0 calc(var(--alignment-dash-length) / var(--board-display-scale,1)),transparent calc(var(--alignment-dash-length) / var(--board-display-scale,1)) calc(var(--alignment-dash-period) / var(--board-display-scale,1)))}
+.alignment-guide-y{border-top-width:0;height:calc(var(--alignment-line-width) / var(--board-display-scale,1));background:repeating-linear-gradient(to right,var(--alignment-edge-color) 0 calc(var(--alignment-dash-length) / var(--board-display-scale,1)),transparent calc(var(--alignment-dash-length) / var(--board-display-scale,1)) calc(var(--alignment-dash-period) / var(--board-display-scale,1)))}
+.alignment-guide-center{background:var(--alignment-center-color)}
+.alignment-guide-center::before,.alignment-guide-center::after{width:calc(6px / var(--board-display-scale,1));height:calc(6px / var(--board-display-scale,1));border:0;box-shadow:inset 0 0 0 calc(1.var(--alignment-dash-length) / var(--board-display-scale,1)) #2585e6}
 .alignment-guide-center.alignment-guide-x::before,.alignment-guide-center.alignment-guide-x::after{left:50%}
 .alignment-guide-center.alignment-guide-y::before,.alignment-guide-center.alignment-guide-y::after{top:50%}
-.stage.center-align-x:after{border-left-width:0!important;width:calc(2px / var(--board-display-scale,1));background:repeating-linear-gradient(to bottom,#ff9800 0 calc(5px / var(--board-display-scale,1)),transparent calc(5px / var(--board-display-scale,1)) calc(9px / var(--board-display-scale,1)))}
-.stage.center-align-y>.axis{border-top-width:0!important;height:calc(2px / var(--board-display-scale,1));background:repeating-linear-gradient(to right,#ff9800 0 calc(5px / var(--board-display-scale,1)),transparent calc(5px / var(--board-display-scale,1)) calc(9px / var(--board-display-scale,1)))}
+.stage.center-align-x:after{border-left-width:0!important;width:calc(var(--alignment-line-width) / var(--board-display-scale,1));background:repeating-linear-gradient(to bottom,var(--alignment-edge-color) 0 calc(var(--alignment-dash-length) / var(--board-display-scale,1)),transparent calc(var(--alignment-dash-length) / var(--board-display-scale,1)) calc(var(--alignment-dash-period) / var(--board-display-scale,1)))}
+.stage.center-align-y>.axis{border-top-width:0!important;height:calc(var(--alignment-line-width) / var(--board-display-scale,1));background:repeating-linear-gradient(to right,var(--alignment-edge-color) 0 calc(var(--alignment-dash-length) / var(--board-display-scale,1)),transparent calc(var(--alignment-dash-length) / var(--board-display-scale,1)) calc(var(--alignment-dash-period) / var(--board-display-scale,1)))}
+.alignment-guide-svg{stroke:var(--alignment-edge-color);stroke-width:calc(var(--alignment-line-width) / var(--alignment-svg-transform-scale,1));stroke-dasharray:calc(var(--alignment-dash-length) / var(--alignment-svg-transform-scale,1)) calc((var(--alignment-dash-period) - var(--alignment-dash-length)) / var(--alignment-svg-transform-scale,1));vector-effect:non-scaling-stroke;pointer-events:none}
+.alignment-guide-svg-center{stroke:var(--alignment-center-color);stroke-dasharray:none}
 
 #contextClipboardToggle[aria-expanded="true"]{background:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
 
@@ -2042,7 +2038,7 @@ body .app .layout :is(#fieldGuideEditor,#pngPreview) .guide-section-toggle[aria-
 :is(#phaseMasterAssignment,#phaseMasterGroupProperties){display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden}
 .phase-master-phase-body{padding:8px;display:flex;flex-direction:column;gap:8px}
 .phase-master-phase-body[hidden]{display:none}
-:is(#phaseMasterAssignment,#phaseMasterGroupProperties) input,:is(#phaseMasterAssignment,#phaseMasterGroupProperties) select,.phase-master-name input{box-sizing:border-box;width:100%;font:inherit}
+:is(#phaseMasterAssignment,#phaseMasterGroupProperties) input,:is(#phaseMasterAssignment,#phaseMasterGroupProperties) select,.phase-master-name input{box-sizing:border-box;width:100%}
 :is(#phaseMasterAssignment,#phaseMasterGroupProperties) #phaseMemo{display:flex!important;flex-direction:column;flex:1!important;height:auto!important;min-height:140px}
 :is(#phaseMasterAssignment,#phaseMasterGroupProperties) #phaseMemo textarea{min-height:100px}
 #contentPanel>.desktop-content-phase-panel,#contentPanel>.phone-phase-shared,#contentPanel>.content-properties:not(:is(#phaseMasterAssignment,#phaseMasterGroupProperties)):not(#phaseMasterGroupProperties){display:none!important}
@@ -2065,8 +2061,6 @@ body .app .layout :is(#fieldGuideEditor,#pngPreview) .guide-section-toggle[aria-
 }
 .phase-master-editing .guide-properties-body #layoutPropertiesPanel{background:#fff!important;color:#33445f!important;border:0!important;border-bottom:1px solid #c7cdd5!important;border-radius:0!important}
 .phase-master-editing .guide-properties-body #layoutPropertiesPanel>.field[hidden]{display:none!important}
-.phase-master-editing .guide-properties-body #layoutPropertiesPanel .field>label{font-size:12px;color:#33445f}
-
 
 #contentPanel>#phaseMasterGroupProperties{display:flex!important;min-height:0;flex-direction:column;overflow:auto}
 #contentPanel>#phaseMasterGroupProperties[hidden],:is(#phaseMasterAssignment,#phaseMasterGroupProperties)[hidden]{display:none!important}
@@ -2074,14 +2068,11 @@ body .app .layout :is(#fieldGuideEditor,#pngPreview) .guide-section-toggle[aria-
 #phaseMasterGroupProperties #phaseGroupProperties[hidden]{display:none}
 :is(#phaseMasterAssignment,#phaseMasterGroupProperties)>.accordion-toggle,#phaseMasterGroupProperties>.accordion-toggle{background:#eef2f7!important;color:#33445f!important;font-size:14px;font-weight:600;border:0;min-height:36px;padding:7px 10px}
 :is(#phaseMasterAssignment,#phaseMasterGroupProperties)>.accordion-toggle:hover,#phaseMasterGroupProperties>.accordion-toggle:hover{background:#e2e9f3!important}
-:is(#phaseMasterAssignment,#phaseMasterGroupProperties) .phase-master-phase-body>.field{display:flex;flex-direction:column;flex:none;gap:4px;margin:0}
-:is(#phaseMasterAssignment,#phaseMasterGroupProperties) input[type=text],:is(#phaseMasterAssignment,#phaseMasterGroupProperties) select,.phase-master-name input{background:#f7f9fc!important;color:#22344f!important;border:1px solid #ccd3df;border-radius:4px;padding:5px 8px}
-:is(#phaseMasterAssignment,#phaseMasterGroupProperties) input:focus,:is(#phaseMasterAssignment,#phaseMasterGroupProperties) select:focus,.phase-master-name input:focus{outline:2px solid #4769b3;outline-offset:-1px}
+:is(#phaseMasterAssignment,#phaseMasterGroupProperties) .phase-master-phase-body>.field{display:flex;flex-direction:column;flex:none;gap:0;margin:0}
 :is(#phaseMasterAssignment,#phaseMasterGroupProperties) #phaseMemo>.phase-memo-body{display:flex!important;flex-direction:column;flex:1;min-height:100px;height:auto!important;padding:0}
 :is(#phaseMasterAssignment,#phaseMasterGroupProperties) #phaseMemo textarea{display:block!important;background:#fff;color:#22344f;box-sizing:border-box;flex:1;height:auto!important;min-height:100px;resize:none;border:1px solid #ccd3df;border-radius:4px;padding:6px}
 :is(#phaseMasterAssignment,#phaseMasterGroupProperties) #phaseMemo .phase-memo-reading{display:none!important}
 :is(#phaseMasterAssignment,#phaseMasterGroupProperties) #phaseMemo>summary{background:transparent;border:0;padding:4px 0}
-
 
 :is(#phaseMasterAssignment,#phaseMasterGroupProperties),#phaseMasterGroupProperties{order:10}
 #phaseMasterListPanel{order:2}
@@ -2147,7 +2138,6 @@ body.phase-master-editing .app .layout.desktop-phase-tools .battle #contentPanel
 
 #phaseMasters .page-tab.renaming>.page-index{height:28px!important;min-height:28px;align-self:center}
 
-
 .phase-master-editing #masterFieldSettings #layoutPropertiesPanel{padding:0!important;margin:0!important;border:0!important}
 #fieldGuideEditor #masterFieldSettings{margin-top:12px}
 
@@ -2157,11 +2147,6 @@ body.phase-master-editing .app .layout.desktop-phase-tools .battle #contentPanel
 #fieldGuideEditor #guideShapeProperties{padding:0}
 #fieldGuideEditor #guideShapeProperties>h3{position:relative;margin:0;padding:0}
 #fieldGuideEditor #guideShapeProperties>h3>.guide-shape-actions{position:absolute;right:var(--panel-action-inset,38px);top:5px;margin:0;padding:0;gap:var(--panel-action-gap,6px);z-index:1}
-
-.phase-master-name input{min-height:30px}
-
-
-
 
 .phase-master-editing #fieldGuideEditor .guide-properties-body{margin:8px 0 8px 8px;padding:0 12px 0 0}
 @media(min-width:851px){.phase-master-editing #fieldGuideEditor .guide-properties-body{padding-right:calc(12px + var(--desktop-scroll-clearance,8px))}}
@@ -2175,7 +2160,7 @@ body .app .layout :is(#contentPanel,#objectLayerPanel,#fieldGuideEditor,#pngPrev
 body .app .layout :is(#contentPanel,#objectLayerPanel,#fieldGuideEditor,#pngPreview) .panel-disclosure[aria-expanded="false"]{border-radius:6px;border-bottom:1px solid transparent!important}
 body .app .layout :is(#contentPanel,#objectLayerPanel,#fieldGuideEditor,#pngPreview) .panel-disclosure::after,body .app .layout #fieldGuideEditor .panel-disclosure>.guide-section-mark{position:absolute!important;right:var(--disclosure-inset);top:50%;transform:translateY(-50%);display:block;width:var(--disclosure-size)!important;height:var(--disclosure-size);margin:0!important;float:none!important;font-family:monospace!important;font-size:var(--disclosure-font)!important;font-weight:var(--disclosure-weight)!important;line-height:var(--disclosure-size)!important;text-align:center}
 body .app .layout #fieldGuideEditor .panel-disclosure::after{content:none}
-body .app .layout :is(#phaseMasterAssignment,#phaseMasterGroupProperties)>.phase-master-phase-body{margin-bottom:8px}
+body .app .layout #phaseMasterGroupProperties>.phase-master-phase-body{margin-bottom:8px}
 
 @media(max-width:850px){body .app .layout #phaseMasters .page-tab:not(.renaming)>.page-tab-x{display:grid!important;place-items:center}}
 
@@ -2185,7 +2170,6 @@ body .app .layout:not(.content-collapsed) .battle .content-heading-row>#contentO
 @media(max-width:850px){body .app .layout .content-heading-row>.phone-content-help{margin-left:auto!important}}
 
 @media(max-width:850px){#fieldGuideEditor .guide-editor-tools [data-guide-tool]{touch-action:pan-y}}
-
 
 /* Field outlines belong inside the same boundary used by guides and clipping. */
 .stage::before{box-sizing:border-box}
@@ -2206,7 +2190,6 @@ body .app .layout:not(.content-collapsed) .battle .content-heading-row>#contentO
 #masterGroupSettings .field{display:flex;flex-direction:column;gap:4px;margin:0}
 #masterGroupSettings label{font-size:12px;color:#000}
 
-
 body.master-group-selected .guide-editor-overlay{pointer-events:none!important;visibility:hidden!important}
 
 /* Master groups only contain a name; leave the remaining height to the list. */
@@ -2223,10 +2206,8 @@ body .app .layout .content-heading-row>#phaseMasterModeToggle{margin-left:6px}
 
 .phase-field-selection{display:flex;align-items:center;gap:6px;min-width:0}
 .phase-field-selection>select{flex:1;min-width:0;width:0}
-#phaseMasterAssignment #editUsedField{box-sizing:border-box;display:grid;place-items:center;flex:0 0 28px;width:28px;min-width:28px;height:28px;min-height:28px;padding:4px;border:1px solid #ccd3df;border-radius:4px;background:#eef2f7;color:#33445f}
+#phaseMasterAssignment #editUsedField{box-sizing:border-box;display:grid;place-items:center;flex:0 0 28px;width:28px;min-width:28px;height:28px;min-height:28px;padding:4px;border-width:1px;border-style:solid;border-radius:4px}
 #editUsedField svg{width:18px;height:18px;pointer-events:none}
-#editUsedField:disabled{cursor:not-allowed;opacity:.45}
-#phaseMasterAssignment #editUsedField:enabled:is(:hover:not(:where(.phone-touch-mode *)),:focus-visible){background:var(--blue);color:#fff}
 @media(max-width:850px){#phaseMasterAssignment #editUsedField{flex-basis:40px;width:40px;min-width:40px;height:40px;min-height:40px}}
 
 /* Destructive menu actions share normal, highlighted and disabled colors. */
@@ -2271,7 +2252,12 @@ body.phase-master-editing .app .layout :is(.content-heading-row,.right .board-ti
  .phone-phase-list-tabbed .phone-object-tabs:has(.phase-heading-actions)>.phone-object-collapse{margin-left:0}
 }
 
-@media(max-width:850px){body .app .layout #contentPanel.phone-phase-list-tabbed>.phone-list-property-group[data-phone-tab-expanded="false"]{flex:0 0 38px!important;height:38px!important;min-height:38px!important}}
+/* Frame sizing belongs to the panel, not each screen's collapse handler. */
+@media(max-width:850px){
+ body .app .layout :is(#contentPanel.phone-phase-list-tabbed,#objectLayerPanel#objectLayerPanel#objectLayerPanel.phone-object-tabbed)>.panel-view-frame[data-panel-expanded="false"]{box-sizing:border-box!important;flex:0 0 38px!important;height:38px!important;min-height:38px!important;max-height:38px!important;padding:0!important;gap:0!important}
+ :is(.phone-phase-list-tabbed,.phone-object-tabbed,.output-selection-tabbed) .panel-view-body{min-height:0}
+ :is(.phone-phase-list-tabbed,.phone-object-tabbed,.output-selection-tabbed) [data-panel-scroll]{min-height:0;overflow-y:auto}
+}
 
 @media(max-width:850px){.output-selection-tabbed>.output-tab-group>.output-switch-tabs{display:flex;align-items:center;gap:6px;min-height:36px;padding:3px 6px 3px 11px;background:#eef2f7;color:#33445f}.output-selection-tabbed>.output-tab-inactive{display:none!important}}
 

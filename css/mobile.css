@@ -2000,16 +2000,12 @@ body:not(.board-read-only) .page-list-box>.page-tab-actions {
 .locked-selection-hint {
   line-height:1.6;
 }
-#inspector select {
-  font-family:inherit;
-  font-size:14px!important;
-  font-weight:400;
-}
+
 #inspector select option {
   font:inherit;
 }
 @media(max-width:850px) {
-  #inspector .coordinate-control input[type="number"],#inspector textarea {
+  #inspector textarea {
     font-family:inherit;
     font-size:14px!important;
     font-weight:400;
