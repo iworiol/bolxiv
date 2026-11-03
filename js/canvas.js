@@ -471,6 +471,29 @@ function colorPickerMarkup(kind,value,id=""){let valueMarkup=`<span>${value}</sp
 
 function closeColorPopovers(){document.querySelectorAll('.color-popover:not([hidden])').forEach(pop=>{pop.hidden=true;if(pop._colorPicker?.isConnected)pop._colorPicker.appendChild(pop);pop._colorPicker=null})}
 
+// Shared phase/field list row structure; domain actions are bound by the caller.
+function createPhaseListRow({name,number,active=false,selected=false}){
+ const row=document.createElement('div');row.className='page-tab'+(active?' active':'')+(selected?' selected':'');row.setAttribute('role','button');row.tabIndex=0;
+ const index=document.createElement('span');index.className='page-index';index.textContent=String(number).padStart(2,'0');
+ const label=document.createElement('span');label.className='page-tab-name';label.textContent=name;
+ const action=document.createElement('button');action.type='button';action.className='page-tab-x';action.textContent='×';row.append(index,label,action);return {row,index,label,action};
+}
+
+// Shared list-name editing mechanics. Callers own data, validation and history.
+function beginListNameEdit({row,list,value,label,inputClass,addition=false,cancelButton=null,additionLabel=label,group=false,onFinish}){
+ const input=document.createElement('textarea');input.rows=1;input.className=inputClass;input.value=value;input.draggable=false;input.setAttribute('aria-label',label);row.classList.add('renaming');row.draggable=false;row.append(input);
+ let done=false,frame=0;const viewport=window.visualViewport,mobile=matchMedia('(max-width:850px)');
+ const resize=()=>{input.style.height='auto';input.style.height=Math.max(group?32:23,input.scrollHeight)+input.offsetHeight-input.clientHeight+'px'};
+ function cleanup(){viewport?.removeEventListener('resize',schedule);viewport?.removeEventListener('scroll',schedule);window.removeEventListener('resize',schedule);observer.disconnect();if(frame)cancelAnimationFrame(frame)}
+ function reveal(){if(!input.isConnected){cleanup();return}revealMovedListItems(list,[input]);if(mobile.matches){input.scrollIntoView({block:'nearest',inline:'nearest'});if(viewport){const r=input.getBoundingClientRect(),bottom=viewport.offsetTop+viewport.height-8;if(r.bottom>bottom)list.scrollTop+=r.bottom-bottom;else if(r.top<viewport.offsetTop+8)list.scrollTop+=r.top-viewport.offsetTop-8}}}
+ function schedule(){if(frame||done)return;frame=requestAnimationFrame(()=>{frame=0;if(!done)reveal()})}
+ function finish(commit){if(done)return;done=true;cleanup();const name=input.value.replace(/[\r\n]+/g,' ').trim();input.remove();onFinish(commit,name)}
+ const observer=new MutationObserver(()=>{if(!input.isConnected)cleanup()});observer.observe(list,{childList:true,subtree:true});
+ input.onkeydown=e=>{e.stopPropagation();if(e.isComposing||e.keyCode===229)return;if(e.key==='Enter'){e.preventDefault();finish(true)}else if(e.key==='Escape'){e.preventDefault();finish(false)}};input.onblur=()=>finish(true);input.oninput=()=>{resize();reveal()};for(const type of ['pointerdown','click'])input.addEventListener(type,e=>e.stopPropagation());
+ if(addition&&cancelButton){const confirm=document.createElement('button');confirm.type='button';confirm.className='addition-confirm';confirm.dataset.confirmAddition='true';confirm.textContent='✓';confirm.title=additionLabel+'追加を確定';confirm.setAttribute('aria-label',confirm.title);cancelButton.classList.remove('phone-row-actions');cancelButton.disabled=false;cancelButton.textContent='↶';cancelButton.title=additionLabel+'追加を取り消す';cancelButton.setAttribute('aria-label',cancelButton.title);if(group){cancelButton.dataset.cancelGroupAddition='true';cancelButton.style.setProperty('display','inline-flex','important')}for(const [button,commit]of [[confirm,true],[cancelButton,false]]){button.onpointerdown=e=>{e.preventDefault();e.stopPropagation()};button.onclick=e=>{e.preventDefault();e.stopPropagation();finish(commit)}}row.insertBefore(confirm,cancelButton)}
+ viewport?.addEventListener('resize',schedule);viewport?.addEventListener('scroll',schedule);window.addEventListener('resize',schedule);input.focus({preventScroll:true});input.select();resize();reveal();schedule();return {input,finish};
+}
+
 function revealMovedListItems(list,items){
  const item=items[0];if(!list||!item)return;
  // Scroll only this list, preserving surrounding panes and the selection.

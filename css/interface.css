@@ -126,9 +126,9 @@
 
 .phone-display-menu-separator{height:1px;margin:6px 4px;background:#d0d4da}
 
-@media(max-width:850px){.app>.top>.brand strong{grid-column:2/4}.app>.top>.brand{grid-template-columns:30px minmax(0,1fr) max-content}.app>.top>.brand>.brand-version{justify-self:start}}
+@media(max-width:850px){.app>.top>.brand strong{grid-column:2/4}.app>.top>.brand{grid-template-columns:30px minmax(0,1fr)}.app>.top>.brand>.brand-version{justify-self:start}}
 
-@media(max-width:850px){.app>.top>.brand{grid-template-columns:30px minmax(0,1fr) max-content}.board-read-only .app>.top .header-history-actions{display:none!important}}
+@media(max-width:850px){.app>.top>.brand{grid-template-columns:30px minmax(0,1fr)}.board-read-only .app>.top .header-history-actions{display:none!important}}
 
 @media(max-width:850px){.board-read-only .app .layout .right .board-display-toolbar>#clearBtn+.board-toolbar-separator{display:none!important}}
 
@@ -793,7 +793,7 @@
  .app .layout[data-phone-pane="canvas"] #objectLayerPanel#objectLayerPanel#objectLayerPanel.phone-object-tabbed[data-object-tab="list"]>.property-group:not(.layer-list-group),
  .app .layout[data-phone-pane="canvas"] #objectLayerPanel#objectLayerPanel#objectLayerPanel.phone-object-tabbed[data-object-tab="properties"]>.layer-list-group{display:none!important}
  .app .layout[data-phone-pane="canvas"] #objectLayerPanel#objectLayerPanel#objectLayerPanel#objectLayerPanel.phone-object-tabbed :is(#toggleLayers,#toggleInspector){display:none!important}
- .phone-object-tabbed>.property-group>.phone-object-tabs{display:flex;align-items:center;flex:0 0 auto;gap:6px;min-height:36px;padding:3px 6px 3px 11px;background:#eef2f7;color:#33445f}
+ .phone-object-tabbed>.property-group>.phone-object-tabs,.phone-phase-list-tabbed>.phone-list-property-group>.phone-object-tabs{display:flex;align-items:center;flex:0 0 auto;gap:6px;min-height:36px;padding:3px 6px 3px 11px;background:#eef2f7;color:#33445f}
  .phone-object-tabs-title{flex:1;min-width:0;font-size:14px;overflow-wrap:anywhere;line-height:1.4}
  .phone-object-tabs button{display:grid;place-items:center;flex:none;width:26px;height:26px;min-height:26px;border:1px solid #d0d4da;border-radius:6px;background:#eef2f7;color:#33445f;padding:3px;font-size:14px}
  .phone-object-tabs button svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
@@ -1797,15 +1797,15 @@ body .app .layout #objectList>.object-group-row>.object-delete{grid-column:5;gri
 #fieldGuideEditor .field-guide-body>.guide-property-frame:first-child{margin-top:0}
 .guide-editor-properties #fieldGuideSettings>h3{margin:2px 0 8px}
 .guide-property-group+.guide-property-group,.guide-shape-group+.guide-shape-group{border-top:1px solid #d0d4da;padding-top:10px;margin-top:10px}
-#fieldGuideEditor .guide-property-frame{box-sizing:border-box;min-width:0;border:1px solid #cbd3df;border-radius:6px;padding:0;margin:12px 0}
+:is(#fieldGuideEditor,#pngPreview) .guide-property-frame{box-sizing:border-box;min-width:0;border:1px solid #cbd3df;border-radius:6px;padding:0;margin:12px 0}
 #fieldGuideEditor .guide-property-group>h3{margin:0;font-size:14px;font-weight:600}
-#fieldGuideEditor .guide-section-toggle{box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-width:0;height:36px;margin:0;padding:0 11px;border:0;border-radius:5px 5px 0 0;background:#eef2f7!important;color:#33445f!important;-webkit-text-fill-color:currentColor!important;font-family:inherit;font-size:14px;font-weight:700;line-height:normal;text-align:left;cursor:pointer;filter:none;-webkit-tap-highlight-color:transparent}
-#fieldGuideEditor .guide-section-toggle:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
-#fieldGuideEditor .guide-section-toggle:is(:hover:not(:where(.phone-touch-mode *)),:focus-visible,:active){background:var(--blue)!important;color:#fff!important}
-#fieldGuideEditor .guide-section-toggle[aria-expanded="false"]{border-radius:5px}
+:is(#fieldGuideEditor,#pngPreview) .guide-section-toggle{box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-width:0;height:36px;margin:0;padding:0 11px;border:0;border-radius:5px 5px 0 0;background:#eef2f7!important;color:#33445f!important;-webkit-text-fill-color:currentColor!important;font-family:inherit;font-size:14px;font-weight:700;line-height:normal;text-align:left;cursor:pointer;filter:none;-webkit-tap-highlight-color:transparent}
+:is(#fieldGuideEditor,#pngPreview) .guide-section-toggle:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+:is(#fieldGuideEditor,#pngPreview) .guide-section-toggle:is(:hover:not(:where(.phone-touch-mode *)),:focus-visible,:active){background:var(--blue)!important;color:#fff!important}
+:is(#fieldGuideEditor,#pngPreview) .guide-section-toggle[aria-expanded="false"]{border-radius:5px}
 #fieldGuideEditor .guide-section-mark{flex:none;font-weight:400}
 #fieldGuideEditor .guide-section-body{margin:0;padding:10px;min-width:0}
-#fieldGuideEditor .guide-property-frame>.guide-section-body{display:flex;flex-direction:column;gap:10px}
+:is(#fieldGuideEditor,#pngPreview) .guide-property-frame>.guide-section-body{display:flex;flex-direction:column;gap:10px}
 #fieldGuideEditor .guide-section-body[hidden]{display:none!important}
 .guide-editor-properties #guideShapeFields{display:flex;flex-direction:column;gap:0}
 .guide-shape-group{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
@@ -1960,7 +1960,7 @@ body .app .layout :is(#phaseMasterAssignment,#phaseMasterGroupProperties)>.accor
 body .app .layout .left .accordion-toggle[aria-expanded="true"],
 body .app .layout .phone-object-tabs:has(.phone-object-collapse[aria-expanded="true"]),
 body .app .layout #pngPreview .png-preview-settings:not(.png-properties-collapsed)>h3,
-body .app .layout #fieldGuideEditor .guide-section-toggle[aria-expanded="true"]{border-bottom:1px solid #d0d4da!important}
+body .app .layout :is(#fieldGuideEditor,#pngPreview) .guide-section-toggle[aria-expanded="true"]{border-bottom:1px solid #d0d4da!important}
 @media(min-width:851px){#phaseMemo #outputNotePhase{box-sizing:border-box;flex:none;width:100%;min-width:0;max-width:100%;padding:6px;border:1px solid #d5dce6;border-radius:5px;background:#f8fafc;color:#17212c;font:inherit}#phaseMemo #outputNotePhase:focus{outline:2px solid var(--blue);outline-offset:-1px}}
 @media(min-width:851px){#desktopPhaseSwitch:disabled{opacity:.4;cursor:default}}
 
@@ -2039,7 +2039,6 @@ body .app .layout #fieldGuideEditor .guide-section-toggle[aria-expanded="true"]{
 #phaseMasterListPanel{min-height:0;flex:1;display:flex;flex-direction:column}
 #phaseMasterListPanel .page-list-box{min-height:0;flex:1;display:flex;flex-direction:column}
 #phaseMasters{min-height:0;overflow:auto;flex:1}
-#phaseMasters .page-tab-name{min-width:0;flex:1;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border:0;background:transparent;color:inherit;font:inherit}
 :is(#phaseMasterAssignment,#phaseMasterGroupProperties){display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden}
 .phase-master-phase-body{padding:8px;display:flex;flex-direction:column;gap:8px}
 .phase-master-phase-body[hidden]{display:none}
@@ -2076,8 +2075,8 @@ body .app .layout #fieldGuideEditor .guide-section-toggle[aria-expanded="true"]{
 :is(#phaseMasterAssignment,#phaseMasterGroupProperties)>.accordion-toggle,#phaseMasterGroupProperties>.accordion-toggle{background:#eef2f7!important;color:#33445f!important;font-size:14px;font-weight:600;border:0;min-height:36px;padding:7px 10px}
 :is(#phaseMasterAssignment,#phaseMasterGroupProperties)>.accordion-toggle:hover,#phaseMasterGroupProperties>.accordion-toggle:hover{background:#e2e9f3!important}
 :is(#phaseMasterAssignment,#phaseMasterGroupProperties) .phase-master-phase-body>.field{display:flex;flex-direction:column;flex:none;gap:4px;margin:0}
-:is(#phaseMasterAssignment,#phaseMasterGroupProperties) input[type=text],:is(#phaseMasterAssignment,#phaseMasterGroupProperties) select{background:#f7f9fc!important;color:#22344f!important;border:1px solid #ccd3df;border-radius:4px;padding:5px 8px}
-:is(#phaseMasterAssignment,#phaseMasterGroupProperties) input:focus,:is(#phaseMasterAssignment,#phaseMasterGroupProperties) select:focus{outline:2px solid #4769b3;outline-offset:-1px}
+:is(#phaseMasterAssignment,#phaseMasterGroupProperties) input[type=text],:is(#phaseMasterAssignment,#phaseMasterGroupProperties) select,.phase-master-name input{background:#f7f9fc!important;color:#22344f!important;border:1px solid #ccd3df;border-radius:4px;padding:5px 8px}
+:is(#phaseMasterAssignment,#phaseMasterGroupProperties) input:focus,:is(#phaseMasterAssignment,#phaseMasterGroupProperties) select:focus,.phase-master-name input:focus{outline:2px solid #4769b3;outline-offset:-1px}
 :is(#phaseMasterAssignment,#phaseMasterGroupProperties) #phaseMemo>.phase-memo-body{display:flex!important;flex-direction:column;flex:1;min-height:100px;height:auto!important;padding:0}
 :is(#phaseMasterAssignment,#phaseMasterGroupProperties) #phaseMemo textarea{display:block!important;background:#fff;color:#22344f;box-sizing:border-box;flex:1;height:auto!important;min-height:100px;resize:none;border:1px solid #ccd3df;border-radius:4px;padding:6px}
 :is(#phaseMasterAssignment,#phaseMasterGroupProperties) #phaseMemo .phase-memo-reading{display:none!important}
@@ -2126,7 +2125,6 @@ body .app .layout :is(#phaseMasterAssignment,#phaseMasterGroupProperties) #phase
 body.phase-master-editing .app .layout.desktop-phase-tools .battle #contentPanel>#phasePropertyResize{display:none!important}
 #phaseMasterListPanel #phaseMasterRowsPanel{padding:8px 0 8px 8px!important}
 #phaseMasterListPanel #phaseMasters{padding-right:calc(15px + var(--desktop-scroll-clearance,8px))!important;scrollbar-gutter:stable;margin:0}
-#phaseMasters .page-tab-name{padding:0;min-height:0;cursor:pointer}
 #phaseMasters .page-tab-x{flex:none}
 #phaseMasters .page-index{padding:0;cursor:grab}
 #phaseMasters .page-index[draggable="false"]{cursor:default}
@@ -2160,8 +2158,7 @@ body.phase-master-editing .app .layout.desktop-phase-tools .battle #contentPanel
 #fieldGuideEditor #guideShapeProperties>h3{position:relative;margin:0;padding:0}
 #fieldGuideEditor #guideShapeProperties>h3>.guide-shape-actions{position:absolute;right:var(--panel-action-inset,38px);top:5px;margin:0;padding:0;gap:var(--panel-action-gap,6px);z-index:1}
 
-.phase-master-name input{background:#f7f9fc!important;color:#22344f!important;border:1px solid #ccd3df;border-radius:4px;padding:5px 8px;min-height:30px}
-.phase-master-name input:focus{outline:2px solid #4769b3;outline-offset:-1px}
+.phase-master-name input{min-height:30px}
 
 
 
@@ -2173,10 +2170,10 @@ body .app .layout #phaseMasterListPanel>.phase-heading-row{border-bottom:1px sol
 
 /* Shared geometry for list and property disclosure headings. Keep the same
    border box in both states so neither titles nor disclosure marks move. */
-body .app .layout :is(#contentPanel,#objectLayerPanel,#fieldGuideEditor) .panel-disclosure{box-sizing:border-box;position:relative;display:flex;align-items:center;flex-shrink:0;height:36px!important;min-height:36px!important;max-height:36px;margin:0!important;padding-top:0!important;padding-bottom:0!important;border:0!important;border-bottom:1px solid transparent!important;line-height:normal;text-align:left}
-body .app .layout :is(#contentPanel,#objectLayerPanel,#fieldGuideEditor) .panel-disclosure[aria-expanded="true"]{border-bottom-color:#d0d4da!important;border-radius:6px 6px 0 0}
-body .app .layout :is(#contentPanel,#objectLayerPanel,#fieldGuideEditor) .panel-disclosure[aria-expanded="false"]{border-radius:6px;border-bottom:1px solid transparent!important}
-body .app .layout :is(#contentPanel,#objectLayerPanel,#fieldGuideEditor) .panel-disclosure::after,body .app .layout #fieldGuideEditor .panel-disclosure>.guide-section-mark{position:absolute!important;right:var(--disclosure-inset);top:50%;transform:translateY(-50%);display:block;width:var(--disclosure-size)!important;height:var(--disclosure-size);margin:0!important;float:none!important;font-family:monospace!important;font-size:var(--disclosure-font)!important;font-weight:var(--disclosure-weight)!important;line-height:var(--disclosure-size)!important;text-align:center}
+body .app .layout :is(#contentPanel,#objectLayerPanel,#fieldGuideEditor,#pngPreview) .panel-disclosure{box-sizing:border-box;position:relative;display:flex;align-items:center;flex-shrink:0;height:36px!important;min-height:36px!important;max-height:36px;margin:0!important;padding-top:0!important;padding-bottom:0!important;border:0!important;border-bottom:1px solid transparent!important;line-height:normal;text-align:left}
+body .app .layout :is(#contentPanel,#objectLayerPanel,#fieldGuideEditor,#pngPreview) .panel-disclosure[aria-expanded="true"]{border-bottom-color:#d0d4da!important;border-radius:6px 6px 0 0}
+body .app .layout :is(#contentPanel,#objectLayerPanel,#fieldGuideEditor,#pngPreview) .panel-disclosure[aria-expanded="false"]{border-radius:6px;border-bottom:1px solid transparent!important}
+body .app .layout :is(#contentPanel,#objectLayerPanel,#fieldGuideEditor,#pngPreview) .panel-disclosure::after,body .app .layout #fieldGuideEditor .panel-disclosure>.guide-section-mark{position:absolute!important;right:var(--disclosure-inset);top:50%;transform:translateY(-50%);display:block;width:var(--disclosure-size)!important;height:var(--disclosure-size);margin:0!important;float:none!important;font-family:monospace!important;font-size:var(--disclosure-font)!important;font-weight:var(--disclosure-weight)!important;line-height:var(--disclosure-size)!important;text-align:center}
 body .app .layout #fieldGuideEditor .panel-disclosure::after{content:none}
 body .app .layout :is(#phaseMasterAssignment,#phaseMasterGroupProperties)>.phase-master-phase-body{margin-bottom:8px}
 
@@ -2260,3 +2257,24 @@ body.phase-master-editing .app .layout :is(.content-heading-row,.right .board-ti
  .app>.layout.phone-content-open .battle #phaseMasterListPanel #phaseMasterRowsPanel{padding:8px!important}
  .app>.layout.phone-content-open .battle #phaseMasterListPanel #phaseMasters{padding:0!important;scrollbar-gutter:auto}
 }
+
+/* Phase list/properties use the same phone switching header as object panels. */
+@media(max-width:850px){
+ body .app .layout #contentPanel.phone-phase-list-tabbed>.phone-list-property-inactive{display:none!important}
+ body .app .layout #contentPanel.phone-phase-list-tabbed>#phasePropertyResize{display:none!important}
+ body .app .layout #contentPanel.phone-phase-list-tabbed>.phone-list-property-group{flex:1 1 0!important;min-height:0!important;max-height:none!important}
+ body .app .layout #contentPanel.phone-phase-list-tabbed>.phone-list-property-group>.accordion-toggle,body .app .layout #contentPanel.phone-phase-list-tabbed>.page-controls>.phase-heading-row{display:none!important}
+ .phone-phase-list-tabbed>.phone-list-property-group>.phone-object-tabs{border-bottom:1px solid #d0d4da;box-sizing:border-box}
+ .phone-phase-list-tabbed .phone-object-tabs-title{flex:0 1 auto}
+ .phone-phase-list-tabbed .phone-object-tabs .phase-heading-actions{position:static;margin-left:auto;display:flex}
+ .phone-phase-list-tabbed .phone-object-tabs>.phone-object-collapse{margin-left:auto}
+ .phone-phase-list-tabbed .phone-object-tabs:has(.phase-heading-actions)>.phone-object-collapse{margin-left:0}
+}
+
+@media(max-width:850px){body .app .layout #contentPanel.phone-phase-list-tabbed>.phone-list-property-group[data-phone-tab-expanded="false"]{flex:0 0 38px!important;height:38px!important;min-height:38px!important}}
+
+@media(max-width:850px){.output-selection-tabbed>.output-tab-group>.output-switch-tabs{display:flex;align-items:center;gap:6px;min-height:36px;padding:3px 6px 3px 11px;background:#eef2f7;color:#33445f}.output-selection-tabbed>.output-tab-inactive{display:none!important}}
+
+.board-read-only:not(.png-preview-active) :is(.phone-content-icon,.phone-content-close,.phone-content-backdrop){display:none!important}
+
+@media(max-width:850px){.app>.top>.brand>.phone-brand-caption{grid-column:2;grid-row:2;display:flex;align-items:baseline;gap:5px;min-width:0}.app>.top>.brand>.phone-brand-caption small{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis}.app>.top>.brand>.phone-brand-caption .brand-version{flex:none;display:block!important;font-size:9px;white-space:nowrap;margin:0!important}.app>.top>.brand>.content-save-status{max-width:calc(100% - 43px)}}

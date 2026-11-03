@@ -216,12 +216,11 @@
 @media(max-width:850px){
  .png-reader-controls>.phone-reader-tabs{display:flex;align-items:center;flex:0 0 38px;height:38px;margin-top:8px;padding:0 5px 0 11px;gap:6px;border:1px solid #d0d4da;border-radius:7px 7px 0 0;background:#eef2f7;color:#33445f}
  .png-reader-controls[data-reader-expanded="false"]>.phone-reader-tabs{border-radius:7px}
- .app .layout .right #pngPreview .png-reader-controls>.page-controls{margin-top:0!important;border-top:0!important;border-radius:0 0 7px 7px!important}
+ .app .layout .right #pngPreview .png-reader-controls>.page-controls{margin-top:0!important;}
  .png-reader-controls>.page-controls>.phase-heading-row,.png-reader-controls>.png-preview-settings>h3{display:none!important}
  .app .layout .right #pngPreview .png-reader-controls[data-reader-tab="properties"]>.page-controls,
- .app .layout .right #pngPreview .png-reader-controls[data-reader-tab="list"]>.png-preview-settings,
- .app .layout .right #pngPreview .png-reader-controls[data-reader-expanded="false"]>:is(.page-controls,.png-preview-settings){display:none!important}
- .png-reader-controls[data-reader-tab="properties"][data-reader-expanded="true"]>.png-preview-settings{display:flex;flex:1 1 0;min-height:0;margin:0!important;border-top:0;border-radius:0 0 7px 7px}
+ .app .layout .right #pngPreview .png-reader-controls[data-reader-tab="list"]>.png-preview-settings{display:none!important}
+ .png-reader-controls[data-reader-tab="properties"][data-reader-expanded="true"]>.png-preview-settings{display:flex;flex:1 1 0;min-height:0;margin:0!important;}
  .png-reader-controls>.png-preview-settings>.png-preview-settings-body{flex:1;min-height:0;overflow:auto;align-content:start}
 }
 .png-settings-fields{display:contents}
@@ -378,3 +377,33 @@
 @media(min-width:851px){#outputPhaseGapField:not([hidden]){column-gap:8px}#outputPhaseGapField>label{gap:6px}#outputPhaseGapField>label>span{flex:0 0 2em;width:2em}#outputPhaseGapField .output-phase-gap{max-width:none}}
 @media(max-width:850px){.app .right .png-preview-toolbar>#pngPreviewContent{display:grid!important}.png-preview-active .layout.phone-content-open>.phone-content-close,.png-preview-active .layout.phone-content-open>.phone-content-backdrop{display:block!important}}
 @media(max-width:850px){.phone-content-preview :is(.output-note-preview,.output-border-preview){display:none!important}}
+
+/* Output owns selection and the existing phase-note editor; no content pane. */
+.png-preview-active :is(.phone-content-icon,.phone-content-close,.phone-content-backdrop,#pngPreviewContent){display:none!important}
+.output-selection-tabbed{display:flex;flex-direction:column;min-width:0;min-height:0;overflow:auto;gap:8px}
+.output-selection-tabbed>.page-controls{min-height:120px;max-height:220px;overflow:auto;flex:none}
+.output-selection-tabbed>.png-preview-settings{min-height:0;flex:1}
+#pngPreview #phaseMemo{display:block;flex:none;min-height:0;margin:8px 0 0}
+
+#pngPreview #phaseMemo .phase-memo-body{display:flex;flex-direction:column;flex:1;min-height:0;padding:0}
+#pngPreview #phaseMemo textarea{display:block!important;box-sizing:border-box;width:100%;min-height:140px;height:160px;resize:vertical;background:#fff;color:#22344f;border:1px solid #ccd3df;border-radius:4px;padding:6px;font:inherit}
+#pngPreview #phaseMemo .phase-memo-reading{display:none!important}
+@media(max-width:850px){
+ .app .layout .right #pngPreview .png-reader-controls>.page-controls{max-height:none;flex:1;min-height:0}
+ .app .layout .right #pngPreview .png-preview-settings-body{display:flex;flex-direction:column;flex:1;min-height:0;overflow-y:auto;margin:8px 0;padding:0 8px;gap:8px}
+ .app .layout .right #pngPreview .png-preview-settings-body>.output-section{flex:none}
+ .output-selection-tabbed .phone-object-tabs-title{flex:0 1 auto}
+ .output-selection-tabbed .phone-object-collapse{margin-left:auto}
+}
+
+.output-selection-tabbed>.output-tab-group>.output-switch-tabs{align-self:stretch;width:100%;box-sizing:border-box;flex-shrink:0;margin:0}
+
+@media(max-width:850px){.output-switch-tabs #printSettingsReset .print-reset-label{display:none}.app .layout .right #pngPreview .output-switch-tabs>#printSettingsReset{margin:0 0 0 auto}.app .layout .right #pngPreview .output-switch-tabs:has(>#printSettingsReset:not([hidden]))>.phone-object-collapse{margin-left:0!important}}
+
+#pngPreview #phaseMemo:not([open])>.phase-memo-body{display:none!important}
+#pngPreview #phaseMemo>.phase-memo-body{padding:8px}
+
+.output-selection-tabbed>.output-tab-group{overflow:hidden}
+@media(max-width:850px){.output-switch-tabs{border-bottom:1px solid transparent}.output-switch-tabs:has(>.phone-object-collapse[aria-expanded="true"]){border-bottom-color:#d0d4da}}
+
+@media(max-width:850px){.app .layout .right #pngPreview .output-selection-tabbed>.output-tab-group{margin-top:0!important;margin-bottom:0!important}}

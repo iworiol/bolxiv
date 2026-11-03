@@ -699,15 +699,8 @@
  const groupMenu=document.createElement('div');groupMenu.id='phaseGroupMenu';groupMenu.className='object-context-menu phase-group-menu';groupMenu.hidden=true;groupMenu.setAttribute('role','menu');groupMenu.setAttribute('aria-label','グループの操作');document.body.append(groupMenu);
  function closeGroupMenu(){groupMenu.hidden=true}
  function renameGroupInList(item,cancelAddition=null){
-  const row=[...list.querySelectorAll('.phase-group-heading')].find(node=>node.dataset.groupId===item.id);if(!row||boardReadOnly||phaseComparisonActive())return;
-  const owner=data,name=row.querySelector('.phase-group-name'),input=document.createElement('textarea');input.className='phase-group-rename';input.rows=1;input.value=item.name;input.setAttribute('aria-label','フェーズグループ名');
-  row.append(input);row.classList.add('renaming');row.draggable=false;let finished=false;
-  function finish(commit){if(finished)return;finished=true;if(owner!==data)return;if(!commit&&cancelAddition){cancelAddition();return}const value=input.value.replace(/[\r\n]+/g,' ').trim();if(commit&&value&&value!==item.name){if(!cancelAddition)recordHistory();item.name=value;renderAndSave()}else{if(commit&&!value)notify('フェーズグループ名を入力してください');render()}}
-  if(cancelAddition){const confirm=document.createElement('button');confirm.type='button';confirm.className='addition-confirm';confirm.textContent='✓';confirm.title='フェーズグループ追加を確定';confirm.setAttribute('aria-label',confirm.title);confirm.dataset.confirmAddition='true';confirm.onpointerdown=event=>{event.preventDefault();event.stopPropagation()};confirm.onclick=event=>{event.preventDefault();event.stopPropagation();finish(true)};row.append(confirm);row.querySelector('.phase-group-toggle').disabled=true;const cancel=row.querySelector('.phase-group-ungroup');cancel.textContent='↶';cancel.title='フェーズグループ追加を取り消す';cancel.setAttribute('aria-label',cancel.title);cancel.removeAttribute('aria-expanded');cancel.dataset.cancelGroupAddition='true';cancel.addEventListener('pointerdown',event=>{event.preventDefault();event.stopPropagation()});cancel.onclick=event=>{event.preventDefault();event.stopPropagation();finish(false)}}
-  input.addEventListener('input',()=>{input.style.height='auto';input.style.height=Math.max(32,input.scrollHeight)+'px'});
-  for(const event of ['pointerdown','click'])input.addEventListener(event,event=>event.stopPropagation());
-  input.addEventListener('keydown',event=>{event.stopPropagation();if(event.isComposing||event.keyCode===229)return;if(event.key==='Enter'){event.preventDefault();finish(true)}else if(event.key==='Escape'){event.preventDefault();finish(false)}});
-  input.addEventListener('blur',()=>finish(true));input.focus();input.select();if(cancelAddition){const reveal=()=>{if(owner===data&&row.isConnected)revealMovedListItems(list,[row])};reveal();requestAnimationFrame(reveal)}
+ const row=[...list.querySelectorAll('.phase-group-heading')].find(node=>node.dataset.groupId===item.id);if(!row||boardReadOnly||phaseComparisonActive())return;const owner=data;if(cancelAddition)row.querySelector('.phase-group-toggle').disabled=true;
+ beginListNameEdit({row,list,value:item.name,label:'フェーズグループ名',inputClass:'phase-group-rename',group:true,addition:!!cancelAddition,cancelButton:row.querySelector('.phase-group-ungroup'),additionLabel:'フェーズグループ',onFinish(commit,value){if(owner!==data)return;if(!commit&&cancelAddition){cancelAddition();return}if(commit&&value&&value!==item.name){if(!cancelAddition)recordHistory();item.name=value;renderAndSave()}else{if(commit&&!value)notify('フェーズグループ名を入力してください');render()}}});
  }
  function groupUnits(){return [...list.children].filter(row=>row.classList.contains('phase-group-heading')||(row.classList.contains('page-tab')&&!row.classList.contains('group-member')))}
  function ungroupPhaseGroup(id){if(boardReadOnly||phaseComparisonActive()||!data.phaseGroups.some(g=>g.id===id))return;recordHistory();data.pageGroupIds=data.pageGroupIds.map(groupId=>groupId===id?null:groupId);data.phaseGroups=data.phaseGroups.filter(g=>g.id!==id);if(data.activePhaseGroup===id)data.activePhaseGroup=null;renderAndSave();notify('グループを解除しました。フェーズは残しています')}
@@ -979,6 +972,7 @@ if(matchMedia('(max-width:850px)').matches&&!Number.isFinite(viewSettings.boardD
 }
 
 window.Bolxiv.initializePhaseMasterUI();
+window.Bolxiv.initializePhonePhaseListTabs();
 
 // A visible grip shares the existing number/disclosure drag target on phones.
 (()=>{

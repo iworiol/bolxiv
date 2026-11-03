@@ -899,21 +899,6 @@ body,.app,.layout,.center,.stagewrap,.footer,.top,.battle,.left,.right,.boardbar
 .left,.left *,.right,.right * {
   scrollbar-color:#aaa #e7e7e7;
 }
-.confirm-dialog#deleteContentDialog {
-  background:#fff;
-  color:#000;
-  border-color:#999;
-}
-.confirm-dialog#deleteContentDialog .btn {
-  background:#fff;
-  color:#000;
-  border-color:#999;
-}
-.confirm-dialog#deleteContentDialog .btn.primary {
-  background:var(--accent);
-  color:#151c10;
-  border-color:var(--accent);
-}
 #fillInput {
   display:block;
   width:100%;

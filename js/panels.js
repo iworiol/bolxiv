@@ -428,7 +428,7 @@ function phoneReaderLayoutMetrics(panel,footerHeight,rowHeight,zoom=boardDisplay
  }
  for(const [button,key] of [[objectButton,'object'],[phaseButton,'phase'],[memo.querySelector('summary'),'memo']]){
   button.addEventListener('click',event=>{
-   if(!active)return;
+   if(!active||button.closest('#pngPreview'))return;
    event.preventDefault();event.stopImmediatePropagation();if(data.activePhaseGroup&&key==='phase'){groupPanelOpen=!groupPanelOpen;syncPhaseHeading();return}if(boardReadOnly||phaseComparisonActive()||data.activePhaseGroup)return;showTool(currentTool===key?'':key);
   },true);
  }
@@ -498,27 +498,28 @@ function phoneReaderLayoutMetrics(panel,footerHeight,rowHeight,zoom=boardDisplay
 })();
 
 ;
+function createPhoneListPropertyBar({heading,onSwitch,group:parentGroup}){
+ const group=parentGroup||heading.closest('.page-controls')||heading.parentElement,bar=document.createElement('div');bar.className='phone-object-tabs';const title=document.createElement('span');title.className='phone-object-tabs-title';bar.append(title);
+ const change=document.createElement('button');change.type='button';change.className='phone-list-property-change';change.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h16l-4-4M20 16H4l4 4"/></svg>';change.onclick=onSwitch;bar.append(change);
+ const collapse=document.createElement('button');collapse.type='button';collapse.className='phone-object-collapse';collapse.setAttribute('aria-controls',heading.getAttribute('aria-controls'));collapse.onclick=()=>heading.click();bar.append(collapse);group.prepend(bar);
+ bar.addEventListener('click',event=>{if(!event.target.closest('button'))collapse.click()});title.setAttribute('role','button');title.tabIndex=0;title.setAttribute('aria-controls',heading.getAttribute('aria-controls'));title.onkeydown=event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();collapse.click()}};
+ return {group,bar,title,change,collapse,heading,update({markup,label,nextLabel}){title.innerHTML=markup;title.title=heading.textContent.trim();change.setAttribute('aria-label',nextLabel);change.title=nextLabel;const open=heading.getAttribute('aria-expanded')==='true';title.setAttribute('aria-expanded',String(open));collapse.textContent=open?'−':'＋';collapse.setAttribute('aria-expanded',String(open));collapse.setAttribute('aria-label',label+(open?'を閉じる':'を開く'))}};
+}
+
 // ===== js/mobile/phone-object-tabs.js =====
 (()=>{
  const mobile=matchMedia('(max-width:850px)'),panel=document.getElementById('objectLayerPanel');
  const listButton=document.getElementById('toggleLayers'),propertyButton=document.getElementById('toggleInspector');
  let selected=viewSettings.phoneObjectTab==='properties'?'properties':'list';
  const entries=[['list',listButton],['properties',propertyButton]].map(([key,heading])=>{
-  const group=heading.parentElement,bar=document.createElement('div');bar.className='phone-object-tabs';
-  const title=document.createElement('span');title.className='phone-object-tabs-title';bar.append(title);
-  const change=document.createElement('button');change.type='button';change.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h16l-4-4M20 16H4l4 4"/></svg>';change.setAttribute('aria-label',key==='list'?'オブジェクトプロパティを表示':'オブジェクトリストに戻る');bar.append(change);
-  const collapse=document.createElement('button');collapse.type='button';collapse.className='phone-object-collapse';collapse.setAttribute('aria-controls',heading.getAttribute('aria-controls'));bar.append(collapse);group.prepend(bar);
-  change.onclick=()=>{selected=key==='list'?'properties':'list';rememberViewSetting('phoneObjectTab',selected);const target=selected==='list'?listButton:propertyButton;if(target.getAttribute('aria-expanded')!=='true')target.click();sync()};
-  collapse.onclick=()=>{heading.click();sync()};
-  bar.addEventListener('click',event=>{if(event.target.closest('button'))return;collapse.click()});
-  title.setAttribute('role','button');title.tabIndex=0;title.setAttribute('aria-controls',heading.getAttribute('aria-controls'));
-  title.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();collapse.click()}});
-
-  return {key,heading,title,collapse};
+  const entry=createPhoneListPropertyBar({heading,onSwitch(){selected=key==='list'?'properties':'list';rememberViewSetting('phoneObjectTab',selected);const target=selected==='list'?listButton:propertyButton;if(target.getAttribute('aria-expanded')!=='true')target.click();sync()}});
+  entry.collapse.onclick=()=>{heading.click();sync()};
+  return {key,...entry};
  });
  function sync(){
   const enabled=mobile.matches&&!boardReadOnly;panel.classList.toggle('phone-object-tabbed',enabled);panel.dataset.objectTab=selected;panel.dataset.objectExpanded=(selected==='list'?listButton:propertyButton).getAttribute('aria-expanded');
-  for(const entry of entries){entry.title.innerHTML=entry.key==='list'?'<strong>オブジェクト リスト</strong> / プロパティ':'<strong>オブジェクト</strong> リスト / <strong>プロパティ</strong>';entry.title.title=entry.key==='properties'?entry.heading.textContent.trim():'オブジェクトリスト';const open=entry.heading.getAttribute('aria-expanded')==='true';entry.title.setAttribute('aria-expanded',String(open));entry.collapse.textContent=open?'−':'＋';entry.collapse.setAttribute('aria-expanded',String(open));entry.collapse.setAttribute('aria-label',(entry.key==='list'?'オブジェクトリスト':'オブジェクトプロパティ')+(open?'を閉じる':'を開く'))}
+  for(const entry of entries)entry.update({markup:entry.key==='list'?'<strong>オブジェクト リスト</strong> / プロパティ':'<strong>オブジェクト</strong> リスト / <strong>プロパティ</strong>',label:entry.key==='list'?'オブジェクトリスト':'オブジェクトプロパティ',nextLabel:entry.key==='list'?'オブジェクトプロパティを表示':'オブジェクトリストに戻る'});
+
  }
  panel.addEventListener('reveal-object-list',()=>{if(!mobile.matches)return;selected='list';rememberViewSetting('phoneObjectTab',selected);if(listButton.getAttribute('aria-expanded')!=='true')listButton.click();sync()});
  for(const heading of [listButton,propertyButton])new MutationObserver(sync).observe(heading,{attributes:true,attributeFilter:['aria-expanded'],childList:true,subtree:true,characterData:true});
@@ -544,7 +545,7 @@ function phoneReaderLayoutMetrics(panel,footerHeight,rowHeight,zoom=boardDisplay
  tabs.addEventListener('click',event=>{if(event.target.closest('button'))return;collapse.click()});
  title.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();collapse.click()}});
  const handle=document.getElementById('phasePropertyResize'),list=host.querySelector('.page-controls'),phaseButton=document.getElementById('toggleBattlePages');let gesture=null,ownsResize=false,resizedHeight=null;
- function canResize(){return mobile.matches&&!boardReadOnly&&expanded&&phaseButton.getAttribute('aria-expanded')==='true'}
+ function canResize(){return !host.classList.contains('phone-phase-list-tabbed')&&mobile.matches&&!boardReadOnly&&expanded&&phaseButton.getAttribute('aria-expanded')==='true'}
  function resizeList(height){const available=list.getBoundingClientRect().height+(document.getElementById(data.activePhaseGroup?'phaseMasterGroupProperties':'phaseMasterAssignment')||shared).getBoundingClientRect().height;const next=Math.max(72,Math.min(available-120,height));resizedHeight=next;list.style.setProperty('flex','0 1 '+next+'px','important');ownsResize=true}
  handle.addEventListener('pointerdown',event=>{if(!canResize()||(event.pointerType!=='touch'&&event.button!==0))return;event.preventDefault();event.stopImmediatePropagation();gesture={id:event.pointerId,y:event.clientY,height:list.getBoundingClientRect().height};handle.classList.add('resizing');handle.setPointerCapture(event.pointerId)},true);
  handle.addEventListener('pointermove',event=>{if(!gesture||gesture.id!==event.pointerId)return;event.preventDefault();event.stopImmediatePropagation();resizeList(gesture.height+event.clientY-gesture.y)},true);
@@ -573,7 +574,7 @@ function phoneReaderLayoutMetrics(panel,footerHeight,rowHeight,zoom=boardDisplay
   title.setAttribute('aria-label','フェーズ '+(selected==='properties'?'プロパティ':'ノート')+'を表示中。設定・ノート欄を'+(expanded?'閉じる':'開く'));
   buttons.forEach(button=>{button.disabled=output;button.hidden=!!data.activePhaseGroup;button.title=prefix+(selected==='properties'?'ノートを表示':'プロパティを表示');button.setAttribute('aria-label',button.title)});
   if(!enabled)return;
-  if(selected==='memo'&&!data.activePhaseGroup)memo.open=true;
+  if(selected==='memo'&&!data.activePhaseGroup&&!memo.closest('#pngPreview'))memo.open=true;
   else{properties.setAttribute('aria-expanded','true');body.hidden=false;body.classList.remove('hidden');body.style.display='flex'}
  }
  window.Bolxiv.phasePanel={
@@ -738,3 +739,14 @@ function phoneReaderLayoutMetrics(panel,footerHeight,rowHeight,zoom=boardDisplay
  },true);
  window.addEventListener('blur',()=>{gesture=null});mobile.addEventListener('change',()=>{gesture=null});
 })();
+
+// The content panel shares the object-panel switching header, with separate state.
+window.Bolxiv.initializePhonePhaseListTabs=function(){
+ const host=document.getElementById('contentPanel'),mobile=matchMedia('(max-width:850px)'),listHeading=document.getElementById('toggleBattlePages');let selected=viewSettings.phonePhaseListTab==='properties'?'properties':'list';
+ const entries=[['list',listHeading],['properties',document.querySelector('#phaseMasterAssignment>.accordion-toggle')],['properties',document.querySelector('#phaseMasterGroupProperties>.accordion-toggle')]].map(([key,heading])=>{const entry=createPhoneListPropertyBar({heading,onSwitch(){selected=key==='list'?'properties':'list';rememberViewSetting('phonePhaseListTab',selected);const target=selected==='list'?listHeading:document.querySelector((data.activePhaseGroup?'#phaseMasterGroupProperties':'#phaseMasterAssignment')+'>.accordion-toggle');if(target.getAttribute('aria-expanded')!=='true')target.click();sync()}});entry.group.classList.add('phone-list-property-group');return {key,...entry}});
+ function sync(){const output=!!window.Bolxiv.pngPreview?.active,enabled=mobile.matches&&!window.Bolxiv.phaseMasters.active&&(output?document.querySelector('.layout').classList.contains('phone-content-open'):!boardReadOnly);host.classList.toggle('phone-phase-list-tabbed',enabled);host.dataset.phaseListTab=selected;if(enabled)document.getElementById('phasePropertyResize').style.setProperty('display','none','important');
+ for(const entry of entries){const group=entry.group;group.dataset.phoneTabExpanded=entry.heading.getAttribute('aria-expanded');group.classList.toggle('phone-list-property-inactive',enabled&&entry.key!==selected);entry.update({markup:entry.key==='list'?'<strong>フェーズ リスト</strong> / プロパティ':'<strong>フェーズ</strong> リスト / <strong>プロパティ</strong>',label:entry.key==='list'?'フェーズリスト':data.activePhaseGroup?'グループプロパティ':'フェーズプロパティ',nextLabel:entry.key==='list'?'フェーズプロパティを表示':'フェーズリストに戻る'})} }
+ const actions=listHeading.parentElement.querySelector('.phase-heading-actions'),actionsHome=actions.parentElement;
+ const previousSync=sync;sync=function(){previousSync();const entry=entries[0];if(host.classList.contains('phone-phase-list-tabbed')){if(actions.parentElement!==entry.bar)entry.bar.insertBefore(actions,entry.collapse)}else if(actions.parentElement!==actionsHome)actionsHome.append(actions)};
+ for(const entry of entries)new MutationObserver(sync).observe(entry.heading,{attributes:true,attributeFilter:['aria-expanded']});new MutationObserver(sync).observe(document.body,{attributes:true,attributeFilter:['class']});new MutationObserver(sync).observe(document.querySelector('.layout'),{attributes:true,attributeFilter:['class']});mobile.addEventListener('change',sync);const before=render;render=function(...args){const result=before(...args);sync();return result};host.addEventListener('reveal-phase-list',()=>{selected='list';rememberViewSetting('phonePhaseListTab',selected);if(listHeading.getAttribute('aria-expanded')!=='true')listHeading.click();sync()});sync();
+};
