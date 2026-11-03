@@ -604,18 +604,8 @@
   background:var(--blue);
   color:#fff;
 }
-.right #inspector .field {
-  margin:5px 0;
-}
-.right #inspector .field label {
-  margin-bottom:2px;
-}
-.right #inspector .coordinate-fields {
-  gap:5px;
-}
-.right #inspector .property-kind-row {
-  gap:8px;
-}
+.right #inspector .field .property-icon-toggle{margin-bottom:2px}
+
 .layout-background-colors {
   display:grid;
   grid-template-columns:repeat(2,minmax(0,1fr));
@@ -2166,58 +2156,25 @@ body.resizing-phase-panels,body.resizing-phase-panels * {
   margin-bottom:0;
   line-height:12px;
 }
-/* Consistent spacing for both property panels. */
-.right #inspector,.battle .layout-properties-panel:not(.hidden) {
+/* Property layout only; control typography and surfaces live in interface.css. */
+.right #inspector .property-kind-row{gap:10px}
+.right #inspector,.battle .layout-properties-panel:not(.hidden){
   display:flex;
   flex-direction:column;
 }
-.right #inspector .field,.battle .layout-properties-panel .field {
-  margin:0;
-}
-.right #inspector .field>label:not(.property-icon-toggle),.right #inspector .coordinate-fields>div>label,.battle .layout-properties-panel .field>label {
-  margin-top:0;
-  margin-bottom:4px;
-  line-height:12px;
-}
-.right #inspector .coordinate-fields,.right #inspector .property-color-fill-row,.battle .layout-properties-panel .layout-background-colors {
-  gap:10px;
-}
-.right #inspector .property-kind-row {
-  gap:10px;
-}
+
 .right #inspector>.hint {
   margin:0;
 }
-.right #inspector,.battle .layout-properties-panel:not(.hidden) {
-  gap:10px;
-}
-.right #inspector .coordinate-fields,.right #inspector .property-color-fill-row,.battle .layout-properties-panel .layout-background-colors {
-  row-gap:10px;
-}
-.right #inspector .field>label:not(:first-child):not(.property-icon-toggle) {
-  margin-top:10px;
-}
-.battle #layoutPropertiesPanel:not(.hidden) {
+
+.battle #layoutPropertiesPanel:not(.hidden){
   display:flex;
   flex-direction:column;
-  gap:10px;
 }
-.battle #layoutPropertiesPanel .field {
-  margin:0;
-}
-.battle #layoutPropertiesPanel .field>label {
-  margin-top:0;
-  margin-bottom:4px;
-  line-height:12px;
-}
-.battle #layoutPropertiesPanel .layout-background-colors {
-  column-gap:10px;
-  row-gap:10px;
-}
-.battle #layoutPropertiesPanel:not([hidden]):not(.hidden) {
+
+.battle #layoutPropertiesPanel:not([hidden]):not(.hidden){
   display:flex!important;
   flex-direction:column;
-  gap:10px;
 }
 .battle #layoutPropertiesPanel>.field,.battle #layoutPropertiesPanel>.layout-background-colors {
   flex-shrink:0;

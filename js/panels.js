@@ -108,14 +108,17 @@
  sync();
  const originalRenderInspector=renderInspector;
  const selectionKey=()=>JSON.stringify([activeContent,data.page,selectedIds]);
- let previousSelection=selectionKey();
+ let previousSelection=selectionKey(),inspectorCache=null;
  renderInspector=function(){
+  const host=document.getElementById('inspector'),items=current().filter(o=>selectedIds.includes(o.id)),viewKey=JSON.stringify([selected,selectedIds,items,boardReadOnly,phaseComparisonActive(),data.activePhaseGroup,!!window.Bolxiv?.pngPreview?.active,individualGroupSelectionActive(),stage.clientWidth,stage.clientHeight]);
+  if(document.getElementById('userPresetManager')?.hidden!==false&&!individualGroupSelectionActive()&&inspectorCache?.owner===data&&inspectorCache.page===current()&&inspectorCache.key===viewKey&&items.every((o,i)=>inspectorCache.items[i]===o)&&!host.contains(document.activeElement)&&host.innerHTML===inspectorCache.html&&inspectorCache.inputs.every(({node,value,checked})=>node.value===value&&node.checked===checked)){sync();return}
   const key=selectionKey(),preserve=key===previousSelection,positions=[];
   if(preserve){for(let node=document.getElementById('inspector');node;node=node.parentElement)positions.push({node,top:node.scrollTop,left:node.scrollLeft})}
   const result=originalRenderInspector.apply(this,arguments);
   sync();
   for(const position of positions){position.node.scrollTop=position.top;position.node.scrollLeft=position.left}
   previousSelection=key;
+  inspectorCache={owner:data,page:current(),key:viewKey,items,html:host.innerHTML,inputs:[...host.querySelectorAll('input,select,textarea')].map(node=>({node,value:node.value,checked:node.checked}))};
   return result;
  };
  new MutationObserver(records=>{
@@ -608,12 +611,13 @@ function createPhoneListPropertyBar(options){return createPanelView(options)}
  const get=id=>document.getElementById(id);let session=null,timer=null,starting=false;
  const practice=()=>session&&data.tutorialPracticeId===session.id;
  const circle=()=>practice()?current().find(item=>item.type==='circle'):null;
+ function phaseNoteTarget(){const input=get('phaseMemo').querySelector('textarea'),visible=node=>node?.checkVisibility({checkVisibilityCSS:true})&&node.getBoundingClientRect().height>0;if(visible(input))return input;if(!desktop.matches){if(!document.querySelector('.layout').classList.contains('phone-content-open'))return document.querySelector('.phone-content-icon');const change=[...get('contentPanel').querySelectorAll('.phone-list-property-change')].find(node=>visible(node)&&node.getAttribute('aria-label')==='フェーズプロパティを表示');if(change)return change;return get('phaseMasterAssignment').querySelector('.phone-object-collapse')}return get('phaseMasterAssignment').querySelector('.accordion-toggle')}
  const steps=[
   {title:'円範囲を配置する',text:'左の「AoE」で円範囲をクリックし、キャンバスをクリックして配置してください。',target:()=>document.querySelector('.left .tool[data-tool="circle"] .glyph'),done:()=>!!circle()},
   {title:'サイズを変える',text:'円範囲をクリックして選び、右側のプロパティで「サイズ」を150px以上にしてください。スライダーでも数値入力でも変更できます。',target:()=>get('widthSpin')||document.querySelector('#objects .obj'),done:()=>!!circle()&&circle().width>=150},
   {title:'矢印キーで移動する',text:'キャンバス上の円範囲をクリックして選び、上下左右キーで動かしてください。数値欄を入力中なら、先に円範囲をクリックします。',target:()=>document.querySelector('#objects .obj'),enter:()=>{const item=circle();session.position=item?{x:item.x,y:item.y}:null},done:()=>{const item=circle();return !!item&&!!session.position&&(Math.abs(item.x-session.position.x)>.001||Math.abs(item.y-session.position.y)>.001)}},
   {title:'フェーズをコピーする',text:'フェーズリスト見出し右側のコピーを押し、「このコンテンツにコピー」を選んでください。配置と設定を引き継いだ次のフェーズを作れます。',target:()=>get('copyPage'),enter:()=>{session.sourcePage=data.page;session.sourceId=circle()?.id},done:()=>data.pages.length>=2&&data.page!==session.sourcePage&&!!circle()&&circle().id!==session.sourceId},
-  {title:'ノートを残す',text:'コンテンツペイン下部の「フェーズ プロパティ / ノート」の＋で欄を開き、切り替えボタンでノートを表示します。「ここで集合」など短いメモを入力してください。ノートはフェーズごとに保存されます。',target:()=>get('phaseMemo').open?get('phaseMemo').querySelector('textarea'):get('desktopPhaseSectionToggle')?.getAttribute('aria-expanded')==='false'?get('desktopPhaseSectionToggle'):get('desktopPhaseSwitch'),done:()=>!!data.pageNotes?.[data.page]?.trim()},
+  {title:'ノートを残す',text:'コンテンツペインの「フェーズプロパティ」を開き、下の「フェーズノート」に「ここで集合」など短いメモを入力してください。ノートはフェーズごとに保存されます。',target:phaseNoteTarget,done:()=>!!data.pageNotes?.[data.page]?.trim()},
   {title:'元に戻す・やり直す',text:'ノート欄の外をクリックし、左上の「元に戻す」、続けて「やり直す」を押してください。入力したノートが戻れば完了です。',target:()=>get(session.sawUndo?'redo':'undo'),enter:()=>{session.note=data.pageNotes[data.page];session.notePage=data.page;session.sawUndo=false},done:()=>{const note=data.pageNotes?.[session.notePage]||'';if(note!==session.note)session.sawUndo=true;return session.sawUndo&&note===session.note}}
  ];
  const mobileSteps=[
@@ -621,7 +625,7 @@ function createPhoneListPropertyBar(options){return createPanelView(options)}
   {...steps[1],enter:()=>{const item=circle();if(item){selected=item.id;selectedIds=[item.id];renderSelectionOnly()}const host=get('objectLayerPanel');if(host.dataset.objectTab!=='properties')get('toggleLayers').parentElement.querySelector('.phone-object-tabs button').click();if(get('toggleInspector').getAttribute('aria-expanded')!=='true')get('toggleInspector').click()},text:'円範囲をタップして選び、画面下の「プロパティ」でサイズのスライダーを右へ動かし、150px以上にします。「リスト」が表示中なら切り替えボタン、「＋」ならそれを押して欄を開いてください。',target:()=>get('widthInput')?.getClientRects().length?get('widthInput'):document.querySelector('.phone-object-tabs button')},
   {...steps[2],title:'指で移動する',text:'円範囲を指でドラッグして、別の場所へ動かしてください。',target:()=>document.querySelector('#objects .obj')},
   {...steps[3],text:'キャンバス左側の矢印からコンテンツを開き、フェーズリスト見出しのコピーから「このコンテンツにコピー」をタップしてください。',target:()=>document.querySelector('.layout').classList.contains('phone-content-open')?get('copyPage'):document.querySelector('.phone-content-icon')},
-  {...steps[4],text:'コンテンツ内の「プロパティ／ノート」を切り替えてノートを開き、「ここで集合」など短いメモを入力してください。「＋」で欄を開けます。',target:()=>get('phaseMemo').getClientRects().length?get('phaseMemo').querySelector('textarea'):get('phonePhaseSwitch-toggle')},
+  {...steps[4],text:'コンテンツを開き、フェーズリスト見出しの切り替えボタンで「プロパティ」を表示します。「＋」なら欄を開き、下の「フェーズノート」に「ここで集合」など短いメモを入力してください。',target:phaseNoteTarget},
   {...steps[5],text:'キーボードを閉じ、コンテンツを開いたまま画面上部の「元に戻す」、続けて「やり直す」をタップしてください。ノートが元どおりになれば完了です。',target:()=>get(session.sawUndo?'redo':'undo')}
  ];
  let activeSteps=steps;

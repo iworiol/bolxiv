@@ -15,7 +15,7 @@
 .png-preview-settings select{width:100%;min-height:36px;padding:4px 8px;border:1px solid #999;border-radius:5px;background:#fff;color:#17212c;font:inherit}
 .png-preview-settings p{margin:0;min-height:20px;font-size:12px;color:#60718c}
 .png-preview-settings-body>.btn{min-height:36px;padding:6px 12px;border:1px solid #293c66;border-radius:5px;background:#293c66;color:#fff;font:inherit}
-.png-preview-panel button:disabled{opacity:.5;cursor:default}
+.png-preview-panel button:disabled:not(:where(.png-preview-settings *)){opacity:.5;cursor:default}
 .png-preview-panel button:focus-visible,.png-preview-panel select:focus-visible{outline:2px solid #4769b3;outline-offset:2px}
 .png-preview-active>.phone-phase-navigation{z-index:10036}
 @media(max-width:850px){.png-preview-active:has(.png-reader-controls #toggleBattlePages[aria-expanded="false"]):has(.png-reader-controls .content-options:not([hidden]))>.phone-phase-navigation{visibility:hidden;pointer-events:none}}
@@ -282,7 +282,7 @@
 .print-margin-guide{position:absolute;box-sizing:border-box;border:1px dashed #9ca8ba;pointer-events:none}
 .print-page-fields{display:flex;flex-direction:column;gap:8px;font-size:12px}
 .print-page-fields>label{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.print-page-fields select,.print-page-fields input{box-sizing:border-box;min-width:0;width:120px;height:28px;padding:3px;border:1px solid #999;border-radius:5px;background:#fff;color:#17212c;font:inherit}
+.print-page-fields select,.print-page-fields input{box-sizing:border-box;min-width:0;width:120px;padding:3px}
 .print-page-fields fieldset{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:8px;border:1px solid #d0d4da;border-radius:5px;min-width:0}
 .print-page-fields fieldset label{display:flex;align-items:center;gap:6px}
 .print-page-fields fieldset input{width:100%;max-width:72px}
@@ -302,21 +302,10 @@
 .print-paper-width{left:52px;top:12px;width:var(--paper-display-width);height:12px;border-left:1px solid #8b97a6;border-right:1px solid #8b97a6;background:linear-gradient(#8b97a6,#8b97a6) center/100% 1px no-repeat}
 .print-paper-width>span{left:50%;top:50%;transform:translate(-50%,-50%)}
 .print-paper-height{left:18px;top:40px;width:12px;height:var(--paper-display-height);border-top:1px solid #8b97a6;border-bottom:1px solid #8b97a6;background:linear-gradient(#8b97a6,#8b97a6) center/1px 100% no-repeat}
-.print-paper-height>span{left:50%;top:50%;transform:translate(-50%,-50%) rotate(-90deg)}/* Print controls share the typography and surfaces of phase/object properties. */
-.app .layout #pngPreview .print-page-fields label,
-.app .layout #pngPreview .print-page-fields legend,
-.app .layout #pngPreview .output-note-toggle{font-family:inherit!important;font-size:12px!important;font-weight:400!important;line-height:1.2!important;color:#000!important;-webkit-text-fill-color:#000!important}
-.app .layout #pngPreview .print-page-fields :is(select,input){font-family:inherit!important;font-weight:400!important;line-height:normal!important;color:#000!important;-webkit-text-fill-color:#000!important;background:#f8fafc!important;border-color:#d5dce6!important;border-radius:6px;outline:0}
-.app .layout #pngPreview .print-page-fields select{font-size:13.333333px!important}
-.app .layout #pngPreview .print-page-fields input{font-size:14px!important}
-.app .layout #pngPreview .print-page-fields :is(select,input):focus-visible{outline:2px solid var(--blue)!important;outline-offset:1px}
-@media(max-width:850px){.app .layout #pngPreview .print-page-fields select{font-size:14px!important}}
-/* Reset uses the same neutral and blue interaction states as other small buttons. */
+.print-paper-height>span{left:50%;top:50%;transform:translate(-50%,-50%) rotate(-90deg)}/* Reset uses the same neutral and blue interaction states as other small buttons. */
 #printSettingsReset[hidden]{display:none!important}
-.app .layout .right #pngPreview #printSettingsReset{flex:none;margin:0 6px 0 auto;padding:2px 7px;min-width:0;min-height:26px;height:26px;border:1px solid #d0d4da!important;border-radius:6px;background:#eef2f7!important;color:#33445f!important;-webkit-text-fill-color:#33445f!important;font-family:inherit;font-size:14px;font-weight:400;line-height:20px;white-space:nowrap;cursor:pointer;filter:none!important;-webkit-tap-highlight-color:transparent}
-.app .layout .right #pngPreview #printSettingsReset:enabled:is(:hover:not(:where(.phone-touch-mode *)),:focus-visible,:active,.phone-control-pressed){background:var(--blue)!important;border-color:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+.app .layout .right #pngPreview #printSettingsReset{flex:none;margin:0 6px 0 auto;padding:2px 7px;min-width:0;min-height:26px;height:26px;border-width:1px;border-style:solid;border-radius:6px;font-family:inherit;font-size:14px;font-weight:400;line-height:20px;white-space:nowrap;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .app .layout .right #pngPreview #printSettingsReset:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
-.app .layout .right #pngPreview #printSettingsReset:disabled{opacity:.45;cursor:not-allowed}
 .print-cut-guide[hidden]{display:none!important}
 #printImageDpi{font-size:12px;line-height:1.5;color:#526078}
 #printImageDpi[hidden]{display:none!important}
@@ -367,12 +356,12 @@
  .app .layout #pngPreview .print-margin-adjustment input[type=range]{flex:1 1 0;width:0;min-width:0;max-width:none;height:32px;min-height:32px;padding:0;border:0!important;background:transparent!important;box-shadow:none}
 }
 @media(min-width:851px){.png-preview-surface.can-drag-preview,.png-preview-surface.can-drag-preview *{cursor:grab}.png-preview-surface.dragging-preview,.png-preview-surface.dragging-preview *{cursor:grabbing;user-select:none}}
-.output-note-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.output-note-row>label{margin:0;font-size:12px;line-height:1.2}.output-note-row>#outputNoteRows{box-sizing:border-box;width:auto;min-width:60px;padding:4px 6px;border:1px solid #d5dce6;border-radius:5px;background:#f8fafc;color:#17212c;font:inherit}.output-note-row>#outputNoteRows:focus{outline:2px solid var(--blue);outline-offset:-1px}
+.output-note-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.output-note-row>label{margin:0;font-size:12px;line-height:1.2}.output-note-row>#outputNoteRows{box-sizing:border-box;width:auto;min-width:60px;padding:4px 6px}
 
-.app .layout #pngPreview :is(#outputNoteRows,#pngPreviewScale){background:#f8fafc!important;border-color:#d5dce6!important;color:#000!important;-webkit-text-fill-color:#000!important;border-radius:6px;font-size:13.333333px}.app .layout #pngPreview :is(#outputNoteRows,#pngPreviewScale):focus-visible{outline:2px solid var(--blue)!important;outline-offset:1px}.png-preview-settings .png-scale-control output{font-size:12px}@media(max-width:850px){.app .layout #pngPreview :is(#outputNoteRows,#pngPreviewScale){font-size:14px}}
+.png-preview-settings .png-scale-control output{font-size:12px}
 .png-preview-settings .output-note-row>label,.png-preview-settings .png-scale-field>label{box-sizing:border-box;flex:0 0 4em;width:4em}
 @media(min-width:851px){.png-preview-panel[data-output-mode="print"] .output-note-row{justify-content:space-between;flex-wrap:nowrap}.png-preview-panel[data-output-mode="print"] .output-note-row>label{flex:0 1 auto;width:auto}.png-preview-panel[data-output-mode="print"] .output-note-row>#outputNoteRows{flex:0 0 120px;width:120px}}
-.app .layout #pngPreview .output-phase-gap{background:#f8fafc!important;border-color:#d5dce6!important;color:#000!important;-webkit-text-fill-color:#000!important;border-radius:6px}.app .layout #pngPreview .output-phase-gap:focus-visible{outline:2px solid var(--blue)!important;outline-offset:1px}
+
 @media(min-width:851px){#outputPhaseGapField:not([hidden]){column-gap:8px}#outputPhaseGapField>label{gap:6px}#outputPhaseGapField>label>span{flex:0 0 2em;width:2em}#outputPhaseGapField .output-phase-gap{max-width:none}}
 @media(max-width:850px){.app .right .png-preview-toolbar>#pngPreviewContent{display:grid!important}.png-preview-active .layout.phone-content-open>.phone-content-close,.png-preview-active .layout.phone-content-open>.phone-content-backdrop{display:block!important}}
 @media(max-width:850px){.phone-content-preview :is(.output-note-preview,.output-border-preview){display:none!important}}
@@ -386,6 +375,7 @@
 
 #pngPreview #phaseMemo .phase-memo-body{display:flex;flex-direction:column;flex:1;min-height:0;padding:0}
 #pngPreview #phaseMemo textarea{display:block!important;box-sizing:border-box;width:100%;min-height:140px;height:160px;resize:vertical;background:#fff;color:#22344f;border:1px solid #ccd3df;border-radius:4px;padding:6px;font:inherit}
+@media(max-width:850px){#pngPreview #phaseMemo textarea{resize:none}}
 #pngPreview #phaseMemo .phase-memo-reading{display:none!important}
 @media(max-width:850px){
  .app .layout .right #pngPreview .png-reader-controls>.page-controls{max-height:none;flex:1;min-height:0}

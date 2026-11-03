@@ -86,15 +86,27 @@
 })();
 
 // Built-in presets use field-relative positions; each insertion is one undo step.
+function createPresetArtworkThumbnail(items){const thumb=document.createElement('span');thumb.className='preset-thumbnail';thumb.setAttribute('aria-hidden','true');const scene=document.createElement('span');scene.className='user-preset-scene';
+  const xs=items.map(o=>o.x/100*640),ys=items.map(o=>o.y/100*640),left=Math.min(...items.map((o,i)=>xs[i]-(o.width||32)/2)),top=Math.min(...items.map((o,i)=>ys[i]-(o.height||32)/2)),right=Math.max(...items.map((o,i)=>xs[i]+(o.width||32)/2)),bottom=Math.max(...items.map((o,i)=>ys[i]+(o.height||32)/2)),extent=Math.max(right-left,bottom-top,32),scale=18/extent;
+  scene.style.cssText='position:absolute;width:640px;height:640px;transform-origin:0 0;transform:scale('+scale+');left:'+((26-(right-left)*scale)/2-left*scale)+'px;top:'+((26-(bottom-top)*scale)/2-top*scale)+'px;';
+  for(const [i,item] of items.entries()){const visual={...item,visible:true};if(visual.type==='icon'){const factor=Math.max(1,8/(scale*Math.min(visual.width||32,visual.height||32)));visual.width=(visual.width||32)*factor;visual.height=(visual.height||32)*factor}const node=createCanvasObjectVisual(visual,i,[]);node.style.pointerEvents='none';for(const img of node.querySelectorAll('img')){img.style.setProperty('width','100%','important');img.style.setProperty('height','100%','important');img.style.setProperty('max-width','none','important');img.style.setProperty('max-height','none','important')}scene.append(node)}thumb.append(scene);return thumb;
+ }
+
 (function setupBuiltinPresets(){
  const button=document.getElementById('builtinFieldMarkers');
  const preview=button.querySelector('.preset-thumbnail');
  for(const [name,x,y] of [['A',50,12],['B',88,50],['C',50,88],['D',12,50],['1',22,22],['2',78,22],['3',78,78],['4',22,78]]){const img=document.createElement('img');img.src=objectImageSource({src:iconPath(name.toLowerCase(),'field-marker-transparent')});img.alt='';img.style.left=x+'%';img.style.top=y+'%';preview.append(img)}
- const icon={name:button.title,presetId:'field-markers',src:objectImageSource({src:iconPath('a','field-marker-transparent')})};button.draggable=true;
- button.onclick=()=>{if(boardReadOnly||phaseComparisonActive())return;selectPlacementIcon(icon)};
- button.ondragstart=event=>{if(boardReadOnly||phaseComparisonActive()){event.preventDefault();return}selectPlacementIcon(icon,false);event.dataTransfer.setData('application/x-tactica',JSON.stringify({type:'icon',...icon}));event.dataTransfer.effectAllowed='copy'};
+ function bind(button,icon){button.draggable=true;button.onclick=()=>{if(boardReadOnly||phaseComparisonActive())return;selectPlacementIcon(icon)};button.ondragstart=event=>{if(boardReadOnly||phaseComparisonActive()){event.preventDefault();return}selectPlacementIcon(icon,false);event.dataTransfer.setData('application/x-tactica',JSON.stringify({type:'icon',...icon}));event.dataTransfer.effectAllowed='copy'}}
+ bind(button,{name:button.title,presetId:'field-markers',src:objectImageSource({src:iconPath('a','field-marker-transparent')})});
+ const artworkButton=document.getElementById('builtinGroupArtwork');artworkButton.append(createPresetArtworkThumbnail(phaseGroupArtworkData.objects));bind(artworkButton,{name:'そう、＊＊よ。',presetId:'group-artwork'});
 
 })();
+
+function placeBuiltinGroupArtwork(cx,cy){
+ if(boardReadOnly||phaseComparisonActive()||window.Bolxiv?.pngPreview?.active||window.Bolxiv?.phaseMasters?.active)return;
+ const items=JSON.parse(JSON.stringify(phaseGroupArtworkData.objects)),groupId=createObjectId();for(const item of items){item.id=createObjectId();item.x+=cx-50;item.y+=cy-50;item.objectGroupId=groupId;item.objectGroupName='そう、＊＊よ。'}
+ snapshot();current().push(...items);individualGroupSelection=null;selectedIds=items.map(item=>item.id);selected=selectedIds[0];setTapPlacementArmed(false);selectPlacementTool('select');hideTouchPlacementPreview();renderAndSave();closePaletteAfterPlacement();notify('「そう、＊＊よ。」を配置しました');
+}
 
 function placeBuiltinFieldMarkers(cx,cy){
   if(boardReadOnly||phaseComparisonActive()||window.Bolxiv?.pngPreview?.active)return;
@@ -1026,11 +1038,7 @@ const userPresetLibrary=(()=>{
 
  function show(anchor,actions,point=null){close();menu._opener=anchor;menu.replaceChildren();for(const [label,action,disabled=false] of actions){menu.append(createMenuAction({label,disabled,destructive:label==='削除',shortcut:label==='名前変更'?'F2':null,onInvoke(){close();action()}}))}addPhoneMenuClose(menu,close);const r=point||anchor.getBoundingClientRect();menu.hidden=false;menu.style.left=Math.max(4,Math.min(r.left,innerWidth-menu.offsetWidth-4))+'px';menu.style.top=Math.max(4,Math.min(r.bottom+4,innerHeight-menu.offsetHeight-4))+'px';menu.querySelector('button:not(:disabled)')?.focus()}
  window.addEventListener('pointerdown',e=>{if(!menu.contains(e.target)&&!manage.contains(e.target))close()},true);window.addEventListener('keydown',e=>{if(e.key==='Escape'&&!menu.hidden){e.preventDefault();e.stopImmediatePropagation();const origin=menu._opener;close();(origin?.closest('.preset-manager-row')||origin)?.focus({preventScroll:true})}},true);window.addEventListener('resize',close);
- function liveThumbnail(items){const thumb=document.createElement('span');thumb.className='preset-thumbnail';thumb.setAttribute('aria-hidden','true');const scene=document.createElement('span');scene.className='user-preset-scene';
-  const xs=items.map(o=>o.x/100*640),ys=items.map(o=>o.y/100*640),left=Math.min(...items.map((o,i)=>xs[i]-(o.width||32)/2)),top=Math.min(...items.map((o,i)=>ys[i]-(o.height||32)/2)),right=Math.max(...items.map((o,i)=>xs[i]+(o.width||32)/2)),bottom=Math.max(...items.map((o,i)=>ys[i]+(o.height||32)/2)),extent=Math.max(right-left,bottom-top,32),scale=18/extent;
-  scene.style.cssText='position:absolute;width:640px;height:640px;transform-origin:0 0;transform:scale('+scale+');left:'+((26-(right-left)*scale)/2-left*scale)+'px;top:'+((26-(bottom-top)*scale)/2-top*scale)+'px;';
-  for(const [i,item] of items.entries()){const visual={...item,visible:true};if(visual.type==='icon'){const factor=Math.max(1,8/(scale*Math.min(visual.width||32,visual.height||32)));visual.width=(visual.width||32)*factor;visual.height=(visual.height||32)*factor}const node=createCanvasObjectVisual(visual,i,[]);node.style.pointerEvents='none';for(const img of node.querySelectorAll('img')){img.style.setProperty('width','100%','important');img.style.setProperty('height','100%','important');img.style.setProperty('max-width','none','important');img.style.setProperty('max-height','none','important')}scene.append(node)}thumb.append(scene);return thumb;
- }
+ function liveThumbnail(items){return createPresetArtworkThumbnail(items)}
  const thumbnailCache=new Map(),thumbnailJobs=[];let thumbnailRunning=false;
  function thumbnailImage(url){const image=new Image();image.src=url;image.alt='';image.style.cssText='display:block;width:26px!important;height:26px!important;max-width:none!important;max-height:none!important';return image}
  function scheduleThumbnail(){if(thumbnailRunning||!thumbnailJobs.length)return;thumbnailRunning=true;const run=async()=>{const job=thumbnailJobs.shift(),host=document.createElement('div');host.className='left pinned';host.setAttribute('aria-hidden','true');host.style.cssText='display:block!important;position:fixed!important;left:-10000px!important;top:0!important;width:26px!important;height:26px!important;padding:0!important;border:0!important;overflow:hidden!important;pointer-events:none!important';const source=liveThumbnail(job.items);source.style.cssText='display:block;position:relative;width:26px;height:26px;overflow:hidden';host.append(source);document.body.append(host);try{const bitmap=await rasterizePngSource(source,3);job.url=bitmap.toDataURL('image/png');for(const node of job.nodes)if(node.isConnected)node.replaceChildren(thumbnailImage(job.url))}catch{thumbnailCache.delete(job.key)}finally{host.remove();job.nodes.clear();thumbnailRunning=false;scheduleThumbnail()}};if(window.requestIdleCallback)requestIdleCallback(run,{timeout:1000});else setTimeout(run,0)}
