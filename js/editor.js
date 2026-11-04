@@ -191,13 +191,289 @@ changeLog.className='operation-guide';
 
 changeLog.setAttribute('aria-labelledby','changeLogTitle');
 
-changeLog.innerHTML='<div class="operation-guide-heading"><h2 id="changeLogTitle">更新履歴</h2><button type="button" class="btn" autofocus>閉じる</button></div><div class="operation-guide-body"><p><span class="change-log-version">2026/11/03　Ver.0.9.2</span><span class="change-log-description">UI調整、処理改善、他修正</span></p><p><span class="change-log-version">2026/11/03　Ver.0.9.1</span><span class="change-log-description">UI調整、不具合修正</span></p><p><span class="change-log-version">2026/11/02　Ver.0.9.0</span><span class="change-log-description">画像読み込み機能追加、フィールド機能追加(ガイド統合)、メニュー強化</span></p><p><span class="change-log-version">2026/10/31　Ver.0.8.2</span><span class="change-log-description">不具合修正</span></p><p><span class="change-log-version">2026/10/31　Ver.0.8.1</span><span class="change-log-description">UI等もろもろ調整</span></p><p><span class="change-log-version">2026/10/30　Ver.0.8.0</span><span class="change-log-description">キャンバスのガイド機能正式実装、印刷機能をスマホ版も拡充、フィールド設定コピー機能追加、UI調整</span></p><p><span class="change-log-version">2026/10/28　Ver.0.7.1</span><span class="change-log-description">印刷機能拡充(PC版のみ)、キャンバスのガイド機能仮実装、UI調整</span></p><p><span class="change-log-version">2026/10/26　Ver.0.7.0</span><span class="change-log-description">プリセット機能正式追加、UI調整</span></p><p><span class="change-log-version">2026/10/25　Ver.0.6.2</span><span class="change-log-description">オブジェクト追加、画像・印刷機能にノート表示追加</span></p><p><span class="change-log-version">2026/10/25　Ver.0.6.1</span><span class="change-log-description">UI調整</span></p><p><span class="change-log-version">2026/10/25　Ver.0.6.0</span><span class="change-log-description">オブジェクトのグループ化対応、印刷機能追加(PNG生成と統合)、プリセット機能仮実装</span></p><p><span class="change-log-version">2026/10/23　Ver.0.5.2</span><span class="change-log-description">UI調整</span></p><p><span class="change-log-version">2026/10/22　Ver.0.5.1</span><span class="change-log-description">UI調整</span></p><p><span class="change-log-version">2026/10/19　Ver.0.5.0</span><span class="change-log-description">コンテンツを履歴操作に追加、PNG生成モード追加、レイアウト少し見直し、その他修正</span></p><p><span class="change-log-version">2026/10/18　Ver.0.4.1</span><span class="change-log-description">ツールの内部構成変更、その他修正</span></p><p><span class="change-log-version">2026/10/18　Ver.0.4.0</span><span class="change-log-description">チュートリアル追加、フェーズグループ化機能追加、メモリ使用量削減、JSONファイルサイズ削減</span></p><p><span class="change-log-version">2026/10/17　Ver.0.3.0</span><span class="change-log-description">コンテンツ間フェーズコピー機能追加、右クリック・長押し操作メニュー各種追加、文字サイズ変更、処理負荷改善</span></p><p><span class="change-log-version">2026/10/15　Ver.0.2.0</span><span class="change-log-description">フェーズノート追加、構成見直し、その他修正&amp;見直し</span></p><p><span class="change-log-version">2026/10/14　Ver.0.1.1</span><span class="change-log-description">見た目見直し</span></p><p><span class="change-log-version">2026/10/12　Ver.0.1.0</span><span class="change-log-description">初版</span></p></div>';
+changeLog.innerHTML='<div class="operation-guide-heading"><h2 id="changeLogTitle">更新履歴</h2><button type="button" class="btn" autofocus>閉じる</button></div><div class="operation-guide-body"><p><span class="change-log-version">2026/11/05　Ver.0.9.3</span><span class="change-log-description">オフライン利用方法の準備、ダウンロードページの準備、UI調整、不具合修正</span></p><p><span class="change-log-version">2026/11/03　Ver.0.9.2</span><span class="change-log-description">UI調整、処理改善、他修正</span></p><p><span class="change-log-version">2026/11/03　Ver.0.9.1</span><span class="change-log-description">UI調整、不具合修正</span></p><p><span class="change-log-version">2026/11/02　Ver.0.9.0</span><span class="change-log-description">画像読み込み機能追加、フィールド機能追加(ガイド統合)、メニュー強化</span></p><p><span class="change-log-version">2026/10/31　Ver.0.8.2</span><span class="change-log-description">不具合修正</span></p><p><span class="change-log-version">2026/10/31　Ver.0.8.1</span><span class="change-log-description">UI等もろもろ調整</span></p><p><span class="change-log-version">2026/10/30　Ver.0.8.0</span><span class="change-log-description">キャンバスのガイド機能正式実装、印刷機能をスマホ版も拡充、フィールド設定コピー機能追加、UI調整</span></p><p><span class="change-log-version">2026/10/28　Ver.0.7.1</span><span class="change-log-description">印刷機能拡充(PC版のみ)、キャンバスのガイド機能仮実装、UI調整</span></p><p><span class="change-log-version">2026/10/26　Ver.0.7.0</span><span class="change-log-description">プリセット機能正式追加、UI調整</span></p><p><span class="change-log-version">2026/10/25　Ver.0.6.2</span><span class="change-log-description">オブジェクト追加、画像・印刷機能にノート表示追加</span></p><p><span class="change-log-version">2026/10/25　Ver.0.6.1</span><span class="change-log-description">UI調整</span></p><p><span class="change-log-version">2026/10/25　Ver.0.6.0</span><span class="change-log-description">オブジェクトのグループ化対応、印刷機能追加(PNG生成と統合)、プリセット機能仮実装</span></p><p><span class="change-log-version">2026/10/23　Ver.0.5.2</span><span class="change-log-description">UI調整</span></p><p><span class="change-log-version">2026/10/22　Ver.0.5.1</span><span class="change-log-description">UI調整</span></p><p><span class="change-log-version">2026/10/19　Ver.0.5.0</span><span class="change-log-description">コンテンツを履歴操作に追加、PNG生成モード追加、レイアウト少し見直し、その他修正</span></p><p><span class="change-log-version">2026/10/18　Ver.0.4.1</span><span class="change-log-description">ツールの内部構成変更、その他修正</span></p><p><span class="change-log-version">2026/10/18　Ver.0.4.0</span><span class="change-log-description">チュートリアル追加、フェーズグループ化機能追加、メモリ使用量削減、JSONファイルサイズ削減</span></p><p><span class="change-log-version">2026/10/17　Ver.0.3.0</span><span class="change-log-description">コンテンツ間フェーズコピー機能追加、右クリック・長押し操作メニュー各種追加、文字サイズ変更、処理負荷改善</span></p><p><span class="change-log-version">2026/10/15　Ver.0.2.0</span><span class="change-log-description">フェーズノート追加、構成見直し、その他修正&amp;見直し</span></p><p><span class="change-log-version">2026/10/14　Ver.0.1.1</span><span class="change-log-description">見た目見直し</span></p><p><span class="change-log-version">2026/10/12　Ver.0.1.0</span><span class="change-log-description">初版</span></p></div>';
 
 document.body.append(changeLog);
 
 changeLog.querySelector('button').onclick=()=>changeLog.close();
 
-changeLog.addEventListener('close',()=>document.getElementById('operationGuideBtn').focus());
+
+
+const usageGuide=document.createElement('dialog');
+usageGuide.id='usageSceneDialog';usageGuide.className='operation-guide usage-scene-guide';usageGuide.setAttribute('aria-labelledby','usageSceneTitle');
+const offlineUsageCases=[
+ {
+  "id": "usagePcCase",
+  "tag": "PC・オフライン",
+  "title": "PCでオフライン利用",
+  "intro": "初回はオンラインで本体を入手します。準備ができたら、次回からはPC内のファイルを開くだけで使えます。ここではWindowsの操作を例に説明します。",
+  "steps": [
+   [
+    "公開ページからZIPを保存する",
+    "インターネットにつながっている間に、公開ページのダウンロード案内からツール本体のZIPファイルを保存します。",
+    "ダウンロード先にZIPファイルが見つかれば次へ進めます。",
+    "ブラウザーの「ページを保存」では、本体一式を入手できません。",
+    0
+   ],
+   [
+    "ZIPを展開する",
+    "保存したZIPを右クリックし、「すべて展開」を選びます。保存先を確認して「展開」を押します。",
+    "ZIPとは別に、展開されたフォルダーができれば完了です。",
+    "ここではWindowsの操作例を案内しています。ほかの環境ではファイル管理アプリの展開操作を使います。",
+    1
+   ],
+   [
+    "index.htmlがあるフォルダーを開く",
+    "展開したフォルダーを開き、index.htmlを探します。見つからない場合は、中のフォルダーを開いて確認します。",
+    "index.htmlと、js・css・imagesフォルダーなどが同じ場所にあれば準備できています。",
+    "ZIPの中のまま進めず、展開後のフォルダーを使います。ファイルの拡張子が非表示なら「index」と見える場合があります。",
+    12
+   ],
+   [
+    "index.htmlをダブルクリックする",
+    "展開先のindex.htmlをダブルクリックします。開くアプリを尋ねられたら、普段使うブラウザーを選びます。",
+    "BOARD OF LIGHT XIVの画面が開き、操作できる状態になれば起動できています。",
+    "index.htmlだけを別の場所へ移さず、同じフォルダーのファイル一式を保ちます。",
+    13
+   ],
+   [
+    "次回も同じ場所から開く",
+    "次回からは、保存してある同じindex.htmlをダブルクリックします。毎回ダウンロードや展開をやり直す必要はありません。",
+    "インターネット接続なしでもツールを開けます。",
+    "公開ページで作ったデータが出ない場合は、公開ページ側でコンテンツをJSONに保存し、この起動先で読み込みます。",
+    2
+   ]
+  ],
+  "note": "<h4>データと次回の起動について</h4><p>データはブラウザー内に自動保存されます。公開ページとこの起動先は、データの保存先が異なる場合があります。大切なデータは「エクスポート」でJSONにも保存してください。ユーザープリセットは専用JSONで別に保存します。</p><p>PC経由のケースのローカルサーバーは、PC自身でも使えます。起動バッチで開いたPCのブラウザーをそのまま利用してください。</p>"
+ },
+ {
+  "id": "usageLanCase",
+  "tag": "Windows PC・スマホ",
+  "title": "スマホでオフライン利用（PC経由）",
+  "intro": "PCを起動したまま、同じネットワークのスマホで使う方法です。初回はオンラインで本体を入手し、使う間はPCとスマホ間の通信を保ちます。",
+  "steps": [
+   [
+    "PCに本体ZIPを保存する",
+    "インターネットにつながっているPCで、公開ページからツール本体のZIPを保存します。直接起動用とPC経由用は同じZIPです。",
+    "PCのダウンロード先にZIPファイルが見つかります。",
+    "追加ツールのインストールは不要です。",
+    0
+   ],
+   [
+    "ZIPを展開して起動ファイルを探す",
+    "ZIPを右クリックして「すべて展開」を選び、「展開」を押します。展開したフォルダーを開き、bolxiv_localserver_win.batを探します。",
+    "index.htmlと同じ場所に起動ファイルが見つかれば準備できています。",
+    "拡張子が非表示ならbolxiv_localserver_winと見える場合があります。種類が「Windows バッチ ファイル」のものを選びます。PS1は直接開きません。",
+    1
+   ],
+   [
+    "PCとスマホを同じネットワークにつなぐ",
+    "スマホの設定で、PCと同じ家庭内ネットワークのWi-Fiに接続します。PCは同じルーターへの有線接続でもかまいません。",
+    "PCとスマホが同じルーターにつながった状態で次へ進みます。",
+    "ゲスト用Wi-Fiなど、端末同士の通信が禁止された接続では使えません。準備後はインターネット接続がなくても、端末間の接続は必要です。",
+    4
+   ],
+   [
+    "PCで起動ファイルを実行する",
+    "bolxiv_localserver_win.batをダブルクリックします。起動したウィンドウは閉じずに残します。",
+    "PCのブラウザーでツールが開き、起動ウィンドウに「Phone URLs」が表示されます。",
+    "Windowsが通信の許可を尋ねた場合は、自分が管理するプライベートネットワークでの通信を許可します。ウイルス対策ソフトが起動ファイルを検知する場合があります。警告が出た場合は起動を中止し、検知名と対象ファイル名を確認してください。",
+    3
+   ],
+   [
+    "Phone URLsのURLを確認する",
+    "起動ウィンドウの「Phone URLs」の下にある、http://で始まるアドレスを確認します。",
+    "スマホに入力するURLを確認できたら次へ進めます。",
+    "http://192.168.1.10:8000/は例です。数字もポートも、実際に表示されたものを使います。複数ある場合は接続中のネットワークのURLを使います。",
+    14
+   ],
+   [
+    "スマホのブラウザーにURLを入力する",
+    "スマホでブラウザーを開き、画面上部のアドレス欄に確認したURLを入力して開きます。",
+    "スマホにBOARD OF LIGHT XIVの画面が表示されれば接続できています。",
+    "検索欄ではなくアドレス欄へ入力します。スマホでlocalhostを開いても、PCのサーバーにはつながりません。利用中はPCをスリープさせず、起動ウィンドウも開いたままにします。",
+    5
+   ]
+  ],
+  "note": "<h4>終了するとき・つながらないとき</h4><p>使い終えたらPCの起動ウィンドウを閉じるか、そこでCtrl+Cを押します。次回は同じ起動ファイルを実行してからスマホで開きます。</p><p>つながらなければ、PC・サーバーが起動中か、端末間の接続が可能か、URLが表示どおりか、Windowsで通信が許可されているかを確認します。PCとスマホの作成データは自動同期されません。移動にはコンテンツJSONとユーザープリセット専用JSONを使います。</p>"
+ },
+ {
+  "id": "usagePhoneCase",
+  "tag": "スマホ・タブレット",
+  "title": "スマホでオフライン利用（スマホ単体）",
+  "intro": "スマホ内のサーバーアプリで本体を開きます。本体とアプリの入手にはインターネット接続が必要です。準備後はPCなしで利用できます。",
+  "steps": [
+   [
+    "スマホにサーバーアプリを用意する",
+    "オンラインのうちに、スマホ内のフォルダーを公開できるローカルHTTPサーバーアプリを用意します。",
+    "そのアプリで公開フォルダーを選べることを確認します。",
+    "特定のアプリを前提にしていません。対応状況や設定名はOS・アプリによって異なります。PC用の起動ファイルはスマホでは使いません。",
+    15
+   ],
+   [
+    "スマホに本体ZIPを保存する",
+    "同じスマホのブラウザーで公開ページを開き、ツール本体のZIPを保存します。",
+    "ダウンロード先やファイル管理アプリでZIPが見つかれば次へ進めます。",
+    "ファイルは端末内へ保存します。クラウド上にしかない場合は、オフラインにする前にダウンロードします。",
+    16
+   ],
+   [
+    "ZIPを展開する",
+    "スマホのファイル管理アプリでZIPを展開し、展開されたフォルダーの中からindex.htmlを探します。",
+    "index.htmlとjs・css・imagesなどがそろったフォルダーを確認します。",
+    "ZIPをタップすると展開される環境もあります。操作名は端末によって異なります。ファイルを一つずつ別の場所へ移さないでください。",
+    6
+   ],
+   [
+    "アプリの公開先フォルダーを指定する",
+    "サーバーアプリを開き、公開するフォルダーとしてindex.htmlがある場所を選びます。フォルダーへのアクセスを求められたら許可します。",
+    "公開先が、展開した本体のフォルダーになっていれば準備できています。",
+    "設定名は「公開フォルダー」「ドキュメントルート」など、アプリによって異なります。ZIPファイル自体は指定しません。",
+    17
+   ],
+   [
+    "スマホ内のサーバーを起動する",
+    "アプリの開始・起動ボタンを押します。",
+    "起動中の表示と、この端末から開くためのURLが表示されれば完了です。",
+    "ボタン名はアプリによって異なります。表示されたURLを次の操作で使います。",
+    18
+   ],
+   [
+    "同じスマホのブラウザーで開く",
+    "サーバーアプリが表示する端末内向けのURLを、同じスマホのブラウザーのアドレス欄に入力して開きます。",
+    "BOARD OF LIGHT XIVの画面が表示されれば起動できています。",
+    "http://localhost:8000/は例です。実際のURLを使います。このケースではサーバーもスマホ内にあるため、localhostを使えます。",
+    19
+   ],
+   [
+    "オフラインで開けることを確認する",
+    "サーバーを起動したまま、インターネット接続を切った状態でも同じURLを開き直せるか確認します。",
+    "ツールが開けば、PCやインターネット接続なしで使う準備ができています。",
+    "画面ロックやアプリ切り替えでサーバーが停止する場合は、OS・アプリのバックグラウンド動作設定を確認します。外部リンクの閲覧には接続が必要です。",
+    8
+   ]
+  ],
+  "note": "<h4>次回もサーバーを起動してから使います</h4><p>サーバー停止後は、再びアプリで起動してから同じブラウザー・URLを開きます。ファイル管理アプリでHTMLを直接開く方法は端末による制約があるため、動作を保証しません。</p><p>データはブラウザー内に自動保存されます。公開ページや別端末のデータは自動では移りません。必要なコンテンツとユーザープリセットは、それぞれのJSONで移します。スマホ向けの手順はタブレットでも共通です。</p>"
+ },
+ {
+  "id": "usageUpdateCase",
+  "tag": "PC・スマホ・タブレット",
+  "title": "オフラインで使うツールのバージョンアップ",
+  "intro": "現在のデータをJSONに保存してから、新しいVersionの本体一式へ入れ替えます。保存したJSONは、更新の確認が終わるまで残します。",
+  "steps": [
+   [
+    "コンテンツをJSONに保存する",
+    "更新前のツールでメニューを開き、「エクスポート」→「すべてのコンテンツを保存」を選びます。",
+    "ダウンロード先などにコンテンツのJSONファイルが保存されます。",
+    "更新対象のフォルダー以外に保存し、ファイルを見つけられることを確認してください。",
+    9
+   ],
+   [
+    "ユーザープリセットも別に保存する",
+    "同じ「エクスポート」メニューから「すべてのユーザープリセットを保存」を選びます。",
+    "コンテンツとは別の、ユーザープリセットのJSONを保存できれば完了です。",
+    "コンテンツのJSONにはユーザープリセット一覧は含まれません。使っていない場合はこの操作を省略できます。",
+    20
+   ],
+   [
+    "新しいVersionのZIPを入手する",
+    "オンラインで公開ページを開き、更新履歴と対象のVersionを確認して、新しいVersionの本体ZIPを保存します。",
+    "新しい本体のZIPがダウンロード先に見つかれば次へ進めます。",
+    "更新前に保存したJSONは、この後のファイル入れ替えでも残しておきます。",
+    0
+   ],
+   [
+    "使用中のツールとサーバーを閉じる",
+    "ツールを開いているタブを閉じます。サーバー利用中なら、PCの起動ウィンドウを閉じるかCtrl+Cを押します。スマホ単体はサーバーアプリの停止操作を使います。",
+    "使用中のツールとサーバーが停止したら入れ替えの準備ができています。",
+    "PC経由で使っているスマホのタブも閉じておきます。",
+    10
+   ],
+   [
+    "新しいZIPを別の場所へ展開する",
+    "ZIPを展開し、新しい本体のindex.htmlがあるフォルダーを確認します。",
+    "新しい本体一式を、古いファイルと混ざっていない状態で用意できれば完了です。",
+    "WindowsではZIPを右クリックして「すべて展開」を使います。スマホはファイル管理アプリで展開します。",
+    1
+   ],
+   [
+    "本体のフォルダーを入れ替える",
+    "古い本体フォルダーは控えとして別名などで残し、新しい本体一式を、できるだけ以前と同じ置き場所・フォルダー名へ置きます。",
+    "以前の起動先が、新しい本体一式を指している状態にします。",
+    "個別ファイルの上書きで新旧を混在させないでください。バックアップJSONと古い本体は、動作確認が終わるまで削除しません。",
+    10
+   ],
+   [
+    "普段の方法で起動し直す",
+    "PCの直接起動は新しいindex.htmlを開きます。PC経由は同梱の起動バッチを実行します。スマホ単体はサーバーアプリの公開先を確認し、起動し直します。",
+    "普段と同じブラウザー・URLでツールを開ければ次へ進めます。",
+    "スマホ単体の公開先が古いフォルダーのままになっていないか確認します。",
+    11
+   ],
+   [
+    "Versionを確認する",
+    "画面上部のVersion表示（「Ver」で始まる数字）を、入手したVersionと見比べます。",
+    "目的のVersionが表示されれば、本体の更新を確認できています。",
+    "古い数字のままなら、開いたファイルやURLが新しい本体を指しているか確認してから、ページを再読み込みします。",
+    21
+   ],
+   [
+    "コンテンツとプリセットを確認する",
+    "以前のコンテンツ・フェーズ・ユーザープリセットを開き、必要なデータが表示されるか確認します。",
+    "必要なデータがそろっていれば更新作業は完了です。",
+    "データは本体ファイルではなくブラウザー内に保存されています。置き場所・ブラウザー・ホスト名・ポートが変わると、保存先が変わる場合があります。",
+    22
+   ],
+   [
+    "データが見つからないときはJSONを読み込む",
+    "まず以前と同じ起動先か確認します。それでもデータがない場合は「インポート」から保存したJSONを読み込みます。コンテンツは「コンテンツを追加」、プリセットは「ユーザープリセットを追加」を選びます。",
+    "読み込み後に必要なデータが表示されれば復元できています。",
+    "「すべて置き換え」は現在のデータを置き換える操作です。追加で重複した場合も、内容を確認してから整理してください。更新前のJSONは残しておきます。",
+    23
+   ]
+  ],
+  "note": "<h4>更新を確認できないとき</h4><p>起動時にファイル不一致の案内が出たら、新旧のファイルが混在していないか確認します。古いVersionのツールで新しいVersionのJSONを読み込めるとは限らないため、更新前のJSONを保持してください。</p>"
+ }
+];
+function offlineUsageArtwork(scene){const cell=scene%12,x=cell%3*724,y=Math.floor(cell/3)*724,sheet=scene>=12?'detail':'base';return `<svg class="usage-scene-art" viewBox="0 0 724 724" aria-hidden="true" focusable="false"><svg width="724" height="724" viewBox="${x} ${y} 724 724" overflow="hidden"><image data-guide-sheet="${sheet}" width="2172" height="2896"/></svg></svg>`}
+function offlineUsageCaseHTML(item){return `<header class="usage-scene-intro"><span class="usage-scene-eyebrow">${item.tag}</span><h3>${item.title}</h3><p>${item.intro}</p></header><p class="usage-download-status">本体ZIPの配布入口は準備中です。公開後は、以下の手順で利用できます。</p><ol class="usage-scene-steps">${item.steps.map(([title,action,result,tip,scene],i)=>`<li><div class="usage-step-heading"><span class="usage-step-number" aria-hidden="true">${i+1}</span><h4>${title}</h4></div>${offlineUsageArtwork(scene)}<p>${action}</p><p class="usage-step-result"><strong>確認：</strong>${result}</p>${tip?`<p class="usage-scene-tip">${tip}</p>`:''}</li>`).join('')}</ol><section class="usage-data-note">${item.note}</section><p class="usage-art-caption">絵は操作のイメージです。画面や操作名は端末・環境で異なる場合があります。</p>`}
+usageGuide.innerHTML=`<div class="operation-guide-heading"><h2 id="usageSceneTitle">オフライン利用方法</h2><button id="closeUsageSceneGuide" type="button" class="btn" autofocus>閉じる</button></div><div class="operation-guide-body">${offlineUsageCases.map((item,i)=>i===0?offlineUsageCaseHTML(item):`<section id="${item.id}">${offlineUsageCaseHTML(item)}</section>`).join('')}</div>`;
+
+document.body.append(usageGuide);
+// A single retained detail view per case; selection changes visibility, never copies data or DOM.
+(()=>{
+ const body=usageGuide.querySelector('.operation-guide-body'),first=document.createElement('section');first.id='usagePcCase';
+ while(body.firstElementChild&&body.firstElementChild.id!=='usageLanCase')first.append(body.firstElementChild);
+ body.prepend(first);
+ const cases=[first];
+ cases.splice(1,0,...body.querySelectorAll(':scope>#usageLanCase,:scope>#usagePhoneCase,:scope>#usageUpdateCase'));
+ const index=document.createElement('nav');index.className='help-contents';index.setAttribute('aria-label','利用シーン一覧');
+ const title=document.createElement('p');title.className='help-contents-title';title.textContent='オフラインでの利用・更新方法';index.append(title);
+ const list=document.createElement('ul');index.append(list);body.prepend(index);
+ const links=[];
+ function selectCase(selected,scroll=false){for(const [i,item] of cases.entries()){item.hidden=i!==selected;if(i===selected)links[i].setAttribute('aria-current','true');else links[i].removeAttribute('aria-current')}body.scrollTop=0;if(scroll)body.scrollTop=Math.max(0,cases[selected].getBoundingClientRect().top-body.getBoundingClientRect().top-12)}
+ cases.forEach((item,i)=>{
+  const heading=item.querySelector('h3'),label=heading.textContent;heading.tabIndex=-1;heading.classList.add('help-section-heading');
+  const text=document.createElement('span');text.textContent=label;heading.replaceChildren(text);
+  const back=document.createElement('button');back.type='button';back.className='help-back-to-contents';back.textContent='← 一覧へ戻る';back.onclick=()=>{body.scrollTop=0;links[i].focus({preventScroll:true})};const footer=document.createElement('p');footer.className='usage-case-footer';footer.append(back);item.append(footer);
+  const row=document.createElement('li'),link=document.createElement('a');link.href='#'+item.id;link.textContent=label;
+  link.onclick=event=>{event.preventDefault();selectCase(i,true)};row.append(link);list.append(row);links.push(link);
+ });
+ usageGuide.showCaseIndex=()=>selectCase(0);selectCase(0);
+})();
+
+document.getElementById('closeUsageSceneGuide').onclick=()=>usageGuide.close();
+
+// One dialog owns both release notes and the download entry.
+const downloadDialog=changeLog;
+downloadDialog.classList.add('download-guide');
+downloadDialog.querySelector('#changeLogTitle').textContent='更新履歴・ダウンロード';
+const releaseBody=downloadDialog.querySelector('.operation-guide-body');
+const releaseHistorySection=document.createElement('section');releaseHistorySection.className='release-history';
+const historyTitle=document.createElement('h3');historyTitle.textContent='更新履歴';releaseHistorySection.append(historyTitle);
+while(releaseBody.firstChild)releaseHistorySection.append(releaseBody.firstChild);
+releaseBody.innerHTML='<p class="download-status" role="note">ダウンロードはVersion 1.0.0から提供予定です。現在、ファイルは準備中です。</p><p>PCで直接開く場合も、PC経由でスマホから使う場合も、起動ファイルを含む同じZIPを使用します。</p><h3>ダウンロード</h3><div data-download-latest><article class="download-release"><div class="download-release-heading"><h4>Version 1.0.0（配布予定）</h4><button type="button" class="btn" disabled aria-label="Version 1.0.0のZIPをダウンロード（準備中）">ZIPをダウンロード</button></div><p>公開日・更新内容は公開時に案内します。</p></article></div><p>過去の配布Versionはまだありません。0.9.x以前は更新履歴のみ掲載します。</p><p>起動・更新の手順は、ヘルプの「オフライン利用方法」を確認してください。</p>';
+releaseBody.append(releaseHistorySection);
 
 const helpMenu=document.createElement('div');
 
@@ -209,7 +485,7 @@ helpMenu.setAttribute('role','menu');
 
 helpMenu.hidden=true;
 
-helpMenu.innerHTML='<button type="button" role="menuitem" data-help-action="guide">操作ガイド</button><button type="button" role="menuitem" data-help-action="shortcuts">ショートカット一覧</button><button type="button" role="menuitem" data-help-action="history">更新履歴</button><button type="button" role="menuitem" data-help-action="about">ツールについて</button>';
+helpMenu.innerHTML='<button type="button" role="menuitem" data-help-action="guide">操作ガイド</button><button type="button" role="menuitem" data-help-action="shortcuts">ショートカット一覧</button><div class="context-separator" role="separator"></div><button type="button" role="menuitem" data-help-action="usage">オフライン利用方法</button><button type="button" role="menuitem" data-help-action="download">更新履歴・ダウンロード</button><div class="context-separator" role="separator"></div><button type="button" role="menuitem" data-help-action="about">ツールについて</button>';
 
 document.body.appendChild(helpMenu);
 
@@ -221,7 +497,7 @@ window.addEventListener('resize',()=>closeHelpMenu());
 
 helpMenu.addEventListener('keydown',e=>{const items=Array.from(helpMenu.querySelectorAll('button')),index=items.indexOf(document.activeElement);if(e.key==='Escape'){e.preventDefault();closeHelpMenu(true)}else if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();items[(index+(e.key==='ArrowDown'?1:items.length-1))%items.length].focus()}else if(e.key==='Tab')closeHelpMenu()});
 
-helpMenu.addEventListener('click',e=>{const item=e.target.closest('[data-help-action]');if(!item)return;closeHelpMenu(true);const dialog=item.dataset.helpAction==='shortcuts'?shortcutDialog:item.dataset.helpAction==='guide'?operationGuide:item.dataset.helpAction==='history'?changeLog:aboutTool;dialog.querySelector('.operation-guide-body').scrollTop=0;dialog.showModal()});
+helpMenu.addEventListener('click',e=>{const item=e.target.closest('[data-help-action]');if(!item)return;closeHelpMenu(true);const dialog=item.dataset.helpAction==='shortcuts'?shortcutDialog:item.dataset.helpAction==='guide'?operationGuide:item.dataset.helpAction==='usage'?usageGuide:item.dataset.helpAction==='download'?downloadDialog:aboutTool;if(dialog===usageGuide)usageGuide.showCaseIndex();if(dialog===usageGuide)for(const image of usageGuide.querySelectorAll('svg image'))if(!image.hasAttribute('href'))image.setAttribute('href',image.dataset.guideSheet==='detail'?offlineGuideDetailArtworkData:offlineGuideArtworkData);dialog.querySelector('.operation-guide-body').scrollTop=0;dialog.showModal()});
 
 document.getElementById('closeShortcuts').onclick=()=>shortcutDialog.close();
 shortcutDialog.addEventListener('close',()=>{const help=document.getElementById('operationGuideBtn');(help.getClientRects().length?help:document.querySelector('.phone-menu-toggle'))?.focus({preventScroll:true})});
@@ -229,9 +505,9 @@ document.getElementById('closeOperationGuide').onclick=()=>operationGuide.close(
 
 document.getElementById('closeAboutTool').onclick=()=>aboutTool.close();
 
-for(const dialog of [operationGuide,aboutTool,shortcutDialog])dialog.addEventListener('close',()=>document.getElementById('operationGuideBtn').focus());
+for(const dialog of [operationGuide,aboutTool,shortcutDialog,usageGuide,downloadDialog])dialog.addEventListener('close',()=>{if(dialog.open)return;const help=document.getElementById('operationGuideBtn');(help.getClientRects().length?help:document.querySelector('.phone-menu-toggle'))?.focus({preventScroll:true})});
 
-document.addEventListener('keydown',e=>{const dialog=operationGuide.open?operationGuide:aboutTool.open?aboutTool:changeLog.open?changeLog:shortcutDialog.open?shortcutDialog:null;if(!dialog)return;if(e.key==='Escape'){e.preventDefault();dialog.close()}e.stopImmediatePropagation()},true);
+document.addEventListener('keydown',e=>{const dialog=operationGuide.open?operationGuide:aboutTool.open?aboutTool:changeLog.open?changeLog:shortcutDialog.open?shortcutDialog:usageGuide.open?usageGuide:null;if(!dialog)return;if(e.key==='Escape'){e.preventDefault();dialog.close()}e.stopImmediatePropagation()},true);
 
 ;
 // ===== js/runtime/canvas-pan.js =====
@@ -618,7 +894,7 @@ $('#fileInput').onchange=e=>{
   try{await yieldDesktopBusyPaint();imported=parseImportedBoards(reader.result)}catch(error){notify('JSONを読み込めませんでした：'+(error?.message||String(error)));e.target.value='';return}finally{finishReading()}
   if(mode==='replace'&&!await confirmReplaceImport(imported)){e.target.value='';return}
   const previous={phaseMasters:window.Bolxiv.phaseMasters?.records(),phaseMasterGroups:window.Bolxiv.phaseMasters?.groupRecords(),data,contentBoards,activeContent,listHistory:contentListHistory.slice(),listFuture:contentListFuture.slice(),history:history.slice(),future:future.slice(),selected,selectedIds:selectedIds.slice(),selectedPhaseIndexes:selectedPhaseIndexes.slice(),phaseSelectionOwner};
-  try{await withDesktopDisplayBusy(()=>applyImportedBoards(imported,mode));notify(mode==='append'?imported.length+' 件のコンテンツを末尾に追加しました':'全コンテンツを読み込みデータに置き換えました')}
+  try{await withDesktopDisplayBusy(()=>applyImportedBoards(imported,mode));notify(mode==='append'?imported.length+' 件のコンテンツを追加しました':'全コンテンツを読み込みデータに置き換えました')}
   catch(error){
    if(previous.phaseMasters)window.Bolxiv.phaseMasters.restoreRecords(previous.phaseMasters,previous.phaseMasterGroups);contentListHistory.splice(0,contentListHistory.length,...previous.listHistory);contentListFuture.splice(0,contentListFuture.length,...previous.listFuture);contentSelectorCache=null;data=previous.data;contentBoards=previous.contentBoards;activeContent=previous.activeContent;history=previous.history;future=previous.future;selected=previous.selected;selectedIds=previous.selectedIds;selectedPhaseIndexes=previous.selectedPhaseIndexes;phaseSelectionOwner=previous.phaseSelectionOwner;
    try{renderAndSave()}catch(recoveryError){console.error('Import recovery failed',recoveryError)}

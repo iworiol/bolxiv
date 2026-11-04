@@ -853,9 +853,13 @@ function confirmPhoneLayerDeletion(id,individual=false){
   trigger.onclick=event=>{
    const fromHeader=!actions.hidden,session=actions._headerSession||0,origin=event?.submenuHover?document.activeElement:null;
    const finish=()=>{
-    if(fromHeader&&(actions.hidden||session!==(actions._headerSession||0))){closeChild();return}
+    if(fromHeader&&(actions.hidden||session!==(actions._headerSession||0)||origin&&actions._submenuHover?.activeToggle!==trigger)){closeChild();if(origin)origin.focus({preventScroll:true});return}
     child._keyboardParent=fromHeader?actions:null;
-    if(!mobile.matches&&!child.hidden&&fromHeader){const r=trigger.getBoundingClientRect(),parent=actions.getBoundingClientRect(),w=child.offsetWidth,h=child.offsetHeight;child.style.left=Math.max(4,Math.min(parent.right+w+4>innerWidth?parent.left-w-4:parent.right+4,innerWidth-w-4))+'px';child.style.top=Math.max(4,Math.min(r.top,innerHeight-h-4))+'px'}
+    if(!mobile.matches&&!child.hidden&&fromHeader){
+     const r=trigger.getBoundingClientRect(),parent=actions.getBoundingClientRect(),w=child.offsetWidth,h=child.offsetHeight,gap=-3,first=[...child.querySelectorAll('button')].find(node=>node.getClientRects().length),inset=first?first.getBoundingClientRect().top-child.getBoundingClientRect().top:0;
+     child.style.left=Math.max(4,Math.min(parent.right+w+gap>innerWidth-4?parent.left-w-gap:parent.right+gap,innerWidth-w-4))+'px';
+     child.style.top=Math.max(4,Math.min(r.top-inset,innerHeight-h-4))+'px';
+    }
     if(origin&&!child.hidden){child._openedByHover=true;origin.focus({preventScroll:true})}
    };
    const result=original.call(trigger,event);if(result?.then)return result.then(finish);finish();
@@ -864,8 +868,8 @@ function confirmPhoneLayerDeletion(id,individual=false){
   child.addEventListener('click',event=>{if(event.target.closest('button')&&!event.target.closest('[data-phone-menu-close]'))close()});
  }
  actions.addEventListener('click',event=>{const action=event.target.closest('button');if(action&&!['exportBtn','importBtn','operationGuideBtn'].includes(action.id)&&!action.hasAttribute('data-phone-menu-close'))close()});
- document.addEventListener('pointerdown',event=>{if(!header.contains(event.target)&&!event.target.closest('#jsonExportMenu,#jsonImportMenu,#helpMenu'))close()},true);
- document.addEventListener('keydown',event=>{if(event.key==='Escape'&&header.classList.contains('phone-menu-open')){event.preventDefault();close(true)}});
+ document.addEventListener('pointerdown',event=>{if(document.querySelector('dialog:modal'))return;if(!header.contains(event.target)&&!event.target.closest('#jsonExportMenu,#jsonImportMenu,#helpMenu'))close()},true);
+ document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!document.querySelector('dialog:modal')&&header.classList.contains('phone-menu-open')){event.preventDefault();close(true)}});
  new MutationObserver(()=>{if(!header.classList.contains('phone-menu-open')){actions.hidden=true;actions._cancelSubmenuHover?.();button.setAttribute('aria-expanded','false')}}).observe(header,{attributes:true,attributeFilter:['class']});
  mobile.addEventListener('change',()=>close());
 })();
