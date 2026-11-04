@@ -1126,6 +1126,9 @@ function bindSubmenuHover(toggle,submenu,open,close){
    const child=state.items.find(item=>item.submenu.contains(event.target));
    if(child){cancel();return}
    const item=state.items.find(item=>item.toggle.contains(event.target));
+   // Switching header rows should clear the old highlight immediately;
+   // the existing leave delay still protects the gap into a child menu.
+   if(root.id==='headerActions'){state.activeToggle=item?.toggle||null;state.items.filter(other=>other!==item).forEach(other=>other.close())}
    if(!item){laterClose();return}
    cancel();if(item.toggle.disabled)return;
    state.openTimer=setTimeout(()=>{state.openTimer=null;if(root.hidden||!desktop()||!item.toggle.getClientRects().length)return;state.items.filter(other=>other!==item).forEach(other=>other.close());const wasHidden=item.submenu.hidden;item.open(true);if(wasHidden&&!item.submenu.hidden)item.submenu._openedByHover=true},140);

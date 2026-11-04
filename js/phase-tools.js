@@ -219,7 +219,7 @@
  window.addEventListener('click',event=>{if(!dialog.open)return;const button=event.target.closest?.('#undo,#redo');if(!button)return;event.preventDefault();event.stopImmediatePropagation();historyAction(button.id==='redo')},true);
  window.addEventListener('keydown',event=>{
   if(event.target.closest?.('dialog.confirm-dialog'))return;
-  if(!dialog.open||event.target.closest?.('#phaseMasters,#phoneIconHelp,#operationGuideDialog,#changeLogDialog,#aboutToolDialog,#shortcutDialog'))return;
+  if(!dialog.open||event.target.closest?.('#phaseMasters,#phoneIconHelp,#operationGuideDialog,#changeLogDialog,#aboutToolDialog,#shortcutDialog,#usageSceneDialog'))return;
   if(event.key==='Control'){guideControlPressed=true;if(gesture?.action==='move'){gesture.memberOnClick=null;if(gesture.recorded)movePointer({pointerId:gesture.id,clientX:gesture.lastClientX,clientY:gesture.lastClientY,ctrlKey:true,shiftKey:event.shiftKey,preventDefault(){},stopPropagation(){}})}return}
   if(event.target.closest?.('.guide-section-toggle')&&event.key===' '){event.preventDefault();event.stopImmediatePropagation();if(!event.repeat)event.target.closest('.guide-section-toggle').click();return}
   if(event.key==='Escape'&&event.target.closest?.('input,select,textarea')&&!gesture&&guideMenu.hidden&&zoomMenu.hidden&&!dialog.querySelector('.color-popover:not([hidden])')){if(properties.contains(event.target)){event.preventDefault();event.stopImmediatePropagation();const shape=currentShape();if(shape&&event.target.dataset.guideShapeKey)event.target.value=Math.round(shape[event.target.dataset.guideShapeKey]);if(event.target===opacityNumber)opacityNumber.value=(shape?.appearance||currentGuide()).opacity;sync()}return}

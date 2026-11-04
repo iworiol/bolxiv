@@ -889,7 +889,7 @@
 .operation-guide-body strong{font-weight:700}
  .operation-guide-body strong.help-destructive{color:#a33b32!important;-webkit-text-fill-color:#a33b32!important}
  .change-log-version{white-space:nowrap}
- #changeLogDialog .operation-guide-body>p{display:grid;grid-template-columns:max-content minmax(0,1fr);column-gap:1ch;align-items:start}
+ #changeLogDialog .release-history>p{display:grid;grid-template-columns:max-content minmax(0,1fr);column-gap:1ch;align-items:start}
  .change-log-description{min-width:0;overflow-wrap:anywhere}
  .change-log-description::before{content:none}
 
@@ -2264,3 +2264,48 @@ body.phase-master-editing .app .layout :is(.content-heading-row,.right .board-ti
 .board-read-only:not(.png-preview-active) :is(.phone-content-icon,.phone-content-close,.phone-content-backdrop){display:none!important}
 
 @media(max-width:850px){.app>.top>.brand>.phone-brand-caption{grid-column:2;grid-row:2;display:flex;align-items:baseline;gap:5px;min-width:0}.app>.top>.brand>.phone-brand-caption small{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis}.app>.top>.brand>.phone-brand-caption .brand-version{flex:none;display:block!important;font-size:9px;white-space:nowrap;margin:0!important}.app>.top>.brand>.content-save-status{max-width:calc(100% - 43px)}}
+
+/* Usage-scene guide: shared illustrations, responsive cards and selectable text. */
+.usage-scene-guide{width:min(1120px,calc(100vw - 32px))}
+.usage-scene-guide .operation-guide-body{padding:20px;background:#fff}
+.usage-scene-intro{position:relative;padding:2px 0 16px;border-bottom:1px solid #c9d9e7}
+.usage-scene-eyebrow{display:inline-block;font-size:12px;letter-spacing:.12em;color:#456780}
+.usage-scene-guide .usage-scene-intro h3{margin:6px 0 8px;font-size:24px;color:#25395f;line-height:1.4}
+.usage-scene-guide p{font-size:14px;line-height:1.8;overflow-wrap:anywhere}
+.usage-scene-guide .usage-download-status{padding:10px 12px;margin:16px 0;background:#eef5fb;border-left:3px solid #76badb;border-radius:4px;color:#33445f;font-size:13px}
+.usage-scene-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:20px 0;padding:0;list-style:none}
+.usage-scene-steps>li{min-width:0;padding:16px;border:1px solid #c9d9e7;border-radius:8px;background:#fff}
+.usage-step-heading{display:grid;grid-template-columns:30px minmax(0,1fr);align-items:center;gap:6px 8px}
+.usage-step-number{display:grid;place-items:center;width:28px;height:28px;border:1px solid #83bddf;border-radius:7px;background:#eaf4fb;color:#23446a;font-size:16px;font-weight:700}
+.usage-scene-guide .usage-step-heading h4{font-size:16px;color:#25395f;line-height:1.5;margin:0}
+.usage-connection{grid-column:2;font-size:12px;color:#326b92}
+.usage-connection-local{color:#49645e}
+.usage-scene-art{display:block;width:100%;height:230px;margin:12px 0;overflow:hidden;border-radius:6px}
+.usage-scene-steps>li>p{margin:8px 0}
+.usage-scene-guide .usage-scene-tip{font-size:13px;color:#526078}
+.usage-scene-guide code{font-family:inherit;font-size:inherit;color:inherit;overflow-wrap:anywhere}
+.usage-data-note{padding:16px;border:1px solid #c9d9e7;border-radius:8px;background:#f3f8fc}
+.usage-scene-guide .usage-data-note h4{margin:0 0 8px;font-size:16px;color:#25395f}
+.usage-data-note p:last-child{margin-bottom:0}
+.usage-scene-guide .usage-art-caption{margin:12px 0 0;font-size:12px;color:#617087}
+@media(max-width:850px){
+ .usage-scene-guide{width:calc(100vw - 16px);max-height:calc(100dvh - 24px)}
+ .usage-scene-guide .operation-guide-body{padding:14px}
+ .usage-scene-guide .usage-scene-intro h3{font-size:21px}
+ .usage-scene-steps{grid-template-columns:minmax(0,1fr);gap:16px;margin:16px 0}
+ .usage-scene-steps>li{padding:14px}
+ .usage-scene-art{height:230px}
+}
+
+/* Offline guide: selector and selected detail share one scrolling body. */
+.usage-scene-guide .help-contents a[aria-current="true"]{font-weight:700;text-decoration:underline}
+.usage-scene-guide>.operation-guide-body{min-height:0}
+.usage-case-footer{display:flex;justify-content:flex-end}
+
+/* Download catalogue shares the help dialog shell, scrolling body and buttons. */
+.download-guide .operation-guide-body{min-height:0;padding-top:16px}
+.download-status{padding:10px 12px;border-left:3px solid #76badb;background:#eef5fb;border-radius:4px}
+.download-release{padding:12px;margin:0 0 12px;border:1px solid #c9d9e7;border-radius:6px}
+.download-release-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.download-release-heading h4{margin:0;font-size:16px;color:#25395f}
+.download-guide [data-download-latest] .download-release{border-color:#83bddf;background:#f4faff}
