@@ -351,13 +351,13 @@ function printPageLayout(width,height){
  async function runOutput(printing){
   if(!session||session.saving)return;flushNoteRefresh();const current=session;current.saving=true;save.disabled=printButton.disabled=true;scaleInput.disabled=true;back.disabled=true;printSettingsReset.disabled=true;
   try{if(printing)await printOutputCanvas();else{const target=window.showSaveFilePicker?await window.showSaveFilePicker(exportPickerOptions(safeExportName('.png'),'image/png','PNG画像')):null;await exportPng(target,current.scale)}}
-  catch(error){if(error?.name!=='AbortError')notify((printing?'印刷画面を開けませんでした：':'PNGを書き出せませんでした：')+(error?.message||String(error)))}
+  catch(error){if(error?.name!=='AbortError')notifyFailure(printing?'印刷画面を開けませんでした':'PNGを書き出せませんでした',{error,retained:'攻略図とノートはそのまま残っています',action:printing?'印刷画面を閉じて開き直し、もう一度印刷してください':'保存先の空き容量・書き込み権限を確認し、もう一度書き出してください'})}
   finally{if(session===current){current.saving=false;save.disabled=printButton.disabled=false;scaleInput.disabled=false;back.disabled=false;printSettingsReset.disabled=false}}
  }
  save.onclick=()=>runOutput(false);printButton.onclick=()=>runOutput(true);
  dialog.addEventListener('close',()=>{if(session&&!dialog.open&&!session.saving)close()});
  window.addEventListener('keydown',event=>{
-  if(!session||event.target.closest?.('#changeLogDialog,#operationGuideDialog,#aboutToolDialog,#phoneIconHelp,#shortcutDialog,#usageSceneDialog'))return;
+  if(!session||document.querySelector('dialog:modal')||event.target.closest?.('#changeLogDialog,#operationGuideDialog,#aboutToolDialog,#phoneIconHelp,#shortcutDialog,#usageSceneDialog'))return;
   if(event.key===' '&&event.target.matches?.('#desktopPhasePanelTitle,#desktopPhaseSectionToggle')){event.preventDefault();event.stopImmediatePropagation();if(!event.repeat)event.target.click();return}
   if(!session.saving&&(event.ctrlKey||event.metaKey)&&['z','y'].includes(event.key.toLowerCase())){event.preventDefault();event.stopImmediatePropagation();if(event.key.toLowerCase()==='y'||event.shiftKey)redo();else undo();return}
   if(event.target.closest?.('#phaseMemo textarea,#outputNotePhase')&&!session.saving){event.stopImmediatePropagation();return}

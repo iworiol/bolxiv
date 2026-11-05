@@ -434,8 +434,9 @@ function confirmPhoneLayerDeletion(id,individual=false){
  const closeButton=document.createElement('button');closeButton.type='button';closeButton.className='phone-content-close';closeButton.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" width="24" height="24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><path d="M15 5l-7 7 7 7"/></svg>';closeButton.setAttribute('aria-label','コンテンツパネルを閉じる');closeButton.title='コンテンツパネルを閉じる';closeButton.onclick=()=>close(true);layout.append(closeButton);
  document.addEventListener('keydown',event=>{
   if(!mobile.matches||!layout.classList.contains('phone-content-open')||event.target.closest?.('#phoneIconHelp,dialog.confirm-dialog'))return;
-  if(event.key==='Escape'){event.preventDefault();close();return}
   if(event.target.closest('input,select,textarea,[contenteditable="true"],dialog'))return;
+  if(event.isComposing||event.keyCode===229)return;
+  if(event.key==='Escape'){event.preventDefault();close();return}
   const key=event.key.toLowerCase(),shortcut=(event.ctrlKey||event.metaKey)&&['c','v','x','z','y'].includes(key),objectAction=['delete','backspace'].includes(key)||key.startsWith('arrow')&&!event.target.closest('#pages,button,[role="separator"]');
   if(shortcut||objectAction){event.preventDefault();event.stopImmediatePropagation()}
  },true);
@@ -464,7 +465,7 @@ function confirmPhoneLayerDeletion(id,individual=false){
   ],
   [
     ".phone-menu-toggle",
-    "保存・読み込み・ヘルプなどのメニューを開きます。"
+    "保存・読み込み・ヘルプなどのメニューを開きます。要望・不具合報告はヘルプから送れます。"
   ],
   [
     ".phone-content-icon",
@@ -497,7 +498,7 @@ function confirmPhoneLayerDeletion(id,individual=false){
   ],
   [
     "#phonePhaseSwitch-toggle",
-    "フェーズプロパティとノートを切り替えます。"
+    "フェーズリストとプロパティを切り替えます。ノートはプロパティ内です。"
   ],
   [
     "#phonePhaseSectionToggle",
@@ -677,7 +678,7 @@ function confirmPhoneLayerDeletion(id,individual=false){
  entries.push(
   ["#phaseMemo textarea","フェーズごとのノートを編集します。変更は元のノートに保存されます。"],
   ["#outputNotePhase","選択中のフェーズから、ノートの編集対象だけを切り替えます。出力対象は変わりません。"],
-  ["#editFieldGuides","ガイド編集を開始・終了します。"],
+  ["#editFieldGuides","コンテンツとフィールドの編集を切り替えます。"],
   ["[data-guide-tool=\"line\"]","直線を選び、キャンバスを押して配置します。"],
   ["[data-guide-tool=\"circle\"]","円を選び、キャンバスを押して配置します。"],
   ["[data-guide-tool=\"rect\"]","四角形を選び、キャンバスを押して配置します。"],
@@ -689,7 +690,7 @@ function confirmPhoneLayerDeletion(id,individual=false){
   ["#fieldGuideOuterRing","一番外側の円を表示・非表示にします。"],
   ["#fieldGuideRays","フィールドの中心から放射線を表示します。"],
   ["#guideShapeFill","塗りを「なし」「薄く」「線と同じ濃さ」から選びます。"],
-  [".guide-property-group[aria-label=\"線の見た目\"]","個別図形・同心円・放射線すべての色と濃さを設定します。"],
+  [".guide-property-group[aria-label=\"線の見た目\"]","共通設定を使う固定ガイドと、同心円・放射線の色・濃さを設定します。"],
   ["#duplicateGuideShape","選択したガイドを複製します。"],
   ["#deleteGuideShape","選択したガイドを削除します。"],
   ["#groupGuideShapes","複数選択したガイドをグループ化します。"],
@@ -741,7 +742,7 @@ function confirmPhoneLayerDeletion(id,individual=false){
   const fieldMode=!!window.Bolxiv?.phaseMasters?.active,png=!!window.Bolxiv?.pngPreview?.active,guides=!!window.Bolxiv?.fieldGuideEditor?.active,content=source===contentButton,mode=fieldMode?'フィールド編集':guides?'ガイド編集':png?(window.Bolxiv.pngPreview.kind==='print'?'印刷':'画像生成'):boardReadOnly?'閲覧':'編集';
   panel.querySelector('h2').textContent='アイコン説明 · '+mode+' · '+(content?(fieldMode?'フィールド':'コンテンツ'):'キャンバス');
   const list=panel.querySelector('.phone-icon-help-list');list.replaceChildren();
-  const intro=document.createElement('p');intro.className='phone-icon-help-intro';intro.textContent=fieldMode?'フィールドとガイドは全コンテンツ共通です。変更は使用中のすべてのフェーズへ反映されます。見出し横の切替からコンテンツへ戻ります。':png&&content?'出力モード中はノートを編集できます。ペインを閉じると出力プレビューへ戻ります。':png&&matchMedia('(min-width:851px)').matches?'拡大したプレビューは左ドラッグで移動できます。':'現在の画面で使える操作です。';list.append(intro);
+  const intro=document.createElement('p');intro.className='phone-icon-help-intro';intro.textContent=fieldMode?'フィールドとガイドは全コンテンツ共通です。変更は使用中のすべてのフェーズへ反映されます。見出し横の切替からコンテンツへ戻ります。':png&&content?'出力画面で選択とノート編集を行います。⇄でフェーズリストと出力設定を切り替えます。':png&&matchMedia('(min-width:851px)').matches?'拡大したプレビューは左ドラッグで移動できます。':'現在の画面で使える操作です。';list.append(intro);
   const scope=content?document.querySelector('.battle'):png?document.getElementById('pngPreview'):document.querySelector('.right');
   const find=selector=>{try{return [...scope.querySelectorAll(selector),...document.querySelectorAll(selector)].find(node=>visible(node)&&!node.disabled&&(content?node.closest('.battle,.phone-content-close,.phone-phase-navigation,.header-mode-status'):!node.closest('.battle')))}catch{return null}};
   const outputProperties=mode+'プロパティ';
@@ -765,8 +766,8 @@ function confirmPhoneLayerDeletion(id,individual=false){
     const mapped=['#fitBoardZoom','#zoomOut','#resetBoardZoom','#zoomIn','#gridToggle','#fieldToggle','#clipToggle'].includes(selector)?png?'#png-'+selector.slice(1):guides&&matchMedia('(min-width:851px)').matches?'#guide-'+selector.slice(1):selector:selector;
     node=find(mapped);if(!node)continue;
     if(content&&!node.closest('.battle,.phone-content-close,.phone-phase-navigation,.header-mode-status'))continue;
-    if(selector==='.phone-content-icon')description=png?'コンテンツペインを開き、盤面を確認しながらノートを編集できます。':'コンテンツ・フェーズ・設定・ノートを開きます。';
-    if(selector==='#editFieldGuides')description=guides?'ボタンを押して通常編集へ戻ります。':'ボタンを押してガイド編集を始めます。';
+    if(selector==='.phone-content-icon')description=png?'出力画面の設定欄でノートを編集します。':'コンテンツ・フェーズ・設定・ノートを開きます。';
+    if(selector==='#editFieldGuides')description=guides?'見出し横の切替ボタンでコンテンツへ戻ります。':'見出し横の切替ボタンでフィールドへ移ります。';
     if(fieldMode&&selector==='.phone-content-icon')description='フィールドペインを開き、フィールドやグループを選択・整理します。';if(fieldMode&&selector==='.phone-content-close')description='フィールドペインを閉じ、選択中のフィールドの編集画面へ戻ります。';
     if(fieldMode&&selector==='#undo')description='フィールド・ガイドの編集や、フィールドの追加・整理を元に戻します。';
     if(guides&&selector==='#redo')description='元に戻した操作をやり直します。';
@@ -779,6 +780,8 @@ function confirmPhoneLayerDeletion(id,individual=false){
    contextual.push({selector,description,node});
   }
   for(const [selector,description] of [
+   ['.output-selection-tabbed .phone-list-property-change','フェーズリストと'+outputProperties+'を切り替えます。ノートは出力設定内です。'],
+   ['.output-selection-tabbed .phone-object-collapse','表示中のフェーズリスト／出力設定欄を開閉します。'],
    ['#contentPanel.phone-phase-list-tabbed .phone-list-property-change','フェーズリストとフェーズプロパティを切り替えます。ノートはプロパティ内で編集できます。'],
    ['#contentPanel.phone-phase-list-tabbed .phone-object-collapse','表示中のフェーズリスト／プロパティ欄を開閉します。'],
    ['.phone-reader-switch',png?'⇄で、フェーズリストと'+outputProperties+'を切り替えます。':'⇄で、フェーズリストとノートを切り替えます。'],
@@ -787,11 +790,12 @@ function confirmPhoneLayerDeletion(id,individual=false){
    ['#objectLayerPanel .phone-object-collapse','オブジェクト欄を開閉します。'],
   ]){const node=find(selector);if(node)contextual.push({selector,description,node})}
   const helpTitles={
+   '.output-selection-tabbed .phone-list-property-change':'フェーズリスト・出力設定の切り替え','.output-selection-tabbed .phone-object-collapse':'出力の欄を開閉',
    '#contentPanel.phone-phase-list-tabbed .phone-list-property-change':'フェーズリスト・プロパティの切り替え','#contentPanel.phone-phase-list-tabbed .phone-object-collapse':'フェーズ欄を開閉',
    '#phaseMasterModeToggle':'コンテンツ／フィールドの切り替え','#editUsedField':'使用フィールドを編集','#addPhaseMaster':'フィールドの追加・整理','#duplicatePhaseMaster':'フィールドを複製','#phaseMasterSelect':'使用フィールドの選択','#editModeToggle':'モード切替','help-png-mode':'モード切替',
    '.phone-menu-toggle':'操作メニュー','.phone-content-icon':fieldMode?'フィールドペインを開く':'コンテンツペインを開く','.phone-content-close':fieldMode?'フィールドペインを閉じる':'コンテンツペインを閉じる','.phone-material-pin':'マテリアルを開閉',
    '.preset-manage':'配置・プリセット管理の切り替え','#addPage':'フェーズを追加','#addPhaseGroup':'フェーズグループを追加','#copyPage':'フェーズをコピー','#copyPageToContent':'別コンテンツへコピー',
-   '#editFieldGuides':'ガイドの開始・終了','#phasePropertyResize':'ペインの高さ調整','#resetBoardZoom':'表示倍率を選ぶ','#guideHideObjects':'オブジェクトを一時的に隠す','#fieldGuide-ringScale':'同心円の大きさ','#fieldGuideOuterRing':'最外周を表示','#guideShapeFill':'ガイドの塗り','.guide-property-group[aria-label="線の見た目"]':'ガイド（共通）','.print-page-fields':'印刷の配置設定','#printSettingsReset':'印刷設定をリセット','#fieldGuideCircles':'同心円','#fieldGuideRays':'放射線','#duplicateGuideShape':'ガイドを複製','#deleteGuideShape':'ガイドを削除','.guide-selection-controls .aoe-box-handle':'サイズ変更ハンドル','#outputPrintReadability':'文字・線を強調','#outputPlainPaper':'普通紙向けの色調整','#outputPrintCutGuide':'切り取りガイド','#phonePhaseSwitch-toggle':'フェーズプロパティ・ノートの切り替え','#phonePhaseSectionToggle':'フェーズ設定・ノート欄を開閉','#toggleBattlePages':'フェーズリストを開閉',
+   '#editFieldGuides':'コンテンツ／フィールドの切り替え','#phasePropertyResize':'ペインの高さ調整','#resetBoardZoom':'表示倍率を選ぶ','#guideHideObjects':'オブジェクトを一時的に隠す','#fieldGuide-ringScale':'同心円の大きさ','#fieldGuideOuterRing':'最外周を表示','#guideShapeFill':'ガイドの塗り','.guide-property-group[aria-label="線の見た目"]':'ガイド（共通）','.print-page-fields':'印刷の配置設定','#printSettingsReset':'印刷設定をリセット','#fieldGuideCircles':'同心円','#fieldGuideRays':'放射線','#duplicateGuideShape':'ガイドを複製','#deleteGuideShape':'ガイドを削除','.guide-selection-controls .aoe-box-handle':'サイズ変更ハンドル','#outputPrintReadability':'文字・線を強調','#outputPlainPaper':'普通紙向けの色調整','#outputPrintCutGuide':'切り取りガイド','#phonePhaseSwitch-toggle':'フェーズリスト・プロパティの切り替え','#phonePhaseSectionToggle':'フェーズ設定・ノート欄を開閉','#toggleBattlePages':'フェーズリストを開閉',
    '.phone-phase-navigation>button:first-child':'前のフェーズへ','.phone-phase-navigation>button:last-child':'次のフェーズへ',
    'help-name-edit':'名前を変更','help-item-delete':'項目を削除','help-name-confirm':'名前を確定','help-add-cancel':'追加を取り消す',
    '#bulkVisibleInput':'全体の表示・非表示','#bulkEditableInput':'全体の編集可否','.handle.move-handle':'移動ハンドル','.handle.rotate':'回転ハンドル','.list-drag-grip':'並べ替え','.phase-group-toggle':'フェーズグループを開閉','.object-group-disclosure':'オブジェクトグループを開閉','help-object-visibility':'オブジェクトの表示・非表示','help-object-lock':'オブジェクトをロック','help-number-step':'プロパティの数値を調整',
@@ -1024,7 +1028,7 @@ window.Bolxiv.selectionSurface=(()=>{
 
 // User presets are an independent library, never part of content JSON.
 const userPresetLibrary=(()=>{
- const key='bolxiv-user-presets-v1';let presets=[];const presetHistory=[],presetFuture=[];
+ const key='bolxiv-user-presets-v1';let presets=[],importedPresetToReveal=null;const presetHistory=[],presetFuture=[];
  try{const stored=JSON.parse(localStorage.getItem(key)||'[]');if(Array.isArray(stored))presets=stored.filter(p=>p&&typeof p.id==='string'&&typeof p.name==='string'&&Array.isArray(p.items)&&p.items.length)}catch{}
  const grid=document.getElementById('userPresetGrid'),empty=document.getElementById('userPresetEmpty'),panel=document.getElementById('presetPanel'),heading=document.querySelector('[aria-controls="presetPanel"]');
  const manage=document.createElement('button');manage.type='button';manage.className='btn preset-manage';manage.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2" stroke-dasharray="2 3"/><circle cx="8.5" cy="8.5" r="2.5"/><path d="M13 6h5v5h-5zM8.5 13l3 5h-6zM14 16h4M16 14v4"/></svg>';manage.title='プリセットの管理';manage.setAttribute('aria-label','プリセットの管理');manage.setAttribute('aria-haspopup','menu');manage.setAttribute('aria-expanded','false');manage.setAttribute('aria-pressed','false');document.querySelector('.left .object-pane-actions').prepend(manage);document.querySelector('.left .object-pane-actions').append(document.getElementById('leftRailToggle'));
@@ -1035,7 +1039,7 @@ const userPresetLibrary=(()=>{
  function close(){const restore=!menu.hidden&&menu.contains(document.activeElement)&&matchMedia('(min-width:851px)').matches,origin=menu._opener;menu.hidden=true;if(restore){manage.focus({preventScroll:true});origin?.closest('.preset-manager-row')?.focus({preventScroll:true})}}
  function blocked(){return boardReadOnly||phaseComparisonActive()||window.Bolxiv?.pngPreview?.active||window.Bolxiv?.phaseMasters?.active}
  function recordPresetChange(before,after,customLabel=null){if(before===after)return;const a=JSON.parse(before),b=JSON.parse(after),label=customLabel||(b.length>a.length?'登録':b.length<a.length?'削除':a.some((item,index)=>item.id!==b[index]?.id)?'並べ替え':'名前変更');presetHistory.push({before,after,label});if(presetHistory.length>50)presetHistory.shift();presetFuture.length=0}
- function save(next,{record=true,label=null}={}){const before=JSON.stringify(presets),after=JSON.stringify(next);window.BolxivSaveStatus.set('presets','保存中…');try{localStorage.setItem(key,after);presets=next;if(record)recordPresetChange(before,after,label);window.BolxivSaveStatus.set('presets','保存済み');render();renderManager();syncPresetHistory();return true}catch{window.BolxivSaveStatus.set('presets','未保存');notify('プリセットを保存できませんでした。保存領域の空きを確認してください');return false}}
+ function save(next,{record=true,label=null}={}){const before=JSON.stringify(presets),after=JSON.stringify(next);window.BolxivSaveStatus.set('presets','保存中…');try{localStorage.setItem(key,after);presets=next;if(record)recordPresetChange(before,after,label);window.BolxivSaveStatus.set('presets','保存済み');render();renderManager();syncPresetHistory();return true}catch(error){window.BolxivSaveStatus.set('presets','未保存');console.warn('Preset persistence failed',error);notifyFailure('プリセットを保存できませんでした',{error,retained:editingPreset?'入力した名称はそのまま残っています':'保存済みのプリセットは変更していません',action:editingPreset?'ページを閉じずに空き容量・保存設定を確認し、もう一度確定してください':'「エクスポート」からユーザープリセットJSONを保存し、空き容量・保存設定を確認してください'});return false}}
  const historyButtons=[];for(const [id,redo] of [['presetUndo',false],['presetRedo',true]]){const button=document.createElement('button');button.id=id;button.type='button';button.className='btn preset-history content-history-button';button.innerHTML=document.getElementById(redo?'redo':'undo').innerHTML;button.onclick=()=>restorePresetHistory(redo);manage.parentElement.insertBefore(button,document.getElementById('leftRailToggle'));historyButtons.push(button)}
  function syncPresetHistory(){for(const [index,button] of historyButtons.entries()){const entries=index?presetFuture:presetHistory,action=index?'やり直す':'元に戻す';button.disabled=blocked()||!!editingPreset||!entries.length;button.title=entries.length?'プリセット：'+entries.at(-1).label+'を'+action:'プリセットに'+(index?'やり直せる':'元に戻せる')+'操作はありません';button.setAttribute('aria-label',button.title)}}
  function restorePresetHistory(redo=false){if(blocked()||editingPreset)return;const source=redo?presetFuture:presetHistory,target=redo?presetHistory:presetFuture,entry=source.at(-1);if(!entry)return;if(save(JSON.parse(redo?entry.after:entry.before),{record:false})){source.pop();target.push(entry);if(activeIcon?.userPresetId&&!presets.some(item=>item.id===activeIcon.userPresetId)){setTapPlacementArmed(false);selectPlacementTool('select')}syncPresetHistory();notify('プリセットの'+entry.label+'を'+(redo?'やり直しました':'元に戻しました'))}}
@@ -1081,7 +1085,8 @@ const userPresetLibrary=(()=>{
  const materialCategories=document.createElement('div');materialCategories.className='material-categories-scroll';const materialHost=document.querySelector('.left');for(const child of [...materialHost.children])if(!child.matches('.material-heading,.object-pane-actions'))materialCategories.append(child);materialHost.append(materialCategories);const syncMaterialScrollInset=()=>{const style=getComputedStyle(materialHost),padding=parseFloat(style.paddingRight)||0,gutter=materialHost.offsetWidth-materialHost.clientWidth-(parseFloat(style.borderLeftWidth)||0)-(parseFloat(style.borderRightWidth)||0);materialHost.style.setProperty('--material-scroll-inset',padding+'px');materialHost.style.setProperty('--material-scroll-outset',(padding+gutter)+'px')};new ResizeObserver(syncMaterialScrollInset).observe(materialHost);syncMaterialScrollInset();
  const manager=document.createElement('section');manager.id='userPresetManager';manager.className='preset-manager-panel';manager.hidden=true;manager.setAttribute('role','region');manager.setAttribute('aria-labelledby','userPresetManagerTitle');manager.innerHTML='<header class="preset-manager-heading"><span class="preset-manager-title-icon" aria-hidden="true"></span><h2 id="userPresetManagerTitle">プリセット管理</h2><button type="button" class="btn" id="registerUserPreset" aria-label="選択中のオブジェクトを登録" title="選択中をプリセットに登録"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button></header><div class="preset-manager-body"><p class="preset-manager-hint">2個以上選択して登録</p><div class="preset-manager-list" role="list" aria-label="登録済みプリセット"></div><p class="preset-manager-empty">登録済みプリセットはありません。</p></div>';manager.querySelector('.preset-manager-title-icon').innerHTML=heading.querySelector('.palette-category-icon').innerHTML;const managerFrame=document.createElement('div');managerFrame.className='preset-manager-frame';managerFrame.append(...manager.childNodes);manager.append(managerFrame);const materialPane=document.querySelector('.left');materialPane.append(manager);let materialScroll=0,categoryDisabled=false;const categoryMode=document.getElementById('categoryModeToggle');
  manage.removeAttribute('aria-haspopup');manage.setAttribute('aria-controls',manager.id);
- function openManager(){if(!manager.hidden)return;close();materialScroll=materialCategories.scrollTop;renderManager();manager.hidden=false;materialPane.classList.add('preset-managing');materialCategories.scrollTop=0;manage.setAttribute('aria-expanded','true');manage.setAttribute('aria-pressed','true');syncMaterialViewIcon(true);categoryDisabled=categoryMode.disabled;categoryMode.disabled=true}
+ function revealImportedPreset(){if(!importedPresetToReveal||manager.hidden||!manager.clientHeight)return;const row=[...manager.querySelectorAll('.preset-manager-row')].find(row=>row.dataset.presetId===importedPresetToReveal);if(row)revealMovedListItems(manager,[row]);importedPresetToReveal=null}
+ function openManager(){if(!manager.hidden)return;close();materialScroll=materialCategories.scrollTop;renderManager();manager.hidden=false;materialPane.classList.add('preset-managing');materialCategories.scrollTop=0;manage.setAttribute('aria-expanded','true');manage.setAttribute('aria-pressed','true');syncMaterialViewIcon(true);categoryDisabled=categoryMode.disabled;categoryMode.disabled=true;requestAnimationFrame(revealImportedPreset)}
  function closeManager(){if(editingPreset&&!editingPreset.finish())return;manager.hidden=true;materialPane.classList.remove('preset-managing');manage.setAttribute('aria-expanded','false');manage.setAttribute('aria-pressed','false');syncMaterialViewIcon(false);categoryMode.disabled=categoryDisabled;manage.focus({preventScroll:true});materialCategories.scrollTop=materialScroll;requestAnimationFrame(()=>{if(manager.hidden)materialCategories.scrollTop=materialScroll})}
  manager.querySelector('#registerUserPreset').onclick=()=>registerSelection();
  manager.addEventListener('keydown',event=>{if(event.key==='Escape'){event.preventDefault();event.stopPropagation();if(editingPreset)editingPreset.finish(true);else closeManager()}});
@@ -1140,7 +1145,7 @@ const userPresetLibrary=(()=>{
  const presetReplaceDialog=document.createElement('dialog');presetReplaceDialog.id='replacePresetImportDialog';presetReplaceDialog.className='confirm-dialog';presetReplaceDialog.setAttribute('aria-labelledby','replacePresetImportTitle');presetReplaceDialog.innerHTML='<h2 id="replacePresetImportTitle">ユーザープリセットをすべて置き換え</h2><p data-preset-import-summary></p><p>コンテンツと配置済みオブジェクトは変更しません。置き換え後はプリセットの「元に戻す」で復元できます。</p><div class="confirm-actions"><button class="btn" type="button" data-preset-import-cancel autofocus>キャンセル</button><button class="btn primary" type="button" data-preset-import-confirm>置き換える</button></div>';document.body.append(presetReplaceDialog);
  function confirmPresetReplace(count){return new Promise(resolve=>{presetReplaceDialog.querySelector('[data-preset-import-summary]').textContent='現在のユーザープリセット（'+presets.length+'件）を、読み込んだデータ（'+count+'件）に置き換えます。';let done=false;const finish=accepted=>{if(done)return;done=true;presetReplaceDialog.oncancel=null;presetReplaceDialog.onclose=null;presetReplaceDialog.close();resolve(accepted)};presetReplaceDialog.querySelector('[data-preset-import-cancel]').onclick=()=>finish(false);presetReplaceDialog.querySelector('[data-preset-import-confirm]').onclick=()=>finish(true);presetReplaceDialog.oncancel=event=>{event.preventDefault();finish(false)};presetReplaceDialog.onclose=()=>finish(false);presetReplaceDialog.showModal()})}
  function choosePresetImport(mode){if(blocked()||editingPreset){notify('編集モードで名前入力を終えてから読み込んでください');return}presetImportMode=mode==='replace'?'replace':'append';presetImportInput.value='';presetImportInput.click()}
- presetImportInput.onchange=async()=>{const file=presetImportInput.files[0],mode=presetImportMode;if(!file)return;try{const imported=await withDesktopDisplayBusy(async()=>parsePresetFile(await file.text()));if(mode==='replace'&&!await confirmPresetReplace(imported.length))return;if(blocked()||editingPreset)throw new Error('編集モードで名前入力を終えてから読み込んでください');if(mode==='append'&&!imported.length){notify('追加するプリセットがありません');return}if(save(mode==='append'?[...presets,...imported]:imported,{label:mode==='append'?'追加読み込み':'全置き換え'})){if(activeIcon?.userPresetId&&!presets.some(preset=>preset.id===activeIcon.userPresetId)){setTapPlacementArmed(false);selectPlacementTool('select')}notify(mode==='append'?imported.length+'件のユーザープリセットを追加しました':'ユーザープリセットを'+imported.length+'件に置き換えました')}}catch(error){console.error('Preset import failed',error);notify('ユーザープリセットを読み込めませんでした：'+(error?.message||String(error)))}finally{presetImportInput.value=''}};
+ presetImportInput.onchange=async()=>{const file=presetImportInput.files[0],mode=presetImportMode;if(!file)return;try{const imported=await withDesktopDisplayBusy(async()=>parsePresetFile(await file.text()));if(mode==='replace'&&!await confirmPresetReplace(imported.length))return;if(blocked()||editingPreset)throw new Error('編集モードで名前入力を終えてから読み込んでください');if(mode==='append'&&!imported.length){notify('追加するプリセットがありません');return}if(save(mode==='append'?[...presets,...imported]:imported,{label:mode==='append'?'追加読み込み':'全置き換え'})){if(activeIcon?.userPresetId&&!presets.some(preset=>preset.id===activeIcon.userPresetId)){setTapPlacementArmed(false);selectPlacementTool('select')}importedPresetToReveal=imported[0]?.id||null;requestAnimationFrame(revealImportedPreset);notify((mode==='append'?imported.length+'件のユーザープリセットを追加しました':'ユーザープリセットを'+imported.length+'件に置き換えました')+(imported[0]?'（先頭：「'+imported[0].name+'」）':''))}}catch(error){console.error('Preset import failed',error);notifyFailure('ユーザープリセットを読み込めませんでした',{error,retained:'保存済みのプリセットは変更していません',action:'ユーザープリセット用JSONを選び直してください。コンテンツ用JSONはコンテンツの読み込み項目を選んでください'})}finally{presetImportInput.value=''}};
  document.addEventListener('board-view-mode-changed',()=>{render();syncPresetHistory()});document.addEventListener('keydown',event=>{if(manager.hidden||editingPreset||!materialPane.contains(event.target)||event.target.closest('input,textarea,[contenteditable="true"]')||!(event.ctrlKey||event.metaKey))return;const key=event.key.toLowerCase();if(key==='z'||key==='y'){event.preventDefault();event.stopImmediatePropagation();restorePresetHistory(key==='y'||event.shiftKey)}},true);render();syncPresetHistory();return {place,exportAll:exportPresets,chooseImport:choosePresetImport,registerSelection:()=>{if(selectionHasImportedImages()){notify('画像を含む選択はプリセットに登録できません');return}if(blocked()||current().filter(o=>selectedIds.includes(o.id)).length<2)return;const layout=document.querySelector('.layout'),phone=matchMedia('(max-width:850px)').matches,wasManaging=!manager.hidden,wasOpen=phone?layout.classList.contains('phone-materials-open'):materialPane.matches('.pinned,.palette-hover-open,:focus-within'),scroll=wasManaging?manager.scrollTop:materialCategories.scrollTop;const restore=()=>{if(!wasManaging)closeManager();if(wasManaging)manager.scrollTop=scroll;else materialCategories.scrollTop=scroll;if(!wasOpen){if(materialPane.contains(document.activeElement))document.activeElement.blur();materialPane.dispatchEvent(new Event('reset-material-hover'));if(phone)document.dispatchEvent(new Event('close-material-pane'))}else if(!phone)manage.focus({preventScroll:true})};if(matchMedia('(max-width:850px)').matches&&!document.querySelector('.layout').classList.contains('phone-materials-open'))document.querySelector('.phone-material-pin')?.click();manage.focus({preventScroll:true});openManager();registerSelection(restore)},thumbnail:id=>{const p=presets.find(p=>p.id===id);return p?liveThumbnail(p.items):null}};
 })();
 // Desktop keeps history/save status together and the mode next to the menu.
@@ -1183,7 +1188,7 @@ const userPresetLibrary=(()=>{
  const previousOpen=openObjectContextMenu;openObjectContextMenu=function(...args){close();previousOpen(...args);const objects=items();copyStyle.disabled=blocked()||objects.length!==1;pasteStyle.disabled=blocked()||!compatible(objects)};
  const previousClose=closeObjectContextMenu;closeObjectContextMenu=function(){close();previousClose()};
  copyStyle.onclick=()=>{const objects=items();if(blocked()||objects.length!==1)return;const o=objects[0];clipboard={kind:kind(o),values:Object.fromEntries(fields.filter(k=>Object.hasOwn(o,k)).map(k=>[k,o[k]]))};closeObjectContextMenu();notify('見た目をコピーしました')};
- pasteStyle.onclick=()=>{const objects=items();if(blocked()||!compatible(objects))return;const updates=objects.map(o=>{const next={...o};for(const key of fields){if(Object.hasOwn(clipboard.values,key))next[key]=clipboard.values[key];else delete next[key]}if(o.type==='image'){next.height=o.height*next.width/o.width}return next});closeObjectContextMenu();if(updates.every((o,i)=>JSON.stringify(o)===JSON.stringify(objects[i])))return;recordHistory();objects.forEach((o,i)=>{for(const key of fields){if(Object.hasOwn(updates[i],key))o[key]=updates[i][key];else delete o[key]}});renderAndSave();notify(objects.length+'個のオブジェクトに見た目を貼り付けました')};
+ pasteStyle.onclick=()=>{const objects=items();if(blocked()||!compatible(objects))return;const updates=objects.map(o=>{const next={...o};for(const key of fields){if(Object.hasOwn(clipboard.values,key))next[key]=clipboard.values[key];else delete next[key]}if(o.type==='image'){next.height=o.height*next.width/o.width}return next});closeObjectContextMenu();if(updates.every((o,i)=>JSON.stringify(o)===JSON.stringify(objects[i]))){notify('見た目はすでに同じ設定です');return}recordHistory();objects.forEach((o,i)=>{for(const key of fields){if(Object.hasOwn(updates[i],key))o[key]=updates[i][key];else delete o[key]}});renderAndSave();notify(objects.length+'個のオブジェクトに見た目を貼り付けました')};
 })();
 
 // Show only keyboard shortcuts implemented for the normal object menu.

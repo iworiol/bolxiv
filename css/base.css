@@ -30,8 +30,12 @@ button {
   border:0;
   cursor:pointer;
 }
-button:hover:not(:where(.phone-touch-mode *)) {
+button:hover:not(:disabled):not(:where(.phone-touch-mode *)) {
   filter:brightness(1.13);
+}
+button:disabled,input:disabled,select:disabled,textarea:disabled {
+  cursor:not-allowed!important;
+  filter:none!important;
 }
 .app {
   height:100dvh;
@@ -135,7 +139,7 @@ button:hover:not(:where(.phone-touch-mode *)) {
 .iconbtn:disabled {
   color:#66717e;
   opacity:.55;
-  cursor:default;
+
 }
 .layout {
   min-height:0;
@@ -1092,7 +1096,9 @@ input[type=file] {
   outline:0;
 }
 /* Briefly mark the moved item without changing its size or selection. */
-.battle #pages .page-tab.item-just-moved,
+.battle :is(#pages,#phaseMasters) :is(.page-tab,.phase-group-heading).item-just-moved,
+.battle #contentOptions .content-option-row.item-just-moved,
+.left .preset-manager-row.item-just-moved,
 .right #objectList .object-row.item-just-moved {
   outline:2px solid var(--blue);
   outline-offset:-2px;

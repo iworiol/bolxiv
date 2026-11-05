@@ -18,7 +18,7 @@
 }
 .right .board-title-row .board-history-actions>.content-history-button:disabled {
   opacity:.4;
-  cursor:default;
+
 }
 .right .board-title-row .board-history-actions>.content-history-button:is(:hover:not(:where(.phone-touch-mode *)),:focus-visible):not(:disabled) {
   background:var(--blue)!important;
@@ -1340,7 +1340,7 @@
  .phone-phase-navigation[hidden],.phone-phase-navigation>button[hidden]{display:none}
  .phone-phase-navigation>button{display:grid;place-items:center;box-sizing:border-box;flex:none;width:28px;height:28px;padding:5px;border:1px solid #d0d4da;border-radius:6px;background:#eef2f7!important;color:#33445f!important;pointer-events:auto;cursor:pointer}
  .phone-phase-navigation>button:not(:disabled):hover{background:var(--blue)!important;color:#fff!important}
- .phone-phase-navigation>button:disabled{opacity:.4;cursor:default}
+ .phone-phase-navigation>button:disabled{opacity:.4;}
  .phone-phase-navigation svg{width:16px;height:16px;pointer-events:none}
 }
 @media(max-width:850px) {

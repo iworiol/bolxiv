@@ -128,6 +128,7 @@
  function changeShape(patch){const value=currentGuide();value.shapes=value.shapes.map(shape=>shape.id===shapeId?{...shape,...patch}:shape);data.pageFieldGuides[data.page]=fieldGuides({pageFieldGuides:[value]},0);renderFieldGuides();updateArtwork();sync()}
  function transact(change){if(window.Bolxiv?.phaseMasters?.locked)return;if(!dialog.open||!allowed())return;endSession();recordHistory();change();renderFieldGuides();save();finishEdit();updateArtwork();sync()}
  function duplicateShape(){const shapes=selectedGuides();if(!shapes.length)return;pasteGuides(shapes)}
+ function copyGuides(){const shapes=selectedGuides();if(!shapes.length)return;guideClipboard=JSON.parse(JSON.stringify(shapes));notify(shapes.length+'個のガイドをコピーしました')}
  function pasteGuides(shapes=guideClipboard){if(!shapes.length||currentGuide().shapes.length+shapes.length>500)return;transact(()=>{const value=currentGuide(),dx=Math.min(12,640-Math.max(...shapes.map(s=>s.x))),dy=Math.min(12,640-Math.max(...shapes.map(s=>s.y))),copies=remapCopiedObjectGroups(shapes.map(shape=>({...shape,id:createObjectId(),x:shape.x+dx,y:shape.y+dy})));value.shapes.push(...copies);data.pageFieldGuides[data.page]=fieldGuides({pageFieldGuides:[value]},0);selectGuides(copies.map(shape=>shape.id))})}
  function deleteShape(){const ids=selectedGuides().map(s=>s.id);if(!ids.length)return;transact(()=>{const value=currentGuide();value.shapes=value.shapes.filter(shape=>!ids.includes(shape.id));data.pageFieldGuides[data.page]=value;selectGuides([])})}
  const guideMenu=document.createElement('div');guideMenu.id='guideShapeMenu';guideMenu.className='object-context-menu';guideMenu.hidden=true;guideMenu.setAttribute('role','menu');dialog.append(guideMenu);
@@ -136,7 +137,7 @@
   const hit=event.target.dataset.guideHit;if(hit&&!selectedGuides().some(s=>s.id===hit))selectGuides([hit]);drawOverlay();sync();guideMenu.replaceChildren();const picked=selectedGuides(),group=selectedGuideGroup(),member=currentGuide().shapes.find(s=>s.id===hit),actions=[];
   actions.push(['グループ化',groupGuides,picked.length<2||!!individualGuideGroup||!!group.length],['グループ解除',ungroupGuides,!picked.some(s=>s.objectGroupId)||!!individualGuideGroup]);
   if(individualGuideGroup)actions.push(['個別編集を終了',finishGuideMemberEdit,false]);else if(member?.objectGroupId)actions.push(['個別編集',()=>editGuideMember(hit),false]);
-  actions.push(['コピー',()=>guideClipboard=JSON.parse(JSON.stringify(selectedGuides())),!picked.length],['貼り付け',()=>pasteGuides(),!guideClipboard.length],['複製',duplicateShape,!picked.length],['削除',deleteShape,!picked.length]);
+  actions.push(['コピー',copyGuides,!picked.length],['貼り付け',()=>pasteGuides(),!guideClipboard.length],['複製',duplicateShape,!picked.length],['削除',deleteShape,!picked.length]);
   for(const [label,action,disabled] of actions){const shortcut={'グループ化':'Ctrl+G','グループ解除':'Ctrl+Shift+G','コピー':'Ctrl+C','貼り付け':'Ctrl+V','複製':'Ctrl+D','削除':'Delete'}[label];guideMenu.append(createMenuAction({label,disabled,destructive:label==='削除',shortcut,onInvoke(){closeGuideMenu();action()}}))}addPhoneMenuClose(guideMenu,closeGuideMenu);guideMenu.hidden=false;guideMenu.style.left=Math.max(4,Math.min(event.clientX,innerWidth-guideMenu.offsetWidth-4))+'px';guideMenu.style.top=Math.max(4,Math.min(event.clientY,innerHeight-guideMenu.offsetHeight-4))+'px';guideMenu.querySelector('button:not(:disabled)')?.focus({preventScroll:true});
  }
  window.addEventListener('pointerdown',event=>{if(!guideMenu.contains(event.target))closeGuideMenu()},true);
@@ -218,7 +219,7 @@
  for(const type of ['pointerdown','click','dblclick','contextmenu','dragstart','dragover','drop'])window.addEventListener(type,event=>{if(dialog.open&&event.target.closest?.('.left .tool,.left .icon-choice'))blockReadOnlyEvent(event)},true);
  window.addEventListener('click',event=>{if(!dialog.open)return;const button=event.target.closest?.('#undo,#redo');if(!button)return;event.preventDefault();event.stopImmediatePropagation();historyAction(button.id==='redo')},true);
  window.addEventListener('keydown',event=>{
-  if(event.target.closest?.('dialog.confirm-dialog'))return;
+  if(document.querySelector('dialog:modal'))return;
   if(!dialog.open||event.target.closest?.('#phaseMasters,#phoneIconHelp,#operationGuideDialog,#changeLogDialog,#aboutToolDialog,#shortcutDialog,#usageSceneDialog'))return;
   if(event.key==='Control'){guideControlPressed=true;if(gesture?.action==='move'){gesture.memberOnClick=null;if(gesture.recorded)movePointer({pointerId:gesture.id,clientX:gesture.lastClientX,clientY:gesture.lastClientY,ctrlKey:true,shiftKey:event.shiftKey,preventDefault(){},stopPropagation(){}})}return}
   if(event.target.closest?.('.guide-section-toggle')&&event.key===' '){event.preventDefault();event.stopImmediatePropagation();if(!event.repeat)event.target.closest('.guide-section-toggle').click();return}
@@ -232,7 +233,7 @@
   if(modifier&&key==='d'){event.preventDefault();event.stopImmediatePropagation();duplicateShape();return}
   if(['delete','backspace'].includes(key)){event.preventDefault();event.stopImmediatePropagation();deleteShape();return}
   if(key.startsWith('arrow')){event.preventDefault();event.stopImmediatePropagation();const shapes=selectedGuides(),amount=event.shiftKey?10:1;if(shapes.length)transact(()=>changeShapes(shapes.map(s=>({id:s.id,x:s.x+(key==='arrowright'?amount:key==='arrowleft'?-amount:0),y:s.y+(key==='arrowdown'?amount:key==='arrowup'?-amount:0)}))));return}
-  if(modifier&&['c','v','x','a'].includes(key)){event.preventDefault();event.stopImmediatePropagation();if(key==='a'){selectGuides(currentGuide().shapes.map(s=>s.id));drawOverlay();sync()}else if(key==='v')pasteGuides();else{guideClipboard=JSON.parse(JSON.stringify(selectedGuides()));if(key==='x')deleteShape()}}
+  if(modifier&&['c','v','x','a'].includes(key)){event.preventDefault();event.stopImmediatePropagation();if(key==='a'){selectGuides(currentGuide().shapes.map(s=>s.id));drawOverlay();sync()}else if(key==='v')pasteGuides();else if(key==='c')copyGuides();else{guideClipboard=JSON.parse(JSON.stringify(selectedGuides()));deleteShape()}}
  },true);
  for(const [id,step] of [['zoomOut',-5],['zoomIn',5]])zoomGroup.querySelector('[data-source-id='+id+']').onclick=()=>{guideZoom=Math.max(5,Math.min(200,guideZoom+step));fit()};
  zoomGroup.querySelector('[data-source-id=fitBoardZoom]').onclick=()=>{guideZoom=Math.max(5,Math.min(200,Math.floor(Math.min((viewport.clientWidth-40)/640,(viewport.clientHeight-40)/640)*20)*5));fit()};
@@ -705,7 +706,7 @@
   window.Bolxiv.drawGroupPreview(overview,item.name);
   if(groupProperties.dataset.group===item.id&&groupProperties.contains(document.activeElement))return;
   groupProperties.dataset.group=item.id;groupProperties.replaceChildren();
-  const nameField=createPropertyTextField({id:'phaseGroupNameInput',label:'グループ名',value:item.name,readOnly:boardReadOnly,maxLength:120,onCommit:raw=>{if(boardReadOnly)return;recordHistory();item.name=raw.trim()||'新規グループ';renderAndSave()}});groupProperties.append(nameField.field);
+  const nameField=createPropertyTextField({id:'phaseGroupNameInput',label:'グループ名',value:item.name,readOnly:boardReadOnly,maxLength:120,onCommit:(raw,event)=>{if(boardReadOnly)return;const value=raw.trim()||'新規グループ';event.target.value=value;if(value===item.name)return;recordHistory();item.name=value;renderAndSave()}});groupProperties.append(nameField.field);
   const noteField=document.createElement('div');noteField.className='field';const noteLabel=document.createElement('label');noteLabel.htmlFor='phaseGroupNoteInput';noteLabel.textContent='グループ概要';const note=document.createElement('textarea');note.id='phaseGroupNoteInput';note.value=item.note;note.readOnly=boardReadOnly;note.disabled=boardReadOnly;note.setAttribute('aria-label','グループ概要');note.placeholder='グループ全体の方針・共通の注意点・フェーズ間の流れなどを自由に記入';noteField.append(noteLabel,note);groupProperties.append(noteField);
   let noted=false;note.onfocus=()=>{noted=false};note.oninput=()=>{if(boardReadOnly)return;if(!noted){recordHistory();noted=true}item.note=note.value;save()};
  }
