@@ -78,7 +78,7 @@ function beginObjectGroupRename(groupId){
  function stopViewportWatch(){viewport?.removeEventListener('resize',scheduleReveal);viewport?.removeEventListener('scroll',scheduleReveal);window.removeEventListener('resize',scheduleReveal);if(revealFrame)cancelAnimationFrame(revealFrame)}
  function scheduleReveal(){if(revealFrame)return;revealFrame=requestAnimationFrame(()=>{revealFrame=0;revealInput()})}
  function finish(cancel=false){if(done)return;done=true;stopViewportWatch();const value=input.value.trim();if(!cancel&&value&&owner===data&&page===current()&&value!==objectGroupName(items)){recordHistory();for(const item of items)item.objectGroupName=value;renderAndSave()}else renderObjectList()}
- input.onpointerdown=e=>e.stopPropagation();input.onkeydown=e=>{e.stopPropagation();if(e.key==='Enter'){e.preventDefault();finish()}else if(e.key==='Escape'){e.preventDefault();finish(true)}};input.onblur=()=>finish();if(mobile.matches)input.focus();else input.focus({preventScroll:true});input.select();
+ input.onpointerdown=e=>e.stopPropagation();input.onkeydown=e=>{e.stopPropagation();if(e.isComposing||e.keyCode===229)return;if(e.key==='Enter'){e.preventDefault();finish()}else if(e.key==='Escape'){e.preventDefault();finish(true)}};input.onblur=()=>finish();if(mobile.matches)input.focus();else input.focus({preventScroll:true});input.select();
  function revealInput(){if(done)return;if(!input.isConnected){stopViewportWatch();return}const list=document.getElementById('objectList');let bounds=list.getBoundingClientRect(),rect=input.getBoundingClientRect(),top=bounds.top+list.clientTop,bottom=top+list.clientHeight;
  if(mobile.matches&&viewport){const visibleTop=viewport.offsetTop,visibleBottom=visibleTop+viewport.height;if(top>=visibleBottom-rect.height||bottom<=visibleTop+rect.height){input.scrollIntoView({block:'center',inline:'nearest'});bounds=list.getBoundingClientRect();rect=input.getBoundingClientRect()}top=Math.max(bounds.top+list.clientTop,viewport.offsetTop+8);bottom=Math.min(bounds.top+list.clientTop+list.clientHeight,viewport.offsetTop+viewport.height-8)}
  if(rect.bottom>bottom-4)list.scrollTop+=rect.bottom-bottom+4;else if(rect.top<top+4)list.scrollTop+=rect.top-top-4}
@@ -356,7 +356,7 @@ function objectTypeTitle(o){if(o.type==='icon'){let src=String(o.src||'');if(o.i
 
 function showTextControl(o,el){controls.replaceChildren();renderObjectSelectionControls(o,el);renderObjectGroupControls()}
 
-function editText(o,el){if(boardReadOnly)return;if(phaseComparisonActive())return;if(el.isContentEditable||o.locked)return;el.contentEditable='true';el.style.whiteSpace='pre-wrap';el.style.textAlign='left';el.focus();let range=document.createRange();range.selectNodeContents(el);let selection=window.getSelection();selection.removeAllRanges();selection.addRange(range);el.onkeydown=e=>{if(e.key==='Escape'){e.preventDefault();el.textContent=o.label||'メモ';el.blur()}};el.onblur=()=>{let value=el.innerText.replace(/\\r/g,'').replace(/\\n$/,'');if(value!==(o.label||'メモ')){recordHistory();o.label=value;renderAndSave()}else{el.contentEditable='false';el.onkeydown=null;el.onblur=null}}}
+function editText(o,el){if(boardReadOnly)return;if(phaseComparisonActive())return;if(el.isContentEditable||o.locked)return;el.contentEditable='true';el.style.whiteSpace='pre-wrap';el.style.textAlign='left';el.focus();let range=document.createRange();range.selectNodeContents(el);let selection=window.getSelection();selection.removeAllRanges();selection.addRange(range);el.onkeydown=e=>{if(e.isComposing||e.keyCode===229)return;if(e.key==='Escape'){e.preventDefault();el.textContent=o.label||'メモ';el.blur()}};el.onblur=()=>{let value=el.innerText.replace(/\\r/g,'').replace(/\\n$/,'');if(value!==(o.label||'メモ')){recordHistory();o.label=value;renderAndSave()}else{el.contentEditable='false';el.onkeydown=null;el.onblur=null}}}
 
 function objectTitle(o){if(o.type==='image')return '画像';if(o.type==='segment')return ['start','end','both'].includes(o.arrowEnds)?'矢印':'線';if(o.type==='icon')return ({'ターゲット赤':'ロックオン赤','ターゲット紫':'ロックオン紫','ダイブボム':'ロックオン青','ターゲット青':'ロックオン青'})[o.iconName]||o.iconName||'アイコン';let paletteItem=document.querySelector('.left .tool[data-tool="'+CSS.escape(o.type)+'"]');if(paletteItem?.title)return paletteItem.title;return {text:'テキスト',segment:'線',circle:'円範囲',donut:'ドーナツ範囲',aoe:'扇範囲',line:'直線範囲',gaze:'視線',targetcircle:'ターゲットサークル',stack:'頭割り',linestack:'直線頭割り',knockback:'円ノックバック',lineknockback:'直線ノックバック',marker:'プレイヤー'}[o.type]||o.type}
 
@@ -502,9 +502,10 @@ function createPhaseListRow({name,number,active=false,selected=false}){
 
 // List views receive commands from their domain adapters; they never mutate saved data.
 function bindPropertyTextCommit(input,{onCommit,restoreOnEscape=null}){
- const change=event=>onCommit?.(input.value,event),keydown=event=>{if(!restoreOnEscape||event.isComposing)return;if(event.key==='Enter'){event.preventDefault();input.blur()}else if(event.key==='Escape'){event.preventDefault();event.stopPropagation();input.value=restoreOnEscape();input.blur()}};
- input.addEventListener('change',change);input.addEventListener('keydown',keydown);
- return ()=>{input.removeEventListener('change',change);input.removeEventListener('keydown',keydown)};
+ let committed=input.value;
+ const focus=()=>{committed=input.value},change=event=>{if(input.value===committed)return;onCommit?.(input.value,event);committed=input.value},keydown=event=>{if(event.isComposing||event.keyCode===229)return;if(event.key==='Enter'){event.preventDefault();event.stopPropagation();input.dispatchEvent(new Event('change',{bubbles:true}))}else if(event.key==='Escape'){event.preventDefault();event.stopPropagation();input.value=restoreOnEscape?restoreOnEscape():committed;committed=input.value;input.blur()}};
+ input.addEventListener('focus',focus);input.addEventListener('change',change);input.addEventListener('keydown',keydown);
+ return ()=>{input.removeEventListener('focus',focus);input.removeEventListener('change',change);input.removeEventListener('keydown',keydown)};
 }
 function createPropertyTextField({id,label:caption,className='field',describedBy=null,value,maxLength,readOnly=false,disabled=false,onCommit,restoreOnEscape=null}){
  const field=document.createElement('div');field.className=className;const label=document.createElement('label');label.htmlFor=id;label.textContent=caption;const input=document.createElement('input');input.id=id;input.type='text';if(describedBy)input.setAttribute('aria-describedby',describedBy);if(value!==undefined)input.value=value;if(maxLength!==undefined)input.maxLength=maxLength;input.readOnly=readOnly;input.disabled=disabled;const dispose=bindPropertyTextCommit(input,{onCommit,restoreOnEscape});field.append(label,input);return {field,label,input,dispose};
@@ -536,10 +537,11 @@ function createConfirmationView({id,messageId=null,cancelId,confirmId,autofocus=
  return {dialog,show(text,value){pending=value;message.textContent=text;if(!dialog.open)dialog.showModal()},close,dispose(){close();dialog.removeEventListener('close',closed);if(captureEscape)window.removeEventListener('keydown',escape,true);binding.dispose();dialog.remove()}};
 }
 
-function createListItemView({model,select,activate=select,action,context,ignoreSelect='',keyboardTargetOnly=false,stopActionPropagation=true}){
+function createListItemView({model,select,activate=select,action,context,ignoreSelect='',keyboardTargetOnly=false,stopActionPropagation=true,resolveRow=null}){
  const view=createPhaseListRow(model),{row}=view;
- row.onclick=event=>{if(!ignoreSelect||!event.target.closest(ignoreSelect))select?.(event)};
- row.onkeydown=event=>{if(keyboardTargetOnly&&event.target!==row)return;if(event.key==='Enter'||event.key===' '){event.preventDefault();activate?.(event)}};
+ function invoke(command,event){const focused=document.activeElement===row;command?.(event);if(focused&&!row.isConnected)resolveRow?.()?.focus({preventScroll:true})}
+ row.onclick=event=>{if(!ignoreSelect||!event.target.closest(ignoreSelect))invoke(select,event)};
+ row.onkeydown=event=>{if(event.isComposing||event.keyCode===229||keyboardTargetOnly&&event.target!==row||event.target!==row&&event.target.closest('button,input,select,textarea,[contenteditable="true"]'))return;if(event.key==='Enter'||event.key===' '){event.preventDefault();invoke(activate,event)}};
  if(action)view.action.onclick=event=>{if(stopActionPropagation)event.stopPropagation();action(event)};
  if(context)row.oncontextmenu=context;
  return view;
@@ -1068,7 +1070,7 @@ function changeObjectGrouping(ids,ungroup=false){
  selectedIds=expanded;selected=expanded.at(-1)||null;renderAndSave();if(!ungroup)revealCreatedObjectGroup(groupId);
 }
 
-function copyObjectsToClipboard(ids){const selectedSet=new Set(expandObjectGroups(ids)),sources=current().filter(o=>selectedSet.has(o.id));if(!sources.length)return;clipboardObjects=sources.map(o=>JSON.parse(JSON.stringify(o)));clipboardSourcePage=current()}
+function copyObjectsToClipboard(ids){const selectedSet=new Set(expandObjectGroups(ids)),sources=current().filter(o=>selectedSet.has(o.id));if(!sources.length)return;clipboardObjects=sources.map(o=>JSON.parse(JSON.stringify(o)));clipboardSourcePage=current();notify(sources.length+'個のオブジェクトをコピーしました')}
 function pasteClipboardObjects(){if(boardReadOnly||phaseComparisonActive()||!clipboardObjects.length)return;recordHistory();let samePage=current()===clipboardSourcePage,copies=clipboardObjects.map(source=>{let copy=JSON.parse(JSON.stringify(source));copy.id=createObjectId();if(samePage){copy.x=Math.max(0,Math.min(100,copy.x+2));copy.y=Math.max(0,Math.min(100,copy.y+2))}return copy});remapCopiedObjectGroups(copies);current().push(...copies);selectedIds=copies.map(o=>o.id);selected=selectedIds[selectedIds.length-1]||null;renderAndSave();revealMovedLayers(selectedIds)}
 
 function deleteSelected(){if(boardReadOnly)return;if(phaseComparisonActive())return;let deletable=selectedIds.filter(id=>!current().find(o=>o.id===id)?.locked);if(!deletable.length)return;snapshot();data.pages[data.page]=current().filter(o=>!deletable.includes(o.id));selectedIds=selectedIds.filter(id=>!deletable.includes(id));selected=selectedIds[selectedIds.length-1]||null;renderAndSave()}
@@ -1116,22 +1118,32 @@ function setBoardDisplayZoom(value,remember=true,recenter=true){const preview=ma
 function bindSubmenuHover(toggle,submenu,open,close){
  const root=toggle.closest('[role="menu"]');
  if(!root._submenuHover){
-  const state={items:[],openTimer:null,closeTimer:null};root._submenuHover=state;
+  const state={items:[],openTimer:null,closeTimer:null,origin:null};root._submenuHover=state;
   const desktop=()=>matchMedia('(min-width:851px) and (hover:hover) and (pointer:fine)').matches;
   const cancel=()=>{clearTimeout(state.openTimer);clearTimeout(state.closeTimer);state.openTimer=state.closeTimer=null};root._cancelSubmenuHover=cancel;
   const closeAll=()=>state.items.forEach(item=>item.close());
-  const laterClose=()=>{cancel();state.closeTimer=setTimeout(()=>{state.closeTimer=null;closeAll()},280)};state.cancel=cancel;state.laterClose=laterClose;state.desktop=desktop;
+  const laterClose=(delay=450)=>{cancel();state.closeTimer=setTimeout(()=>{state.closeTimer=null;closeAll()},delay)};state.cancel=cancel;state.laterClose=laterClose;state.desktop=desktop;
+  // Protect diagonal travel into an offset child without delaying unrelated rows.
+  const movingToChild=event=>{
+   const origin=state.origin;if(!origin||performance.now()-origin.time>700)return false;
+   const active=state.items.find(item=>!item.submenu.hidden&&item.toggle===origin.toggle);if(!active)return false;
+   const rect=active.submenu.getBoundingClientRect(),edge=rect.right<=origin.x?rect.right:rect.left;
+   if(Math.abs(event.clientX-edge)>Math.abs(origin.x-edge)+2)return false;
+   const a={x:origin.x,y:origin.y},b={x:edge,y:rect.top-8},c={x:edge,y:rect.bottom+8},p={x:event.clientX,y:event.clientY};
+   const cross=(u,v,w)=>(u.x-w.x)*(v.y-w.y)-(v.x-w.x)*(u.y-w.y);
+   const signs=[cross(p,a,b),cross(p,b,c),cross(p,c,a)];return !(signs.some(n=>n<0)&&signs.some(n=>n>0));
+  };
+  root.addEventListener('pointermove',event=>{if(event.pointerType!=='mouse'||!desktop())return;const item=state.items.find(item=>item.toggle.contains(event.target)&&!item.submenu.hidden);if(item)state.origin={x:event.clientX,y:event.clientY,time:performance.now(),toggle:item.toggle}});
   root.addEventListener('pointerover',event=>{
    if(event.pointerType!=='mouse'||!desktop()||root.hidden)return;
    const child=state.items.find(item=>item.submenu.contains(event.target));
    if(child){cancel();return}
    const item=state.items.find(item=>item.toggle.contains(event.target));
-   // Switching header rows should clear the old highlight immediately;
-   // the existing leave delay still protects the gap into a child menu.
-   if(root.id==='headerActions'){state.activeToggle=item?.toggle||null;state.items.filter(other=>other!==item).forEach(other=>other.close())}
-   if(!item){laterClose();return}
+   const protect=movingToChild(event);
+   if(root.id==='headerActions'){state.activeToggle=item?.toggle||null;if(!protect)state.items.filter(other=>other!==item).forEach(other=>other.close())}
+   if(!item){laterClose(protect?600:450);return}
    cancel();if(item.toggle.disabled)return;
-   state.openTimer=setTimeout(()=>{state.openTimer=null;if(root.hidden||!desktop()||!item.toggle.getClientRects().length)return;state.items.filter(other=>other!==item).forEach(other=>other.close());const wasHidden=item.submenu.hidden;item.open(true);if(wasHidden&&!item.submenu.hidden)item.submenu._openedByHover=true},140);
+   state.openTimer=setTimeout(()=>{state.openTimer=null;if(root.hidden||!desktop()||!item.toggle.getClientRects().length)return;state.items.filter(other=>other!==item).forEach(other=>other.close());const wasHidden=item.submenu.hidden;item.open(true);if(wasHidden&&!item.submenu.hidden)item.submenu._openedByHover=true},protect?600:140);
   });
   root.addEventListener('pointerout',event=>{if(event.pointerType==='mouse'&&desktop()&&!root.contains(event.relatedTarget))laterClose()});
   root.addEventListener('pointerdown',cancel,true);

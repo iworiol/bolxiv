@@ -74,7 +74,7 @@
 .header-mode-status>.header-history-actions{display:flex;gap:8px;align-items:center;flex:none}
 .header-history-actions>.content-history-button{display:grid;place-items:center;box-sizing:border-box;flex:none;width:34px;min-width:34px;height:34px;min-height:34px;padding:6px;border:1px solid #999;border-radius:6px;background:#fff;color:#111}
 .header-history-actions>.content-history-button svg{width:20px;height:20px}
-.header-history-actions>.content-history-button:disabled{opacity:.4;cursor:default}
+.header-history-actions>.content-history-button:disabled{opacity:.4;}
 @media(hover:hover) and (pointer:fine){
  .header-history-actions>.content-history-button:is(:hover,:focus-visible):not(:disabled){background:var(--blue);border-color:var(--blue);color:#fff;filter:none}
 }
@@ -84,7 +84,7 @@
  .header-mode-status>.header-history-actions{display:flex;gap:8px;align-items:center}
  .header-history-actions>.content-history-button{display:grid;place-items:center;box-sizing:border-box;flex:none;width:36px;min-width:36px;height:36px;min-height:36px;padding:6px;border:1px solid #999;border-radius:6px;background:#fff;color:#111}
  .header-history-actions>.content-history-button svg{width:22px;height:22px}
- .header-history-actions>.content-history-button:disabled{opacity:.4;cursor:default}
+ .header-history-actions>.content-history-button:disabled{opacity:.4;}
 }
 
 @media(max-width:850px){
@@ -340,7 +340,8 @@
   outline-offset:-2px;
  }
  .app>.layout #contentOptions .content-option-row:focus-within,
- .app>.layout #objectList .object-row:focus-visible{outline:2px solid var(--blue);outline-offset:-2px}
+ .app>.layout #objectList .object-row:focus-visible,
+ .app>.layout #userPresetManager .preset-manager-row:focus-visible{outline:2px solid var(--blue);outline-offset:-2px}
 
 /* ===== css/desktop-delete-button-emphasis.css ===== */
 @media(min-width:851px){
@@ -747,7 +748,7 @@
 
  .app .layout.desktop-phase-tools #toggleBattlePages[aria-controls][aria-expanded]:disabled,
  .app .layout.desktop-phase-tools #toggleBattlePages[aria-controls][aria-expanded]:disabled:is(:hover,:focus-visible){
-  pointer-events:none!important;opacity:1!important;cursor:default!important;background:#eef2f7!important;
+  pointer-events:none!important;opacity:1!important;!important;background:#eef2f7!important;
   color:#33445f!important;-webkit-text-fill-color:#33445f!important;
  }
  .app .layout.desktop-phase-tools #toggleBattlePages[aria-controls][aria-expanded]:disabled:is(:hover,:focus-visible) *{
@@ -765,7 +766,7 @@
  .app .layout.desktop-phase-tools :is(#objectLayerPanel,.desktop-content-phase-panel) .desktop-phase-shared-heading>.desktop-phase-collapse{display:grid;place-items:center;box-sizing:border-box;flex:none;width:26px;height:26px;border-radius:5px;font-size:14px}
  .app .layout.desktop-phase-tools :is(#objectLayerPanel,.desktop-content-phase-panel) .desktop-phase-shared-heading>.desktop-phase-switch{border:1px solid #d0d4da!important;background:#eef2f7!important;color:#33445f!important;-webkit-text-fill-color:#33445f!important}
  .desktop-phase-switch svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
- .desktop-phase-shared-heading>button:disabled{cursor:default;opacity:1}
+ .desktop-phase-shared-heading>button:disabled{opacity:1}
  .app .layout.desktop-phase-tools :is(#objectLayerPanel,.desktop-content-phase-panel) .desktop-phase-shared-heading:has(>.desktop-phase-panel-title:not(:disabled)):is(:hover,:has(>.desktop-phase-panel-title:focus-visible,>.desktop-phase-collapse:focus-visible)):not(:has(>:is(.desktop-phase-switch,.phase-guide-toggle):is(:hover,:focus-visible))){background:var(--blue);color:#fff;-webkit-text-fill-color:#fff}
  .app .layout.desktop-phase-tools :is(#objectLayerPanel,.desktop-content-phase-panel) .desktop-phase-shared-heading>.desktop-phase-switch:is(:hover,:focus-visible):not(:disabled){background:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
  .app .layout.desktop-phase-tools :is(#objectLayerPanel,.desktop-content-phase-panel) .desktop-phase-shared-heading[data-expanded="true"]{border-radius:7px 7px 0 0}
@@ -871,7 +872,7 @@
 .tutorial-footer{display:flex;align-items:center;justify-content:space-between;gap:8px}#tutorialExit[hidden]{display:none!important}#tutorialNext{margin-left:auto}
 #pcTutorial button,#tutorialIntro button{border:1px solid #ccd5e2;border-radius:6px;min-height:32px;padding:5px 10px;background:#eef2f7;color:#33445f;font:inherit;font-size:14px;cursor:pointer}
 #pcTutorial .tutorial-primary,#tutorialIntro .tutorial-primary{background:#293c66;color:#fff;border-color:#293c66}
-#pcTutorial button:disabled{opacity:.4;cursor:default}
+#pcTutorial button:disabled{opacity:.4;}
 #tutorialHighlight{position:fixed;z-index:10065;pointer-events:none;border:3px solid #d99116;border-radius:7px;box-shadow:0 0 0 3px #fff9;box-sizing:border-box}
 @media(max-width:850px){
  body.tutorial-active>.app{height:calc(100dvh - 210px)!important;min-height:0!important} #pcTutorial{bottom:0;top:auto;width:100%;max-width:100%;height:210px;max-height:40dvh;overflow:auto;padding:8px 12px}
@@ -1541,7 +1542,7 @@ body .app .layout #objectList>.object-group-row>.object-delete{grid-column:5;gri
 .left>#userPresetManager .preset-manager-heading{display:flex;flex:none;align-items:center;justify-content:flex-start;gap:6px;box-sizing:border-box;min-height:36px;padding:4px 6px;border-bottom:1px solid #d0d4da;background:#eef2f7;color:#33445f}
 .left>#userPresetManager .preset-manager-heading h2{margin:0;min-width:0;font-family:inherit;font-size:14px;font-weight:700;line-height:1.2}
 .left>#userPresetManager .btn{box-sizing:border-box;white-space:nowrap;padding:4px 6px;min-height:32px;border:1px solid #999;border-radius:5px;background:#fff;color:#33445f;font:inherit}
-.left>#userPresetManager .btn:disabled{opacity:.45;cursor:default}
+.left>#userPresetManager .btn:disabled{opacity:.45;}
 .left>#userPresetManager .btn:enabled:hover:not(:where(.phone-touch-mode *)){background:var(--blue)!important;border-color:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
 .left>#userPresetManager .preset-manager-close{display:grid;place-items:center;flex:none;width:26px;min-width:26px;height:26px;min-height:26px;padding:3px;border-color:#d0d4da;background:#eef2f7}
 .left>#userPresetManager .preset-manager-close svg,.left>#userPresetManager .preset-manager-action svg,.left>#userPresetManager #registerUserPreset svg{display:block;width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
@@ -1566,7 +1567,7 @@ body .app .layout #objectList>.object-group-row>.object-delete{grid-column:5;gri
 @media(max-width:850px){.app .layout.phone-materials-open>.left.preset-managing{display:flex!important;flex-direction:column;overflow:hidden!important}.left>#userPresetManager:not([hidden]){border-radius:6px}}
 
 /* The same material toolbar remains available in placement and management. */
-.app .layout>.left>.object-pane-actions>.preset-manage{position:static;display:grid;place-items:center;box-sizing:border-box;flex:0 0 34px;width:34px;min-width:34px;max-width:34px;height:34px;min-height:34px;margin:0;padding:3px;border:1px solid #999!important;border-radius:6px;background:#fff!important;color:#000!important;-webkit-text-fill-color:#000!important}.app .layout>.left>.object-pane-actions>.preset-manage svg{width:24px;height:24px}.app .layout>.left>.object-pane-actions>.preset-manage:is(:hover:not(:where(.phone-touch-mode *)),:active,.phone-control-pressed,:focus-visible){background:var(--press-bg,var(--blue))!important;border-color:var(--blue)!important;color:var(--press-fg,#fff)!important;-webkit-text-fill-color:var(--press-fg,#fff)!important}.left.preset-managing>.object-pane-actions #clearBtn{display:none!important}.left.preset-managing #categoryModeToggle:disabled{opacity:.45;cursor:default;filter:none!important;background:#fff!important;color:#000!important;border-color:#999!important}.left:not(.pinned):not(.palette-hover-open):not(:focus-within):not(.preset-managing)>.object-pane-actions>.preset-manage{display:none}.left>#userPresetManager .preset-manager-heading{padding-left:8px}@media(max-width:850px){.app>.layout.phone-materials-open>.left>.object-pane-actions{display:flex!important;flex:none}}
+.app .layout>.left>.object-pane-actions>.preset-manage{position:static;display:grid;place-items:center;box-sizing:border-box;flex:0 0 34px;width:34px;min-width:34px;max-width:34px;height:34px;min-height:34px;margin:0;padding:3px;border:1px solid #999!important;border-radius:6px;background:#fff!important;color:#000!important;-webkit-text-fill-color:#000!important}.app .layout>.left>.object-pane-actions>.preset-manage svg{width:24px;height:24px}.app .layout>.left>.object-pane-actions>.preset-manage:is(:hover:not(:where(.phone-touch-mode *)),:active,.phone-control-pressed,:focus-visible){background:var(--press-bg,var(--blue))!important;border-color:var(--blue)!important;color:var(--press-fg,#fff)!important;-webkit-text-fill-color:var(--press-fg,#fff)!important}.left.preset-managing>.object-pane-actions #clearBtn{display:none!important}.left.preset-managing #categoryModeToggle:disabled{opacity:.45;filter:none!important;background:#fff!important;color:#000!important;border-color:#999!important}.left:not(.pinned):not(.palette-hover-open):not(:focus-within):not(.preset-managing)>.object-pane-actions>.preset-manage{display:none}.left>#userPresetManager .preset-manager-heading{padding-left:8px}@media(max-width:850px){.app>.layout.phone-materials-open>.left>.object-pane-actions{display:flex!important;flex:none}}
 
 .app .layout :is(#pages,#phaseMasters) .phase-group-heading.renaming>[data-cancel-group-addition]{display:grid!important;grid-column:3;grid-row:1;color:inherit}
 
@@ -1690,7 +1691,7 @@ body .app .layout #objectList>.object-group-row>.object-delete{grid-column:5;gri
 .app .layout>.left>.object-pane-actions>.preset-history{display:none;place-items:center;box-sizing:border-box;flex:0 0 34px;width:34px;min-width:34px;max-width:34px;height:34px;min-height:34px;margin:0;padding:6px;border:1px solid #999;border-radius:6px;background:#fff;color:#000}
 .app .layout>.left.preset-managing>.object-pane-actions>.preset-history{display:grid}
 .left .preset-history svg{display:block;width:20px;height:20px}
-.left .preset-history:disabled{opacity:.4;cursor:default}
+.left .preset-history:disabled{opacity:.4;}
 .app .layout>.left>.object-pane-actions>.preset-history:enabled:is(:hover:not(:where(.phone-touch-mode *)),:focus-visible){background:var(--blue);color:#fff}
 @media(max-width:850px){.app .layout>.left>.object-pane-actions>.preset-history{flex-basis:40px;width:40px;min-width:40px;max-width:40px;height:40px;min-height:40px}}
 
@@ -1711,7 +1712,7 @@ body .app .layout #objectList>.object-group-row>.object-delete{grid-column:5;gri
 
 :is(#jsonExportMenu,#jsonImportMenu) .json-menu-note{padding:4px 8px 8px;font-size:12px;color:#64748b;line-height:1.4}
 :is(#jsonExportMenu,#jsonImportMenu) .json-menu-section{padding:5px 8px;font-size:12px;font-weight:700;color:#33445f}
-:is(#jsonExportMenu,#jsonImportMenu) button:disabled{color:#8b949e!important;-webkit-text-fill-color:#8b949e!important;background:transparent!important;cursor:default;filter:none!important}
+:is(#jsonExportMenu,#jsonImportMenu) button:disabled{color:#8b949e!important;-webkit-text-fill-color:#8b949e!important;background:transparent!important;filter:none!important}
 /* Phase artwork guides stay below objects and are included in exports. */
 .stage>.field-guides{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;overflow:hidden}
 .stage.field-hidden>.field-guides{display:none}
@@ -1734,7 +1735,7 @@ body .app .layout #objectList>.object-group-row>.object-delete{grid-column:5;gri
 .guide-editor-heading select{font:inherit;min-width:0;max-width:420px;flex:1;padding:5px;border:1px solid #cbd3df;border-radius:5px;background:#fff}
 .guide-editor-heading #finishFieldGuides{margin-left:auto}
 .guide-editor-dialog .btn{font:inherit;border-width:1px;border-style:solid;border-radius:5px;padding:5px 10px;cursor:pointer;white-space:nowrap}
-.guide-editor-dialog .btn:disabled:not(:where(.guide-editor-properties *)){opacity:.4;cursor:default}
+.guide-editor-dialog .btn:disabled:not(:where(.guide-editor-properties *)){opacity:.4;}
 .guide-editor-dialog .btn:focus-visible,.guide-editor-dialog summary:focus-visible{outline:2px solid var(--blue,#3182ce);outline-offset:2px}
 .guide-editor-content{display:grid;grid-template-columns:minmax(0,1fr) 280px;flex:1;min-height:0;gap:12px;padding:12px}
 .guide-editor-preview{display:flex;flex-direction:column;min-width:0;min-height:0}
@@ -1827,7 +1828,7 @@ body .app .layout #objectList>.object-group-row>.object-delete{grid-column:5;gri
 #fieldGuideEditor #fieldGuideSettings .field-guide-number{margin:0}
 #fieldGuideEditor #fieldGuideSettings .field-guide-check input,#fieldGuideEditor .guide-hide-objects input,#fieldGuideEditor input[type="range"]{accent-color:auto}
 #fieldGuideEditor .guide-properties-body .layout-background-colors .color-trigger{padding-left:4px;padding-right:4px;gap:4px}
-.field-guide-editing #editModeToggle:disabled{opacity:.45;cursor:default}
+.field-guide-editing #editModeToggle:disabled{opacity:.45;}
 .field-guide-editing .phone-phase-navigation{display:none!important}
 .field-guide-editing .left :is(.tool,.icon-choice){opacity:.45;cursor:not-allowed}
 #fieldGuideEditor.guide-editor-dialog .btn:not(:where(.guide-editor-properties *)){background:#eef2f7!important;color:#33445f!important;-webkit-text-fill-color:#33445f!important;border:1px solid #cbd3df!important}
@@ -1866,7 +1867,7 @@ body .app .layout #objectList>.object-group-row>.object-delete{grid-column:5;gri
 body .app .layout #contentPanel :is(.desktop-phase-shared-heading,.phone-phase-tabs)>#editFieldGuides{box-sizing:border-box;display:grid;place-items:center;flex:0 0 26px;width:26px;min-width:26px;height:26px;min-height:26px;margin:0 0 0 2px;padding:3px!important;border:1px solid #d0d4da!important;border-radius:5px;background:#eef2f7!important;color:#33445f!important;-webkit-text-fill-color:#33445f!important;cursor:pointer;filter:none;-webkit-tap-highlight-color:transparent}
 body .app .layout #contentPanel :is(.desktop-phase-shared-heading,.phone-phase-tabs)>#editFieldGuides svg{display:block;width:18px;height:18px}
 body .app .layout #contentPanel :is(.desktop-phase-shared-heading,.phone-phase-tabs)>#editFieldGuides:enabled:is(:hover:not(:where(.phone-touch-mode *)),:focus-visible,:active){background:var(--blue)!important;border-color:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
-body .app .layout #contentPanel :is(.desktop-phase-shared-heading,.phone-phase-tabs)>#editFieldGuides:disabled{opacity:.45;cursor:default}
+body .app .layout #contentPanel :is(.desktop-phase-shared-heading,.phone-phase-tabs)>#editFieldGuides:disabled{opacity:.45;}
 #fieldGuideEditor #finishFieldGuides[hidden]{display:none!important}
 #fieldGuideModeMenu{z-index:10060}
 @media(min-width:851px){
@@ -1950,7 +1951,7 @@ body .app .layout .phone-object-tabs:has(.phone-object-collapse[aria-expanded="t
 body .app .layout #pngPreview .png-preview-settings:not(.png-properties-collapsed)>h3,
 body .app .layout :is(#fieldGuideEditor,#pngPreview) .guide-section-toggle[aria-expanded="true"]{border-bottom:1px solid #d0d4da!important}
 @media(min-width:851px){#phaseMemo #outputNotePhase{box-sizing:border-box;flex:none;width:100%;min-width:0;max-width:100%;padding:6px;border:1px solid #d5dce6;border-radius:5px;background:#f8fafc;color:#17212c;font:inherit}#phaseMemo #outputNotePhase:focus{outline:2px solid var(--blue);outline-offset:-1px}}
-@media(min-width:851px){#desktopPhaseSwitch:disabled{opacity:.4;cursor:default}}
+@media(min-width:851px){#desktopPhaseSwitch:disabled{opacity:.4;}}
 
 /* Shared property controls. Domain panels own placement, never a separate palette.
    These rules also own normal/hover/pressed/disabled states for property buttons.
@@ -1971,7 +1972,7 @@ body .app .layout :is(#fieldGuideEditor,#pngPreview) .guide-section-toggle[aria-
 }
 
 @media(max-width:850px){#phaseMemo #outputNotePhase{box-sizing:border-box;flex:none;width:100%;min-width:0;height:40px;min-height:40px;padding:4px 8px;border:1px solid #d5dce6;border-radius:6px;background:#f8fafc;color:#000;font:inherit;font-size:14px}#phaseMemo #outputNotePhase:focus-visible{outline:2px solid var(--blue);outline-offset:1px}}
-@media(max-width:850px){#phonePhaseSwitch-toggle:disabled{opacity:.4;cursor:default}}
+@media(max-width:850px){#phonePhaseSwitch-toggle:disabled{opacity:.4;}}
 #phoneContentModeStatus{display:none}@media(max-width:850px){#phoneContentModeStatus{display:inline-block;margin-left:8px;font-size:12px;font-weight:400;line-height:1.2;white-space:nowrap;color:inherit}}
 @media(max-width:850px){#fieldGuideModeMenu{box-sizing:border-box;width:max-content;min-width:160px;max-width:calc(100vw - 8px)}#fieldGuideModeMenu>button{white-space:nowrap}}
 #editFieldGuides svg{fill:none!important;stroke:currentColor!important}
@@ -2309,3 +2310,4 @@ body.phase-master-editing .app .layout :is(.content-heading-row,.right .board-ti
 .download-release-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .download-release-heading h4{margin:0;font-size:16px;color:#25395f}
 .download-guide [data-download-latest] .download-release{border-color:#83bddf;background:#f4faff}
+.download-guide a.btn{text-decoration:none}

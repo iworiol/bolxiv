@@ -66,7 +66,7 @@ window.BolxivSession=(()=>{
 async function initializeBoardStorage(){
  const key='tactica-board-v1';let db=null,storageError=null,pending=null,worker=null,lastSaved=null,revision=0,clearing=false,warned=false,editingSavePending=false,savedImageIds=new Set();
  function status(text){window.BolxivSaveStatus.set('content',text==='保存済み'&&typeof boardSavePending!=='undefined'&&boardSavePending&&!boardSaveNavigationOnly?'未保存の変更あり':text)}
- function report(error){if(!window.BolxivSession.owned)return;status('未保存');console.warn('Board persistence failed',error);if(!warned){warned=true;if(typeof notify==='function')notify('自動保存できません：'+(error?.message||String(error))+'。エクスポートで保存してください。')}}
+ function report(error){if(!window.BolxivSession.owned)return;status('未保存');console.warn('Board persistence failed',error);if(!warned){warned=true;if(typeof notifyFailure==='function')notifyFailure('自動保存できませんでした',{error,retained:'編集中の内容は画面に残っています',action:'ページを閉じずに「エクスポート」からコンテンツJSONを保存してください'})}}
  function transaction(mode,action){return new Promise((resolve,reject)=>{let tx;try{tx=db.transaction(['boards','images'],mode);tx.oncomplete=()=>resolve();tx.onabort=()=>reject(tx.error||new Error('保存処理が中断されました'));tx.onerror=()=>{};const boards=tx.objectStore('boards'),images=tx.objectStore('images');if(mode==='readwrite')window.BolxivSession.guardWrite(boards,tx,()=>action(boards,images));else action(boards,images)}catch(error){if(tx)try{tx.abort()}catch{}reject(error)}})}
  async function drain(){while(pending&&!clearing){const item=pending;pending=null;try{
   if(storageError)throw storageError;
@@ -86,7 +86,7 @@ async function initializeBoardStorage(){
   if(value===lastSaved&&!pending&&!worker){if(!navigationOnly||warned)status('保存済み');return true}
   if(!navigationOnly)editingSavePending=true;pending={value,imageAssets,revision:++revision};if(editingSavePending)status('保存中…');startWorker();return true;
  },async flush(){while(worker||pending){startWorker();if(worker)await worker;else break}},async clear(){clearing=true;pending=null;revision++;if(worker)await worker;try{if(storageError)throw storageError;await transaction('readwrite',(store,images)=>{store.delete(key);images.clear()});lastSaved=null;savedImageIds.clear()}catch(error){clearing=false;throw error}},get saving(){return !!(pending||worker)}};
- window.addEventListener('beforeunload',event=>{if(typeof flushScheduledBoardSave==='function')flushScheduledBoardSave();if(window.boardStorage.saving||(typeof boardSavePending!=='undefined'&&boardSavePending)){event.preventDefault();event.returnValue=''}});
+ window.addEventListener('beforeunload',event=>{if(typeof flushScheduledBoardSave==='function')flushScheduledBoardSave();if(window.boardStorage.saving||(typeof boardSavePending!=='undefined'&&boardSavePending)||['content','presets'].some(source=>window.BolxivSaveStatus.get(source)==='未保存')){event.preventDefault();event.returnValue=''}});
  try{
   db=await new Promise((resolve,reject)=>{const request=indexedDB.open('tactica-board-storage',2);request.onupgradeneeded=()=>{for(const name of ['boards','images'])if(!request.result.objectStoreNames.contains(name))request.result.createObjectStore(name)};request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error);request.onblocked=()=>reject(new Error('別のタブを閉じてから開き直してください'))});
   db.onversionchange=()=>{db.close();storageError=new Error('保存先が更新されました。ページを開き直してください')};

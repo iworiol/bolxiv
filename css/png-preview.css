@@ -15,7 +15,7 @@
 .png-preview-settings select{width:100%;min-height:36px;padding:4px 8px;border:1px solid #999;border-radius:5px;background:#fff;color:#17212c;font:inherit}
 .png-preview-settings p{margin:0;min-height:20px;font-size:12px;color:#60718c}
 .png-preview-settings-body>.btn{min-height:36px;padding:6px 12px;border:1px solid #293c66;border-radius:5px;background:#293c66;color:#fff;font:inherit}
-.png-preview-panel button:disabled:not(:where(.png-preview-settings *)){opacity:.5;cursor:default}
+.png-preview-panel button:disabled:not(:where(.png-preview-settings *)){opacity:.5;}
 .png-preview-panel button:focus-visible,.png-preview-panel select:focus-visible{outline:2px solid #4769b3;outline-offset:2px}
 .png-preview-active>.phone-phase-navigation{z-index:10036}
 @media(max-width:850px){.png-preview-active:has(.png-reader-controls #toggleBattlePages[aria-expanded="false"]):has(.png-reader-controls .content-options:not([hidden]))>.phone-phase-navigation{visibility:hidden;pointer-events:none}}
@@ -100,7 +100,7 @@
 .png-preview-surface #objectControls{visibility:hidden}
 .png-preview-surface .obj{outline:none!important}
 
-.png-preview-active #editModeToggle:disabled{opacity:1!important;cursor:default;background:#fff!important;color:#000!important;-webkit-text-fill-color:#000!important;border-color:#999!important}
+.png-preview-active #editModeToggle:disabled{opacity:1!important;background:#fff!important;color:#000!important;-webkit-text-fill-color:#000!important;border-color:#999!important}
 .png-preview-active :is(#undo,#redo):disabled{opacity:.45!important;cursor:not-allowed}
 @media(max-width:850px){.png-preview-active .app .top :is(#undo,#redo){display:none!important}}
 

@@ -38,7 +38,7 @@
  },true);
  document.addEventListener('blur',event=>{if(isSpin(event.target)&&!applying)commit(event.target)},true);
  document.addEventListener('keydown',event=>{
-  if(!isSpin(event.target)||!['Enter','Escape','ArrowUp','ArrowDown'].includes(event.key))return;
+  if(event.isComposing||event.keyCode===229||!isSpin(event.target)||!['Enter','Escape','ArrowUp','ArrowDown'].includes(event.key))return;
   const spin=event.target,current=state(spin);
   event.preventDefault();event.stopImmediatePropagation();
   if(event.key==='Escape'){restore(spin);return}
