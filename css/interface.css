@@ -1,3 +1,5 @@
+:root{--property-input-background:#f8fafc}
+.phase-memo-body>textarea[readonly],#phaseGroupNoteInput[readonly]{--property-input-background:#fff}
 /* ===== css/mobile-reading-content.css ===== */
 .phone-view-content { display:none; }
 @media(max-width:850px) {
@@ -316,7 +318,7 @@
  .app>.layout :is(#layoutPropertiesPanel,#inspector) :is(select,textarea,input[type="number"],input[type="text"],.color-trigger),
  .app>.layout #contentSelect{
   border-color:#d5dce6!important;
-  background:#f8fafc!important;
+  background:var(--property-input-background)!important;
  }
  .app>.layout #contentSelect[aria-expanded="false"]{background:#eef2f7!important}
  .app>.layout #contentSelect[aria-expanded="false"]:is(:hover:not(:where(.phone-touch-mode *)),:focus-visible){background:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
@@ -579,7 +581,7 @@
  .phase-memo-body{padding:8px;display:flex;flex-direction:column;gap:4px}
  .phase-memo:not([open])>.phase-memo-body{display:none}
  .phase-memo-phase{font-size:12px;color:#687386}
- .phase-memo-body>textarea{box-sizing:border-box;width:100%;min-height:96px;padding:7px;border:1px solid #d5dce6;border-radius:5px;background:#f8fafc;color:#17212c;font:inherit;font-size:14px;line-height:1.5;resize:vertical}
+ .phase-memo-body>textarea{box-sizing:border-box;width:100%;min-height:96px;padding:7px;border:1px solid #d5dce6;border-radius:5px;background:var(--property-input-background);color:#17212c;font:inherit;font-size:14px;line-height:1.5;resize:vertical}
  .phase-memo-reading{white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px;line-height:1.6;max-height:140px;overflow:auto}
 }
 @media(min-width:851px){
@@ -606,7 +608,7 @@
  .phase-memo-phase{font-size:12px;color:#687386;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
  .phase-memo-body>textarea{
   width:100%;flex:1;min-height:78px;resize:none;padding:7px;
-  border:1px solid #d5dce6;border-radius:5px;background:#f8fafc;color:#17212c;
+  border:1px solid #d5dce6;border-radius:5px;background:var(--property-input-background);color:#17212c;
   font:inherit;font-size:14px;line-height:1.5;
  }
  .phase-memo-body>textarea:focus{outline:2px solid var(--blue);outline-offset:-1px}
@@ -1095,7 +1097,7 @@
 #phaseGroupProperties>.field:last-child{display:flex;flex-direction:column;flex:1;min-height:78px}
 #phaseGroupProperties>.field:last-child>textarea{flex:1;min-height:0}
 #phaseGroupProperties[hidden]{display:none!important}
-#phaseGroupProperties textarea{box-sizing:border-box;width:100%;min-height:78px;padding:7px;border:1px solid #d5dce6;border-radius:5px;background:#f8fafc;color:#17212c;font:inherit;font-size:14px;line-height:1.5;resize:none}#phaseGroupProperties textarea:focus{outline:2px solid var(--blue);outline-offset:-1px}#phaseGroupProperties textarea[readonly]{background:#fff}
+#phaseGroupProperties textarea{box-sizing:border-box;width:100%;min-height:78px;padding:7px;border:1px solid #d5dce6;border-radius:5px;background:var(--property-input-background);color:#17212c;font:inherit;font-size:14px;line-height:1.5;resize:none}#phaseGroupProperties textarea:focus{outline:2px solid var(--blue);outline-offset:-1px}#phaseGroupProperties textarea[readonly]{background:#fff}
 .phase-group-selected #objectList>*{display:none!important}
 .phase-group-selected #objectList::after{content:"グループを選択中です";display:block;padding:10px;color:#60718c}
 #phaseGroupMenu{max-width:calc(100vw - 16px)}
@@ -1308,13 +1310,14 @@ body .app .layout #contentSelect::after{
 /* Shared property layout density; controls are styled in the common block below. */
 .app .layout #propertyPanel,
 .app .layout #layoutPropertiesPanel:not([hidden]):not(.hidden){padding-top:8px!important;padding-bottom:8px!important;padding-left:8px!important}
-.app .layout :is(#inspector,#layoutPropertiesPanel){gap:8px!important}
+.app .layout :is(#inspector,#layoutPropertiesPanel){gap:var(--property-field-gap)!important}
 .app .layout :is(#inspector,#layoutPropertiesPanel) .field{margin:0!important}
 
-.app .layout :is(#inspector,#layoutPropertiesPanel) :is(.coordinate-fields,.property-color-fill-row,.layout-background-colors){row-gap:8px!important;column-gap:8px!important}
+.app .layout :is(#inspector,#layoutPropertiesPanel) :is(.coordinate-fields,.property-color-fill-row,.layout-background-colors){row-gap:var(--property-related-gap)!important;column-gap:8px!important}
 .app .layout #inspector>.inspector-section-start,
 .app .layout #inspector>.object-common-properties>.inspector-section-start,
-.app .layout #layoutPropertiesPanel>.layout-background-colors{border-top:0!important;padding-top:0!important;margin-top:4px!important}
+.app .layout #layoutPropertiesPanel>.layout-background-colors{border-top:1px solid var(--property-separator-color)!important;padding-top:var(--property-separator-space)!important;margin-top:0!important}
+.app .layout #inspector :is(.field:has(#heightInput),.field:has(#donutInnerInput)){margin-top:calc(var(--property-related-gap) - var(--property-field-gap))!important}
 /* Balance long phone phase and content names instead of squeezing context away. */
 @media(max-width:850px){
  :is(#selectionTitle,#pngPreviewTitle,#guideEditorTitle)>.selection-content-context{max-width:45%;flex-shrink:1}
@@ -1792,7 +1795,7 @@ body .app .layout #objectList>.object-group-row>.object-delete{grid-column:5;gri
 .guide-editor-properties #fieldGuideSettings>.field-guide-body{display:flow-root;padding-top:0}
 #fieldGuideEditor .field-guide-body>.guide-property-frame:first-child{margin-top:0}
 .guide-editor-properties #fieldGuideSettings>h3{margin:2px 0 8px}
-.guide-property-group+.guide-property-group,.guide-shape-group+.guide-shape-group{border-top:1px solid #d0d4da;padding-top:10px;margin-top:10px}
+.guide-property-group+.guide-property-group,.guide-shape-group+.guide-shape-group{border-top:1px solid var(--property-separator-color);padding-top:var(--property-separator-space);margin-top:var(--property-field-gap)}
 :is(#fieldGuideEditor,#pngPreview) .guide-property-frame{box-sizing:border-box;min-width:0;border:1px solid #cbd3df;border-radius:6px;padding:0;margin:12px 0}
 #fieldGuideEditor .guide-property-group>h3{margin:0;font-size:14px;font-weight:600}
 :is(#fieldGuideEditor,#pngPreview) .guide-section-toggle{box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-width:0;height:36px;margin:0;padding:0 11px;border:0;border-radius:5px 5px 0 0;background:#eef2f7!important;color:#33445f!important;-webkit-text-fill-color:currentColor!important;font-family:inherit;font-size:14px;font-weight:700;line-height:normal;text-align:left;cursor:pointer;filter:none;-webkit-tap-highlight-color:transparent}
@@ -1805,7 +1808,7 @@ body .app .layout #objectList>.object-group-row>.object-delete{grid-column:5;gri
 #fieldGuideEditor .guide-section-body[hidden]{display:none!important}
 .guide-editor-properties #guideShapeFields{display:flex;flex-direction:column;gap:0}
 .guide-shape-group{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
-.guide-editor-properties #guideShapeFields .guide-shape-group{grid-template-columns:minmax(0,1fr);gap:10px}
+.guide-editor-properties #guideShapeFields .guide-shape-group{grid-template-columns:minmax(0,1fr);gap:var(--property-related-gap)}
 .guide-editor-properties .phone-number-step-buttons{display:none}
 .guide-zoom-toolbar{margin-left:auto!important;flex:none!important}
 .guide-zoom-toolbar .board-zoom-group{display:flex;align-items:center;gap:6px;box-sizing:border-box;height:26px;padding:0 5px;border:1px solid #fff;border-radius:6px;color:#fff}
@@ -1956,7 +1959,7 @@ body .app .layout :is(#fieldGuideEditor,#pngPreview) .guide-section-toggle[aria-
 /* Shared property controls. Domain panels own placement, never a separate palette.
    These rules also own normal/hover/pressed/disabled states for property buttons.
    Guide/output toolbar fallbacks below and above exclude property descendants. */
-.app .layout{--property-input-bg:#f8fafc;--property-input-fg:#000;--property-input-border:#d5dce6;--property-input-radius:6px;--property-input-height:28px;--property-label-gap:4px;--property-button-bg:#eef2f7;--property-button-fg:#33445f;--property-button-border:#d0d4da}
+.app .layout{--property-related-gap:6px;--property-field-gap:8px;--property-separator-space:4px;--property-separator-color:#e5e9ef;--property-input-bg:#f8fafc;--property-input-fg:#000;--property-input-border:#d5dce6;--property-input-radius:6px;--property-input-height:28px;--property-label-gap:4px;--property-button-bg:#eef2f7;--property-button-fg:#33445f;--property-button-border:#d0d4da}
 .app .layout :is(#inspector,#layoutPropertiesPanel,#phaseGroupProperties,#phaseMasterAssignment,#phaseMasterGroupProperties,#fieldGuideEditor .guide-editor-properties,#pngPreview .png-preview-settings) :is(.field>label:not(.property-icon-toggle),.coordinate-fields>div>label,.field-guide-check,.print-page-fields label,.print-page-fields legend,.output-note-row>label,.png-scale-field>label,.output-note-toggle,.phase-master-phase-body .phase-memo>summary){font-family:inherit!important;font-size:12px!important;font-weight:400!important;line-height:1.2!important;color:var(--property-input-fg)!important;-webkit-text-fill-color:var(--property-input-fg)!important}
 .app .layout :is(#inspector,#layoutPropertiesPanel,#phaseGroupProperties,#phaseMasterAssignment,#phaseMasterGroupProperties,#fieldGuideEditor .guide-editor-properties,#pngPreview .png-preview-settings) :is(.field>label:not(.property-icon-toggle):not(:has(input[type="checkbox"])),.coordinate-fields>div>label){margin-top:0!important;margin-bottom:var(--property-label-gap)!important}
 .app .layout :is(#inspector,#layoutPropertiesPanel,#phaseGroupProperties,#phaseMasterAssignment,#phaseMasterGroupProperties,#fieldGuideEditor .guide-editor-properties,#pngPreview .png-preview-settings) :is(input[type="number"],input[type="text"],input:not([type]),select,.color-trigger){box-sizing:border-box;font-family:inherit!important;font-size:14px!important;font-weight:400!important;line-height:normal!important;height:var(--property-input-height)!important;min-height:var(--property-input-height)!important;max-height:var(--property-input-height)!important;padding-top:3px!important;padding-bottom:3px!important;border:1px solid var(--property-input-border)!important;border-radius:var(--property-input-radius)!important;background:var(--property-input-bg)!important;color:var(--property-input-fg)!important;-webkit-text-fill-color:var(--property-input-fg)!important}
@@ -2037,7 +2040,7 @@ body .app .layout :is(#fieldGuideEditor,#pngPreview) .guide-section-toggle[aria-
 #phaseMasterListPanel .page-list-box{min-height:0;flex:1;display:flex;flex-direction:column}
 #phaseMasters{min-height:0;overflow:auto;flex:1}
 :is(#phaseMasterAssignment,#phaseMasterGroupProperties){display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden}
-.phase-master-phase-body{padding:8px;display:flex;flex-direction:column;gap:8px}
+.phase-master-phase-body{padding:8px;display:flex;flex-direction:column;gap:var(--property-field-gap)}
 .phase-master-phase-body[hidden]{display:none}
 :is(#phaseMasterAssignment,#phaseMasterGroupProperties) input,:is(#phaseMasterAssignment,#phaseMasterGroupProperties) select,.phase-master-name input{box-sizing:border-box;width:100%}
 :is(#phaseMasterAssignment,#phaseMasterGroupProperties) #phaseMemo{display:flex!important;flex-direction:column;flex:1!important;height:auto!important;min-height:140px}
@@ -2071,7 +2074,7 @@ body .app .layout :is(#fieldGuideEditor,#pngPreview) .guide-section-toggle[aria-
 :is(#phaseMasterAssignment,#phaseMasterGroupProperties)>.accordion-toggle:hover,#phaseMasterGroupProperties>.accordion-toggle:hover{background:#e2e9f3!important}
 :is(#phaseMasterAssignment,#phaseMasterGroupProperties) .phase-master-phase-body>.field{display:flex;flex-direction:column;flex:none;gap:0;margin:0}
 :is(#phaseMasterAssignment,#phaseMasterGroupProperties) #phaseMemo>.phase-memo-body{display:flex!important;flex-direction:column;flex:1;min-height:100px;height:auto!important;padding:0}
-:is(#phaseMasterAssignment,#phaseMasterGroupProperties) #phaseMemo textarea{display:block!important;background:#fff;color:#22344f;box-sizing:border-box;flex:1;height:auto!important;min-height:100px;resize:none;border:1px solid #ccd3df;border-radius:4px;padding:6px}
+:is(#phaseMasterAssignment,#phaseMasterGroupProperties) #phaseMemo textarea{display:block!important;background:var(--property-input-background);color:#22344f;box-sizing:border-box;flex:1;height:auto!important;min-height:100px;resize:none;border:1px solid #ccd3df;border-radius:4px;padding:6px}
 :is(#phaseMasterAssignment,#phaseMasterGroupProperties) #phaseMemo .phase-memo-reading{display:none!important}
 :is(#phaseMasterAssignment,#phaseMasterGroupProperties) #phaseMemo>summary{background:transparent;border:0;padding:4px 0}
 
@@ -2106,7 +2109,7 @@ body .app .layout :is(#phaseMasterAssignment,#phaseMasterGroupProperties) #phase
 #phaseMasterGroupProperties>.phase-master-phase-body>#phaseGroupProperties{flex:1;min-height:180px}
 #phaseMasterGroupProperties #phaseGroupProperties>.field{display:flex;flex-direction:column;gap:4px;margin:0}
 #phaseMasterGroupProperties #phaseGroupProperties>.field:last-child{flex:1;min-height:100px}
-#phaseMasterGroupProperties #phaseGroupNoteInput{background:#fff;border:1px solid #ccd3df;border-radius:4px;padding:6px;color:#22344f}
+#phaseMasterGroupProperties #phaseGroupNoteInput{background:var(--property-input-background);border:1px solid #ccd3df;border-radius:4px;padding:6px;color:#22344f}
 
 /* Phase name is already shown in the content phase properties. */
 #phaseMasterAssignment #phaseMemo .phase-memo-phase{display:none!important}
@@ -2310,4 +2313,33 @@ body.phase-master-editing .app .layout :is(.content-heading-row,.right .board-ti
 .download-release-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .download-release-heading h4{margin:0;font-size:16px;color:#25395f}
 .download-guide [data-download-latest] .download-release{border-color:#83bddf;background:#f4faff}
-.download-guide a.btn{text-decoration:none}
+.download-guide a.btn{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
+
+/* Title-bar palette trial: scoped to the top strip; popup and pane palettes stay shared. */
+.app>.top{background:var(--titlebar-bg)!important;color:var(--titlebar-fg);border-bottom-color:#393939}
+.app>.top .brand strong,.app>.top .content-save-status{color:var(--titlebar-fg)!important;-webkit-text-fill-color:var(--titlebar-fg)!important}
+.app>.top .brand :is(small,.brand-version){color:var(--titlebar-muted)!important;-webkit-text-fill-color:var(--titlebar-muted)!important}
+
+/* Mobile trial: the black title strip meets the mode-colored pane directly. */
+@media(max-width:850px){.app>.top{border-bottom:0!important}}
+
+/* Flush mobile pane corners at the title strip; internal cards keep their corners. */
+@media(max-width:850px){
+ .app .layout .right>.layer-group,
+ .app .layout .right>.layer-group>.board-title-row,
+ .app .layout .right>.png-preview-panel[open],
+ .app .layout .right>.png-preview-panel>.png-preview-heading,
+ #fieldGuideEditor.guide-editor-embedded,
+ #fieldGuideEditor.guide-editor-embedded>.guide-editor-heading{
+  border-top-left-radius:0!important;border-top-right-radius:0!important;
+ }
+}
+
+/* Full-width mobile content/field panes share square outer edges. */
+@media(max-width:850px){
+ .app .layout>.battle,
+ .app .layout>.battle>#battlePanel,
+ .app>.layout.phone-content-open .battle #battlePanel>.content-group,
+ .app .layout .battle .content-group,
+ .app .layout .battle .content-group>.content-heading-row{border-radius:0!important}
+}

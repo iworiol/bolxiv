@@ -746,7 +746,7 @@ function organizeInspectorFields(el){
  const ordered=Array.from(el.children).sort((a,b)=>rank(a)-rank(b));
  let previousSection=null;
  for(const field of ordered){
-  const order=rank(field),section=order<2?'status':order<10?'text':order<20?'position':order<40?'geometry':order<70?'appearance':'other';
+  const order=rank(field),section=order<2?'status':order<10?'text':order<20?'position':order<30?'geometry':order<40?'rotation':order<70?'appearance':'other';
   field.classList.toggle('inspector-section-start',previousSection!==null&&section!==previousSection&&section!=='status');
   if(!field.classList.contains('hint'))previousSection=section;
   el.appendChild(field);
@@ -979,21 +979,48 @@ function renderedBoardBounds(bounds,boardRect,scaleX,scaleY,borderLeft,borderTop
 
 function alignmentSnapshot(){let boardRect=stage.getBoundingClientRect(),scaleX=boardRect.width/stage.offsetWidth,scaleY=boardRect.height/stage.offsetHeight;if(!scaleX||!scaleY)return [];let nodes=new Map(Array.from(layer.children).map(node=>[node.dataset.id,node]));return current().map(item=>{let node=nodes.get(item.id);return node?{...item,bounds:renderedBoardBounds(node.getBoundingClientRect(),boardRect,scaleX,scaleY,stage.clientLeft,stage.clientTop)}:item})}
 
+// Gesture-owned geometry: stationary objects cannot change during an ordinary move.
+// Moving objects still use their actual rendered bounds (text, rotation and clipping).
+function objectMoveAlignmentSnapshot(){
+ if(drag?.mode!=='move')return alignmentSnapshot();
+ const page=current(),rect=stage.getBoundingClientRect(),width=stage.offsetWidth,height=stage.offsetHeight;
+ const nodes=Array.from(layer.children),ids=drag.ids.join('\0'),signature=[rect.left,rect.top,rect.width,rect.height,width,height,stage.clientLeft,stage.clientTop,stage.className].join('|');
+ let cache=drag.stationaryAlignment;
+ if(!cache||cache.page!==page||cache.count!==page.length||cache.ids!==ids||cache.signature!==signature||cache.nodes.length!==nodes.length||nodes.some((node,index)=>node!==cache.nodes[index])){
+  const items=alignmentSnapshot();
+  drag.stationaryAlignment={page,count:page.length,ids,signature,nodes,items,nodeById:new Map(nodes.map(node=>[node.dataset.id,node]))};
+  return items;
+ }
+ const moving=new Set(drag.ids),scaleX=rect.width/width,scaleY=rect.height/height;
+ if(!scaleX||!scaleY)return [];
+ return page.map((item,index)=>{
+  if(!moving.has(item.id))return cache.items[index];
+  const node=cache.nodeById.get(item.id);
+  return node?{...item,bounds:renderedBoardBounds(node.getBoundingClientRect(),rect,scaleX,scaleY,stage.clientLeft,stage.clientTop)}:item;
+ });
+}
+
 function boardCenterGuides(items,movingIds,previous,width,height){items=movementAlignmentItems(items,movingIds);let moving=new Set(movingIds),before=new Map(previous.map(item=>[item.id,item])),vertical=false,horizontal=false;let crossed=(value,oldValue,target)=>Math.abs(value-target)<=0.000001;for(let item of items){if(!moving.has(item.id)||item.visible===false||!item.bounds)continue;let bounds=item.bounds,old=before.get(item.id)?.bounds;for(let key of ['left','centerX','right']){let value=key==='centerX'?(bounds.left+bounds.right)/2:bounds[key],oldValue=old?(key==='centerX'?(old.left+old.right)/2:old[key]):undefined;if(crossed(value,oldValue,width/2))vertical=true}for(let key of ['top','centerY','bottom']){let value=key==='centerY'?(bounds.top+bounds.bottom)/2:bounds[key],oldValue=old?(key==='centerY'?(old.top+old.bottom)/2:old[key]):undefined;if(crossed(value,oldValue,height/2))horizontal=true}}let guides=[];if(vertical)guides.push({axis:'x',x:width/2,y:0,length:height});if(horizontal)guides.push({axis:'y',x:0,y:height/2,length:width});return guides}
 
-function updateAlignmentGuides(ids){if(drag?.shiftGuidesDisabled){clearAlignmentGuides();return}let width=stage.clientWidth,height=stage.clientHeight;if(!width||!height){clearAlignmentGuides();return}let items=alignmentSnapshot(),previous=drag?.alignmentPrevious||[],guides=objectAlignmentGuides(items,ids,previous);if(drag?.mode==='move')guides.push(...boardCenterGuides(items,ids,previous,width,height).map(guide=>({...guide,centerLine:true})));if(drag)drag.alignmentPrevious=items;clearAlignmentGuides();if(!guides.length)return;drawAlignmentGuides(guides,width,height)}
+function updateAlignmentGuides(ids){if(drag?.shiftGuidesDisabled){clearAlignmentGuides();return}let width=stage.clientWidth,height=stage.clientHeight;if(!width||!height){clearAlignmentGuides();return}let items=objectMoveAlignmentSnapshot(),previous=drag?.alignmentPrevious||[],guides=objectAlignmentGuides(items,ids,previous);if(drag?.mode==='move')guides.push(...boardCenterGuides(items,ids,previous,width,height).map(guide=>({...guide,centerLine:true})));if(drag)drag.alignmentPrevious=items;drawAlignmentGuides(guides,width,height)}
 
 function mergedAlignmentGuides(guides){const lines=new Map(),centers=[];for(const guide of guides){if(guide.centerLine||guide.centerMatch){centers.push(guide);continue}if(!guide.length)continue;const key=guide.axis+':'+(guide.axis==='x'?guide.x:guide.y),previous=lines.get(key);if(!previous){lines.set(key,{...guide});continue}const start=guide.axis==='x'?'y':'x',end=Math.max(previous[start]+previous.length,guide[start]+guide.length);previous[start]=Math.min(previous[start],guide[start]);previous.length=end-previous[start]}return [...lines.values(),...centers]}
 
 function syncSvgAlignmentScale(svg){const width=parseFloat(getComputedStyle(svg).width),scale=width?svg.getBoundingClientRect().width/width:1;svg.style.setProperty('--alignment-svg-transform-scale',String(scale||1))}
 
 function drawAlignmentGuides(guides,width,height){
+ const existing=Array.from(controls.querySelectorAll('.alignment-guide'));let index=0;const centers=new Set();
  for(const guide of mergedAlignmentGuides(guides)){
-  if(guide.centerLine){stage.classList.add('center-align-'+guide.axis);continue}
+  if(guide.centerLine){centers.add(guide.axis);continue}
   if(!guide.length&&!guide.centerMatch)continue;
-  const node=document.createElement('div');node.className='alignment-guide alignment-guide-'+guide.axis+(guide.centerMatch?' alignment-guide-center':'');
-  node.style.left=guide.x/width*100+'%';node.style.top=guide.y/height*100+'%';node.style[guide.axis==='x'?'height':'width']=guide.length/(guide.axis==='x'?height:width)*100+'%';controls.appendChild(node);
+  const node=existing[index]||document.createElement('div'),className='alignment-guide alignment-guide-'+guide.axis+(guide.centerMatch?' alignment-guide-center':'');index++;
+  if(node.className!==className)node.className=className;
+  const style='left: '+guide.x/width*100+'%; top: '+guide.y/height*100+'%; '+(guide.axis==='x'?'height':'width')+': '+guide.length/(guide.axis==='x'?height:width)*100+'%;';
+  if(node.style.cssText!==style)node.style.cssText=style;
+  if(!node.parentNode)controls.appendChild(node);
  }
+ for(const node of existing.slice(index))node.remove();
+ for(const axis of ['x','y'])if(stage.classList.contains('center-align-'+axis)!==centers.has(axis))stage.classList.toggle('center-align-'+axis,centers.has(axis));
 }
 
 function snappedObjectMove(items,starts,dx,dy,width,height,minX,maxX,minY,maxY){

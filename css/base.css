@@ -59,7 +59,7 @@ button:disabled,input:disabled,select:disabled,textarea:disabled {
 .logo {
   width:30px;
   height:30px;
-  background:var(--accent);
+  background:var(--titlebar-bg);
   border-radius:9px;
   display:grid;
   place-items:center;

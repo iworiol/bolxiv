@@ -374,7 +374,7 @@
 #pngPreview #phaseMemo{display:block;flex:none;min-height:0;margin:8px 0 0}
 
 #pngPreview #phaseMemo .phase-memo-body{display:flex;flex-direction:column;flex:1;min-height:0;padding:0}
-#pngPreview #phaseMemo textarea{display:block!important;box-sizing:border-box;width:100%;min-height:140px;height:160px;resize:vertical;background:#fff;color:#22344f;border:1px solid #ccd3df;border-radius:4px;padding:6px;font:inherit}
+#pngPreview #phaseMemo textarea{display:block!important;box-sizing:border-box;width:100%;min-height:140px;height:160px;resize:vertical;background:var(--property-input-background);color:#22344f;border:1px solid #ccd3df;border-radius:4px;padding:6px;font:inherit}
 @media(max-width:850px){#pngPreview #phaseMemo textarea{resize:none}}
 #pngPreview #phaseMemo .phase-memo-reading{display:none!important}
 @media(max-width:850px){
