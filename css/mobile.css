@@ -1503,7 +1503,7 @@
     height:100%!important;
     padding:0!important;
     border:0!important;
-    border-radius:7px 7px 0 0!important;
+    border-radius:0!important;
     box-shadow:4px 0 16px #0004!important;
   }
   .app>.layout[data-phone-pane="canvas"].phone-content-open>.right {
@@ -1753,7 +1753,7 @@
     background-color:#fff!important;
   }
   .app>.top {
-    border-radius:10px 10px 0 0;
+    border-radius:0;
     background-color:var(--bg)!important;
   }
 }
