@@ -23,7 +23,7 @@ html.app-restoring:not(.app-shell-ready) .startup-shell{display:grid;position:fi
 .startup-shell-version{grid-column:3;grid-row:2;align-self:baseline;color:var(--titlebar-muted);font:12px 'Segoe UI Variable','Segoe UI','Yu Gothic UI',sans-serif;letter-spacing:.06em;white-space:nowrap}
 .startup-shell-header small{display:block;grid-column:2;grid-row:2;align-self:baseline;font:12px 'Segoe UI Variable','Segoe UI','Yu Gothic UI',sans-serif;letter-spacing:.1em;color:var(--titlebar-muted);margin-top:0;white-space:nowrap}
 .startup-shell-logo{display:grid;place-items:center;flex:none;width:30px;height:30px;background:var(--titlebar-bg);border-radius:9px}
-.startup-shell-logo svg{width:25px;height:25px}
+.startup-shell-logo svg{width:28px;height:28px}
 .startup-shell-layout{display:grid;grid-template-columns:56px 284px minmax(480px,1fr);min-height:0;overflow:hidden}
 .startup-shell-rail{padding:17px 7px;border-right:1px solid #b8b8b8}
 .startup-shell-rail span{display:block;width:34px;height:34px;margin-bottom:8px;border-radius:6px;background:#eef2f7}
