@@ -271,7 +271,8 @@ function phoneReaderLayoutMetrics(panel,footerHeight,rowHeight,zoom=boardDisplay
   const controls=phaseListButton.closest('.page-controls');
   controls.style.flex=open?'1 1 0':'0 0 36px';controls.style.minHeight=open?'0':'36px';controls.style.height=open?'auto':'36px';
  }
- const homes=[list,resizeHandle,object,phase,memo].map(node=>{const anchor=document.createComment('desktop phase tool home');node.before(anchor);return {node,anchor}});
+ // The note belongs to the phase properties in both layouts.
+ const homes=[list,resizeHandle,object,phase].map(node=>{const anchor=document.createComment('desktop phase tool home');node.before(anchor);return {node,anchor}});
  let resizeGesture=null;
  if(Number.isFinite(viewSettings.desktopObjectListHeight)&&viewSettings.desktopObjectListHeight>=80)rail.style.setProperty('--desktop-list-height',viewSettings.desktopObjectListHeight+'px');
  function resizeList(height){
@@ -604,7 +605,7 @@ function createPhoneListPropertyBar(options){return createPanelView(options)}
  const desktop=matchMedia('(min-width:851px)');
  const menuButton=document.createElement('button');menuButton.type='button';menuButton.setAttribute('role','menuitem');menuButton.dataset.helpAction='tutorial';menuButton.textContent='チュートリアル';helpMenu.querySelector('[data-help-action="guide"]').after(menuButton);
  const intro=document.createElement('dialog');intro.id='tutorialIntro';intro.setAttribute('aria-labelledby','tutorialIntroTitle');
- intro.innerHTML='<h2 id="tutorialIntroTitle">小さな攻略図を作ってみよう</h2><p>配置・サイズ調整・移動・フェーズコピー・ノート・元に戻すを、約3分で試せます。</p><p>練習専用のコンテンツを追加します。終了すると練習データを削除し、練習を始める前の画面に戻ります。</p><div class="tutorial-intro-actions"><button type="button" id="tutorialCancel">キャンセル</button><button type="button" id="tutorialStart" class="tutorial-primary">練習を始める</button></div>';document.body.append(intro);
+ intro.innerHTML='<h2 id="tutorialIntroTitle">小さな攻略図を作ってみよう</h2><p>配置・サイズ調整・移動・フェーズ複製・ノート・元に戻すを、約3分で試せます。</p><p>練習専用のコンテンツを追加します。終了すると練習データを削除し、練習を始める前の画面に戻ります。</p><div class="tutorial-intro-actions"><button type="button" id="tutorialCancel">キャンセル</button><button type="button" id="tutorialStart" class="tutorial-primary">練習を始める</button></div>';document.body.append(intro);
  const panel=document.createElement('section');panel.id='pcTutorial';panel.hidden=true;panel.setAttribute('role','region');panel.setAttribute('aria-label','PCチュートリアル');
  panel.innerHTML='<div class="tutorial-progress" id="tutorialProgress"></div><h2 id="tutorialTitle"></h2><p id="tutorialInstruction"></p><p id="tutorialStatus" role="status" aria-live="polite"></p><div class="tutorial-footer"><button type="button" id="tutorialExit">途中で終了</button><button type="button" id="tutorialNext" class="tutorial-primary">次へ</button></div>';document.body.append(panel);
  const highlight=document.createElement('div');highlight.id='tutorialHighlight';highlight.hidden=true;highlight.setAttribute('aria-hidden','true');document.body.append(highlight);
@@ -616,7 +617,7 @@ function createPhoneListPropertyBar(options){return createPanelView(options)}
   {title:'円範囲を配置する',text:'左の「AoE」で円範囲をクリックし、キャンバスをクリックして配置してください。',target:()=>document.querySelector('.left .tool[data-tool="circle"] .glyph'),done:()=>!!circle()},
   {title:'サイズを変える',text:'円範囲をクリックして選び、右側のプロパティで「サイズ」を150px以上にしてください。スライダーでも数値入力でも変更できます。',target:()=>get('widthSpin')||document.querySelector('#objects .obj'),done:()=>!!circle()&&circle().width>=150},
   {title:'矢印キーで移動する',text:'キャンバス上の円範囲をクリックして選び、上下左右キーで動かしてください。数値欄を入力中なら、先に円範囲をクリックします。',target:()=>document.querySelector('#objects .obj'),enter:()=>{const item=circle();session.position=item?{x:item.x,y:item.y}:null},done:()=>{const item=circle();return !!item&&!!session.position&&(Math.abs(item.x-session.position.x)>.001||Math.abs(item.y-session.position.y)>.001)}},
-  {title:'フェーズをコピーする',text:'フェーズリスト見出し右側のコピーを押し、「このコンテンツにコピー」を選んでください。配置と設定を引き継いだ次のフェーズを作れます。',target:()=>get('copyPage'),enter:()=>{session.sourcePage=data.page;session.sourceId=circle()?.id},done:()=>data.pages.length>=2&&data.page!==session.sourcePage&&!!circle()&&circle().id!==session.sourceId},
+  {title:'フェーズを複製する',text:'フェーズリスト見出し右側の複製を押し、「このコンテンツに複製」を選んでください。配置と設定を引き継いだ次のフェーズを作れます。',target:()=>get('copyPage'),enter:()=>{session.sourcePage=data.page;session.sourceId=circle()?.id},done:()=>data.pages.length>=2&&data.page!==session.sourcePage&&!!circle()&&circle().id!==session.sourceId},
   {title:'ノートを残す',text:'コンテンツペインの「フェーズプロパティ」を開き、下の「フェーズノート」に「ここで集合」など短いメモを入力してください。ノートはフェーズごとに保存されます。',target:phaseNoteTarget,done:()=>!!data.pageNotes?.[data.page]?.trim()},
   {title:'元に戻す・やり直す',text:'ノート欄の外をクリックし、左上の「元に戻す」、続けて「やり直す」を押してください。入力したノートが戻れば完了です。',target:()=>get(session.sawUndo?'redo':'undo'),enter:()=>{session.note=data.pageNotes[data.page];session.notePage=data.page;session.sawUndo=false},done:()=>{const note=data.pageNotes?.[session.notePage]||'';if(note!==session.note)session.sawUndo=true;return session.sawUndo&&note===session.note}}
  ];
@@ -624,7 +625,7 @@ function createPhoneListPropertyBar(options){return createPanelView(options)}
   {...steps[0],text:'「マテリアル」を開き、「AoE」の円範囲をタップします。一覧の外をタップして閉じ、キャンバスの空いている場所をタップして配置してください。',target:()=>document.querySelector('.layout').classList.contains('phone-materials-open')?document.querySelector('.left .tool[data-tool="circle"]'):document.querySelector('.phone-material-pin')},
   {...steps[1],enter:()=>{const item=circle();if(item){selected=item.id;selectedIds=[item.id];renderSelectionOnly()}const host=get('objectLayerPanel');if(host.dataset.objectTab!=='properties')get('toggleLayers').parentElement.querySelector('.phone-object-tabs button').click();if(get('toggleInspector').getAttribute('aria-expanded')!=='true')get('toggleInspector').click()},text:'円範囲をタップして選び、画面下の「プロパティ」でサイズのスライダーを右へ動かし、150px以上にします。「リスト」が表示中なら切り替えボタン、「＋」ならそれを押して欄を開いてください。',target:()=>get('widthInput')?.getClientRects().length?get('widthInput'):document.querySelector('.phone-object-tabs button')},
   {...steps[2],title:'指で移動する',text:'円範囲を指でドラッグして、別の場所へ動かしてください。',target:()=>document.querySelector('#objects .obj')},
-  {...steps[3],text:'キャンバス左側の矢印からコンテンツを開き、フェーズリスト見出しのコピーから「このコンテンツにコピー」をタップしてください。',target:()=>document.querySelector('.layout').classList.contains('phone-content-open')?get('copyPage'):document.querySelector('.phone-content-icon')},
+  {...steps[3],text:'キャンバス左側の矢印からコンテンツを開き、フェーズリスト見出しの複製から「このコンテンツに複製」をタップしてください。',target:()=>document.querySelector('.layout').classList.contains('phone-content-open')?get('copyPage'):document.querySelector('.phone-content-icon')},
   {...steps[4],text:'コンテンツを開き、フェーズリスト見出しの切り替えボタンで「プロパティ」を表示します。「＋」なら欄を開き、下の「フェーズノート」に「ここで集合」など短いメモを入力してください。',target:phaseNoteTarget},
   {...steps[5],text:'キーボードを閉じ、コンテンツを開いたまま画面上部の「元に戻す」、続けて「やり直す」をタップしてください。ノートが元どおりになれば完了です。',target:()=>get(session.sawUndo?'redo':'undo')}
  ];

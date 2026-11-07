@@ -271,7 +271,7 @@ button:disabled,input:disabled,select:disabled,textarea:disabled {
   width:min(100%,900px);
   aspect-ratio:1.65;
   background-color:#17212c;
-  background-size:32px 32px,32px 32px,100% 100%;
+  background-size:var(--grid-step,32px) var(--grid-step,32px),var(--grid-step,32px) var(--grid-step,32px),100% 100%;
   border:1px solid transparent;
   border-radius:0;
   overflow:hidden;
@@ -3375,8 +3375,8 @@ input[type=file] {
 .stage.field-square:before,.stage.field-circle:before,.stage.field-landscape:before,.stage.field-portrait:before,.stage.field-image:before {
   background-color:var(--field-bg,#17212c);
   background-image:linear-gradient(#71809055 1px,transparent 1px),linear-gradient(90deg,#71809055 1px,transparent 1px);
-  background-size:32px 32px;
-  background-position:calc(50% + 16px) calc(50% + 16px);
+  background-size:var(--grid-step,32px) var(--grid-step,32px);
+  background-position:calc(50% + var(--grid-step,32px)/2) calc(50% + var(--grid-step,32px)/2);
 }
 .stage.field-landscape:after {
   top:25%;

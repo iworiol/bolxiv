@@ -19,10 +19,12 @@
  groupToggle.onclick=openGroupMenu;groupToggle.onkeydown=event=>{if(event.key==='ArrowRight'){event.preventDefault();if(groupMenu.hidden)openGroupMenu();groupMenu.querySelector('button:not(:disabled)')?.focus()}};
  groupMenu.addEventListener('keydown',event=>{if(event.key==='Escape'||event.key==='ArrowLeft'){event.preventDefault();event.stopPropagation();closeGroupMenu();groupToggle.focus()}});
  const groupStart=document.createElement('div');groupStart.className='context-separator';groupStart.setAttribute('role','separator');menu.insertBefore(groupStart,groupToggle);
- for(const [id,label] of [['contextGroup','グループ化'],['contextUngroup','グループ解除'],['contextRenameObjectGroup','グループ名を変更']]){
+ for(const [id,label] of [['contextGroup','グループ化'],['contextUngroup','グループ解除'],['contextDetachGroupMembers','グループから外す'],['contextRenameObjectGroup','グループ名を変更']]){
   const button=createMenuAction({label});button.id=id;
   groupMenu.append(button);
   button.onclick=()=>{
+   if(button.disabled)return;
+   if(id==='contextDetachGroupMembers'){const ids=JSON.parse(menu.dataset.ids||'[]');closeObjectContextMenu();detachObjectGroupMembers(ids);return}
    const ids=expandObjectGroups(JSON.parse(menu.dataset.ids||'[]')),items=current().filter(o=>ids.includes(o.id));closeObjectContextMenu();
    if(id==='contextRenameObjectGroup'){if(selectedObjectGroup().length)beginObjectGroupRename(items[0].objectGroupId);return}
    changeObjectGrouping(ids,id==='contextUngroup');
@@ -312,10 +314,10 @@ function placeBuiltinFieldMarkers(cx,cy){
  trigger.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 3v4m0 5v9M12 3v10m0 5v3M19 3v4m0 5v9"/><rect x="2.5" y="7" width="5" height="5" rx="1"/><rect x="9.5" y="13" width="5" height="5" rx="1"/><rect x="16.5" y="7" width="5" height="5" rx="1"/></svg>';
  toolbar.insertBefore(trigger,document.getElementById('gridToggle'));
  menu.id='phoneDisplayMenu';menu.className='phone-display-menu';menu.hidden=true;menu.setAttribute('role','menu');menu.setAttribute('aria-label','表示設定');document.body.append(menu);
- const items=[['gridToggle','グリッドを表示'],['fieldToggle','フィールドを表示'],['clipToggle','フィールド外を表示']].map(([id,label])=>{
-  const source=document.getElementById(id),item=document.createElement('button');item.type='button';item.setAttribute('role','menuitemcheckbox');item.innerHTML='<span>'+label+'</span><span class="phone-display-state" aria-hidden="true"></span>';
-  const sync=()=>{const pressed=source.getAttribute('aria-pressed')==='true',checked=id==='clipToggle'?!pressed:pressed;item.setAttribute('aria-checked',String(checked));item.lastElementChild.textContent=checked?'オン':'オフ';item.disabled=source.disabled};
-  item.onclick=()=>{source.click();sync();item.focus({preventScroll:true})};new MutationObserver(sync).observe(source,{attributes:true,attributeFilter:['aria-pressed','disabled']});sync();menu.append(item);return item;
+ const items=[['gridToggle','グリッド線の表示・間隔'],['fieldToggle','フィールドを表示'],['clipToggle','フィールド外を表示']].map(([id,label])=>{
+  const source=document.getElementById(id),item=document.createElement('button');item.type='button';item.setAttribute('role',id==='gridToggle'?'menuitem':'menuitemcheckbox');if(id==='gridToggle')item.setAttribute('aria-haspopup','menu');item.innerHTML='<span>'+label+'</span><span class="phone-display-state" aria-hidden="true"></span>';
+  const sync=()=>{const pressed=source.getAttribute('aria-pressed')==='true',checked=id==='clipToggle'?!pressed:pressed;if(id!=='gridToggle')item.setAttribute('aria-checked',String(checked));item.lastElementChild.textContent=id==='gridToggle'?'▸':checked?'オン':'オフ';item.disabled=source.disabled};
+  item.onclick=()=>{if(id==='gridToggle'){close();window.Bolxiv.openGridMenu?.(trigger);return}source.click();sync();item.focus({preventScroll:true})};new MutationObserver(sync).observe(source,{attributes:true,attributeFilter:['aria-pressed','disabled']});sync();menu.append(item);return item;
  });
  const separator=document.createElement('div');separator.className='phone-display-menu-separator';separator.setAttribute('role','separator');menu.append(separator);
  const closeButton=document.createElement('button');closeButton.type='button';closeButton.setAttribute('role','menuitem');closeButton.textContent='閉じる';closeButton.onclick=()=>close(true);menu.append(closeButton);items.push(closeButton);
@@ -490,11 +492,11 @@ function confirmPhoneLayerDeletion(id,individual=false){
   ],
   [
     "#copyPage",
-    "フェーズやグループのコピー先を選びます。"
+    "フェーズやグループの複製先を選びます。"
   ],
   [
     "#copyPageToContent",
-    "別コンテンツへコピーします。元のデータは残します。"
+    "別コンテンツへ複製します。元のデータは残します。"
   ],
   [
     "#phonePhaseSwitch-toggle",
@@ -794,7 +796,7 @@ function confirmPhoneLayerDeletion(id,individual=false){
    '#contentPanel.phone-phase-list-tabbed .phone-list-property-change':'フェーズリスト・プロパティの切り替え','#contentPanel.phone-phase-list-tabbed .phone-object-collapse':'フェーズ欄を開閉',
    '#phaseMasterModeToggle':'コンテンツ／フィールドの切り替え','#editUsedField':'使用フィールドを編集','#addPhaseMaster':'フィールドの追加・整理','#duplicatePhaseMaster':'フィールドを複製','#phaseMasterSelect':'使用フィールドの選択','#editModeToggle':'モード切替','help-png-mode':'モード切替',
    '.phone-menu-toggle':'操作メニュー','.phone-content-icon':fieldMode?'フィールドペインを開く':'コンテンツペインを開く','.phone-content-close':fieldMode?'フィールドペインを閉じる':'コンテンツペインを閉じる','.phone-material-pin':'マテリアルを開閉',
-   '.preset-manage':'配置・プリセット管理の切り替え','#addPage':'フェーズを追加','#addPhaseGroup':'フェーズグループを追加','#copyPage':'フェーズをコピー','#copyPageToContent':'別コンテンツへコピー',
+   '.preset-manage':'配置・プリセット管理の切り替え','#addPage':'フェーズを追加','#addPhaseGroup':'フェーズグループを追加','#copyPage':'フェーズを複製','#copyPageToContent':'別コンテンツへ複製',
    '#editFieldGuides':'コンテンツ／フィールドの切り替え','#phasePropertyResize':'ペインの高さ調整','#resetBoardZoom':'表示倍率を選ぶ','#guideHideObjects':'オブジェクトを一時的に隠す','#fieldGuide-ringScale':'同心円の大きさ','#fieldGuideOuterRing':'最外周を表示','#guideShapeFill':'ガイドの塗り','.guide-property-group[aria-label="線の見た目"]':'ガイド（共通）','.print-page-fields':'印刷の配置設定','#printSettingsReset':'印刷設定をリセット','#fieldGuideCircles':'同心円','#fieldGuideRays':'放射線','#duplicateGuideShape':'ガイドを複製','#deleteGuideShape':'ガイドを削除','.guide-selection-controls .aoe-box-handle':'サイズ変更ハンドル','#outputPrintReadability':'文字・線を強調','#outputPlainPaper':'普通紙向けの色調整','#outputPrintCutGuide':'切り取りガイド','#phonePhaseSwitch-toggle':'フェーズリスト・プロパティの切り替え','#phonePhaseSectionToggle':'フェーズ設定・ノート欄を開閉','#toggleBattlePages':'フェーズリストを開閉',
    '.phone-phase-navigation>button:first-child':'前のフェーズへ','.phone-phase-navigation>button:last-child':'次のフェーズへ',
    'help-name-edit':'名前を変更','help-item-delete':'項目を削除','help-name-confirm':'名前を確定','help-add-cancel':'追加を取り消す',
@@ -1026,6 +1028,47 @@ window.Bolxiv.selectionSurface=(()=>{
 
 ;
 
+// Grid spacing is a display option shared by content and field editing.
+(()=>{
+ const menu=document.createElement('div');menu.id='boardGridMenu';menu.className='board-zoom-menu';menu.hidden=true;menu.setAttribute('role','menu');menu.setAttribute('aria-label','グリッド線');document.body.append(menu);
+ const spacingOptions=[8,16,32,64,128],source=document.getElementById('gridToggle');
+ let anchor=null;
+ for(const trigger of [source,document.getElementById('guide-gridToggle')].filter(Boolean)){
+  trigger.setAttribute('aria-haspopup','menu');trigger.setAttribute('aria-controls',menu.id);trigger.setAttribute('aria-expanded','false');
+ }
+ function close(focus=false){
+  const trigger=anchor;anchor=null;menu.hidden=true;
+  trigger?.setAttribute('aria-expanded','false');
+  if(focus)trigger?.focus({preventScroll:true});
+ }
+ window.Bolxiv.openGridMenu=trigger=>{
+  if(source.disabled||trigger.disabled||window.Bolxiv.pngPreview?.active)return;
+  if(anchor===trigger&&!menu.hidden){close(true);return}
+  close();anchor=trigger;
+  const tiled=activeBoardShape()==='image4',spacing=tiled&&gridSpacing===128?64:gridSpacing;
+  const options=[0,...spacingOptions.filter(value=>!tiled||value!==128)];
+  const items=options.map(value=>{
+   const item=document.createElement('button');item.type='button';item.setAttribute('role','menuitemradio');
+   item.textContent=value===0?'非表示':value===32?'32px（標準）':value+'px';
+   item.setAttribute('aria-checked',String(value===(gridVisible?spacing:0)));
+   item.onclick=()=>{
+    gridVisible=value!==0;
+    if(value)gridSpacing=value;
+    updateGridToggle();render();close(true);
+   };
+   return item;
+  });
+  menu.replaceChildren(...items);addPhoneMenuClose(menu,()=>close(true));
+  menu.hidden=false;trigger.setAttribute('aria-expanded','true');
+  const bounds=trigger.getBoundingClientRect();
+  menu.style.left=Math.max(4,Math.min(bounds.right-menu.offsetWidth,innerWidth-menu.offsetWidth-4))+'px';
+  menu.style.top=Math.max(4,Math.min(bounds.bottom+4,innerHeight-menu.offsetHeight-4))+'px';
+  (items.find(item=>item.getAttribute('aria-checked')==='true')||items[0]).focus({preventScroll:true});
+ };
+ document.addEventListener('pointerdown',event=>{if(anchor&&!anchor.contains(event.target)&&!menu.contains(event.target))close()},true);
+ window.addEventListener('resize',()=>close());
+})();
+
 // User presets are an independent library, never part of content JSON.
 const userPresetLibrary=(()=>{
  const key='bolxiv-user-presets-v1';let presets=[],importedPresetToReveal=null;const presetHistory=[],presetFuture=[];
@@ -1175,7 +1218,7 @@ const userPresetLibrary=(()=>{
  const separator=document.createElement('div');separator.className='context-separator';separator.setAttribute('role','separator');sub.append(separator);
  const make=(id,label)=>{const b=createMenuAction({label});b.id=id;sub.append(b);return b},copyStyle=make('contextCopyAppearance','見た目をコピー'),pasteStyle=make('contextPasteAppearance','見た目を貼り付け');
  let clipboard=null;
- const fields=['color','strokeColor','opacity','width','height','gradient','fillType','innerSize','angle','fontSize','lineStyle','arrowEnds','arrowSize'];
+ const fields=['color','strokeColor','opacity','width','height','gradient','fillType','innerSize','angle','fontSize','lineStyle','arrowEnds','arrowSize','brightness'];
  const kind=o=>JSON.stringify([objectCategory(o),o.type,o.type==='icon'?objectTitle(o):o.type==='segment'?objectTitle(o):'']);
  const items=()=>{const ids=JSON.parse(menu.dataset.ids||'[]');return current().filter(o=>ids.includes(o.id))};
  const blocked=()=>boardReadOnly||phaseComparisonActive()||!!window.Bolxiv?.pngPreview?.active||!!window.Bolxiv?.fieldGuideEditor?.active;

@@ -51,10 +51,12 @@
 /* ===== css/board-zoom-menu.css ===== */
 .board-zoom-menu { position:fixed; z-index:20050; width:112px; padding:4px; background:#fff; border:1px solid #999; border-radius:6px; box-shadow:0 5px 14px #0003; overflow-y:auto; }
 .board-zoom-menu[hidden] { display:none; }
+#boardGridMenu { width:max-content; min-width:112px; }
+#boardGridMenu button { white-space:nowrap; }
 .board-zoom-menu button { display:flex; align-items:center; width:100%; min-height:36px; padding:6px 10px; border:0; border-radius:4px; background:#fff; color:#111; font-size:14px; text-align:left; cursor:pointer; }
 .board-zoom-menu button::before { content:''; width:22px; flex:none; }
 .board-zoom-menu button[aria-checked="true"]::before { content:'✓'; }
-.board-zoom-menu button:is(:hover:not(:where(.phone-touch-mode *)),:focus-visible) { background:var(--blue); color:#fff; outline:none; }
+:is(#boardZoomMenu,#guideZoomMenu,#boardGridMenu) button:is(:hover:not(:where(.phone-touch-mode *)),:focus-visible) { background:var(--blue)!important; color:#fff!important; -webkit-text-fill-color:#fff!important; outline:none; filter:none; }
 
 /* ===== css/mode-status-layout.css ===== */
 @media(min-width:851px){
@@ -984,10 +986,19 @@
  @media(pointer:coarse){.content-item-menu>button{min-height:44px}}
 
 /* ===== css/field-image-appearance.css ===== */
-.stage.field-image:not(.field-image4)::before{background-image:linear-gradient(#71809055 1px,transparent 1px),linear-gradient(90deg,#71809055 1px,transparent 1px)!important;background-size:32px 32px!important;z-index:1}
+.stage.field-image:not(.field-image4)::before{background-image:linear-gradient(#71809055 1px,transparent 1px),linear-gradient(90deg,#71809055 1px,transparent 1px)!important;background-size:var(--grid-step,32px) var(--grid-step,32px)!important;z-index:1}
  .stage.grid-hidden.field-image:not(.field-image4)::before{background-image:none!important}
  .field-image-visual{position:absolute;left:50%;top:50%;width:var(--field-width);height:var(--field-height);max-width:none;transform:translate(-50%,-50%);pointer-events:none;z-index:0}
  .image4-cell>.field-image-tile{position:absolute;left:50%;top:50%;width:var(--image4-tile-width);height:var(--image4-tile-height);transform:translate(-50%,-50%)}
+ .field-image-tile-grid{
+  position:absolute;
+  inset:0;
+  background-image:linear-gradient(#71809055 1px,transparent 1px),linear-gradient(90deg,#71809055 1px,transparent 1px);
+  background-size:var(--grid-step,32px) var(--grid-step,32px);
+  background-position:calc(50% + var(--grid-step,32px)/2) calc(50% + var(--grid-step,32px)/2);
+  pointer-events:none;
+ }
+ .stage.grid-hidden .field-image-tile-grid{display:none}
  .field-image-visual>img,.field-image-tile>img{display:block;width:100%;height:100%;max-width:none}
  .field-image-tint{position:absolute;inset:0;background:var(--field-image-tint-color,#000000);opacity:var(--field-image-tint-strength,0);pointer-events:none}
  .stage.field-hidden>.field-image-visual{display:none}
@@ -1316,7 +1327,7 @@ body .app .layout #contentSelect::after{
 .app .layout :is(#inspector,#layoutPropertiesPanel) :is(.coordinate-fields,.property-color-fill-row,.layout-background-colors){row-gap:var(--property-related-gap)!important;column-gap:8px!important}
 .app .layout #inspector>.inspector-section-start,
 .app .layout #inspector>.object-common-properties>.inspector-section-start,
-.app .layout #layoutPropertiesPanel>.layout-background-colors{border-top:1px solid var(--property-separator-color)!important;padding-top:var(--property-separator-space)!important;margin-top:0!important}
+.app .layout #layoutPropertiesPanel>.layout-background-colors,.app .layout #layoutPropertiesPanel>.image4-image-controls:not([hidden])+.field:has(#fieldWidthRange){border-top:1px solid var(--property-separator-color)!important;padding-top:var(--property-separator-space)!important;margin-top:0!important}
 .app .layout #inspector :is(.field:has(#heightInput),.field:has(#donutInnerInput)){margin-top:calc(var(--property-related-gap) - var(--property-field-gap))!important}
 /* Balance long phone phase and content names instead of squeezing context away. */
 @media(max-width:850px){
@@ -2251,9 +2262,9 @@ body.phase-master-editing .app .layout :is(.content-heading-row,.right .board-ti
  body .app .layout #contentPanel.phone-phase-list-tabbed>.phone-list-property-group>.accordion-toggle,body .app .layout #contentPanel.phone-phase-list-tabbed>.page-controls>.phase-heading-row{display:none!important}
  .phone-phase-list-tabbed>.phone-list-property-group>.phone-object-tabs{border-bottom:1px solid #d0d4da;box-sizing:border-box}
  .phone-phase-list-tabbed .phone-object-tabs-title{flex:0 1 auto}
- .phone-phase-list-tabbed .phone-object-tabs .phase-heading-actions{position:static;margin-left:auto;display:flex}
- .phone-phase-list-tabbed .phone-object-tabs>.phone-object-collapse{margin-left:auto}
- .phone-phase-list-tabbed .phone-object-tabs:has(.phase-heading-actions)>.phone-object-collapse{margin-left:0}
+ .phone-phase-list-tabbed .phone-object-tabs>.phone-list-property-change{margin-right:auto}
+ .phone-phase-list-tabbed .phone-object-tabs>.phase-heading-actions{position:static;display:flex}
+ .app .phone-phase-list-tabbed .phone-object-tabs>.phone-object-collapse{margin-left:0!important}
 }
 
 /* Frame sizing belongs to the panel, not each screen's collapse handler. */
@@ -2343,3 +2354,41 @@ body.phase-master-editing .app .layout :is(.content-heading-row,.right .board-ti
  .app .layout .battle .content-group,
  .app .layout .battle .content-group>.content-heading-row{border-radius:0!important}
 }
+
+/* Field image picker follows the canvas quadrant order. */
+.image4-image-actions{display:flex;align-items:center;gap:var(--property-related-gap);margin-top:6px}
+.image4-action-separator{width:1px;align-self:stretch;margin-block:4px;background:var(--property-button-border)}
+.image4-image-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));margin-top:6px}
+.image4-image-choices{
+ gap:1px;
+ border:1px solid var(--property-button-border);
+ background:var(--property-button-border);
+}
+.image4-quadrant{
+ box-sizing:border-box;
+ min-height:var(--property-input-height);
+ min-width:0;
+ padding:2px 4px;
+ border:0;
+ border-radius:0;
+ background:var(--property-input-bg)!important;
+ color:var(--property-button-fg);
+ font:inherit;
+ cursor:pointer;
+}
+#layoutPropertiesPanel .image4-quadrant[aria-pressed="true"]{background:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+.image4-quadrant:not([aria-pressed="true"]):enabled:hover:not(:where(.phone-touch-mode *)){background:var(--property-button-bg)!important}
+.image4-quadrant:focus-visible{outline:2px solid var(--blue);outline-offset:-2px}
+.image4-quadrant[aria-pressed="true"]:focus-visible{outline-color:#fff}
+.image4-image-actions .btn{
+ display:grid;
+ place-items:center;
+ width:var(--property-input-height);
+ padding:0;
+ box-sizing:border-box;
+ height:var(--property-input-height);
+ border-radius:var(--property-input-radius);
+ font:inherit;
+}
+
+.image4-image-actions svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}

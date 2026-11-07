@@ -992,9 +992,9 @@ body,.app,.layout,.center,.stagewrap,.footer,.top,.battle,.left,.right,.boardbar
 .stage.field-image:before {
   background-color:transparent!important;
   background-image:linear-gradient(#71809055 1px,transparent 1px),linear-gradient(90deg,#71809055 1px,transparent 1px),var(--field-image)!important;
-  background-size:32px 32px,32px 32px,100% 100%;
+  background-size:var(--grid-step,32px) var(--grid-step,32px),var(--grid-step,32px) var(--grid-step,32px),100% 100%;
   background-repeat:repeat,repeat,no-repeat;
-  background-position:calc(50% + 16px) calc(50% + 16px),calc(50% + 16px) calc(50% + 16px),center;
+  background-position:calc(50% + var(--grid-step,32px)/2) calc(50% + var(--grid-step,32px)/2),calc(50% + var(--grid-step,32px)/2) calc(50% + var(--grid-step,32px)/2),center;
 }
 .stage.grid-hidden.field-image:before {
   background-image:var(--field-image)!important;
@@ -2340,39 +2340,7 @@ body.resizing-phase-panels,body.resizing-phase-panels * {
   padding:0;
   justify-content:center;
 }
-.stage.field-image4:before {
-  background-size:32px 32px,32px 32px,50% 50%!important;
-  background-repeat:repeat,repeat,repeat!important;
-  background-position:calc(50% + 16px) calc(50% + 16px),calc(50% + 16px) calc(50% + 16px),left top!important;
-}
-.stage.grid-hidden.field-image4:before {
-  background-size:50% 50%!important;
-  background-repeat:repeat!important;
-  background-position:left top!important;
-}
-.stage.field-image4:before {
-  width:100%!important;
-  height:100%!important;
-  border:0!important;
-  background-color:transparent!important;
-  background-image:linear-gradient(#71809055 1px,transparent 1px),linear-gradient(90deg,#71809055 1px,transparent 1px),var(--field-image),var(--field-image),var(--field-image),var(--field-image)!important;
-  background-size:32px 32px,32px 32px,var(--image4-tile-width) var(--image4-tile-height),var(--image4-tile-width) var(--image4-tile-height),var(--image4-tile-width) var(--image4-tile-height),var(--image4-tile-width) var(--image4-tile-height)!important;
-  background-repeat:repeat,repeat,no-repeat,no-repeat,no-repeat,no-repeat!important;
-  background-position:16px 16px,16px 16px,calc(160px - var(--image4-tile-width)/2) calc(160px - var(--image4-tile-height)/2),calc(480px - var(--image4-tile-width)/2) calc(160px - var(--image4-tile-height)/2),calc(160px - var(--image4-tile-width)/2) calc(480px - var(--image4-tile-height)/2),calc(480px - var(--image4-tile-width)/2) calc(480px - var(--image4-tile-height)/2)!important;
-}
-.stage.grid-hidden.field-image4:before {
-  background-image:linear-gradient(transparent,transparent),linear-gradient(transparent,transparent),var(--field-image),var(--field-image),var(--field-image),var(--field-image)!important;
-}
-.stage.field-image4:before {
-  background-image:linear-gradient(#71809055 1px,transparent 1px),linear-gradient(90deg,#71809055 1px,transparent 1px)!important;
-  background-size:32px 32px!important;
-  background-position:16px 16px!important;
-  background-repeat:repeat!important;
-  z-index:1;
-}
-.stage.grid-hidden.field-image4:before {
-  background-image:none!important;
-}
+.stage.field-image4::before{display:none!important}
 .image4-fields {
   position:absolute;
   inset:0;
