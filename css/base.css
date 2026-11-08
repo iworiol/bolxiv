@@ -2172,11 +2172,11 @@ input[type=file] {
   border-color:#999!important;
   box-shadow:inset 3px 0 var(--blue)!important;
 }
-.right .object-row:hover:not(:where(.phone-touch-mode *)) {
+.right .object-row:hover:not(:where(.phone-touch-mode *,.drop-before,.drop-after)) {
   background:var(--blue)!important;
   color:#000!important;
 }
-.right .object-row:hover:not(:where(.phone-touch-mode *)) .object-name,.right .object-row:hover:not(:where(.phone-touch-mode *)) .object-delete {
+.right .object-row:hover:not(:where(.phone-touch-mode *,.drop-before,.drop-after)) .object-name,.right .object-row:hover:not(:where(.phone-touch-mode *,.drop-before,.drop-after)) .object-delete {
   background:var(--blue)!important;
   color:#000!important;
 }
@@ -2188,7 +2188,7 @@ input[type=file] {
   color:#c62828!important;
   border-color:#999!important;
 }
-.right .object-name:hover:not(:where(.phone-touch-mode *)),.right .object-row:hover:not(:where(.phone-touch-mode *)) .object-name {
+.right .object-name:hover:not(:where(.phone-touch-mode *)),.right .object-row:hover:not(:where(.phone-touch-mode *,.drop-before,.drop-after)) .object-name {
   background:var(--blue)!important;
   color:#000!important;
 }
@@ -2203,7 +2203,7 @@ input[type=file] {
   font-size:20px!important;
   line-height:22px!important;
 }
-.right .object-row:hover:not(:where(.phone-touch-mode *)) .object-delete {
+.right .object-row:hover:not(:where(.phone-touch-mode *,.drop-before,.drop-after)) .object-delete {
   background:#fff!important;
   color:#000!important;
 }
@@ -2211,7 +2211,7 @@ input[type=file] {
   background:var(--blue)!important;
   color:#000!important;
 }
-.right .object-row:hover:not(:where(.phone-touch-mode *)) .object-name,.right .object-row:hover:not(:where(.phone-touch-mode *)) .object-delete,.right .object-row .object-name:hover:not(:where(.phone-touch-mode *)),.right .object-row .object-delete:hover:not(:where(.phone-touch-mode *)) {
+.right .object-row:hover:not(:where(.phone-touch-mode *,.drop-before,.drop-after)) .object-name,.right .object-row:hover:not(:where(.phone-touch-mode *,.drop-before,.drop-after)) .object-delete,.right .object-row .object-name:hover:not(:where(.phone-touch-mode *,.drop-before *,.drop-after *)),.right .object-row .object-delete:hover:not(:where(.phone-touch-mode *)) {
   background:var(--blue)!important;
   color:#000!important;
 }
@@ -2237,7 +2237,7 @@ input[type=file] {
   flex:none!important;
   justify-self:end;
 }
-.right .object-delete:hover:not(:where(.phone-touch-mode *)),.right .object-row:hover:not(:where(.phone-touch-mode *)) .object-delete {
+.right .object-delete:hover:not(:where(.phone-touch-mode *)),.right .object-row:hover:not(:where(.phone-touch-mode *,.drop-before,.drop-after)) .object-delete {
   background:var(--blue)!important;
   color:#000!important;
 }
@@ -2336,7 +2336,7 @@ input[type=file] {
 :is(.battle,.phone-view-content) .page-tab.drop-after::after,.object-row.drop-after::after {
   bottom:0;
 }
-.object-row.drag-over {
+.object-row.drag-over:not(.object-group-row:not(.drop-before,.drop-after)) {
   outline:none!important;
 }
 .property-toggles {

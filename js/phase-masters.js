@@ -16,7 +16,7 @@ window.Bolxiv.phaseMasters=(()=>{
   const result=clone(defaults);for(const key of keys)if(value&&Object.hasOwn(value,key))result[key]=clone(value[key]);
   if(!['none','square','landscape','portrait','circle','image','image4'].includes(result.pageBoardShapes))throw Error('フィールド形状が不正です');
   for(const key of ['pageColors','pageFieldBackgroundColors'])if(!/^#[0-9a-f]{6}$/i.test(result[key]))throw Error('フィールドの色が不正です');
-  const size=result.pageFieldSizes;if(!size||!['width','height'].every(key=>Number.isFinite(size[key])&&size[key]>=64&&size[key]<=960))throw Error('フィールドの大きさが不正です');
+  const size=result.pageFieldSizes;if(!size||!['width','height'].every(key=>Number.isFinite(size[key])&&size[key]>=(result.pageBoardShapes==='image4'?32:64)&&size[key]<=960))throw Error('フィールドの大きさが不正です');
   result.pageFieldGuides=fieldGuides({pageFieldGuides:[result.pageFieldGuides]},0);
   result.pageFieldImageTints=fieldImageTint({pageFieldImageTints:[result.pageFieldImageTints]},0);
   const tiles=result.pageFieldTileImageIds;
@@ -132,11 +132,52 @@ window.Bolxiv.phaseMasters=(()=>{
   record();for(const board of contentBoards){board.pageMasterIds=board.pageMasterIds.map(id=>remap.get(id)||id);apply(board)}
   const layout=units();for(const unit of layout)if(unit.group)unit.items=unit.items.filter(item=>!remap.has(item.id));writeUnits(layout.filter(unit=>unit.group||!remap.has(unit.item.id)));selectedId=remap.get(selectedId)||selectedId;if(!selectedGroupId){const group=masterGroups.find(g=>g.id===get(selectedId).groupId);if(group)group.collapsed=false}showSelected();persist();document.getElementById('phaseMasters').dispatchEvent(new Event('reveal-master-selection'));notify('同じ設定のフィールドを'+remap.size+'件統合しました');return remap.size;
  }
+ function canCombineImagePhases(){
+  if(active||boardReadOnly||window.Bolxiv.pngPreview?.active||selectedPhaseIndexes.length<2||selectedPhaseIndexes.length>4)return false;
+  const first=selectedPhaseIndexes[0],id=data.pageMasterIds[first];
+  return !!id&&data.pageBoardShapes[first]==='image'&&!!fieldImageSource(data,first)&&
+   selectedPhaseIndexes.every(index=>data.pageMasterIds[index]===id);
+ }
+ function combineImagePhases(){
+  if(!canCombineImagePhases())return;
+  const indexes=selectedPhaseIndexes.slice().sort((a,b)=>a-b),first=indexes[0];
+  const baseName='2×2 フェーズ',name=data.pageNames.includes(baseName)?nextCopiedPhaseName(baseName,data.pageNames):baseName;
+  const source=settings(data,first),size=source.pageFieldSizes,guide=source.pageFieldGuides;
+  const items=[],shapes=[];
+  for(const [tile,index] of indexes.entries()){
+   const left=(tile%2)*320,top=Math.floor(tile/2)*320,objects=clone(data.pages[index]),groups=new Map();
+   for(const shape of guide.shapes){
+    const copy={...shape,id:createObjectId(),x:left+shape.x/2,y:top+shape.y/2,width:shape.width/2,height:shape.height/2};
+    if(shape.objectGroupId){
+     if(!groups.has(shape.objectGroupId))groups.set(shape.objectGroupId,createObjectId());
+     copy.objectGroupId=groups.get(shape.objectGroupId);
+    }
+    shapes.push(copy);
+   }
+   remapCopiedObjectGroups(objects);
+   for(const object of objects){
+    object.id=createObjectId();object.x=left/6.4+object.x/2;object.y=top/6.4+object.y/2;
+    for(const key of ['width','height','fontSize','strokeWidth'])if(Number.isFinite(object[key]))object[key]/=2;
+    items.push(object);
+   }
+  }
+  const notes=indexes.map((index,tile)=>data.pageNotes[index]?['左上','右上','左下','右下'][tile]+' · '+data.pageNames[index]+'\n'+data.pageNotes[index]:'').filter(Boolean).join('\n\n');
+  recordHistory();
+  const master=newMaster(name,{...source,pageBoardShapes:'image4',pageFieldSizes:{width:size.width/2,height:size.height/2},
+   pageFieldTileImageIds:Array.from({length:4},(_,tile)=>tile<indexes.length?'':null),
+   pageFieldGuides:{...guide,reference:null,shapes}
+  });
+  const index=data.pages.length;
+  data.pages.push(items);data.pageNames.push(name);data.pageNotes.push(notes);data.pageGroupIds.push(null);data.pageMasterIds.push(master.id);
+  data.page=index;data.activePhaseGroup=null;selectedPhaseIndexes=[];selectedIds=[];selected=null;
+  openPhaseListForCreation(index);renderAndSave();revealCreatedPhase(index);
+  notify(indexes.length+'つのフェーズから2×2フェーズを作成しました');
+ }
  function assign(id){if(active||boardReadOnly||window.Bolxiv.pngPreview?.active||phaseComparisonActive()||data.activePhaseGroup)return;recordHistory();data.pageMasterIds[data.page]=get(id).id;apply(data);renderAndSave()}
  masterGroups=(window.boardPhaseMasterGroupsInitial||[]).map(g=>({...g}));window.boardPhaseMasterGroupsInitial=null;const saved=window.boardPhaseMastersInitial||[];window.boardPhaseMastersInitial=null;
  for(const entry of saved){if(entry.id===INITIAL)continue;masters.push({id:entry.id,name:String(entry.name||'フィールド'),settings:clean(entry.settings),...(masterGroups.some(g=>g.id===entry.groupId)?{groupId:entry.groupId}:{})})}
  const original=data;for(const board of contentBoards){data=board;normalizePageNames();ensure(board,!firstRun&&!Array.isArray(board.pageMasterIds))}data=original;
- return {INITIAL,keys,all,get,ensure,apply,state,imageBoards,exportPayload,prepareImport,acceptImport,record,history:masterHistory,commit,enter,leave,select,add,cancelAddition,rename,remove,move,mergeDuplicates,assign,units,selectGroup,addGroup,renameGroup,toggleGroup,ungroup,moveIntoGroup,moveGroup,moveBeforeGroup,moveToEnd,groupRecords:()=>clone(masterGroups),get selectedGroupId(){return selectedGroupId},get active(){return active},get selectedId(){return selectedId},get locked(){return active&&(selectedId===INITIAL||!!selectedGroupId)},get canUndo(){return past.length>0},get canRedo(){return next.length>0},records:()=>clone(masters),restoreRecords:(value,groups=[])=>{masters=clone(value);masterGroups=clone(groups);selectedGroupId=null},paint:()=>refreshUI(),set confirmRemoval(fn){confirmRemoval=fn},set refresh(fn){refreshUI=fn},get editorBoard(){return editorBoard}};
+ return {INITIAL,keys,all,get,ensure,apply,state,imageBoards,exportPayload,prepareImport,acceptImport,record,history:masterHistory,commit,enter,leave,select,add,cancelAddition,rename,remove,move,mergeDuplicates,assign,canCombineImagePhases,combineImagePhases,units,selectGroup,addGroup,renameGroup,toggleGroup,ungroup,moveIntoGroup,moveGroup,moveBeforeGroup,moveToEnd,groupRecords:()=>clone(masterGroups),get selectedGroupId(){return selectedGroupId},get active(){return active},get selectedId(){return selectedId},get locked(){return active&&(selectedId===INITIAL||!!selectedGroupId)},get canUndo(){return past.length>0},get canRedo(){return next.length>0},records:()=>clone(masters),restoreRecords:(value,groups=[])=>{masters=clone(value);masterGroups=clone(groups);selectedGroupId=null},paint:()=>refreshUI(),set confirmRemoval(fn){confirmRemoval=fn},set refresh(fn){refreshUI=fn},get editorBoard(){return editorBoard}};
 })();
 
 window.Bolxiv.initializePhaseMasterUI=()=>{

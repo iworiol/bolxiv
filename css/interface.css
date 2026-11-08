@@ -276,7 +276,7 @@
  .app>.layout #contentOptions .content-option-row,
  .app>.layout #contentOptions .content-option-row:hover:not(:where(.phone-touch-mode *)) *,
  .app>.layout #objectList .object-row:hover:not(:where(.phone-touch-mode *)),
- .app>.layout #objectList .object-row:hover:not(:where(.phone-touch-mode *)) *{
+ .app>.layout #objectList .object-row:hover:not(:where(.phone-touch-mode *)) *, .app>.layout #objectList .object-row:is(.drop-before,.drop-after) :is(.object-name,.object-name *){
   color:#17212c!important;
   -webkit-text-fill-color:#17212c!important;
  }
@@ -1031,7 +1031,7 @@
  @media(max-width:850px){.help-contents ul{grid-template-columns:minmax(0,1fr)}.help-contents a{padding:7px 0}.operation-guide .help-back-to-contents{min-height:32px}}
 
 /* ===== css/phase-groups.css ===== */
-.phase-group-heading.drag-over{outline:2px solid #416da9;outline-offset:-2px}.phase-group-heading{display:flex;align-items:center;box-sizing:border-box;width:100%;height:34px;min-height:34px;flex-shrink:0;gap:9px;padding:0 5px 0 4px;border:1px solid transparent;border-radius:6px;background:#f0f4fa;color:#33445f;margin:2px 0;font-size:14px;font-weight:400}
+.phase-group-heading.drag-over,#objectList>.object-group-row.drag-over:not(.drop-before,.drop-after){outline:2px solid #416da9;outline-offset:-2px}.phase-group-heading{display:flex;align-items:center;box-sizing:border-box;width:100%;height:34px;min-height:34px;flex-shrink:0;gap:9px;padding:0 5px 0 4px;border:1px solid transparent;border-radius:6px;background:#f0f4fa;color:#33445f;margin:2px 0;font-size:14px;font-weight:400}
 .phase-group-heading button{box-sizing:border-box;border:0;background:transparent;color:inherit;height:32px;min-height:0;padding:0 3px;cursor:pointer;font:inherit}
 .phase-group-heading .phase-group-name{display:flex;align-items:center;flex:1;min-width:0;text-align:left;white-space:nowrap;overflow:hidden;font-weight:400}
 .phase-group-range{flex:0 0 var(--group-name-offset,38px);font:12px 'DM Mono';color:#111;font-variant-numeric:tabular-nums}
@@ -1140,6 +1140,8 @@
 .app .layout #phaseComparisonStatus{display:none!important}
 .app .layout.phase-multi-select-mode .page-tab-actions{display:none!important}
 .app .layout.phase-multi-select-mode :is(#pages,#phaseMasters) :is(.phone-row-actions,.phase-group-menu-trigger){display:none!important}
+
+
 .phase-multi-select-mode #toggleBattlePages{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .board-read-only .layout.phase-multi-select-mode .phase-heading-actions{display:flex!important}
 .row-action-menu-title{padding:8px 10px;border-bottom:1px solid #d0d4da;color:#60718c;font-size:12px;max-width:260px;overflow-wrap:anywhere}
@@ -1152,6 +1154,8 @@
  body .app .layout :is(:is(#pages,#phaseMasters),#objectList,#contentOptions) :is(.phone-row-actions,.phase-group-menu-trigger),body .app .layout :is(:is(#pages,#phaseMasters),#objectList,#contentOptions) :is(.phone-row-actions,.phase-group-menu-trigger):is(:hover,:focus,:focus-visible,:active,.phone-control-pressed){background:transparent!important;color:#33445f!important;-webkit-text-fill-color:#33445f!important;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;filter:none!important}
  .app .layout :is(#pages,#phaseMasters,#objectList,#contentOptions) .phone-row-actions{display:grid!important;place-items:center;flex:0 0 28px;width:28px;height:28px;padding:4px;border:0!important;border-radius:4px;background:transparent!important;color:#33445f!important}
  .app .layout .phone-row-actions[hidden]{display:none!important}
+ .app .layout #pages .page-tab>.phone-row-actions{touch-action:manipulation}
+ .app .layout.phase-multi-select-mode #pages .page-tab:not(.renaming)>.phone-row-actions:not([hidden]){display:grid!important}
  .phone-row-actions svg{display:block;width:18px;height:18px;pointer-events:none}
  .app .layout :is(#pages,#phaseMasters) .page-tab:not(.renaming) :is(.page-tab-edit,.page-tab-x),.app .layout #objectList .object-row .object-delete,.app .layout #contentOptions .content-option-row:not(:has(input))>.content-row-action{display:none!important}
  .app .layout :is(#pages,#phaseMasters) .page-tab.renaming>.phone-row-actions,.app .layout :is(#pages,#phaseMasters) .page-tab.renaming>.page-tab-edit{display:none!important}
@@ -1362,8 +1366,8 @@ body .app .layout #contentSelect::after{
 #objectList>.object-group-row{display:grid!important;align-items:center}
 .app .layout #objectList>.object-row.object-group-row{position:relative;overflow:visible!important}
 #objectList>.object-group-expanded{border-radius:6px 6px 0 0}
-#objectList>.object-group-row::before{content:'';position:absolute;left:-1px;right:-1px;top:-1px;height:calc(100% + 2px);box-sizing:border-box;border:1px solid #d0d4da;border-radius:6px;pointer-events:none;z-index:2}
-#objectList>.object-group-expanded::before{height:var(--object-group-frame-height,100%)}
+#objectList>.object-group-row:not(.drop-before)::before{content:'';position:absolute;left:-1px;right:-1px;top:-1px;height:calc(100% + 2px);box-sizing:border-box;border:1px solid #d0d4da;border-radius:6px;pointer-events:none;z-index:2}
+#objectList>.object-group-expanded:not(.drop-before)::before{height:var(--object-group-frame-height,100%)}
 .app>.layout #objectList>.object-row.object-group-row{background:#f0f4fa!important}
 .app>.layout #objectList>.object-row.object-group-row:hover:not(:where(.phone-touch-mode *)){background:#e1e9f4!important}
 .app>.layout #objectList>.object-row.object-group-row.selected{background:#eaf3ff!important;border-radius:6px}
@@ -1371,14 +1375,15 @@ body .app .layout #contentSelect::after{
 .app>.layout #objectList>.object-group-row>:is(.object-name,.object-group-disclosure){background:transparent!important}
 #objectList>.object-group-expanded::after{content:'';position:absolute;left:2px;right:0;bottom:-1px;border-bottom:1px solid #d0d4da;pointer-events:none;z-index:2}
 .app>.layout #objectList>.object-row.object-group-row.selected.object-group-expanded{border-bottom-left-radius:6px;border-bottom-right-radius:0}
-#objectList>.object-group-row.selected::after{content:'';position:absolute;inset:-1px;box-sizing:border-box;border:1px solid transparent;border-left-color:var(--blue);box-shadow:inset 2px 0 0 var(--blue);border-radius:6px;pointer-events:none;z-index:3}
-#objectList>.object-group-row.selected.object-group-expanded::after{border-radius:6px 6px 0 6px}
+#objectList>.object-group-row.selected:not(.drop-after)::after{content:'';position:absolute;inset:-1px;box-sizing:border-box;border:1px solid transparent;border-left-color:var(--blue);box-shadow:inset 2px 0 0 var(--blue);border-radius:6px;pointer-events:none;z-index:3}
+#objectList>.object-group-row.selected.object-group-expanded:not(.drop-after)::after{border-radius:6px 6px 0 6px}
 #objectList>.object-group-expanded::before{background:linear-gradient(#d0d4da,#d0d4da) left calc(var(--object-group-header-height,34px) - 1px)/100% 1px no-repeat;background-origin:border-box}
 #objectList>.object-group-row>.object-name{grid-column:4;grid-row:1;min-width:0;padding-left:24px!important}
 .app .layout #objectList>.object-row.object-group-row>.object-name{padding-left:24px!important}
 #objectList .object-group-symbol{grid-column:4;grid-row:1;justify-self:start;align-self:start;margin-left:4px;transform:translateY(0);align-self:center;width:16px;height:14px;color:#293c66;pointer-events:none;z-index:1}
 #objectList .object-group-symbol svg{display:block;width:16px;height:14px}
 #objectList .object-group-disclosure{grid-column:1;grid-row:1;justify-self:stretch;align-self:stretch;z-index:4;margin:0;width:100%;min-width:0;height:100%;min-height:24px;line-height:normal;padding:0;background:transparent;border:0;color:#293c66;font-size:18px;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;cursor:grab}
+.app>.layout #objectList>.object-group-row.drag-over :is(.object-name,.object-name *){color:#17212c!important;-webkit-text-fill-color:#17212c!important}
 #objectList .object-group-member[hidden]{display:none!important}
 #objectList>.object-group-member:not([hidden]){display:grid!important;align-items:center;margin-left:0;cursor:default;overflow:visible!important}
 #objectList>.object-group-member::before{content:'';grid-column:4;grid-row:1;justify-self:start;margin-left:12px;pointer-events:none;border-color:#c1c7ce;z-index:1}
@@ -1541,8 +1546,8 @@ body .app .layout #objectList>.object-group-row>.object-delete{grid-column:5;gri
 
 /* Popup-open feedback overrides per-button themes without affecting disclosures. */
 @layer menu-open-state{
- button[aria-haspopup="menu"][aria-expanded="true"].menu-open-trigger:not(:disabled){transition:none!important;background:var(--blue)!important;border-color:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important;filter:none!important}
- button[aria-haspopup="menu"][aria-expanded="true"].menu-open-trigger:not(:disabled) *{color:#fff!important;-webkit-text-fill-color:#fff!important}
+ button[aria-haspopup="menu"][aria-expanded="true"].menu-open-trigger:not(:disabled,[aria-controls="phaseItemMenu"]){transition:none!important;background:var(--blue)!important;border-color:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important;filter:none!important}
+ button[aria-haspopup="menu"][aria-expanded="true"].menu-open-trigger:not(:disabled,[aria-controls="phaseItemMenu"]) *{color:#fff!important;-webkit-text-fill-color:#fff!important}
 }
 
 @media(min-width:851px){.app>.top #editModeToggle{flex-basis:var(--mode-button-width,180px);width:var(--mode-button-width,180px);min-width:var(--mode-button-width,180px);max-width:var(--mode-button-width,180px);padding-left:8px;padding-right:4px;gap:4px}.app>.top #editModeToggle .mode-label{white-space:nowrap}}
@@ -1688,6 +1693,7 @@ body .app .layout #objectList>.object-group-row>.object-delete{grid-column:5;gri
 .left>#userPresetManager .preset-manager-heading h2{white-space:nowrap}
 
 .content-options>.content-options-scroll{box-sizing:border-box;padding-block:4px;scroll-padding-block:4px}
+@media(max-width:850px){.content-options>.content-options-scroll{max-height:min(355px,var(--content-list-available,45dvh));overscroll-behavior-y:contain;touch-action:pan-y} .content-options-scroll .phone-row-actions{touch-action:pan-y}}
 
 #contextGroupMenuToggle[aria-expanded="true"]{background:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
 

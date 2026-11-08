@@ -1625,7 +1625,7 @@ body.resizing-content-pane,body.resizing-content-pane * {
   flex:none;
   margin:0;
 }
-:is(.battle,.phone-view-content) .page-tab:hover:not(:where(.phone-touch-mode *)),:is(.battle,.phone-view-content) .page-tab:hover:not(:where(.phone-touch-mode *)) button,.right .object-row:hover:not(:where(.phone-touch-mode *)) button,.content-options .content-option-row:hover:not(:where(.phone-touch-mode *)) button {
+:is(.battle,.phone-view-content) .page-tab:hover:not(:where(.phone-touch-mode *)),:is(.battle,.phone-view-content) .page-tab:hover:not(:where(.phone-touch-mode *)) button,.right .object-row:hover:not(:where(.phone-touch-mode *,.drop-before,.drop-after)) button,.content-options .content-option-row:hover:not(:where(.phone-touch-mode *)) button {
   filter:none!important;
 }
 *,*::before,*::after {
@@ -1759,7 +1759,7 @@ body.resizing-phase-panels,body.resizing-phase-panels * {
 .battle #battlePanel:has(.content-options:not([hidden])) {
   overflow:visible!important;
 }
-:is(.battle,.phone-view-content) .page-tabs .page-tab:hover:not(:where(.phone-touch-mode *)),:is(.battle,.phone-view-content) .page-tabs .page-tab:hover:not(:where(.phone-touch-mode *)) *,:is(.battle,.phone-view-content) .page-tabs .page-tab .page-tab-x:hover:not(:where(.phone-touch-mode *)),:is(.battle,.phone-view-content) .page-tabs .page-tab .page-tab-edit:hover:not(:where(.phone-touch-mode *)),.right .object-row:hover:not(:where(.phone-touch-mode *)),.right .object-row:hover:not(:where(.phone-touch-mode *)) .object-name,.right .object-row:hover:not(:where(.phone-touch-mode *)) .object-name *,.right .object-row:hover:not(:where(.phone-touch-mode *)) .object-index,.right .object-row .object-name:hover:not(:where(.phone-touch-mode *)),.right .object-row .object-delete:hover:not(:where(.phone-touch-mode *)),.right .object-toggle:hover:not(:where(.phone-touch-mode *)),.content-options .content-option-row:not(.content-option-add-row):hover:not(:where(.phone-touch-mode *)),.content-options .content-option-row:not(.content-option-add-row):hover:not(:where(.phone-touch-mode *)) *,.left .icon-choice:hover:not(:where(.phone-touch-mode *)) {
+:is(.battle,.phone-view-content) .page-tabs .page-tab:hover:not(:where(.phone-touch-mode *)),:is(.battle,.phone-view-content) .page-tabs .page-tab:hover:not(:where(.phone-touch-mode *)) *,:is(.battle,.phone-view-content) .page-tabs .page-tab .page-tab-x:hover:not(:where(.phone-touch-mode *)),:is(.battle,.phone-view-content) .page-tabs .page-tab .page-tab-edit:hover:not(:where(.phone-touch-mode *)),.right .object-row:hover:not(:where(.phone-touch-mode *,.drop-before,.drop-after)),.right .object-row:hover:not(:where(.phone-touch-mode *,.drop-before,.drop-after)) .object-name,.right .object-row:hover:not(:where(.phone-touch-mode *,.drop-before,.drop-after)) .object-name *,.right .object-row:hover:not(:where(.phone-touch-mode *,.drop-before,.drop-after)) .object-index,.right .object-row .object-name:hover:not(:where(.phone-touch-mode *,.drop-before *,.drop-after *)),.right .object-row .object-delete:hover:not(:where(.phone-touch-mode *)),.right .object-toggle:hover:not(:where(.phone-touch-mode *)),.content-options .content-option-row:not(.content-option-add-row):hover:not(:where(.phone-touch-mode *)),.content-options .content-option-row:not(.content-option-add-row):hover:not(:where(.phone-touch-mode *)) *,.left .icon-choice:hover:not(:where(.phone-touch-mode *)) {
   color:#fff!important;
   -webkit-text-fill-color:#fff!important;
 }
