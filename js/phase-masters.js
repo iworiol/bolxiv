@@ -1,8 +1,8 @@
 // Shared field definitions. Per-phase arrays are rendering caches, not saved overrides.
 window.Bolxiv.phaseMasters=(()=>{
  const INITIAL='initial',clone=value=>JSON.parse(JSON.stringify(value));
- const keys=['pageBoardShapes','pageFieldSizes','pageFieldBackgroundColors','pageColors','pageFieldImageIds','pageFieldImageTints','pageFieldGuides'];
- const defaults={pageBoardShapes:'square',pageFieldSizes:{width:538,height:538},pageFieldBackgroundColors:'#17212c',pageColors:'#ffffff',pageFieldImageIds:'',pageFieldImageTints:{color:'#000000',strength:0},pageFieldGuides:fieldGuides({},0)};
+ const keys=['pageBoardShapes','pageFieldSizes','pageFieldBackgroundColors','pageColors','pageFieldImageIds','pageFieldTileImageIds','pageFieldImageTints','pageFieldGuides'];
+ const defaults={pageBoardShapes:'square',pageFieldSizes:{width:538,height:538},pageFieldBackgroundColors:'#17212c',pageColors:'#ffffff',pageFieldImageIds:'',pageFieldTileImageIds:[],pageFieldImageTints:{color:'#000000',strength:0},pageFieldGuides:fieldGuides({},0)};
  let masters=[],masterGroups=[],selectedGroupId=null,active=false,selectedId=INITIAL,editorBoard=null,returnState=null,refreshUI=()=>{},past=[],next=[],restoring=false,confirmRemoval=()=>{};
  const freeze=value=>{Object.values(value).filter(v=>v&&typeof v==='object').forEach(freeze);return Object.freeze(value)};freeze(defaults);
  const initial=Object.freeze({id:INITIAL,name:'初期フィールド',settings:defaults});
@@ -16,9 +16,12 @@ window.Bolxiv.phaseMasters=(()=>{
   const result=clone(defaults);for(const key of keys)if(value&&Object.hasOwn(value,key))result[key]=clone(value[key]);
   if(!['none','square','landscape','portrait','circle','image','image4'].includes(result.pageBoardShapes))throw Error('フィールド形状が不正です');
   for(const key of ['pageColors','pageFieldBackgroundColors'])if(!/^#[0-9a-f]{6}$/i.test(result[key]))throw Error('フィールドの色が不正です');
-  const size=result.pageFieldSizes;if(!size||!['width','height'].every(key=>Number.isFinite(size[key])&&size[key]>=64&&size[key]<=960))throw Error('フィールドの大きさが不正です');
+  const size=result.pageFieldSizes;if(!size||!['width','height'].every(key=>Number.isFinite(size[key])&&size[key]>=(result.pageBoardShapes==='image4'?32:64)&&size[key]<=960))throw Error('フィールドの大きさが不正です');
   result.pageFieldGuides=fieldGuides({pageFieldGuides:[result.pageFieldGuides]},0);
   result.pageFieldImageTints=fieldImageTint({pageFieldImageTints:[result.pageFieldImageTints]},0);
+  const tiles=result.pageFieldTileImageIds;
+  if(!Array.isArray(tiles)||tiles.length>4||tiles.some(id=>id!==null&&typeof id!=='string'))throw Error('区画の画像参照が不正です');
+  while(tiles.at(-1)==='')tiles.pop();
   if(typeof result.pageFieldImageIds!=='string')throw Error('フィールドの画像参照が不正です');return result;
  }
  function newMaster(name,value,groupId=null){const item={id:createObjectId(),name:String(name||'新規フィールド'),settings:clean(value)};if(masterGroups.some(g=>g.id===groupId))item.groupId=groupId;masters.push(item);writeUnits(units());return item}
@@ -29,7 +32,7 @@ window.Bolxiv.phaseMasters=(()=>{
  }
  function apply(board){if(board===editorBoard)return;for(let i=0;i<board.pages.length;i++)put(board,i,get(board.pageMasterIds?.[i]).settings)}
  function stripped(board){const result=clone(board);delete result.page;for(const key of keys)delete result[key];delete result.boardShape;delete result.layoutColor;delete result.fieldBackgroundColor;return result}
- function imageBoards(boards,records=masters){return [...boards,...records.map(item=>({pages:[],pageFieldImageIds:[item.settings.pageFieldImageIds]}))]}
+ function imageBoards(boards,records=masters){return [...boards,...records.map(item=>({pages:[],pageFieldImageIds:[item.settings.pageFieldImageIds,...(item.settings.pageFieldTileImageIds||[])]}))]}
  function state(){if(!active)contentBoards[activeContent]=data;return {version:5,activeContent,phaseMasters:clone(masters),phaseMasterGroups:clone(masterGroups),contents:contentBoards.map(board=>({...stripped(board),page:board.page}))}}
  function exportPayload(boards,includeUnused=false){
   const ids=new Set(boards.flatMap(board=>board.pageMasterIds||[])),records=masters.filter(item=>includeUnused||ids.has(item.id));
@@ -41,7 +44,9 @@ window.Bolxiv.phaseMasters=(()=>{
    if(!guides.circles)for(const key of ['rings','ringScale','outerRing'])delete guides[key];
    if(!guides.rays)for(const key of ['sectors','rayMode','fieldRayLength','circleRayLength','rayLength','rayBoundary','rayScale','rotation'])delete guides[key];
    if(!guides.circles&&!guides.rays&&!guides.shapes?.length)v.pageFieldGuides={};
-  }v.pageFieldImageIds=boardImageLibrary.get(v.pageFieldImageIds)||'';
+  }
+  v.pageFieldImageIds=boardImageLibrary.get(v.pageFieldImageIds)||'';
+  v.pageFieldTileImageIds=(v.pageFieldTileImageIds||[]).map(id=>id===null?null:boardImageLibrary.get(id)||'');
   const groups=new Map();if(guides?.shapes)for(const shape of guides.shapes){delete shape.id;if(shape.objectGroupId){if(!groups.has(shape.objectGroupId))groups.set(shape.objectGroupId,groups.size);shape.objectGroupId=groups.get(shape.objectGroupId)}}
   const stable=x=>Array.isArray(x)?x.map(stable):x&&typeof x==='object'?Object.fromEntries(Object.keys(x).sort().map(key=>[key,stable(x[key])])):x;return JSON.stringify(stable(v));
  }
@@ -52,8 +57,15 @@ window.Bolxiv.phaseMasters=(()=>{
    for(const group of value.phaseMasterGroups||[]){if(!group||typeof group.id!=='string'||groups.some(g=>g.id===group.id))throw Error('フィールドグループのIDが不正です');groups.push({id:group.id,name:String(group.name||'新規グループ'),collapsed:group.collapsed===true,position:Number.isInteger(group.position)?group.position:groups.length})}
    const seen=new Set();for(const entry of value.phaseMasters){
     if(!entry||typeof entry.id!=='string'||entry.id===INITIAL||seen.has(entry.id))throw Error('フィールドのIDが不正です');seen.add(entry.id);
-    const setting=clean(entry.settings),image=setting.pageFieldImageIds;
-    if(image){const record=value.imageLibrary?.[image];if(!record||typeof record.source!=='string')throw Error('フィールドの画像がありません');setting.pageFieldImageIds=boardImageLibrary.register(record.source,record)}
+    const setting=clean(entry.settings);
+    const importImage=id=>{
+     if(!id)return '';
+     const record=value.imageLibrary?.[id];
+     if(!record||typeof record.source!=='string')throw Error('フィールドの画像がありません');
+     return boardImageLibrary.register(record.source,record);
+    };
+    setting.pageFieldImageIds=importImage(setting.pageFieldImageIds);
+    setting.pageFieldTileImageIds=setting.pageFieldTileImageIds.map(id=>id===null?null:importImage(id));
     if(entry.groupId&&!groups.some(g=>g.id===entry.groupId))throw Error('所属するフィールドグループがありません');records.push({id:entry.id,name:String(entry.name||'フィールド'),settings:setting,...(entry.groupId?{groupId:entry.groupId}:{})});
    }
    for(const board of boards){if(!Array.isArray(board.pageMasterIds)||board.pageMasterIds.length!==board.pages.length||board.pageMasterIds.some(id=>id!==INITIAL&&!seen.has(id)))throw Error('使用するフィールドがありません')}
@@ -113,6 +125,21 @@ window.Bolxiv.phaseMasters=(()=>{
  function moveGroup(from,target,after=false){const layout=units(),moving=layout.find(unit=>unit.group?.id===from),to=layout.find(unit=>unit.group?.id===target||unit.group&&unit.items.some(m=>m.id===target)||unit.item?.id===target);if(!moving||moving===to)return;record();layout.splice(layout.indexOf(moving),1);layout.splice(target===INITIAL?0:to?layout.indexOf(to)+(after?1:0):layout.length,0,moving);writeUnits(layout);refreshUI();persist()}
  function moveBeforeGroup(from,id){const moving=masters.find(m=>m.id===from);if(!moving||!masterGroups.some(g=>g.id===id))return;record();const layout=units();for(const unit of layout)if(unit.group)unit.items=unit.items.filter(m=>m.id!==from);const value=layout.filter(unit=>unit.group||unit.item.id!==from);delete moving.groupId;value.splice(value.findIndex(unit=>unit.group?.id===id),0,{item:moving});writeUnits(value);refreshUI();persist()}
  function moveToEnd(from,isGroup=false){if(isGroup){moveGroup(from,null);return}const moving=masters.find(m=>m.id===from);if(!moving)return;record();const layout=units();for(const unit of layout)if(unit.group)unit.items=unit.items.filter(m=>m.id!==from);const value=layout.filter(unit=>unit.group||unit.item.id!==from);delete moving.groupId;value.push({item:moving});writeUnits(value);refreshUI();persist()}
+ function unusedFieldIds(){
+  const used=new Set(contentBoards.flatMap(board=>board.pageMasterIds||[]));
+  return masters.filter(field=>!used.has(field.id)).map(field=>field.id);
+ }
+ function removeUnusedFields(confirmedIds){
+  const unused=new Set(unusedFieldIds().filter(id=>confirmedIds.includes(id)));
+  if(!active||!unused.size)return;
+  record();
+  const layout=units();
+  for(const unit of layout)if(unit.group)unit.items=unit.items.filter(field=>!unused.has(field.id));
+  writeUnits(layout.filter(unit=>unit.group||!unused.has(unit.item.id)));
+  if(unused.has(selectedId))selectedId=INITIAL;
+  showSelected();persist();
+  notify('未使用フィールドを'+unused.size+'件削除しました');
+ }
  function mergeDuplicates(){
   if(!active)return 0;commit();const first=new Map(),remap=new Map();
   for(const item of all()){const key=signature(item.settings,true);if(first.has(key))remap.set(item.id,first.get(key));else first.set(key,item.id)}
@@ -120,11 +147,53 @@ window.Bolxiv.phaseMasters=(()=>{
   record();for(const board of contentBoards){board.pageMasterIds=board.pageMasterIds.map(id=>remap.get(id)||id);apply(board)}
   const layout=units();for(const unit of layout)if(unit.group)unit.items=unit.items.filter(item=>!remap.has(item.id));writeUnits(layout.filter(unit=>unit.group||!remap.has(unit.item.id)));selectedId=remap.get(selectedId)||selectedId;if(!selectedGroupId){const group=masterGroups.find(g=>g.id===get(selectedId).groupId);if(group)group.collapsed=false}showSelected();persist();document.getElementById('phaseMasters').dispatchEvent(new Event('reveal-master-selection'));notify('同じ設定のフィールドを'+remap.size+'件統合しました');return remap.size;
  }
+ function canCombineImagePhases(){
+  if(active||boardReadOnly||window.Bolxiv.pngPreview?.active||selectedPhaseIndexes.length<2||selectedPhaseIndexes.length>4)return false;
+  const first=selectedPhaseIndexes[0],id=data.pageMasterIds[first];
+  return !!id&&data.pageBoardShapes[first]==='image'&&!!fieldImageSource(data,first)&&
+   selectedPhaseIndexes.every(index=>data.pageMasterIds[index]===id);
+ }
+ function combineImagePhases(){
+  if(!canCombineImagePhases())return;
+  const indexes=selectedPhaseIndexes.slice(),first=indexes[0];
+  const baseName='2×2 フェーズ',name=data.pageNames.includes(baseName)?nextCopiedPhaseName(baseName,data.pageNames):baseName;
+  const source=settings(data,first),size=source.pageFieldSizes,guide=source.pageFieldGuides;
+  const tileSize={width:size.width/2,height:size.height/2};
+  const items=[],shapes=[];
+  for(const [tile,index] of indexes.entries()){
+   const left=(tile%2)*320,top=Math.floor(tile/2)*320,objects=clone(data.pages[index]),groups=new Map();
+   for(const shape of guide.shapes){
+    const copy={...shape,id:createObjectId(),x:left+shape.x/2,y:top+shape.y/2,width:shape.width/2,height:shape.height/2};
+    if(shape.objectGroupId){
+     if(!groups.has(shape.objectGroupId))groups.set(shape.objectGroupId,createObjectId());
+     copy.objectGroupId=groups.get(shape.objectGroupId);
+    }
+    shapes.push(copy);
+   }
+   remapCopiedObjectGroups(objects);
+   for(const object of objects){
+    object.id=createObjectId();object.x=left/6.4+object.x/2;object.y=top/6.4+object.y/2;
+    for(const key of ['width','height','fontSize','strokeWidth'])if(Number.isFinite(object[key]))object[key]/=2;
+    items.push(object);
+   }
+  }
+  const notes=indexes.map((index,tile)=>data.pageNotes[index]?['左上','右上','左下','右下'][tile]+' · '+data.pageNames[index]+'\n'+data.pageNotes[index]:'').filter(Boolean).join('\n\n');
+  recordHistory();
+  const master=newMaster(name,{...source,pageBoardShapes:'image4',pageFieldSizes:tileSize,
+   pageFieldTileImageIds:Array.from({length:4},(_,tile)=>tile<indexes.length?'':null),
+   pageFieldGuides:{...guide,reference:{...tileSize,shape:'image4'},shapes}
+  });
+  const index=data.pages.length;
+  data.pages.push(items);data.pageNames.push(name);data.pageNotes.push(notes);data.pageGroupIds.push(null);data.pageMasterIds.push(master.id);
+  data.page=index;data.activePhaseGroup=null;selectedPhaseIndexes=[];selectedIds=[];selected=null;
+  openPhaseListForCreation(index);renderAndSave();revealCreatedPhase(index);
+  notify(indexes.length+'つのフェーズから2×2フェーズを作成しました');
+ }
  function assign(id){if(active||boardReadOnly||window.Bolxiv.pngPreview?.active||phaseComparisonActive()||data.activePhaseGroup)return;recordHistory();data.pageMasterIds[data.page]=get(id).id;apply(data);renderAndSave()}
  masterGroups=(window.boardPhaseMasterGroupsInitial||[]).map(g=>({...g}));window.boardPhaseMasterGroupsInitial=null;const saved=window.boardPhaseMastersInitial||[];window.boardPhaseMastersInitial=null;
  for(const entry of saved){if(entry.id===INITIAL)continue;masters.push({id:entry.id,name:String(entry.name||'フィールド'),settings:clean(entry.settings),...(masterGroups.some(g=>g.id===entry.groupId)?{groupId:entry.groupId}:{})})}
  const original=data;for(const board of contentBoards){data=board;normalizePageNames();ensure(board,!firstRun&&!Array.isArray(board.pageMasterIds))}data=original;
- return {INITIAL,keys,all,get,ensure,apply,state,imageBoards,exportPayload,prepareImport,acceptImport,record,history:masterHistory,commit,enter,leave,select,add,cancelAddition,rename,remove,move,mergeDuplicates,assign,units,selectGroup,addGroup,renameGroup,toggleGroup,ungroup,moveIntoGroup,moveGroup,moveBeforeGroup,moveToEnd,groupRecords:()=>clone(masterGroups),get selectedGroupId(){return selectedGroupId},get active(){return active},get selectedId(){return selectedId},get locked(){return active&&(selectedId===INITIAL||!!selectedGroupId)},get canUndo(){return past.length>0},get canRedo(){return next.length>0},records:()=>clone(masters),restoreRecords:(value,groups=[])=>{masters=clone(value);masterGroups=clone(groups);selectedGroupId=null},paint:()=>refreshUI(),set confirmRemoval(fn){confirmRemoval=fn},set refresh(fn){refreshUI=fn},get editorBoard(){return editorBoard}};
+ return {INITIAL,keys,all,get,ensure,apply,state,imageBoards,exportPayload,prepareImport,acceptImport,record,history:masterHistory,commit,enter,leave,select,add,cancelAddition,rename,remove,move,mergeDuplicates,unusedFieldIds,removeUnusedFields,assign,canCombineImagePhases,combineImagePhases,units,selectGroup,addGroup,renameGroup,toggleGroup,ungroup,moveIntoGroup,moveGroup,moveBeforeGroup,moveToEnd,groupRecords:()=>clone(masterGroups),get selectedGroupId(){return selectedGroupId},get active(){return active},get selectedId(){return selectedId},get locked(){return active&&(selectedId===INITIAL||!!selectedGroupId)},get canUndo(){return past.length>0},get canRedo(){return next.length>0},records:()=>clone(masters),restoreRecords:(value,groups=[])=>{masters=clone(value);masterGroups=clone(groups);selectedGroupId=null},paint:()=>refreshUI(),set confirmRemoval(fn){confirmRemoval=fn},set refresh(fn){refreshUI=fn},get editorBoard(){return editorBoard}};
 })();
 
 window.Bolxiv.initializePhaseMasterUI=()=>{
@@ -153,7 +222,7 @@ window.Bolxiv.initializePhaseMasterUI=()=>{
  const groupPanel=document.createElement('section');groupPanel.id='phaseMasterGroupProperties';groupPanel.className='accordion-group content-properties';const groupTitle=document.createElement('button');groupTitle.type='button';groupTitle.className='accordion-toggle';groupTitle.textContent='グループプロパティ';groupTitle.setAttribute('aria-expanded','true');groupPanel.append(groupTitle);const groupBody=document.createElement('div');groupBody.className='phase-master-phase-body';groupBody.id='phaseMasterGroupBody';groupTitle.setAttribute('aria-controls',groupBody.id);const originalGroup=$('#phaseGroupProperties');if(originalGroup)groupBody.append(originalGroup);groupBody.append(groupSettings);groupPanel.append(groupBody);$('#contentPanel').append(groupPanel);groupTitle.onclick=()=>{setPanelExpanded(groupTitle,groupBody,groupBody.hidden,{manageDisplay:false,hiddenClass:false,frame:groupPanel,collapsedClass:'phase-properties-collapsed'});window.dispatchEvent(new Event('phase-properties-toggle'))};
  let draggingMaster=null,draggingMasterGroup=null;function clearMasterDrop(){$('#phaseMasters').classList.remove('phase-drop-at-end');for(const row of $('#phaseMasters').children)row.classList.remove('drop-before','drop-after','drag-over');}$('#phaseMasters').ondragend=()=>{draggingMaster=null;draggingMasterGroup=null;clearMasterDrop()};$('#phaseMasters').ondragleave=e=>{if(!$('#phaseMasters').contains(e.relatedTarget))clearMasterDrop()};
  const masterList=$('#phaseMasters');masterList.addEventListener('dragover',e=>{if(e.target!==masterList||!e.dataTransfer.types.some(t=>['application/x-phase-master','application/x-phase-master-group'].includes(t)))return;e.preventDefault();clearMasterDrop();masterList.classList.add('phase-drop-at-end')});masterList.addEventListener('drop',e=>{if(e.target!==masterList)return;e.preventDefault();const group=e.dataTransfer.getData('application/x-phase-master-group'),item=e.dataTransfer.getData('application/x-phase-master');clearMasterDrop();if(group||item)pm.moveToEnd(group||item,!!group)});
- const deletion=createConfirmationView({id:'deletePhaseMasterDialog',cancelId:'deletePhaseMasterNo',confirmId:'deletePhaseMasterYes',captureEscape:true,onConfirm(id){if(pm.active&&id&&pm.get(id).id===id){pm.select(id);pm.remove(true)}}});
+ const deletion=createConfirmationView({id:'deletePhaseMasterDialog',cancelId:'deletePhaseMasterNo',confirmId:'deletePhaseMasterYes',captureEscape:true,onConfirm(id){if(Array.isArray(id)){pm.removeUnusedFields(id);return}if(pm.active&&id&&pm.get(id).id===id){pm.select(id);pm.remove(true)}}});
  pm.confirmRemoval=(id,count)=>deletion.show('フィールド「'+pm.get(id).name+'」は'+count+'フェーズで使用されています。削除すると使用先は初期フィールドに切り替わります。削除しますか？',id);
  const menu=document.createElement('div');menu.id='phaseMasterMenu';menu.className='object-context-menu';menu.hidden=true;menu.setAttribute('role','menu');document.body.append(menu);
  function createMaster(copy){pm.add(copy);renameInList(pm.selectedId,true)}
@@ -172,7 +241,7 @@ window.Bolxiv.initializePhaseMasterUI=()=>{
  trigger.onclick=()=>{if(!popup.hidden){close();return}if(blocked())return;owner=data;addPhoneMenuClose(popup,()=>close(true));popup.hidden=false;trigger.setAttribute('aria-expanded','true');const r=trigger.getBoundingClientRect();popup.style.left=Math.max(8,Math.min(r.left,innerWidth-popup.offsetWidth-8))+'px';popup.style.top=Math.max(8,r.bottom+4+popup.offsetHeight<=innerHeight?r.bottom+4:r.top-popup.offsetHeight-4)+'px'};
  trigger.addEventListener('keydown',e=>{if(e.key==='ArrowDown'){e.preventDefault();if(popup.hidden)trigger.click();popup.querySelector('button:not(:disabled)')?.focus()}});document.addEventListener('pointerdown',e=>{if(!popup.contains(e.target)&&!trigger.contains(e.target))close()},true);window.addEventListener('keydown',e=>{if(!popup.hidden&&e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();close(true)}},true);window.addEventListener('resize',()=>close());
  }
- const directPhaseAdd=$('#addPage').onclick,directPhaseGroup=$('#addPhaseGroup').onclick;$('#addPhaseGroup').hidden=true;$('#addPhaseGroup').style.setProperty('display','none','important');addMenu($('#addPage'),'phaseAddMenu',[['フェーズを追加',()=>directPhaseAdd.call($('#addPage')),'item'],['グループを追加',()=>directPhaseGroup.call($('#addPhaseGroup')),'group']]);addMenu($('#addPhaseMaster'),'masterAddMenu',[['フィールドを追加',()=>createMaster(false),'item'],['グループを追加',createMasterGroup,'group'],[null],['同じ設定のフィールドを統合',()=>pm.mergeDuplicates(),'merge']],true);
+ const directPhaseAdd=$('#addPage').onclick,directPhaseGroup=$('#addPhaseGroup').onclick;$('#addPhaseGroup').hidden=true;$('#addPhaseGroup').style.setProperty('display','none','important');addMenu($('#addPage'),'phaseAddMenu',[['フェーズを追加',()=>directPhaseAdd.call($('#addPage')),'item'],['グループを追加',()=>directPhaseGroup.call($('#addPhaseGroup')),'group']]);addMenu($('#addPhaseMaster'),'masterAddMenu',[['フィールドを追加',()=>createMaster(false),'item'],['グループを追加',createMasterGroup,'group'],[null],['同じ設定のフィールドを統合',()=>pm.mergeDuplicates(),'merge'],['未使用フィールドを一括削除',()=>{const ids=pm.unusedFieldIds();if(ids.length)deletion.show('未使用フィールド'+ids.length+'件を削除しますか？',ids);else notify('未使用フィールドはありません')},'remove-unused']],true);
  function masterGroupMenu(event,id,opener){event.preventDefault();const r=(opener||event.target).getBoundingClientRect();pm.selectGroup(id);menu.replaceChildren();const units=pm.units(),at=units.findIndex(u=>u.group?.id===id),target=unit=>unit.group?.id||unit.item.id;
  for(const [label,action,disabled]of [['名前変更',()=>renameInList(id,false,true),false],['前へ移動',()=>pm.moveGroup(id,target(units[at-1]),false),at<=0],['後ろへ移動',()=>pm.moveGroup(id,target(units[at+1]),true),at===units.length-1],['グループ解除',()=>pm.ungroup(id),false]]){const button=createMenuAction({label,disabled,shortcut:label==='名前変更'?'F2':null,onInvoke(){closeMenu();action()}});menu.append(button)}addPhoneMenuClose(menu,closeMenu);menu.hidden=false;menu.style.left=Math.max(4,Math.min(event.clientX||r.left,innerWidth-menu.offsetWidth-4))+'px';menu.style.top=Math.max(4,Math.min(event.clientY||r.bottom,innerHeight-menu.offsetHeight-4))+'px';menu.querySelector('button:not(:disabled)')?.focus();
  }
@@ -195,6 +264,57 @@ window.Bolxiv.initializePhaseMasterUI=()=>{
   if(cache?.signature===signature&&cache.nodes.length===select.options.length&&cache.nodes.every((node,index)=>node===select.options[index]&&node.value===items[index].id&&node.textContent===items[index].name))return;
   const nodes=items.map(item=>{const option=document.createElement('option');option.value=item.id;option.textContent=item.name;return option});select.replaceChildren(...nodes);select._phaseMasterOptions={signature,nodes};
  }
+ const tileNames=['左上','右上','左下','右下'];
+ const tileControls=document.createElement('div');
+ tileControls.className='field image4-image-controls';
+ const imageAction=(key,label,path)=>'<button type="button" class="btn" data-'+key+' title="'+label+'" aria-label="'+label+'"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="'+path+'"/></svg></button>';
+ tileControls.innerHTML='<label>フィールド区画</label><div class="image4-image-actions" role="group" aria-label="区画の画像操作">'+
+  imageAction('common','共通画像を差し替え','M3 3h18v18H3z M3 12h18 M12 3v18 M14 17l2-2 3 3')+
+  '<span class="image4-action-separator" aria-hidden="true"></span>'+
+  imageAction('replace','選択区画の画像を差し替え','M3 3h18v18H3z M3 17l5-5 4 4 3-3 6 6 M15 8h2')+
+  imageAction('reset','選択区画を共通画像に戻す','M4 10h10a5 5 0 0 1 0 10H9 M4 10l5-5 M4 10l5 5')+
+  imageAction('empty','選択区画を画像なしにする','M3 3h18v18H3z M5 19 19 5')+
+  '</div><div class="image4-image-choices" role="group" aria-label="画像を編集する区画"></div>';
+ fields.querySelector('#boardShapeInput').closest('.field').after(tileControls);
+ const choices=tileControls.querySelector('.image4-image-choices');
+ const replace=tileControls.querySelector('[data-replace]'),reset=tileControls.querySelector('[data-reset]'),empty=tileControls.querySelector('[data-empty]');
+ let selectedTile=0,tileOwner=null;
+ const tiles=tileNames.map((name,index)=>{
+  const button=document.createElement('button');
+  button.type='button';button.className='image4-quadrant';
+  choices.append(button);
+  button.onclick=()=>{selectedTile=index;refreshTileControls()};
+  return {button,name};
+ });
+ function refreshTileControls(){
+  tileControls.hidden=!pm.active||activeBoardShape()!=='image4'||!!pm.selectedGroupId;
+  if(tileControls.hidden)return;
+  if(tileOwner!==pm.selectedId){tileOwner=pm.selectedId;selectedTile=0}
+  const ids=data.pageFieldTileImageIds?.[data.page]||[];
+  for(const [index,{button,name}] of tiles.entries()){
+   button.textContent=name+' · '+(ids[index]===null?'なし':ids[index]?'個別':'共通');
+   button.setAttribute('aria-pressed',String(index===selectedTile));button.disabled=pm.locked;
+  }
+  replace.disabled=pm.locked;reset.disabled=pm.locked||(!ids[selectedTile]&&ids[selectedTile]!==null);
+  empty.disabled=pm.locked||ids[selectedTile]===null;
+  tileControls.querySelector('[data-common]').disabled=pm.locked;
+ }
+ function chooseTileImage(mode){
+  if(tileControls.hidden||pm.locked)return;
+  fieldImageInput.dataset.mode=mode;
+  fieldImageInput.value='';fieldImageInput.click();
+ }
+ tileControls.querySelector('[data-common]').onclick=()=>chooseTileImage('image4-common');
+ replace.onclick=()=>chooseTileImage('image4-tile-'+selectedTile);
+ function setTileImage(value){
+  pm.record();
+  const ids=data.pageFieldTileImageIds[data.page];
+  while(ids.length<=selectedTile)ids.push('');
+  ids[selectedTile]=value;
+  renderAndSave();
+ }
+ reset.onclick=()=>{if(!tileControls.hidden&&!reset.disabled)setTileImage('')};
+ empty.onclick=()=>{if(!tileControls.hidden&&!empty.disabled)setTileImage(null)};
  function refresh(){
   const focusedMaster=document.activeElement?.matches('#phaseMasters .page-tab')?document.activeElement.dataset.masterId:null;
   const active=pm.active;masterGroupPreview.hidden=!(active&&pm.selectedGroupId);const embeddedPreview=matchMedia('(min-width:851px)').matches;masterGroupPreview.classList.toggle('master-preview-embedded',embeddedPreview);const previewHost=embeddedPreview?previewCanvas:$('#boardZoomSpace');if(masterGroupPreview.parentNode!==previewHost)previewHost.append(masterGroupPreview);if(!masterGroupPreview.hidden)window.Bolxiv.drawGroupPreview(masterGroupPreview,pm.groupRecords().find(g=>g.id===pm.selectedGroupId).name,'フィールドグループ');const resizeBar=$('#phasePropertyResize');if(active){resizeBar.style.setProperty('display','none','important');resizeBar.dataset.masterHidden='true'}else if(resizeBar.dataset.masterHidden){resizeBar.style.removeProperty('display');delete resizeBar.dataset.masterHidden}const phoneReading=boardReadOnly&&matchMedia('(max-width:850px)').matches&&!window.Bolxiv.pngPreview?.active;if(note&&matchMedia('(min-width:851px)').matches&&!window.Bolxiv.pngPreview?.active&&note.parentNode!==phaseBody)phaseBody.append(note);if(note&&!phoneReading&&!window.Bolxiv.pngPreview?.active)note.open=true;phase.hidden=active||!!data.activePhaseGroup;const groupWasHidden=groupPanel.hidden;groupPanel.hidden=active?!pm.selectedGroupId:!data.activePhaseGroup;if(originalGroup){originalGroup.style.setProperty('display',active?'none':'flex','important')}if(groupWasHidden!==groupPanel.hidden)window.dispatchEvent(new Event('phase-properties-toggle'));toggle.setAttribute('aria-pressed',String(active));toggle.title=active?'コンテンツへ切り替え':'フィールドへ切り替え';toggle.setAttribute('aria-label',toggle.title);toggle.disabled=!active&&(boardReadOnly||!!window.Bolxiv.pngPreview?.active);$('#toggleContent').textContent=active?'フィールド':'コンテンツ';listPanel.hidden=!active;
@@ -203,6 +323,7 @@ window.Bolxiv.initializePhaseMasterUI=()=>{
    if(!$('#phaseMasters .page-tab-input,#phaseMasters .phase-group-rename')&&!reuseMasterRows(items,rowsSignature)){$('#phaseMasters').replaceChildren(...items.map((item,index)=>{const {row,index:number,label:name,action:more}=createListItemView({model:{name:item.name,number:(usage.get(item.id)||0),active:!pm.selectedGroupId&&item.id===pm.selectedId,selected:!pm.selectedGroupId&&item.id===pm.selectedId},select:()=>pm.select(item.id),resolveRow:()=>[...$('#phaseMasters').querySelectorAll('.page-tab')].find(row=>row.dataset.masterId===item.id),ignoreSelect:'.page-tab-x,input,textarea',keyboardTargetOnly:true,stopActionPropagation:false,action:e=>{if(matchMedia('(max-width:850px)').matches)openMenu(e,item.id,more);else{pm.select(item.id);pm.remove()}},context:e=>openMenu(e,item.id)});row.dataset.masterId=item.id;row.title=item.name+'\nクリックで選択、右クリック／長押しで操作メニュー'+(item.id===pm.INITIAL?'':'、ドラッグで並べ替え');row.draggable=index>0&&matchMedia('(min-width:851px)').matches;row.ondragstart=e=>{if(e.target.closest('input,.page-tab-x')){e.preventDefault();return}draggingMaster=item.id;e.dataTransfer.setData('application/x-phase-master',item.id);e.dataTransfer.effectAllowed='move'};const usageCount=(usage.get(item.id)||0);number.textContent=String(usageCount).padStart(2,'0');number.title=usageCount+'フェーズで使用';number.setAttribute('aria-label',number.title);number.draggable=index>0;number.ondragstart=e=>{draggingMaster=item.id;e.dataTransfer.setData('application/x-phase-master',item.id);e.dataTransfer.effectAllowed='move'};name.title=item.name;const phone=matchMedia('(max-width:850px)').matches;more.className=phone?'page-tab-x phone-row-actions':'page-tab-x';more.textContent=phone?'…':'×';more.disabled=!phone&&item.id===pm.INITIAL;if(more.disabled){more.style.visibility='hidden';more.setAttribute('aria-hidden','true')}more.setAttribute('aria-label',item.name+(phone?'の操作':'を削除'));row.ondragover=e=>{if(!e.dataTransfer.types.some(type=>['application/x-phase-master','application/x-phase-master-group'].includes(type)))return;clearMasterDrop();if(e.dataTransfer.types.includes('application/x-phase-master-group')&&item.groupId)return;const after=e.clientY>=row.getBoundingClientRect().top+row.getBoundingClientRect().height/2;const source=draggingMaster||e.dataTransfer.getData('application/x-phase-master');if(item.id===source||item.id===pm.INITIAL&&!after)return;e.preventDefault();e.dataTransfer.dropEffect='move';row.classList.add(after?'drop-after':'drop-before')};row.ondrop=e=>{e.preventDefault();if(e.dataTransfer.types.includes('application/x-phase-master-group')){const after=e.clientY>=row.getBoundingClientRect().top+row.getBoundingClientRect().height/2;clearMasterDrop();pm.moveGroup(e.dataTransfer.getData('application/x-phase-master-group')||draggingMasterGroup,item.id,after);return}if(!e.dataTransfer.types.includes('application/x-phase-master'))return;const after=e.clientY>=row.getBoundingClientRect().top+row.getBoundingClientRect().height/2;clearMasterDrop();pm.move(e.dataTransfer.getData('application/x-phase-master')||draggingMaster,item.id,after);draggingMaster=null};return row}));
    renderMasterGroups();masterRowsCache={signature:rowsSignature,items:items.slice(),nodes:[...$('#phaseMasters').children]};}document.body.classList.toggle('master-group-selected',!!pm.selectedGroupId);groupSettings.hidden=!pm.selectedGroupId;if(pm.selectedGroupId){const group=pm.groupRecords().find(g=>g.id===pm.selectedGroupId);if(document.activeElement!==$('#masterGroupName'))$('#masterGroupName').value=group.name;$('#selectionTitle').textContent='フィールドグループ：'+group.name;$('#guideEditorTitle').textContent='フィールドグループ：'+group.name;}$('#duplicatePhaseMaster').disabled=!!pm.selectedGroupId;body.classList.toggle('phase-master-locked',pm.locked);body.inert=pm.locked;updateHistoryButtons();
   }else{document.body.classList.remove('master-group-selected');groupSettings.hidden=true;body.inert=false;if(fields.parentNode!==home)placeholder.after(fields);fields.hidden=true;fields.inert=false;masterName.hidden=true;const select=$('#phaseMasterSelect');updateMasterOptions(select,pm.all());select.value=data.pageMasterIds?.[data.page]||pm.INITIAL;select.disabled=boardReadOnly||!!window.Bolxiv.pngPreview?.active||phaseComparisonActive()||!!data.activePhaseGroup;if(document.activeElement!==$('#phaseMasterPhaseName'))$('#phaseMasterPhaseName').value=data.pageNames[data.page];$('#phaseMasterPhaseName').disabled=select.disabled;$('#editUsedField').disabled=select.disabled;}
+  refreshTileControls();
   if(active&&focusedMaster&&document.activeElement===document.body)[...$('#phaseMasters').querySelectorAll('.page-tab')].find(row=>row.dataset.masterId===focusedMaster)?.focus({preventScroll:true});
  }
  window.addEventListener('keydown',event=>{
@@ -220,7 +341,9 @@ window.Bolxiv.initializePhaseMasterUI=()=>{
  window.bindTouchListReorder?.(['phaseMasters','.page-tab,.phase-group-heading','.phase-group-range,.phase-group-menu-trigger,.page-tab:not(.renaming) .page-index[draggable="true"],.page-tab:not([data-master-id="initial"]):not(.renaming) .phone-row-actions','application/x-phase-master']);
  document.getElementById('contextRenameObjectGroup').dataset.shortcut='F2';
  for(const button of document.querySelectorAll('#toggleBattlePages,#toggleLayers,#toggleInspector,#phaseMasterAssignment>.accordion-toggle,#phaseMasterGroupProperties>.accordion-toggle,#fieldGuideEditor .guide-section-toggle'))button.classList.add('panel-disclosure');
- pm.refresh=refresh;refresh();window.dispatchEvent(new Event('phase-properties-toggle'));save();
+ pm.refresh=refresh;refresh();window.dispatchEvent(new Event('phase-properties-toggle'));
+ // Compare the complete current-format state against the original stored data.
+ boardSaveSuspended=false;save();
  const originalRender=render;render=function(...args){if(!pm.active)pm.ensure(data);const result=originalRender(...args);refresh();return result};
  document.addEventListener('keydown',event=>{if(!pm.active||event.target.closest('input,textarea,select'))return;if((event.ctrlKey||event.metaKey)&&['z','y'].includes(event.key.toLowerCase())){event.preventDefault();event.stopImmediatePropagation();pm.history(event.key.toLowerCase()==='y'||event.shiftKey)}},true);
 };

@@ -9,7 +9,7 @@
  const dialog=document.createElement('dialog');dialog.id='fieldGuideEditor';dialog.className='guide-editor-dialog';dialog.setAttribute('aria-labelledby','guideEditorTitle');
  dialog.innerHTML='<header class="guide-editor-heading"><h2 id="guideEditorTitle">キャンバス</h2><select id="guideEditorPhase" aria-label="フェーズを変更してガイド編集を終了"></select><button class="btn primary" type="button" id="finishFieldGuides">完了</button></header><div class="guide-editor-content"><main class="guide-editor-preview"><div class="guide-editor-tools" role="toolbar" aria-label="ガイドを描く"><button class="btn" type="button" data-guide-tool="line">直線</button><button class="btn" type="button" data-guide-tool="circle">円</button><button class="btn" type="button" data-guide-tool="rect">四角形</button><button class="btn" type="button" id="guideUndo" aria-label="ガイドの編集を元に戻す">↶</button><button class="btn" type="button" id="guideRedo" aria-label="ガイドの編集をやり直す">↷</button></div><div class="guide-editor-viewport"><div class="guide-editor-canvas"><div class="guide-editor-art"></div><svg class="guide-editor-overlay" viewBox="0 0 640 640" aria-label="ガイドの描画領域"></svg></div></div><p class="guide-editor-hint" role="status">図形を選んで追加します。追加したガイドはクリック／タップで選択できます。</p></main><aside class="guide-editor-properties"><div class="guide-properties-title" role="heading" aria-level="3">フェーズプロパティ：ガイド</div><label class="field-guide-check guide-hide-objects"><input type="checkbox" id="guideHideObjects"> オブジェクトを隠す</label><section id="guideShapeProperties"><h3>ガイド（個別）</h3><p id="guideNoSelection">線・図形を選ぶと位置や大きさを変更できます。</p><div id="guideShapeFields" hidden></div><div class="guide-shape-actions"><button type="button" class="btn" id="duplicateGuideShape">複製</button><button type="button" class="btn" id="deleteGuideShape">削除</button></div></section></aside></div>';
  document.body.append(dialog);const propertyPane=dialog.querySelector('.guide-editor-properties'),propertyBody=document.createElement('div');propertyBody.className='guide-properties-body';for(const node of [...propertyPane.children])if(!node.classList.contains('guide-properties-title'))propertyBody.append(node);propertyBody.append(settings);propertyPane.append(propertyBody);propertyPane.querySelector('.guide-properties-title').append(dialog.querySelector('#finishFieldGuides'));const zoomToolbar=document.createElement('div');zoomToolbar.className='board-display-toolbar guide-zoom-toolbar';const zoomGroup=document.querySelector('.board-display-toolbar .board-zoom-group').cloneNode(true);for(const node of zoomGroup.querySelectorAll('[id]')){node.dataset.sourceId=node.id;node.id='guide-'+node.id}zoomToolbar.append(zoomGroup);const guideHeading=dialog.querySelector('.guide-editor-heading');guideHeading.classList.add('board-title-row');guideHeading.append(zoomToolbar);
- const displayButtons=['gridToggle','fieldToggle','clipToggle'].map(id=>{const source=document.getElementById(id),button=source.cloneNode(true);button.id='guide-'+id;button.dataset.sourceId=id;button.onclick=()=>source.click();const sync=()=>{for(const attribute of ['aria-pressed','aria-label','title'])button.setAttribute(attribute,source.getAttribute(attribute)||'');button.innerHTML=source.innerHTML;button.disabled=source.disabled};new MutationObserver(sync).observe(source,{attributes:true,childList:true,subtree:true,attributeFilter:['aria-pressed','aria-label','title','disabled']});sync();zoomToolbar.insertBefore(button,zoomGroup);source.addEventListener('click',()=>{if(dialog.open&&!dialog.classList.contains('guide-editor-phone'))updateArtwork(true)});return button});
+ const displayButtons=['gridToggle','fieldToggle','clipToggle'].map(id=>{const source=document.getElementById(id),button=source.cloneNode(true);button.id='guide-'+id;button.dataset.sourceId=id;button.onclick=()=>id==='gridToggle'?window.Bolxiv.openGridMenu?.(button):source.click();const sync=()=>{for(const attribute of ['aria-pressed','aria-label','title'])button.setAttribute(attribute,source.getAttribute(attribute)||'');button.innerHTML=source.innerHTML;button.disabled=source.disabled};new MutationObserver(sync).observe(source,{attributes:true,childList:true,subtree:true,attributeFilter:['aria-pressed','aria-label','title','disabled']});sync();zoomToolbar.insertBefore(button,zoomGroup);source.addEventListener('click',()=>{if(dialog.open&&!dialog.classList.contains('guide-editor-phone'))updateArtwork(true)});return button});
  const zoomTrigger=zoomGroup.querySelector('[data-source-id="resetBoardZoom"]'),zoomValue=zoomGroup.querySelector('[data-source-id="boardZoomValue"]'),zoomMenu=document.getElementById('boardZoomMenu').cloneNode(true);zoomMenu.id='guideZoomMenu';dialog.append(zoomMenu);zoomTrigger.setAttribute('aria-controls',zoomMenu.id);const zoomItems=[...zoomMenu.querySelectorAll('[data-zoom]')];
  function closeZoomMenu(focus=false){zoomMenu.hidden=true;zoomTrigger.setAttribute('aria-expanded','false');if(focus)zoomTrigger.focus({preventScroll:true})}
  function openZoomMenu(){if(!dialog.open)return;addPhoneMenuClose(zoomMenu,()=>closeZoomMenu(true));for(const item of zoomItems)item.setAttribute('aria-checked',String(Number(item.dataset.zoom)===guideZoom));zoomMenu.hidden=false;zoomTrigger.setAttribute('aria-expanded','true');const r=zoomTrigger.getBoundingClientRect();zoomMenu.style.left=Math.max(8,Math.min(r.right-zoomMenu.offsetWidth,innerWidth-zoomMenu.offsetWidth-8))+'px';zoomMenu.style.top=Math.max(8,Math.min(r.bottom+4,innerHeight-zoomMenu.offsetHeight-8))+'px';(zoomItems.find(item=>item.getAttribute('aria-checked')==='true')||zoomItems[0]).focus({preventScroll:true})}
@@ -293,9 +293,9 @@
 // ===== js/phases/phase-content-copy.js =====
 (()=>{
  const original=document.getElementById('copyPage'),button=document.createElement('button');
- button.id='copyPageToContent';button.type='button';button.className=original.className;button.title='現在のフェーズを別のコンテンツにコピー';button.setAttribute('aria-label',button.title);button.setAttribute('aria-haspopup','menu');button.setAttribute('aria-expanded','false');
+ button.id='copyPageToContent';button.type='button';button.className=original.className;button.title='現在のフェーズを別のコンテンツに複製';button.setAttribute('aria-label',button.title);button.setAttribute('aria-haspopup','menu');button.setAttribute('aria-expanded','false');
  button.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4H4v16h13v-6M8 8v8h5M12 3h9v9M21 3l-9 9"/></svg>';original.after(button);
- const menu=document.createElement('div');menu.id='phaseContentCopyMenu';menu.className='object-context-menu phase-content-copy-menu';menu.hidden=true;menu.setAttribute('role','menu');menu.setAttribute('aria-label','フェーズのコピー先');button.setAttribute('aria-controls',menu.id);document.body.append(menu);
+ const menu=document.createElement('div');menu.id='phaseContentCopyMenu';menu.className='object-context-menu phase-content-copy-menu';menu.hidden=true;menu.setAttribute('role','menu');menu.setAttribute('aria-label','フェーズの複製先');button.setAttribute('aria-controls',menu.id);document.body.append(menu);
  let sourceBoard=null,sourcePage=null,sourceGroup=null;
  function close(focus=false){menu.hidden=true;button.setAttribute('aria-expanded','false');sourceBoard=null;sourcePage=null;sourceGroup=null;if(focus&&!button.disabled)(button.getClientRects().length?button:original).focus()}
  function copyTo(destination){
@@ -319,17 +319,17 @@
   if(!historyEntry.history.length||!sameHistoryState(historyEntry.history.at(-1),before))historyEntry.history.push(before);
   if(historyEntry.history.length>100)historyEntry.history.shift();historyEntry.future=[];contentHistoryStore.set(destination,historyEntry);
   const destinationName=destination.title||'名称未設定のコンテンツ';
-  close();save();flushScheduledBoardSave();notify(destinationName+'へ'+copiedLabel+'をコピーしました',[destinationName]);
+  close();save();flushScheduledBoardSave();notify(destinationName+'へ'+copiedLabel+'を複製しました',[destinationName]);
  }
  function open(index=data.page,anchor=button,groupId=null){
   if(button.disabled||boardReadOnly||phaseComparisonActive()||(groupId?!data.phaseGroups?.some(group=>group.id===groupId):!Number.isInteger(index)||!data.pages[index]))return;
   closeColorPopovers();closeJsonExportMenu();closeJsonImportMenu();closeHelpMenu();
   sourceBoard=data;sourcePage=index;sourceGroup=groupId;menu.replaceChildren();
-  const heading=document.createElement('p');heading.className='phase-content-copy-heading';heading.textContent='コピー先のコンテンツ';
+  const heading=document.createElement('p');heading.className='phase-content-copy-heading';heading.textContent='複製先のコンテンツ';
   const separator=document.createElement('div');separator.className='context-separator';separator.setAttribute('role','separator');
-  const hint=document.createElement('p');hint.className='phase-content-copy-hint';hint.textContent=groupId?'グループ名・共通メモ・配下の全フェーズを、コピー先の末尾に新しいグループとして追加します。':'選ぶと末尾にコピーします。オブジェクト・フィールド設定・背景・ノートを含みます。';menu.append(heading,separator,hint);
+  const hint=document.createElement('p');hint.className='phase-content-copy-hint';hint.textContent=groupId?'グループ名・共通メモ・配下の全フェーズを、複製先の末尾に新しいグループとして追加します。':'選ぶと末尾に複製します。オブジェクト・フィールド設定・背景・ノートを含みます。';menu.append(heading,separator,hint);
   contentBoards.forEach((board,index)=>{if(board===data)return;menu.append(createMenuAction({label:board.title||'コンテンツ'+(index+1),onInvoke:()=>copyTo(board)}))});
-  if(!menu.querySelector('button')){const empty=document.createElement('p');empty.className='phase-content-copy-hint';empty.textContent='コピー先のコンテンツがありません';menu.append(empty)}
+  if(!menu.querySelector('button')){const empty=document.createElement('p');empty.className='phase-content-copy-hint';empty.textContent='複製先のコンテンツがありません';menu.append(empty)}
   addPhoneMenuClose(menu,()=>close(true));menu._opener=anchor;menu.hidden=false;button.setAttribute('aria-expanded','true');
   const rect=anchor.getBoundingClientRect(),below=innerHeight-rect.bottom-8,above=rect.top-8;
   menu.style.maxHeight=Math.max(60,Math.min(360,Math.max(below,above)))+'px';
@@ -358,7 +358,7 @@
 (()=>{
  document.getElementById('addPage').innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>';
  document.getElementById('copyPage').innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="1"/><path d="M15 9V4H4v11h5"/></svg>';
- const heading=document.querySelector('.phase-heading-row'),actions=document.createElement('div');actions.className='phase-heading-actions';actions.setAttribute('role','group');actions.setAttribute('aria-label','フェーズの追加とコピー');for(const id of ['addPage','copyPage','copyPageToContent']){const button=document.getElementById(id);if(button)actions.append(button)}heading.append(actions);actions.addEventListener('click',event=>event.stopPropagation())})();
+ const heading=document.querySelector('.phase-heading-row'),actions=document.createElement('div');actions.className='phase-heading-actions';actions.setAttribute('role','group');actions.setAttribute('aria-label','フェーズの追加と複製');for(const id of ['addPage','copyPage','copyPageToContent']){const button=document.getElementById(id);if(button)actions.append(button)}heading.append(actions);actions.addEventListener('click',event=>event.stopPropagation())})();
 
 ;
 // ===== js/phases/phase-item-menu.js =====
@@ -395,18 +395,28 @@
   for(const key of ['pageGroupIds','pages','pageNames','pageNotes','pageColors','pageBoardShapes','pageFieldBackgroundColors','pageFieldImageIds','pageFieldImageTints','pageFieldGuides','pageFieldSizes','pageMasterIds']){const [value]=data[key].splice(from,1);data[key].splice(to,0,value)}
   data.page=data.pages.indexOf(current);selectedPhaseIndexes=selected.map(page=>data.pages.indexOf(page));renderAndSave();revealMovedPhase(to);
  }
- function open(row,x,y){
+ function open(row,x,y,opener=null){
   const index=[...list.querySelectorAll('.page-tab')].indexOf(row);if(index<0||row.classList.contains('renaming'))return;
   document.getElementById('phaseContentCopyMenu').hidden=true;document.getElementById('copyPageToContent').setAttribute('aria-expanded','false');
   closeObjectContextMenu();closeColorPopovers();closeJsonImportMenu();closeJsonExportMenu();closeHelpMenu();
   targetBoard=data;targetPhase=data.pages[index];menu._opener=row.querySelector('.phone-row-actions');menu._openerResolver=()=>targetBoard===data?list.querySelectorAll('.page-tab')[data.pages.indexOf(targetPhase)]?.querySelector('.phone-row-actions'):null;menu.replaceChildren();
-  const actions=[['rename','名前変更'],['copy','コピー'],['cross-copy','別コンテンツへコピー'],['previous','前へ移動'],['next','後ろへ移動'],['delete','削除']];
+  if(selectedPhaseIndexes.length&&!selectedPhaseIndexes.includes(index))return;
+  const actions=selectedPhaseIndexes.length?[['combine','2×2フェーズにまとめる']]:[['rename','名前変更'],['copy','複製'],['cross-copy','別コンテンツへ複製'],['previous','前へ移動'],['next','後ろへ移動'],['delete','削除']];
   for(const [action,label] of actions){
    if(action==='copy'||action==='field-copy'||action==='previous'||action==='delete'){const separator=document.createElement('div');separator.className='context-separator';separator.setAttribute('role','separator');menu.append(separator)}
    const button=createMenuAction({label,shortcut:action==='rename'?'F2':null});button.dataset.action=action;
-   button.disabled=boardReadOnly||phaseComparisonActive()||!!window.Bolxiv.pngPreview?.active||(action==='field-paste'&&!fieldClipboard)||(action==='previous'&&index===0&&!data.pageGroupIds[index])||(action==='next'&&index===data.pages.length-1&&!data.pageGroupIds[index]);
+   button.disabled=boardReadOnly||(action!=='combine'&&phaseComparisonActive())||!!window.Bolxiv.pngPreview?.active||(action==='field-paste'&&!fieldClipboard)||(action==='previous'&&index===0&&!data.pageGroupIds[index])||(action==='next'&&index===data.pages.length-1&&!data.pageGroupIds[index]);
+   if(action==='combine'&&!window.Bolxiv.phaseMasters.canCombineImagePhases()){
+    button.disabled=true;
+    const hint=document.createElement('div');
+    hint.className='phase-content-copy-hint';
+    hint.textContent='フィールド形状が「画像」で、同じフィールドを使うフェーズを2〜4個選択してください。画像（2×2）のフェーズは対象外です。';
+    menu.append(button,hint);
+    continue;
+   }
    if(action==='delete')button.className='context-delete';
    button.onclick=()=>{
+    if(action==='combine'){close();window.Bolxiv.phaseMasters.combineImagePhases();return}
     if(button.disabled||boardReadOnly||phaseComparisonActive()||window.Bolxiv.pngPreview?.active||targetBoard!==data)return;
     const at=data.pages.indexOf(targetPhase),tab=list.querySelectorAll('.page-tab')[at];if(at<0||!tab){close();return}close();
     if(action==='field-copy')copyField(at);
@@ -420,9 +430,13 @@
    };menu.append(button);
   }
   menu.style.maxHeight=Math.max(80,innerHeight-16)+'px';addPhoneMenuClose(menu,()=>close(true));menu.hidden=false;
+  if(opener){
+   const bounds=opener.getBoundingClientRect();
+   x=bounds.right-menu.offsetWidth;y=bounds.top;
+  }
   menu.style.left=Math.max(8,Math.min(x,innerWidth-menu.offsetWidth-8))+'px';menu.style.top=Math.max(8,Math.min(y,innerHeight-menu.offsetHeight-8))+'px';
  }
- list.addEventListener('open-row-actions',event=>{cancelGesture();const index=[...list.querySelectorAll('.page-tab')].indexOf(event.detail.row);if(index<0)return;selectPhase(index);open(list.querySelectorAll('.page-tab')[index],event.detail.x,event.detail.y)});
+ list.addEventListener('open-row-actions',event=>{cancelGesture();const index=[...list.querySelectorAll('.page-tab')].indexOf(event.detail.row);if(index<0)return;if(!selectedPhaseIndexes.length)selectPhase(index);const row=list.querySelectorAll('.page-tab')[index];open(row,event.detail.x,event.detail.y,row.querySelector('.phone-row-actions'))});
  list.addEventListener('contextmenu',event=>{const row=event.target.closest('.page-tab');if(!row||event.target.closest('input,textarea,button'))return;event.preventDefault();event.stopPropagation();if(gesture){clearTimeout(gesture.timer);consumeClick=true;list.setPointerCapture(gesture.id);if(menu.hidden)open(row,gesture.x,gesture.y);return}open(row,event.clientX,event.clientY)});
  list.addEventListener('pointerdown',event=>{
   if(event.pointerType!=='touch'||event.target.closest('input,textarea,button'))return;
@@ -439,8 +453,8 @@
  menu.addEventListener('keydown',event=>{consumeClick=false;if(!['ArrowDown','ArrowUp','Home','End'].includes(event.key))return;event.preventDefault();const items=[...menu.querySelectorAll('button:not(:disabled)')];if(!items.length)return;const current=items.indexOf(document.activeElement),index=event.key==='Home'?0:event.key==='End'?items.length-1:(current+(event.key==='ArrowDown'?1:-1)+items.length)%items.length;items[index].focus()});
  window.addEventListener('keydown',event=>{if(!menu.hidden&&event.key==='Escape'){event.preventDefault();event.stopImmediatePropagation();consumeClick=false;close(true)}},true);
  window.addEventListener('scroll',event=>{if(!menu.contains(event.target)){cancelGesture();close()}},true);window.addEventListener('resize',()=>{cancelGesture();close()});window.addEventListener('blur',()=>{cancelGesture();close()});
- const previousRender=render;render=function(){previousRender();cancelGesture();close()};
- new MutationObserver(()=>{cancelGesture();close()}).observe(document.body,{attributes:true,attributeFilter:['class']});
+ const previousRender=render;render=function(){previousRender();cancelGesture();if(!menu.hidden&&(targetBoard!==data||!data.pages.includes(targetPhase)))close()};
+
 })();
 
 ;
@@ -505,7 +519,7 @@
   list.addEventListener('pointerdown',event=>{
    if(event.pointerType!=='touch'||!event.target.closest(handleSelector)||boardReadOnly||phaseComparisonActive()||(id==='contentOptions'&&editingContentIndex>=0))return;
    clear();const row=event.target.closest(rowSelector);if(!row||event.target.closest('[data-cancel-group-addition]'))return;event.preventDefault();event.stopImmediatePropagation();
-   const transfer=new DataTransfer();if(id==='phaseMasters'&&row.dataset.masterGroupId)transfer.setData('application/x-phase-master-group',row.dataset.masterGroupId);else if(id==='pages'&&row.classList.contains('phase-group-heading'))transfer.setData('application/x-tactica-phase-group',row.dataset.groupId);else transfer.setData(id==='objectList'&&row.classList.contains('object-group-member')?'application/x-tactica-group-member':mime,id==='phaseMasters'?row.dataset.masterId:id==='userPresetManager'?row.dataset.presetId:id==='objectList'?row.dataset.id:String(id==='pages'?[...list.querySelectorAll('.page-tab')].indexOf(row):rows().indexOf(row)));transfer.effectAllowed='move';
+   const transfer=new DataTransfer();if(id==='phaseMasters'&&row.dataset.masterGroupId)transfer.setData('application/x-phase-master-group',row.dataset.masterGroupId);else if(id==='pages'&&row.classList.contains('phase-group-heading'))transfer.setData('application/x-tactica-phase-group',row.dataset.groupId);else transfer.setData(id==='objectList'&&row.classList.contains('object-group-member')?'application/x-tactica-group-member':mime,id==='phaseMasters'?row.dataset.masterId:id==='userPresetManager'?row.dataset.presetId:id==='objectList'?row.dataset.id:String(id==='pages'?[...list.querySelectorAll('.page-tab')].indexOf(row):rows().indexOf(row)));if(id==='objectList'&&row.classList.contains('object-group-row'))transfer.setData('application/x-tactica-object-group','1');transfer.effectAllowed='move';
    gesture={id:event.pointerId,row,menuButton:event.target.closest('.list-drag-grip')?null:event.target.closest('.phone-row-actions,.phase-group-menu-trigger,.object-group-disclosure,.preset-manager-menu'),armed:false,draggable:row.draggable,transfer,x:event.clientX,y:event.clientY,sourceLeft:row.getBoundingClientRect().left,sourceTop:row.getBoundingClientRect().top,sourceHeight:row.getBoundingClientRect().height,moved:false,target:null,board:data,phase:current()};row.draggable=false;list.setPointerCapture(event.pointerId);
    const next=gesture;next.timer=setTimeout(()=>{
     if(gesture!==next||!row.isConnected||next.board!==data||next.phase!==current()||boardReadOnly||phaseComparisonActive())return;
@@ -516,6 +530,13 @@
    const next=gesture;if(!next||event.pointerId!==next.id)return;
    if(next.board!==data||next.phase!==current()||boardReadOnly||phaseComparisonActive()){clear();return}
    event.preventDefault();if(!next.moved&&Math.hypot(event.clientX-next.x,event.clientY-next.y)<8)return;
+   if(['contentOptions','pages','objectList'].includes(id)&&!next.armed){
+    clearTimeout(next.timer);next.moved=true;consumeClick=true;
+    const scroller=scrollHost();
+    if(scroller)scroller.scrollTop+=(next.lastY??next.y)-event.clientY;
+    next.lastY=event.clientY;
+    return;
+   }
    if(next.menuButton&&!next.armed){consumeClick=true;clear();return}clearTimeout(next.timer);next.moved=true;consumeClick=true;moveGhost(next,event.clientX,event.clientY);next.row.classList.add('dragging');
    next.lastX=event.clientX;next.lastY=event.clientY;updateDragTarget(next,event.clientX,event.clientY);if(!next.scrollFrame)next.scrollFrame=requestAnimationFrame(()=>scrollDrag(next));
   },{passive:false});
@@ -531,7 +552,7 @@
   for(const name of ['resize','blur'])window.addEventListener(name,clear);
  }
  window.bindTouchListReorder=bindTouchListReorder;
- for(const definition of [['objectList','.object-row','.object-index,.object-group-disclosure,.phone-row-actions','application/x-tactica-layer'],['pages','.page-tab,.phase-group-heading','.page-index,.phase-group-range,.phone-row-actions,.phase-group-menu-trigger','application/x-tactica-page'],['contentOptions','.content-options-scroll>.content-option-row','.content-option-index,.phone-row-actions','application/x-tactica-content']])bindTouchListReorder(definition);
+ for(const definition of [['objectList','.object-row','.object-index,.object-group-disclosure,.phone-row-actions','application/x-tactica-layer'],['pages','.page-tab,.phase-group-heading','.page-index,.phase-group-range,.phase-group-menu-trigger,.phone-row-actions','application/x-tactica-page'],['contentOptions','.content-options-scroll>.content-option-row','.content-option-index','application/x-tactica-content']])bindTouchListReorder(definition);
  bindTouchListReorder(['userPresetManager','.preset-manager-row','.preset-manager-leading,.preset-manager-menu','application/x-bolxiv-user-preset-order']);
 })();
 
@@ -846,7 +867,7 @@
    row.oncontextmenu=event=>{if(event.target.closest('input,textarea'))return;event.preventDefault();event.stopPropagation();openGroupMenu(item.id,event.clientX,event.clientY)};
    grip.setAttribute('aria-label',item.name+'全体を並べ替え');
    if(!data.activePhaseGroup&&data.pageGroupIds[data.page]===item.id){const current=document.createElement('span');current.className='phase-group-current';current.textContent=String(data.page+1).padStart(2,'0');current.setAttribute('aria-label','表示中のフェーズ '+(data.page+1));name.append(current)}
-   if(item.id===data.activePhaseGroup){const menuButton=button('…',()=>{const bounds=menuButton.getBoundingClientRect();openGroupMenu(item.id,bounds.left,bounds.bottom)});menuButton.className='phase-group-menu-trigger';menuButton.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>';menuButton.title='グループの操作';menuButton.setAttribute('aria-label',item.name+'の操作メニュー');menuButton.setAttribute('aria-haspopup','menu');menuButton.setAttribute('aria-controls','phaseGroupMenu');menuButton.setAttribute('aria-expanded','false');menuButton.addEventListener('pointerdown',event=>event.stopPropagation());row.insertBefore(menuButton,ungroup)}
+   {const menuButton=button('…',()=>{const bounds=menuButton.getBoundingClientRect();openGroupMenu(item.id,bounds.left,bounds.bottom)});menuButton.className='phase-group-menu-trigger';menuButton.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>';menuButton.title='グループの操作';menuButton.setAttribute('aria-label',item.name+'の操作メニュー');menuButton.setAttribute('aria-haspopup','menu');menuButton.setAttribute('aria-controls','phaseGroupMenu');menuButton.setAttribute('aria-expanded','false');menuButton.addEventListener('pointerdown',event=>event.stopPropagation());row.insertBefore(menuButton,ungroup)}
    ungroup.disabled=boardReadOnly||phaseComparisonActive();ungroup.addEventListener('pointerdown',event=>event.stopPropagation());
    row.onclick=event=>{if(event.target.closest('button'))return;showGroup(item.id,true)};
    row.classList.toggle('group-expanded',!item.collapsed&&count>0);
@@ -922,14 +943,14 @@
 (()=>{
  const trigger=document.getElementById('copyPage'),directCopy=trigger.onclick;
  const caret=document.createElement('span');caret.className='phase-copy-caret';caret.textContent='▾';caret.setAttribute('aria-hidden','true');trigger.append(caret);
- trigger.title='フェーズのコピー';trigger.setAttribute('aria-label','フェーズのコピー');trigger.setAttribute('aria-haspopup','menu');trigger.setAttribute('aria-expanded','false');trigger.setAttribute('aria-controls','phaseCopyMenu');
- const menu=document.createElement('div');menu.id='phaseCopyMenu';menu.className='object-context-menu phase-copy-menu';menu.hidden=true;menu.setAttribute('role','menu');menu.setAttribute('aria-label','フェーズのコピー');document.body.append(menu);
+ trigger.title='フェーズの複製';trigger.setAttribute('aria-label','フェーズの複製');trigger.setAttribute('aria-haspopup','menu');trigger.setAttribute('aria-expanded','false');trigger.setAttribute('aria-controls','phaseCopyMenu');
+ const menu=document.createElement('div');menu.id='phaseCopyMenu';menu.className='object-context-menu phase-copy-menu';menu.hidden=true;menu.setAttribute('role','menu');menu.setAttribute('aria-label','フェーズの複製');document.body.append(menu);
  let owner=null,index=null,selectedGroup=null;
  function close(focus=false){menu.hidden=true;trigger.setAttribute('aria-expanded','false');if(focus)trigger.focus({preventScroll:true})}
  function action(label,callback){menu.append(createMenuAction({label,onInvoke(){close();if(boardReadOnly||phaseComparisonActive()||trigger.disabled||data!==owner||data.page!==index||(data.activePhaseGroup||null)!==selectedGroup)return;callback()}}))}
- action('このコンテンツにコピー',()=>directCopy.call(trigger));
- action('別のコンテンツへコピー ▸',()=>document.dispatchEvent(new CustomEvent('open-phase-copy-targets',{detail:{index,anchor:trigger,groupId:selectedGroup}})));
- trigger.onclick=()=>{if(!menu.hidden){close();return}if(trigger.disabled||boardReadOnly||phaseComparisonActive())return;closeHelpMenu();closeJsonExportMenu();closeJsonImportMenu();document.getElementById('phaseContentCopyMenu').hidden=true;owner=data;index=data.page;selectedGroup=data.activePhaseGroup||null;menu.firstElementChild.hidden=!!selectedGroup;menu.setAttribute('aria-label',selectedGroup?'フェーズグループのコピー':'フェーズのコピー');addPhoneMenuClose(menu,()=>close(true));menu.hidden=false;trigger.setAttribute('aria-expanded','true');const rect=trigger.getBoundingClientRect();menu.style.left=Math.max(8,Math.min(rect.left,innerWidth-menu.offsetWidth-8))+'px';menu.style.top=Math.max(8,rect.bottom+4+menu.offsetHeight<=innerHeight?rect.bottom+4:rect.top-menu.offsetHeight-4)+'px'};
+ action('このコンテンツに複製',()=>directCopy.call(trigger));
+ action('別のコンテンツへ複製 ▸',()=>document.dispatchEvent(new CustomEvent('open-phase-copy-targets',{detail:{index,anchor:trigger,groupId:selectedGroup}})));
+ trigger.onclick=()=>{if(!menu.hidden){close();return}if(trigger.disabled||boardReadOnly||phaseComparisonActive())return;closeHelpMenu();closeJsonExportMenu();closeJsonImportMenu();document.getElementById('phaseContentCopyMenu').hidden=true;owner=data;index=data.page;selectedGroup=data.activePhaseGroup||null;menu.firstElementChild.hidden=!!selectedGroup;menu.setAttribute('aria-label',selectedGroup?'フェーズグループの複製':'フェーズの複製');addPhoneMenuClose(menu,()=>close(true));menu.hidden=false;trigger.setAttribute('aria-expanded','true');const rect=trigger.getBoundingClientRect();menu.style.left=Math.max(8,Math.min(rect.left,innerWidth-menu.offsetWidth-8))+'px';menu.style.top=Math.max(8,rect.bottom+4+menu.offsetHeight<=innerHeight?rect.bottom+4:rect.top-menu.offsetHeight-4)+'px'};
  trigger.addEventListener('keydown',event=>{if(event.key==='ArrowDown'){event.preventDefault();event.stopImmediatePropagation();if(menu.hidden)trigger.click();menu.querySelector('button:not([hidden])')?.focus()}});
  menu.addEventListener('keydown',event=>{if(event.key==='Escape'){event.preventDefault();close(true);return}if(!['ArrowUp','ArrowDown','Home','End'].includes(event.key))return;event.preventDefault();const buttons=[...menu.querySelectorAll('button:not([hidden])')],at=buttons.indexOf(document.activeElement);buttons[event.key==='Home'?0:event.key==='End'?buttons.length-1:(at+(event.key==='ArrowDown'?1:buttons.length-1))%buttons.length].focus()});
  document.addEventListener('pointerdown',event=>{if(!menu.contains(event.target)&&!trigger.contains(event.target))close()},true);
@@ -941,6 +962,7 @@
 // ===== js/mobile/phone-row-actions.js =====
 (()=>{
  for(const type of ['contextmenu','dragstart'])window.addEventListener(type,event=>{
+  if(type==='contextmenu'&&event.pointerType==='mouse'&&event.target.closest('#pages .page-tab'))return;
   if(!matchMedia('(max-width:850px)').matches||event.target.closest('input,textarea,[contenteditable="true"]')||!event.target.closest('#pages .page-tab,#pages .phase-group-heading,#objectList .object-row,#contentOptions .content-option-row:not(.content-option-add-row),#userPresetManager .preset-manager-row'))return;
   event.preventDefault();event.stopImmediatePropagation();
  },true);
@@ -951,8 +973,8 @@
    for(const row of host.querySelectorAll(selector)){
     let button=row.querySelector('.phone-row-actions');
     if(!button){button=document.createElement('button');button.type='button';button.className='phone-row-actions';button.innerHTML=icon;button.setAttribute('aria-label','操作メニュー');button.setAttribute('aria-haspopup','menu');button.setAttribute('aria-controls',id==='objectList'?'objectContextMenu':id==='pages'?'phaseItemMenu':'contentItemMenu');button.setAttribute('aria-expanded','false');button.addEventListener('pointerdown',event=>event.stopPropagation());button.onclick=event=>{event.preventDefault();event.stopPropagation();const rect=button.getBoundingClientRect();if(id==='objectList'){const objectId=row.dataset.id;if(row.classList.contains('object-group-member')){if(!individualGroupSelectionActive()||!selectedIds.includes(objectId))selectIndividualGroupMember(objectId)}else if(!selectedIds.includes(objectId)){selected=objectId;selectedIds=[objectId];renderSelectionOnly()}closeColorPopovers();openObjectContextMenu(objectId,rect.left,rect.bottom,row.querySelector('.phone-row-actions'))}else host.dispatchEvent(new CustomEvent('open-row-actions',{detail:{row,x:rect.left,y:rect.bottom}}))};row.append(button)}
-    const hidden=id==='pages'?!row.classList.contains('active')||row.classList.contains('renaming'):id==='objectList'?!row.classList.contains('selected'):!!row.querySelector('input');
-    if(id==='objectList')button.disabled=boardReadOnly||phaseComparisonActive();if(button.hidden!==hidden)button.hidden=hidden;
+    const hidden=id==='pages'?row.classList.contains('renaming'):id==='objectList'?!row.classList.contains('selected'):!!row.querySelector('input');
+    if(id==='objectList')button.disabled=boardReadOnly||phaseComparisonActive();if(id==='pages')button.disabled=selectedPhaseIndexes.length>0&&!row.querySelector('.phase-select-check')?.checked;if(button.hidden!==hidden)button.hidden=hidden;
    }
   }
  }
@@ -966,10 +988,28 @@
  const layout=document.querySelector('.layout'),heading=document.getElementById('toggleBattlePages'),actions=document.querySelector('.phase-heading-actions'),exit=document.getElementById('exitPhaseComparison');
  const count=document.createElement('span');count.className='phase-mode-count';count.setAttribute('aria-live','polite');
  actions.append(exit);exit.title='複数選択モードを解除';exit.setAttribute('aria-label',exit.title);
- function sync(){const selectedCount=selectedPhaseIndexes.length,active=selectedCount>0;layout.classList.toggle('phase-multi-select-mode',active);heading.textContent=active?'フェーズ複数選択モード':'フェーズリスト';if(active){count.textContent=selectedCount+'件';heading.append(count);for(const id of ['phaseItemMenu','phaseGroupMenu','phaseContentCopyMenu']){const menu=document.getElementById(id);if(menu)menu.hidden=true}}exit.hidden=!active}
+ let previousBoard=null,previousSelection='',previousMode='';
+ function sync(){
+  const selectedCount=selectedPhaseIndexes.length,active=selectedCount>0,signature=selectedPhaseIndexes.join(',');
+  for(const row of document.querySelectorAll('#pages .page-tab')){
+   const action=row.querySelector('.phone-row-actions');
+   if(action)action.disabled=active&&!row.querySelector('.phase-select-check')?.checked;
+  }
+  const mode=[boardReadOnly,window.Bolxiv.phaseMasters.active,!!window.Bolxiv.pngPreview?.active].join(',');
+  if(data!==previousBoard||signature!==previousSelection||mode!==previousMode){
+   for(const id of ['phaseItemMenu','phaseGroupMenu','phaseContentCopyMenu']){
+    const menu=document.getElementById(id);if(menu)menu.hidden=true;
+   }
+   previousBoard=data;previousSelection=signature;previousMode=mode;
+  }
+  layout.classList.toggle('phase-multi-select-mode',active);
+  heading.textContent=active?'フェーズ複数選択モード':'フェーズリスト';
+  if(active){count.textContent=selectedCount+'件';heading.append(count)}
+  exit.hidden=!active;
+ }
  const before=render;render=function(){before();sync()};
- window.addEventListener('contextmenu',event=>{if(selectedPhaseIndexes.length&&event.target.closest('#pages')){event.preventDefault();event.stopImmediatePropagation()}},true);
- window.addEventListener('click',event=>{if(selectedPhaseIndexes.length&&event.target.closest('#pages .phone-row-actions,#pages .phase-group-menu-trigger')){event.preventDefault();event.stopImmediatePropagation()}},true);
+ window.addEventListener('contextmenu',event=>{if(selectedPhaseIndexes.length&&event.target.closest('#pages')&&!event.target.closest('.page-tab:has(.phase-select-check:checked)')){event.preventDefault();event.stopImmediatePropagation()}},true);
+ window.addEventListener('click',event=>{if(selectedPhaseIndexes.length&&event.target.closest('#pages .phone-row-actions,#pages .phase-group-menu-trigger')&&!event.target.closest('.page-tab:has(.phase-select-check:checked)')){event.preventDefault();event.stopImmediatePropagation()}},true);
  sync();
 })();
 

@@ -51,10 +51,12 @@
 /* ===== css/board-zoom-menu.css ===== */
 .board-zoom-menu { position:fixed; z-index:20050; width:112px; padding:4px; background:#fff; border:1px solid #999; border-radius:6px; box-shadow:0 5px 14px #0003; overflow-y:auto; }
 .board-zoom-menu[hidden] { display:none; }
+#boardGridMenu { width:max-content; min-width:112px; }
+#boardGridMenu button { white-space:nowrap; }
 .board-zoom-menu button { display:flex; align-items:center; width:100%; min-height:36px; padding:6px 10px; border:0; border-radius:4px; background:#fff; color:#111; font-size:14px; text-align:left; cursor:pointer; }
 .board-zoom-menu button::before { content:''; width:22px; flex:none; }
 .board-zoom-menu button[aria-checked="true"]::before { content:'✓'; }
-.board-zoom-menu button:is(:hover:not(:where(.phone-touch-mode *)),:focus-visible) { background:var(--blue); color:#fff; outline:none; }
+:is(#boardZoomMenu,#guideZoomMenu,#boardGridMenu) button:is(:hover:not(:where(.phone-touch-mode *)),:focus-visible) { background:var(--blue)!important; color:#fff!important; -webkit-text-fill-color:#fff!important; outline:none; filter:none; }
 
 /* ===== css/mode-status-layout.css ===== */
 @media(min-width:851px){
@@ -274,7 +276,7 @@
  .app>.layout #contentOptions .content-option-row,
  .app>.layout #contentOptions .content-option-row:hover:not(:where(.phone-touch-mode *)) *,
  .app>.layout #objectList .object-row:hover:not(:where(.phone-touch-mode *)),
- .app>.layout #objectList .object-row:hover:not(:where(.phone-touch-mode *)) *{
+ .app>.layout #objectList .object-row:hover:not(:where(.phone-touch-mode *)) *, .app>.layout #objectList .object-row:is(.drop-before,.drop-after) :is(.object-name,.object-name *){
   color:#17212c!important;
   -webkit-text-fill-color:#17212c!important;
  }
@@ -973,8 +975,9 @@
 @media(max-width:850px){
   :is(#pages,#phaseMasters) .page-tab-name,#pages .page-index{-webkit-user-select:none!important;user-select:none!important;-webkit-touch-callout:none}
   #pages .page-index,#objectList .object-index,#contentOptions .content-option-index{touch-action:none!important;cursor:grab;min-width:24px;align-self:stretch;display:flex;align-items:center;justify-content:center;-webkit-user-select:none!important;user-select:none!important;-webkit-touch-callout:none}
-  :is(#pages,#phaseMasters) .page-tab :is(.page-tab-edit,.page-tab-x),#objectList .object-row :is(.object-delete,.object-toggle),#contentOptions .content-options-scroll>.content-option-row .content-row-action{touch-action:none!important;-webkit-user-select:none!important;user-select:none!important;-webkit-touch-callout:none}
-  :is(#pages,#phaseMasters) .page-tab input[type="checkbox"],#objectList .object-row input[type="checkbox"]{touch-action:none!important}
+  #phaseMasters .page-tab :is(.page-tab-edit,.page-tab-x),#contentOptions .content-options-scroll>.content-option-row .content-row-action{touch-action:none!important;-webkit-user-select:none!important;user-select:none!important;-webkit-touch-callout:none}
+  #pages .page-tab :is(.page-tab-edit,.page-tab-x,input[type="checkbox"]),#objectList .object-row :is(.object-delete,.object-toggle,input[type="checkbox"]){touch-action:pan-y!important;-webkit-user-select:none!important;user-select:none!important;-webkit-touch-callout:none}
+  #phaseMasters .page-tab input[type="checkbox"]{touch-action:none!important}
   :is(#pages,#phaseMasters) .page-tab.dragging,#objectList .object-row.dragging,#contentOptions .content-option-row.dragging{opacity:.55}
  }
 
@@ -984,10 +987,19 @@
  @media(pointer:coarse){.content-item-menu>button{min-height:44px}}
 
 /* ===== css/field-image-appearance.css ===== */
-.stage.field-image:not(.field-image4)::before{background-image:linear-gradient(#71809055 1px,transparent 1px),linear-gradient(90deg,#71809055 1px,transparent 1px)!important;background-size:32px 32px!important;z-index:1}
+.stage.field-image:not(.field-image4)::before{background-image:linear-gradient(#71809055 1px,transparent 1px),linear-gradient(90deg,#71809055 1px,transparent 1px)!important;background-size:var(--grid-step,32px) var(--grid-step,32px)!important;z-index:1}
  .stage.grid-hidden.field-image:not(.field-image4)::before{background-image:none!important}
  .field-image-visual{position:absolute;left:50%;top:50%;width:var(--field-width);height:var(--field-height);max-width:none;transform:translate(-50%,-50%);pointer-events:none;z-index:0}
  .image4-cell>.field-image-tile{position:absolute;left:50%;top:50%;width:var(--image4-tile-width);height:var(--image4-tile-height);transform:translate(-50%,-50%)}
+ .field-image-tile-grid{
+  position:absolute;
+  inset:0;
+  background-image:linear-gradient(#71809055 1px,transparent 1px),linear-gradient(90deg,#71809055 1px,transparent 1px);
+  background-size:var(--grid-step,32px) var(--grid-step,32px);
+  background-position:calc(50% + var(--grid-step,32px)/2) calc(50% + var(--grid-step,32px)/2);
+  pointer-events:none;
+ }
+ .stage.grid-hidden .field-image-tile-grid{display:none}
  .field-image-visual>img,.field-image-tile>img{display:block;width:100%;height:100%;max-width:none}
  .field-image-tint{position:absolute;inset:0;background:var(--field-image-tint-color,#000000);opacity:var(--field-image-tint-strength,0);pointer-events:none}
  .stage.field-hidden>.field-image-visual{display:none}
@@ -1020,7 +1032,7 @@
  @media(max-width:850px){.help-contents ul{grid-template-columns:minmax(0,1fr)}.help-contents a{padding:7px 0}.operation-guide .help-back-to-contents{min-height:32px}}
 
 /* ===== css/phase-groups.css ===== */
-.phase-group-heading.drag-over{outline:2px solid #416da9;outline-offset:-2px}.phase-group-heading{display:flex;align-items:center;box-sizing:border-box;width:100%;height:34px;min-height:34px;flex-shrink:0;gap:9px;padding:0 5px 0 4px;border:1px solid transparent;border-radius:6px;background:#f0f4fa;color:#33445f;margin:2px 0;font-size:14px;font-weight:400}
+.phase-group-heading.drag-over,#objectList>.object-group-row.drag-over:not(.drop-before,.drop-after){outline:2px solid #416da9;outline-offset:-2px}.phase-group-heading{display:flex;align-items:center;box-sizing:border-box;width:100%;height:34px;min-height:34px;flex-shrink:0;gap:9px;padding:0 5px 0 4px;border:1px solid transparent;border-radius:6px;background:#f0f4fa;color:#33445f;margin:2px 0;font-size:14px;font-weight:400}
 .phase-group-heading button{box-sizing:border-box;border:0;background:transparent;color:inherit;height:32px;min-height:0;padding:0 3px;cursor:pointer;font:inherit}
 .phase-group-heading .phase-group-name{display:flex;align-items:center;flex:1;min-width:0;text-align:left;white-space:nowrap;overflow:hidden;font-weight:400}
 .phase-group-range{flex:0 0 var(--group-name-offset,38px);font:12px 'DM Mono';color:#111;font-variant-numeric:tabular-nums}
@@ -1034,7 +1046,7 @@
 .phase-group-heading .phase-group-range{cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
 .phase-group-heading>.phase-group-number-space{flex:0 0 16px;width:16px;min-width:16px;margin-right:-6px}
 .phase-group-heading>.phase-group-toggle{flex:0 0 26px;width:26px;min-width:26px;padding:0;text-align:center}
-@media(max-width:850px){.phase-group-heading>.phase-group-toggle{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}}
+@media(max-width:850px){.phase-group-heading>.phase-group-toggle{touch-action:pan-y;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}}
 .phase-group-heading>.phase-select-check{visibility:hidden;margin-right:-4px}
 .phase-group-heading>.phase-group-name{padding:0}
 .app .layout :is(#pages,#phaseMasters) .phase-group-heading>.phase-group-menu-trigger{display:grid;place-items:center;flex:0 0 26px;width:26px;padding:0;border-radius:4px;background:transparent!important}
@@ -1129,6 +1141,8 @@
 .app .layout #phaseComparisonStatus{display:none!important}
 .app .layout.phase-multi-select-mode .page-tab-actions{display:none!important}
 .app .layout.phase-multi-select-mode :is(#pages,#phaseMasters) :is(.phone-row-actions,.phase-group-menu-trigger){display:none!important}
+
+
 .phase-multi-select-mode #toggleBattlePages{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .board-read-only .layout.phase-multi-select-mode .phase-heading-actions{display:flex!important}
 .row-action-menu-title{padding:8px 10px;border-bottom:1px solid #d0d4da;color:#60718c;font-size:12px;max-width:260px;overflow-wrap:anywhere}
@@ -1141,6 +1155,8 @@
  body .app .layout :is(:is(#pages,#phaseMasters),#objectList,#contentOptions) :is(.phone-row-actions,.phase-group-menu-trigger),body .app .layout :is(:is(#pages,#phaseMasters),#objectList,#contentOptions) :is(.phone-row-actions,.phase-group-menu-trigger):is(:hover,:focus,:focus-visible,:active,.phone-control-pressed){background:transparent!important;color:#33445f!important;-webkit-text-fill-color:#33445f!important;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;filter:none!important}
  .app .layout :is(#pages,#phaseMasters,#objectList,#contentOptions) .phone-row-actions{display:grid!important;place-items:center;flex:0 0 28px;width:28px;height:28px;padding:4px;border:0!important;border-radius:4px;background:transparent!important;color:#33445f!important}
  .app .layout .phone-row-actions[hidden]{display:none!important}
+ .app .layout #pages .page-tab>.phone-row-actions:disabled{touch-action:pan-y}
+ .app .layout.phase-multi-select-mode #pages .page-tab:not(.renaming)>.phone-row-actions:not([hidden]){display:grid!important}
  .phone-row-actions svg{display:block;width:18px;height:18px;pointer-events:none}
  .app .layout :is(#pages,#phaseMasters) .page-tab:not(.renaming) :is(.page-tab-edit,.page-tab-x),.app .layout #objectList .object-row .object-delete,.app .layout #contentOptions .content-option-row:not(:has(input))>.content-row-action{display:none!important}
  .app .layout :is(#pages,#phaseMasters) .page-tab.renaming>.phone-row-actions,.app .layout :is(#pages,#phaseMasters) .page-tab.renaming>.page-tab-edit{display:none!important}
@@ -1316,7 +1332,7 @@ body .app .layout #contentSelect::after{
 .app .layout :is(#inspector,#layoutPropertiesPanel) :is(.coordinate-fields,.property-color-fill-row,.layout-background-colors){row-gap:var(--property-related-gap)!important;column-gap:8px!important}
 .app .layout #inspector>.inspector-section-start,
 .app .layout #inspector>.object-common-properties>.inspector-section-start,
-.app .layout #layoutPropertiesPanel>.layout-background-colors{border-top:1px solid var(--property-separator-color)!important;padding-top:var(--property-separator-space)!important;margin-top:0!important}
+.app .layout #layoutPropertiesPanel>.layout-background-colors,.app .layout #layoutPropertiesPanel>.image4-image-controls:not([hidden])+.field:has(#fieldWidthRange){border-top:1px solid var(--property-separator-color)!important;padding-top:var(--property-separator-space)!important;margin-top:0!important}
 .app .layout #inspector :is(.field:has(#heightInput),.field:has(#donutInnerInput)){margin-top:calc(var(--property-related-gap) - var(--property-field-gap))!important}
 /* Balance long phone phase and content names instead of squeezing context away. */
 @media(max-width:850px){
@@ -1345,14 +1361,17 @@ body .app .layout #contentSelect::after{
 .object-group-control.object-group-context{border-width:2px;pointer-events:none}
 .obj.group-member-selected.selected-many{outline-width:1px;outline-color:#ffc477}
 .obj.group-member-selected.selected-many::after{border-width:1px;border-color:#ffc477}
+.phone-content-preview .object-controls{display:none}
+.phone-content-preview .obj:is(.selected,.selected-many){outline:none!important}
+.phone-content-preview .obj.selected-many::after{content:none!important}
 .group-member-selection.targetcircle-multi-control>.targetcircle-selection-frame{border:1px solid #ffc477}
 .controlbox.locked-selection-control.group-member-selection{border-width:1px;border-color:#ffc477}
 .controlbox.group-member-selection :is(.stack-control-frame,.targetcircle-control-frame,.aoe-control-frame){border-width:1px;border-color:#ffc477}
 #objectList>.object-group-row{display:grid!important;align-items:center}
 .app .layout #objectList>.object-row.object-group-row{position:relative;overflow:visible!important}
 #objectList>.object-group-expanded{border-radius:6px 6px 0 0}
-#objectList>.object-group-row::before{content:'';position:absolute;left:-1px;right:-1px;top:-1px;height:calc(100% + 2px);box-sizing:border-box;border:1px solid #d0d4da;border-radius:6px;pointer-events:none;z-index:2}
-#objectList>.object-group-expanded::before{height:var(--object-group-frame-height,100%)}
+#objectList>.object-group-row:not(.drop-before)::before{content:'';position:absolute;left:-1px;right:-1px;top:-1px;height:calc(100% + 2px);box-sizing:border-box;border:1px solid #d0d4da;border-radius:6px;pointer-events:none;z-index:2}
+#objectList>.object-group-expanded:not(.drop-before)::before{height:var(--object-group-frame-height,100%)}
 .app>.layout #objectList>.object-row.object-group-row{background:#f0f4fa!important}
 .app>.layout #objectList>.object-row.object-group-row:hover:not(:where(.phone-touch-mode *)){background:#e1e9f4!important}
 .app>.layout #objectList>.object-row.object-group-row.selected{background:#eaf3ff!important;border-radius:6px}
@@ -1360,14 +1379,15 @@ body .app .layout #contentSelect::after{
 .app>.layout #objectList>.object-group-row>:is(.object-name,.object-group-disclosure){background:transparent!important}
 #objectList>.object-group-expanded::after{content:'';position:absolute;left:2px;right:0;bottom:-1px;border-bottom:1px solid #d0d4da;pointer-events:none;z-index:2}
 .app>.layout #objectList>.object-row.object-group-row.selected.object-group-expanded{border-bottom-left-radius:6px;border-bottom-right-radius:0}
-#objectList>.object-group-row.selected::after{content:'';position:absolute;inset:-1px;box-sizing:border-box;border:1px solid transparent;border-left-color:var(--blue);box-shadow:inset 2px 0 0 var(--blue);border-radius:6px;pointer-events:none;z-index:3}
-#objectList>.object-group-row.selected.object-group-expanded::after{border-radius:6px 6px 0 6px}
+#objectList>.object-group-row.selected:not(.drop-after)::after{content:'';position:absolute;inset:-1px;box-sizing:border-box;border:1px solid transparent;border-left-color:var(--blue);box-shadow:inset 2px 0 0 var(--blue);border-radius:6px;pointer-events:none;z-index:3}
+#objectList>.object-group-row.selected.object-group-expanded:not(.drop-after)::after{border-radius:6px 6px 0 6px}
 #objectList>.object-group-expanded::before{background:linear-gradient(#d0d4da,#d0d4da) left calc(var(--object-group-header-height,34px) - 1px)/100% 1px no-repeat;background-origin:border-box}
 #objectList>.object-group-row>.object-name{grid-column:4;grid-row:1;min-width:0;padding-left:24px!important}
 .app .layout #objectList>.object-row.object-group-row>.object-name{padding-left:24px!important}
 #objectList .object-group-symbol{grid-column:4;grid-row:1;justify-self:start;align-self:start;margin-left:4px;transform:translateY(0);align-self:center;width:16px;height:14px;color:#293c66;pointer-events:none;z-index:1}
 #objectList .object-group-symbol svg{display:block;width:16px;height:14px}
 #objectList .object-group-disclosure{grid-column:1;grid-row:1;justify-self:stretch;align-self:stretch;z-index:4;margin:0;width:100%;min-width:0;height:100%;min-height:24px;line-height:normal;padding:0;background:transparent;border:0;color:#293c66;font-size:18px;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;cursor:grab}
+.app>.layout #objectList>.object-group-row.drag-over :is(.object-name,.object-name *){color:#17212c!important;-webkit-text-fill-color:#17212c!important}
 #objectList .object-group-member[hidden]{display:none!important}
 #objectList>.object-group-member:not([hidden]){display:grid!important;align-items:center;margin-left:0;cursor:default;overflow:visible!important}
 #objectList>.object-group-member::before{content:'';grid-column:4;grid-row:1;justify-self:start;margin-left:12px;pointer-events:none;border-color:#c1c7ce;z-index:1}
@@ -1530,8 +1550,8 @@ body .app .layout #objectList>.object-group-row>.object-delete{grid-column:5;gri
 
 /* Popup-open feedback overrides per-button themes without affecting disclosures. */
 @layer menu-open-state{
- button[aria-haspopup="menu"][aria-expanded="true"].menu-open-trigger:not(:disabled){transition:none!important;background:var(--blue)!important;border-color:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important;filter:none!important}
- button[aria-haspopup="menu"][aria-expanded="true"].menu-open-trigger:not(:disabled) *{color:#fff!important;-webkit-text-fill-color:#fff!important}
+ button[aria-haspopup="menu"][aria-expanded="true"].menu-open-trigger:not(:disabled,[aria-controls="phaseItemMenu"]){transition:none!important;background:var(--blue)!important;border-color:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important;filter:none!important}
+ button[aria-haspopup="menu"][aria-expanded="true"].menu-open-trigger:not(:disabled,[aria-controls="phaseItemMenu"]) *{color:#fff!important;-webkit-text-fill-color:#fff!important}
 }
 
 @media(min-width:851px){.app>.top #editModeToggle{flex-basis:var(--mode-button-width,180px);width:var(--mode-button-width,180px);min-width:var(--mode-button-width,180px);max-width:var(--mode-button-width,180px);padding-left:8px;padding-right:4px;gap:4px}.app>.top #editModeToggle .mode-label{white-space:nowrap}}
@@ -1677,6 +1697,7 @@ body .app .layout #objectList>.object-group-row>.object-delete{grid-column:5;gri
 .left>#userPresetManager .preset-manager-heading h2{white-space:nowrap}
 
 .content-options>.content-options-scroll{box-sizing:border-box;padding-block:4px;scroll-padding-block:4px}
+@media(max-width:850px){#contentOptions{max-height:var(--content-options-viewport-height,calc(100dvh - 190px))}.content-options>.content-options-scroll{max-height:min(355px,45dvh);overscroll-behavior-y:contain;touch-action:pan-y} .content-options-scroll .phone-row-actions{touch-action:pan-y}}
 
 #contextGroupMenuToggle[aria-expanded="true"]{background:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
 
@@ -2245,15 +2266,15 @@ body.phase-master-editing .app .layout :is(.content-heading-row,.right .board-ti
 
 /* Phase list/properties use the same phone switching header as object panels. */
 @media(max-width:850px){
- body .app .layout #contentPanel.phone-phase-list-tabbed>.phone-list-property-inactive{display:none!important}
+ body .app .layout #contentPanel.phone-phase-list-tabbed>:is(.page-controls,#phaseMasterAssignment,#phaseMasterGroupProperties).phone-list-property-inactive{display:none!important}
  body .app .layout #contentPanel.phone-phase-list-tabbed>#phasePropertyResize{display:none!important}
  body .app .layout #contentPanel.phone-phase-list-tabbed>.phone-list-property-group{flex:1 1 0!important;min-height:0!important;max-height:none!important}
  body .app .layout #contentPanel.phone-phase-list-tabbed>.phone-list-property-group>.accordion-toggle,body .app .layout #contentPanel.phone-phase-list-tabbed>.page-controls>.phase-heading-row{display:none!important}
  .phone-phase-list-tabbed>.phone-list-property-group>.phone-object-tabs{border-bottom:1px solid #d0d4da;box-sizing:border-box}
  .phone-phase-list-tabbed .phone-object-tabs-title{flex:0 1 auto}
- .phone-phase-list-tabbed .phone-object-tabs .phase-heading-actions{position:static;margin-left:auto;display:flex}
- .phone-phase-list-tabbed .phone-object-tabs>.phone-object-collapse{margin-left:auto}
- .phone-phase-list-tabbed .phone-object-tabs:has(.phase-heading-actions)>.phone-object-collapse{margin-left:0}
+ .phone-phase-list-tabbed .phone-object-tabs>.phone-list-property-change{margin-right:auto}
+ .phone-phase-list-tabbed .phone-object-tabs>.phase-heading-actions{position:static;display:flex}
+ .app .phone-phase-list-tabbed .phone-object-tabs>.phone-object-collapse{margin-left:0!important}
 }
 
 /* Frame sizing belongs to the panel, not each screen's collapse handler. */
@@ -2343,3 +2364,41 @@ body.phase-master-editing .app .layout :is(.content-heading-row,.right .board-ti
  .app .layout .battle .content-group,
  .app .layout .battle .content-group>.content-heading-row{border-radius:0!important}
 }
+
+/* Field image picker follows the canvas quadrant order. */
+.image4-image-actions{display:flex;align-items:center;gap:var(--property-related-gap);margin-top:6px}
+.image4-action-separator{width:1px;align-self:stretch;margin-block:4px;background:var(--property-button-border)}
+.image4-image-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));margin-top:6px}
+.image4-image-choices{
+ gap:1px;
+ border:1px solid var(--property-button-border);
+ background:var(--property-button-border);
+}
+.image4-quadrant{
+ box-sizing:border-box;
+ min-height:var(--property-input-height);
+ min-width:0;
+ padding:2px 4px;
+ border:0;
+ border-radius:0;
+ background:var(--property-input-bg)!important;
+ color:var(--property-button-fg);
+ font:inherit;
+ cursor:pointer;
+}
+#layoutPropertiesPanel .image4-quadrant[aria-pressed="true"]{background:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+.image4-quadrant:not([aria-pressed="true"]):enabled:hover:not(:where(.phone-touch-mode *)){background:var(--property-button-bg)!important}
+.image4-quadrant:focus-visible{outline:2px solid var(--blue);outline-offset:-2px}
+.image4-quadrant[aria-pressed="true"]:focus-visible{outline-color:#fff}
+.image4-image-actions .btn{
+ display:grid;
+ place-items:center;
+ width:var(--property-input-height);
+ padding:0;
+ box-sizing:border-box;
+ height:var(--property-input-height);
+ border-radius:var(--property-input-radius);
+ font:inherit;
+}
+
+.image4-image-actions svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}

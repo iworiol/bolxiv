@@ -19,17 +19,60 @@
  groupToggle.onclick=openGroupMenu;groupToggle.onkeydown=event=>{if(event.key==='ArrowRight'){event.preventDefault();if(groupMenu.hidden)openGroupMenu();groupMenu.querySelector('button:not(:disabled)')?.focus()}};
  groupMenu.addEventListener('keydown',event=>{if(event.key==='Escape'||event.key==='ArrowLeft'){event.preventDefault();event.stopPropagation();closeGroupMenu();groupToggle.focus()}});
  const groupStart=document.createElement('div');groupStart.className='context-separator';groupStart.setAttribute('role','separator');menu.insertBefore(groupStart,groupToggle);
- for(const [id,label] of [['contextGroup','グループ化'],['contextUngroup','グループ解除'],['contextRenameObjectGroup','グループ名を変更']]){
+ for(const [id,label] of [['contextGroup','グループ化'],['contextUngroup','グループ解除'],['contextDetachGroupMembers','グループから外す'],['contextRenameObjectGroup','グループ名を変更']]){
   const button=createMenuAction({label});button.id=id;
   groupMenu.append(button);
   button.onclick=()=>{
+   if(button.disabled)return;
+   if(id==='contextDetachGroupMembers'){const ids=JSON.parse(menu.dataset.ids||'[]');closeObjectContextMenu();detachObjectGroupMembers(ids);return}
    const ids=expandObjectGroups(JSON.parse(menu.dataset.ids||'[]')),items=current().filter(o=>ids.includes(o.id));closeObjectContextMenu();
    if(id==='contextRenameObjectGroup'){if(selectedObjectGroup().length)beginObjectGroupRename(items[0].objectGroupId);return}
    changeObjectGrouping(ids,id==='contextUngroup');
   };
  }
  const groupEnd=document.createElement('div');groupEnd.className='context-separator';groupEnd.setAttribute('role','separator');menu.insertBefore(groupEnd,document.getElementById('contextCopy'));
- const register=createMenuAction({label:'プリセットに登録'});register.id='contextRegisterPreset';menu.insertBefore(register,document.getElementById('contextCopy'));register.onclick=()=>{if(register.disabled)return;selectedIds=JSON.parse(menu.dataset.ids||'[]').filter(id=>current().some(item=>item.id===id));selected=selectedIds.at(-1)||null;closeObjectContextMenu();userPresetLibrary.registerSelection()};
+ const presetToggle=createMenuAction({label:'プリセット ▸'});
+ presetToggle.id='contextPresetToggle';
+ presetToggle.setAttribute('aria-haspopup','menu');
+ presetToggle.setAttribute('aria-controls','contextPresetMenu');
+ presetToggle.setAttribute('aria-expanded','false');
+ menu.insertBefore(presetToggle,document.getElementById('contextCopy'));
+ const presetSeparator=document.createElement('div');
+ presetSeparator.id='contextPresetSeparator';presetSeparator.className='context-separator';
+ presetSeparator.setAttribute('role','separator');
+ presetToggle.after(presetSeparator);
+ const presetMenu=document.createElement('div');
+ presetMenu.id='contextPresetMenu';presetMenu.className='object-context-menu';presetMenu.hidden=true;
+ presetMenu.setAttribute('role','menu');presetMenu.setAttribute('aria-label','プリセット');
+ menu.append(presetMenu);
+ function closePresetMenu(){presetMenu._openedByHover=false;presetMenu.hidden=true;presetToggle.setAttribute('aria-expanded','false')}
+ function openPresetMenu(fromHover=false){
+  if(presetToggle.hidden||presetToggle.disabled)return;
+  if(!presetMenu.hidden){if(fromHover!==true)closePresetMenu();return}
+  closeGroupMenu();
+  const clipboardToggle=document.getElementById('contextClipboardToggle');
+  if(clipboardToggle?.getAttribute('aria-expanded')==='true')clipboardToggle.click();
+  addPhoneMenuClose(presetMenu,()=>{closePresetMenu();presetToggle.focus()});
+  presetMenu.hidden=false;presetToggle.setAttribute('aria-expanded','true');
+  const r=presetToggle.getBoundingClientRect(),width=presetMenu.offsetWidth,height=presetMenu.offsetHeight;
+  presetMenu.style.left=Math.max(4,Math.min(r.right+4+width>innerWidth?r.left-width-4:r.right+4,innerWidth-width-4))+'px';
+  presetMenu.style.top=Math.max(4,Math.min(r.top,innerHeight-height-4))+'px';
+ }
+ bindSubmenuHover(presetToggle,presetMenu,openPresetMenu,closePresetMenu);
+ presetToggle.onclick=openPresetMenu;
+ presetToggle.onkeydown=event=>{if(event.key==='ArrowRight'){event.preventDefault();if(presetMenu.hidden)openPresetMenu();presetMenu.querySelector('button:not(:disabled)')?.focus()}};
+ presetMenu.addEventListener('keydown',event=>{if(['Escape','ArrowLeft'].includes(event.key)){event.preventDefault();event.stopPropagation();closePresetMenu();presetToggle.focus()}});
+ for(const [id,label,asSvg] of [['contextRegisterPreset','オブジェクト群として登録',false],['contextRegisterSvgPreset','SVG画像として登録',true]]){
+  const action=createMenuAction({label});action.id=id;presetMenu.append(action);
+  action.onclick=()=>{
+   if(presetToggle.disabled)return;
+   selectedIds=JSON.parse(menu.dataset.ids||'[]').filter(id=>current().some(item=>item.id===id));selected=selectedIds.at(-1)||null;
+   closeObjectContextMenu();userPresetLibrary.registerSelection(asSvg);
+  };
+ }
+ const beforePresetClose=closeObjectContextMenu;
+ closeObjectContextMenu=function(){closePresetMenu();beforePresetClose()};
+ groupToggle.addEventListener('click',closePresetMenu);
  document.addEventListener('pointermove',e=>{
   if(!['group-scale','group-rotate'].includes(drag?.mode)||drag.pointerId!==e.pointerId)return;e.preventDefault();e.stopImmediatePropagation();
   if(drag.mode==='group-rotate'){
@@ -91,6 +134,35 @@ function createPresetArtworkThumbnail(items){const thumb=document.createElement(
   scene.style.cssText='position:absolute;width:640px;height:640px;transform-origin:0 0;transform:scale('+scale+');left:'+((26-(right-left)*scale)/2-left*scale)+'px;top:'+((26-(bottom-top)*scale)/2-top*scale)+'px;';
   for(const [i,item] of items.entries()){const visual={...item,visible:true};if(visual.type==='icon'){const factor=Math.max(1,8/(scale*Math.min(visual.width||32,visual.height||32)));visual.width=(visual.width||32)*factor;visual.height=(visual.height||32)*factor}const node=createCanvasObjectVisual(visual,i,[]);node.style.pointerEvents='none';for(const img of node.querySelectorAll('img')){img.style.setProperty('width','100%','important');img.style.setProperty('height','100%','important');img.style.setProperty('max-width','none','important');img.style.setProperty('max-height','none','important')}scene.append(node)}thumb.append(scene);return thumb;
  }
+
+function createSvgPresetItem(items){
+ const visible=items.filter(item=>item.visible!==false);
+ if(!visible.length)throw new Error('表示中のオブジェクトを選択してください');
+ const scene=document.createElement('div');
+ scene.className='stage';
+ scene.style.cssText='position:fixed;left:-2000px;top:0;width:640px;height:640px;margin:0;transform:none;border:0;opacity:0;pointer-events:none';
+ document.body.append(scene);
+ try{
+  visible.forEach((item,index)=>scene.append(createCanvasObjectVisual(item,index,[])));
+  const origin=scene.getBoundingClientRect(),bounds=[...scene.children].map(node=>node.getBoundingClientRect());
+  const left=Math.floor(Math.min(...bounds.map(box=>box.left))-origin.left)-8;
+  const top=Math.floor(Math.min(...bounds.map(box=>box.top))-origin.top)-8;
+  const width=Math.ceil(Math.max(...bounds.map(box=>box.right))-origin.left)-left+8;
+  const height=Math.ceil(Math.max(...bounds.map(box=>box.bottom))-origin.top)-top+8;
+  const artwork=document.createElementNS('http://www.w3.org/1999/xhtml','div');
+  artwork.style.cssText='position:relative;width:100%;height:100%';
+  for(const [index,node] of [...scene.children].entries()){
+   const copy=clonePngNode(node),item=visible[index];
+   for(const side of ['inline-start','inline-end','block-start','block-end'])copy.style.removeProperty('inset-'+side);
+   copy.style.left=(item.x*6.4-left)+'px';copy.style.top=(item.y*6.4-top)+'px';
+   copy.style.right='auto';copy.style.bottom='auto';
+   artwork.append(copy);
+  }
+  const markup=new XMLSerializer().serializeToString(artwork);
+  const svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+width+'" height="'+height+'" viewBox="0 0 '+width+' '+height+'"><foreignObject width="100%" height="100%">'+markup+'</foreignObject></svg>';
+  return {type:'icon',svgPreset:true,iconName:'SVGプリセット',src:'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg),x:50,y:50,width,height,rotation:0,opacity:100,additionalOpacityInitialized:true,visible:true};
+ }finally{scene.remove()}
+}
 
 (function setupBuiltinPresets(){
  const button=document.getElementById('builtinFieldMarkers');
@@ -312,10 +384,10 @@ function placeBuiltinFieldMarkers(cx,cy){
  trigger.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 3v4m0 5v9M12 3v10m0 5v3M19 3v4m0 5v9"/><rect x="2.5" y="7" width="5" height="5" rx="1"/><rect x="9.5" y="13" width="5" height="5" rx="1"/><rect x="16.5" y="7" width="5" height="5" rx="1"/></svg>';
  toolbar.insertBefore(trigger,document.getElementById('gridToggle'));
  menu.id='phoneDisplayMenu';menu.className='phone-display-menu';menu.hidden=true;menu.setAttribute('role','menu');menu.setAttribute('aria-label','表示設定');document.body.append(menu);
- const items=[['gridToggle','グリッドを表示'],['fieldToggle','フィールドを表示'],['clipToggle','フィールド外を表示']].map(([id,label])=>{
-  const source=document.getElementById(id),item=document.createElement('button');item.type='button';item.setAttribute('role','menuitemcheckbox');item.innerHTML='<span>'+label+'</span><span class="phone-display-state" aria-hidden="true"></span>';
-  const sync=()=>{const pressed=source.getAttribute('aria-pressed')==='true',checked=id==='clipToggle'?!pressed:pressed;item.setAttribute('aria-checked',String(checked));item.lastElementChild.textContent=checked?'オン':'オフ';item.disabled=source.disabled};
-  item.onclick=()=>{source.click();sync();item.focus({preventScroll:true})};new MutationObserver(sync).observe(source,{attributes:true,attributeFilter:['aria-pressed','disabled']});sync();menu.append(item);return item;
+ const items=[['gridToggle','グリッド線の表示・間隔'],['fieldToggle','フィールドを表示'],['clipToggle','フィールド外を表示']].map(([id,label])=>{
+  const source=document.getElementById(id),item=document.createElement('button');item.type='button';item.setAttribute('role',id==='gridToggle'?'menuitem':'menuitemcheckbox');if(id==='gridToggle')item.setAttribute('aria-haspopup','menu');item.innerHTML='<span>'+label+'</span><span class="phone-display-state" aria-hidden="true"></span>';
+  const sync=()=>{const pressed=source.getAttribute('aria-pressed')==='true',checked=id==='clipToggle'?!pressed:pressed;if(id!=='gridToggle')item.setAttribute('aria-checked',String(checked));item.lastElementChild.textContent=id==='gridToggle'?'▸':checked?'オン':'オフ';item.disabled=source.disabled};
+  item.onclick=()=>{if(id==='gridToggle'){close();window.Bolxiv.openGridMenu?.(trigger);return}source.click();sync();item.focus({preventScroll:true})};new MutationObserver(sync).observe(source,{attributes:true,attributeFilter:['aria-pressed','disabled']});sync();menu.append(item);return item;
  });
  const separator=document.createElement('div');separator.className='phone-display-menu-separator';separator.setAttribute('role','separator');menu.append(separator);
  const closeButton=document.createElement('button');closeButton.type='button';closeButton.setAttribute('role','menuitem');closeButton.textContent='閉じる';closeButton.onclick=()=>close(true);menu.append(closeButton);items.push(closeButton);
@@ -442,7 +514,7 @@ function confirmPhoneLayerDeletion(id,individual=false){
  },true);
  new MutationObserver(sync).observe(layout,{attributes:true,attributeFilter:['class']});
  mobile.addEventListener('change',()=>{layout.classList.remove('phone-content-open');sync()});sync();
- document.addEventListener('pointerdown',event=>{if(!mobile.matches||!visible||event.target.closest('#editModeToggle,#modeSwitchMenu,#undo,#redo,.battle,.phone-phase-navigation,.phone-content-backdrop,.phone-content-close,.color-popover,.native-color-picker,.phone-nav,.phone-content-icon,.phase-content-copy-menu,.phase-item-menu,.content-item-menu,.phase-group-menu,.phase-copy-menu,#phaseMasterMenu,dialog.confirm-dialog,#phoneIconHelp,#pcTutorial'))return;close()},true);
+ document.addEventListener('pointerdown',event=>{if(!mobile.matches||!visible||event.composedPath().some(node=>node instanceof Element&&node.matches('#editModeToggle,#modeSwitchMenu,#undo,#redo,.battle,.phone-phase-navigation,.phone-content-backdrop,.phone-content-close,.color-popover,.native-color-picker,.phone-nav,.phone-content-icon,.phase-content-copy-menu,.phase-item-menu,.content-item-menu,.phase-group-menu,.phase-copy-menu,#phaseMasterMenu,dialog.confirm-dialog,#phoneIconHelp,#pcTutorial')))return;close()},true);
 })();
 
 ;
@@ -481,7 +553,7 @@ function confirmPhoneLayerDeletion(id,individual=false){
   ],
   ["#phaseMasterModeToggle","コンテンツ／フィールドを切り替えます。フィールドへ移るときは、選択中フェーズの使用フィールドを表示します。"],
   ["#editUsedField","使用中のフィールドを選択して編集画面へ移動します。"],
-  ["#addPhaseMaster","フィールド／グループの追加や、同じ設定のフィールドの統合を選びます。"],
+  ["#addPhaseMaster","フィールド・グループの追加、同じ設定の統合、未使用フィールドの一括削除を選べます。"],
   ["#duplicatePhaseMaster","選択中のフィールドを複製します。フェーズの使用先は変わりません。"],
   ["#phaseMasterSelect","このフェーズで使用するフィールドを選びます。"],
   [
@@ -490,11 +562,11 @@ function confirmPhoneLayerDeletion(id,individual=false){
   ],
   [
     "#copyPage",
-    "フェーズやグループのコピー先を選びます。"
+    "フェーズやグループの複製先を選びます。"
   ],
   [
     "#copyPageToContent",
-    "別コンテンツへコピーします。元のデータは残します。"
+    "別コンテンツへ複製します。元のデータは残します。"
   ],
   [
     "#phonePhaseSwitch-toggle",
@@ -768,7 +840,7 @@ function confirmPhoneLayerDeletion(id,individual=false){
     if(content&&!node.closest('.battle,.phone-content-close,.phone-phase-navigation,.header-mode-status'))continue;
     if(selector==='.phone-content-icon')description=png?'出力画面の設定欄でノートを編集します。':'コンテンツ・フェーズ・設定・ノートを開きます。';
     if(selector==='#editFieldGuides')description=guides?'見出し横の切替ボタンでコンテンツへ戻ります。':'見出し横の切替ボタンでフィールドへ移ります。';
-    if(fieldMode&&selector==='.phone-content-icon')description='フィールドペインを開き、フィールドやグループを選択・整理します。';if(fieldMode&&selector==='.phone-content-close')description='フィールドペインを閉じ、選択中のフィールドの編集画面へ戻ります。';
+    if(fieldMode&&selector==='.phone-content-icon')description='フィールドペインを開きます。＋メニューから追加・統合・未使用フィールドの一括削除ができます。';if(fieldMode&&selector==='.phone-content-close')description='フィールドペインを閉じ、選択中のフィールドの編集画面へ戻ります。';
     if(fieldMode&&selector==='#undo')description='フィールド・ガイドの編集や、フィールドの追加・整理を元に戻します。';
     if(guides&&selector==='#redo')description='元に戻した操作をやり直します。';
     if(selector==='#outputPrintButton')description='用紙プレビューの設定で印刷します。PDF保存は印刷画面で選びます。';
@@ -794,7 +866,7 @@ function confirmPhoneLayerDeletion(id,individual=false){
    '#contentPanel.phone-phase-list-tabbed .phone-list-property-change':'フェーズリスト・プロパティの切り替え','#contentPanel.phone-phase-list-tabbed .phone-object-collapse':'フェーズ欄を開閉',
    '#phaseMasterModeToggle':'コンテンツ／フィールドの切り替え','#editUsedField':'使用フィールドを編集','#addPhaseMaster':'フィールドの追加・整理','#duplicatePhaseMaster':'フィールドを複製','#phaseMasterSelect':'使用フィールドの選択','#editModeToggle':'モード切替','help-png-mode':'モード切替',
    '.phone-menu-toggle':'操作メニュー','.phone-content-icon':fieldMode?'フィールドペインを開く':'コンテンツペインを開く','.phone-content-close':fieldMode?'フィールドペインを閉じる':'コンテンツペインを閉じる','.phone-material-pin':'マテリアルを開閉',
-   '.preset-manage':'配置・プリセット管理の切り替え','#addPage':'フェーズを追加','#addPhaseGroup':'フェーズグループを追加','#copyPage':'フェーズをコピー','#copyPageToContent':'別コンテンツへコピー',
+   '.preset-manage':'配置・プリセット管理の切り替え','#addPage':'フェーズを追加','#addPhaseGroup':'フェーズグループを追加','#copyPage':'フェーズを複製','#copyPageToContent':'別コンテンツへ複製',
    '#editFieldGuides':'コンテンツ／フィールドの切り替え','#phasePropertyResize':'ペインの高さ調整','#resetBoardZoom':'表示倍率を選ぶ','#guideHideObjects':'オブジェクトを一時的に隠す','#fieldGuide-ringScale':'同心円の大きさ','#fieldGuideOuterRing':'最外周を表示','#guideShapeFill':'ガイドの塗り','.guide-property-group[aria-label="線の見た目"]':'ガイド（共通）','.print-page-fields':'印刷の配置設定','#printSettingsReset':'印刷設定をリセット','#fieldGuideCircles':'同心円','#fieldGuideRays':'放射線','#duplicateGuideShape':'ガイドを複製','#deleteGuideShape':'ガイドを削除','.guide-selection-controls .aoe-box-handle':'サイズ変更ハンドル','#outputPrintReadability':'文字・線を強調','#outputPlainPaper':'普通紙向けの色調整','#outputPrintCutGuide':'切り取りガイド','#phonePhaseSwitch-toggle':'フェーズリスト・プロパティの切り替え','#phonePhaseSectionToggle':'フェーズ設定・ノート欄を開閉','#toggleBattlePages':'フェーズリストを開閉',
    '.phone-phase-navigation>button:first-child':'前のフェーズへ','.phone-phase-navigation>button:last-child':'次のフェーズへ',
    'help-name-edit':'名前を変更','help-item-delete':'項目を削除','help-name-confirm':'名前を確定','help-add-cancel':'追加を取り消す',
@@ -1026,6 +1098,47 @@ window.Bolxiv.selectionSurface=(()=>{
 
 ;
 
+// Grid spacing is a display option shared by content and field editing.
+(()=>{
+ const menu=document.createElement('div');menu.id='boardGridMenu';menu.className='board-zoom-menu';menu.hidden=true;menu.setAttribute('role','menu');menu.setAttribute('aria-label','グリッド線');document.body.append(menu);
+ const spacingOptions=[8,16,32,64,128],source=document.getElementById('gridToggle');
+ let anchor=null;
+ for(const trigger of [source,document.getElementById('guide-gridToggle')].filter(Boolean)){
+  trigger.setAttribute('aria-haspopup','menu');trigger.setAttribute('aria-controls',menu.id);trigger.setAttribute('aria-expanded','false');
+ }
+ function close(focus=false){
+  const trigger=anchor;anchor=null;menu.hidden=true;
+  trigger?.setAttribute('aria-expanded','false');
+  if(focus)trigger?.focus({preventScroll:true});
+ }
+ window.Bolxiv.openGridMenu=trigger=>{
+  if(source.disabled||trigger.disabled||window.Bolxiv.pngPreview?.active)return;
+  if(anchor===trigger&&!menu.hidden){close(true);return}
+  close();anchor=trigger;
+  const tiled=activeBoardShape()==='image4',spacing=tiled&&gridSpacing===128?64:gridSpacing;
+  const options=[0,...spacingOptions.filter(value=>!tiled||value!==128)];
+  const items=options.map(value=>{
+   const item=document.createElement('button');item.type='button';item.setAttribute('role','menuitemradio');
+   item.textContent=value===0?'非表示':value===32?'32px（標準）':value+'px';
+   item.setAttribute('aria-checked',String(value===(gridVisible?spacing:0)));
+   item.onclick=()=>{
+    gridVisible=value!==0;
+    if(value)gridSpacing=value;
+    updateGridToggle();render();close(true);
+   };
+   return item;
+  });
+  menu.replaceChildren(...items);addPhoneMenuClose(menu,()=>close(true));
+  menu.hidden=false;trigger.setAttribute('aria-expanded','true');
+  const bounds=trigger.getBoundingClientRect();
+  menu.style.left=Math.max(4,Math.min(bounds.right-menu.offsetWidth,innerWidth-menu.offsetWidth-4))+'px';
+  menu.style.top=Math.max(4,Math.min(bounds.bottom+4,innerHeight-menu.offsetHeight-4))+'px';
+  (items.find(item=>item.getAttribute('aria-checked')==='true')||items[0]).focus({preventScroll:true});
+ };
+ document.addEventListener('pointerdown',event=>{if(anchor&&!anchor.contains(event.target)&&!menu.contains(event.target))close()},true);
+ window.addEventListener('resize',()=>close());
+})();
+
 // User presets are an independent library, never part of content JSON.
 const userPresetLibrary=(()=>{
  const key='bolxiv-user-presets-v1';let presets=[],importedPresetToReveal=null;const presetHistory=[],presetFuture=[];
@@ -1078,8 +1191,8 @@ const userPresetLibrary=(()=>{
   input.onkeydown=event=>{if(event.isComposing||event.keyCode===229)return;if(event.key==='Enter'){event.preventDefault();event.stopPropagation();finish()}else if(event.key==='Escape'){event.preventDefault();event.stopPropagation();finish(true)}};input.onblur=()=>{if(!isNew)finish()};input.focus();input.select();revealInput();requestAnimationFrame(revealInput);
  }
  function deletePreset(id){if(blocked())return;if(editingPreset&&!editingPreset.finish())return;if(activeIcon?.userPresetId===id){setTapPlacementArmed(false);selectPlacementTool('select')}save(presets.filter(preset=>preset.id!==id))}
- function registerSelection(onFinish=null){  if(blocked())return;const originals=current().filter(o=>selectedIds.includes(o.id));if(selectionHasImportedImages(originals)){notify('画像を含む選択はプリセットに登録できません');return}if(originals.length<2)return;const items=JSON.parse(JSON.stringify(originals));for(const item of items){if(item.imageId){item.src=objectImageSource(item);delete item.imageId}delete item.id}
-  if(editingPreset&&!editingPreset.finish())return;const name=selectedObjectGroup().length?objectGroupName(originals):'新しいプリセット',id=createObjectId();for(const item of items){item.locked=false;item.objectGroupId=id;item.objectGroupName=name;delete item.objectGroupRotationOwner;delete item.objectGroupPlacementRotation;delete item.objectGroupOrientationRotation}const preset={id,name,items};presetDraft=preset;renderManager();renamePreset(preset,true,onFinish);
+ function registerSelection(onFinish=null,asSvg=false){  if(blocked())return;const originals=current().filter(o=>selectedIds.includes(o.id));if(selectionHasImportedImages(originals)){notify('画像を含む選択はプリセットに登録できません');return}if(originals.length<2)return;const items=asSvg?[createSvgPresetItem(originals)]:JSON.parse(JSON.stringify(originals));for(const item of items){if(item.imageId){item.src=objectImageSource(item);delete item.imageId}delete item.id}
+  if(editingPreset&&!editingPreset.finish())return;const name=selectedObjectGroup().length?objectGroupName(originals):'新しいプリセット',id=createObjectId();for(const item of items){item.locked=false;if(!item.svgPreset){item.objectGroupId=id;item.objectGroupName=name}else{delete item.objectGroupId;delete item.objectGroupName}delete item.objectGroupRotationOwner;delete item.objectGroupPlacementRotation;delete item.objectGroupOrientationRotation}const preset={id,name,items};presetDraft=preset;renderManager();renamePreset(preset,true,onFinish);
  }
 
  const materialCategories=document.createElement('div');materialCategories.className='material-categories-scroll';const materialHost=document.querySelector('.left');for(const child of [...materialHost.children])if(!child.matches('.material-heading,.object-pane-actions'))materialCategories.append(child);materialHost.append(materialCategories);const syncMaterialScrollInset=()=>{const style=getComputedStyle(materialHost),padding=parseFloat(style.paddingRight)||0,gutter=materialHost.offsetWidth-materialHost.clientWidth-(parseFloat(style.borderLeftWidth)||0)-(parseFloat(style.borderRightWidth)||0);materialHost.style.setProperty('--material-scroll-inset',padding+'px');materialHost.style.setProperty('--material-scroll-outset',(padding+gutter)+'px')};new ResizeObserver(syncMaterialScrollInset).observe(materialHost);syncMaterialScrollInset();
@@ -1102,7 +1215,7 @@ const userPresetLibrary=(()=>{
  manage.onclick=event=>{event.stopPropagation();if(reopenManager){reopenManager=false;manage.focus({preventScroll:true});return}if(manager.hidden)openManager();else closeManager()};
 
  function place(id,x,y){if(blocked())return;const preset=presets.find(p=>p.id===id);if(!preset)return;const items=JSON.parse(JSON.stringify(preset.items)),cx=(Math.min(...items.map(o=>o.x))+Math.max(...items.map(o=>o.x)))/2,cy=(Math.min(...items.map(o=>o.y))+Math.max(...items.map(o=>o.y)))/2;
-  for(const item of items){item.id=createObjectId();item.x+=x-cx;item.y+=y-cy;if(item.objectGroupId)item.objectGroupName=preset.name;if(item.type==='icon'&&item.src?.startsWith('data:image/')){item.imageId=boardImageLibrary.register(item.src);delete item.src}}remapCopiedObjectGroups(items);snapshot();current().push(...items);individualGroupSelection=null;selectedIds=items.map(o=>o.id);selected=selectedIds[0];setTapPlacementArmed(false);selectPlacementTool('select');hideTouchPlacementPreview();renderAndSave();closePaletteAfterPlacement();
+  for(const item of items){item.id=createObjectId();item.x+=x-cx;item.y+=y-cy;if(item.objectGroupId)item.objectGroupName=preset.name;if(item.svgPreset)item.svgPresetName=preset.name;if(item.type==='icon'&&item.src?.startsWith('data:image/')){item.imageId=boardImageLibrary.register(item.src);delete item.src}}remapCopiedObjectGroups(items);snapshot();current().push(...items);individualGroupSelection=null;selectedIds=items.map(o=>o.id);selected=selectedIds[0];setTapPlacementArmed(false);selectPlacementTool('select');hideTouchPlacementPreview();renderAndSave();closePaletteAfterPlacement();
  }
  function syncManagerControls(){syncPresetHistory();if(manager.hidden)return;manager.querySelector('#registerUserPreset').disabled=selectionHasImportedImages()||!!editingPreset||blocked()||current().filter(o=>selectedIds.includes(o.id)).length<2;manager.querySelector('.preset-manager-hint').textContent=selectionHasImportedImages()?'画像を含む選択は登録できません':'2個以上選択して登録';manager.querySelector('.preset-manager-hint').hidden=!manager.querySelector('#registerUserPreset').disabled;for(const button of manager.querySelectorAll('[data-preset-action]'))button.disabled=blocked()}
  new MutationObserver(syncManagerControls).observe(document.body,{attributes:true,attributeFilter:['class']});
@@ -1130,7 +1243,7 @@ const userPresetLibrary=(()=>{
      if(item.src){const src=embeddedPngs[item.src]||item.src;if(typeof src!=='string'||!/^data:image\/(?:png|jpeg|gif|webp|svg\+xml)(?:;|,)/i.test(src))throw new Error(name+'：対応する埋め込み画像ではありません');item.src=src}
      else if(!isBossObject(item)&&!isTowerObject(item))throw new Error(name+'：画像がありません');
     }
-    item.locked=false;item.objectGroupId=id;item.objectGroupName=name;delete item.objectGroupRotationOwner;delete item.objectGroupPlacementRotation;delete item.objectGroupOrientationRotation;
+    item.locked=false;if(!item.svgPreset){item.objectGroupId=id;item.objectGroupName=name}else{delete item.objectGroupId;delete item.objectGroupName}delete item.objectGroupRotationOwner;delete item.objectGroupPlacementRotation;delete item.objectGroupOrientationRotation;
     return item;
    });return {id,name,items};
   });
@@ -1146,7 +1259,7 @@ const userPresetLibrary=(()=>{
  function confirmPresetReplace(count){return new Promise(resolve=>{presetReplaceDialog.querySelector('[data-preset-import-summary]').textContent='現在のユーザープリセット（'+presets.length+'件）を、読み込んだデータ（'+count+'件）に置き換えます。';let done=false;const finish=accepted=>{if(done)return;done=true;presetReplaceDialog.oncancel=null;presetReplaceDialog.onclose=null;presetReplaceDialog.close();resolve(accepted)};presetReplaceDialog.querySelector('[data-preset-import-cancel]').onclick=()=>finish(false);presetReplaceDialog.querySelector('[data-preset-import-confirm]').onclick=()=>finish(true);presetReplaceDialog.oncancel=event=>{event.preventDefault();finish(false)};presetReplaceDialog.onclose=()=>finish(false);presetReplaceDialog.showModal()})}
  function choosePresetImport(mode){if(blocked()||editingPreset){notify('編集モードで名前入力を終えてから読み込んでください');return}presetImportMode=mode==='replace'?'replace':'append';presetImportInput.value='';presetImportInput.click()}
  presetImportInput.onchange=async()=>{const file=presetImportInput.files[0],mode=presetImportMode;if(!file)return;try{const imported=await withDesktopDisplayBusy(async()=>parsePresetFile(await file.text()));if(mode==='replace'&&!await confirmPresetReplace(imported.length))return;if(blocked()||editingPreset)throw new Error('編集モードで名前入力を終えてから読み込んでください');if(mode==='append'&&!imported.length){notify('追加するプリセットがありません');return}if(save(mode==='append'?[...presets,...imported]:imported,{label:mode==='append'?'追加読み込み':'全置き換え'})){if(activeIcon?.userPresetId&&!presets.some(preset=>preset.id===activeIcon.userPresetId)){setTapPlacementArmed(false);selectPlacementTool('select')}importedPresetToReveal=imported[0]?.id||null;requestAnimationFrame(revealImportedPreset);notify((mode==='append'?imported.length+'件のユーザープリセットを追加しました':'ユーザープリセットを'+imported.length+'件に置き換えました')+(imported[0]?'（先頭：「'+imported[0].name+'」）':''))}}catch(error){console.error('Preset import failed',error);notifyFailure('ユーザープリセットを読み込めませんでした',{error,retained:'保存済みのプリセットは変更していません',action:'ユーザープリセット用JSONを選び直してください。コンテンツ用JSONはコンテンツの読み込み項目を選んでください'})}finally{presetImportInput.value=''}};
- document.addEventListener('board-view-mode-changed',()=>{render();syncPresetHistory()});document.addEventListener('keydown',event=>{if(manager.hidden||editingPreset||!materialPane.contains(event.target)||event.target.closest('input,textarea,[contenteditable="true"]')||!(event.ctrlKey||event.metaKey))return;const key=event.key.toLowerCase();if(key==='z'||key==='y'){event.preventDefault();event.stopImmediatePropagation();restorePresetHistory(key==='y'||event.shiftKey)}},true);render();syncPresetHistory();return {place,exportAll:exportPresets,chooseImport:choosePresetImport,registerSelection:()=>{if(selectionHasImportedImages()){notify('画像を含む選択はプリセットに登録できません');return}if(blocked()||current().filter(o=>selectedIds.includes(o.id)).length<2)return;const layout=document.querySelector('.layout'),phone=matchMedia('(max-width:850px)').matches,wasManaging=!manager.hidden,wasOpen=phone?layout.classList.contains('phone-materials-open'):materialPane.matches('.pinned,.palette-hover-open,:focus-within'),scroll=wasManaging?manager.scrollTop:materialCategories.scrollTop;const restore=()=>{if(!wasManaging)closeManager();if(wasManaging)manager.scrollTop=scroll;else materialCategories.scrollTop=scroll;if(!wasOpen){if(materialPane.contains(document.activeElement))document.activeElement.blur();materialPane.dispatchEvent(new Event('reset-material-hover'));if(phone)document.dispatchEvent(new Event('close-material-pane'))}else if(!phone)manage.focus({preventScroll:true})};if(matchMedia('(max-width:850px)').matches&&!document.querySelector('.layout').classList.contains('phone-materials-open'))document.querySelector('.phone-material-pin')?.click();manage.focus({preventScroll:true});openManager();registerSelection(restore)},thumbnail:id=>{const p=presets.find(p=>p.id===id);return p?liveThumbnail(p.items):null}};
+ document.addEventListener('board-view-mode-changed',()=>{render();syncPresetHistory()});document.addEventListener('keydown',event=>{if(manager.hidden||editingPreset||!materialPane.contains(event.target)||event.target.closest('input,textarea,[contenteditable="true"]')||!(event.ctrlKey||event.metaKey))return;const key=event.key.toLowerCase();if(key==='z'||key==='y'){event.preventDefault();event.stopImmediatePropagation();restorePresetHistory(key==='y'||event.shiftKey)}},true);render();syncPresetHistory();return {place,exportAll:exportPresets,chooseImport:choosePresetImport,registerSelection:(asSvg=false)=>{if(selectionHasImportedImages()){notify('画像を含む選択はプリセットに登録できません');return}if(blocked()||current().filter(o=>selectedIds.includes(o.id)).length<2)return;const layout=document.querySelector('.layout'),phone=matchMedia('(max-width:850px)').matches,wasManaging=!manager.hidden,wasOpen=phone?layout.classList.contains('phone-materials-open'):materialPane.matches('.pinned,.palette-hover-open,:focus-within'),scroll=wasManaging?manager.scrollTop:materialCategories.scrollTop;const restore=()=>{if(!wasManaging)closeManager();if(wasManaging)manager.scrollTop=scroll;else materialCategories.scrollTop=scroll;if(!wasOpen){if(materialPane.contains(document.activeElement))document.activeElement.blur();materialPane.dispatchEvent(new Event('reset-material-hover'));if(phone)document.dispatchEvent(new Event('close-material-pane'))}else if(!phone)manage.focus({preventScroll:true})};if(matchMedia('(max-width:850px)').matches&&!document.querySelector('.layout').classList.contains('phone-materials-open'))document.querySelector('.phone-material-pin')?.click();manage.focus({preventScroll:true});openManager();try{registerSelection(restore,asSvg)}catch(error){restore();notifyFailure('SVG画像を登録できませんでした',{error})}},thumbnail:id=>{const p=presets.find(p=>p.id===id);return p?liveThumbnail(p.items):null}};
 })();
 // Desktop keeps history/save status together and the mode next to the menu.
 (function placeDesktopModeBesideMenu(){
@@ -1175,7 +1288,7 @@ const userPresetLibrary=(()=>{
  const separator=document.createElement('div');separator.className='context-separator';separator.setAttribute('role','separator');sub.append(separator);
  const make=(id,label)=>{const b=createMenuAction({label});b.id=id;sub.append(b);return b},copyStyle=make('contextCopyAppearance','見た目をコピー'),pasteStyle=make('contextPasteAppearance','見た目を貼り付け');
  let clipboard=null;
- const fields=['color','strokeColor','opacity','width','height','gradient','fillType','innerSize','angle','fontSize','lineStyle','arrowEnds','arrowSize'];
+ const fields=['color','strokeColor','opacity','width','height','gradient','fillType','innerSize','angle','fontSize','lineStyle','arrowEnds','arrowSize','brightness'];
  const kind=o=>JSON.stringify([objectCategory(o),o.type,o.type==='icon'?objectTitle(o):o.type==='segment'?objectTitle(o):'']);
  const items=()=>{const ids=JSON.parse(menu.dataset.ids||'[]');return current().filter(o=>ids.includes(o.id))};
  const blocked=()=>boardReadOnly||phaseComparisonActive()||!!window.Bolxiv?.pngPreview?.active||!!window.Bolxiv?.fieldGuideEditor?.active;
@@ -1184,7 +1297,7 @@ const userPresetLibrary=(()=>{
  function open(fromHover=false){if(!sub.hidden){if(fromHover!==true)close();return}document.getElementById('contextGroupMenu').hidden=true;document.getElementById('contextGroupMenuToggle').setAttribute('aria-expanded','false');addPhoneMenuClose(sub,()=>{close();toggle.focus()});sub.hidden=false;toggle.setAttribute('aria-expanded','true');const r=toggle.getBoundingClientRect();sub.style.left=Math.max(4,Math.min(r.right+4+sub.offsetWidth>innerWidth?r.left-sub.offsetWidth-4:r.right+4,innerWidth-sub.offsetWidth-4))+'px';sub.style.top=Math.max(4,Math.min(r.top,innerHeight-sub.offsetHeight-4))+'px';if(fromHover!==true)sub.querySelector('button:not(:disabled)')?.focus({preventScroll:true})}
  bindSubmenuHover(toggle,sub,open,close);
  toggle.onclick=open;toggle.onkeydown=e=>{if(e.key==='ArrowRight'){e.preventDefault();if(sub.hidden)open();sub.querySelector('button:not(:disabled)')?.focus()}};sub.addEventListener('keydown',e=>{if(['Escape','ArrowLeft'].includes(e.key)){e.preventDefault();e.stopPropagation();close();toggle.focus()}});
- document.getElementById('contextGroupMenuToggle').addEventListener('click',close);
+ document.getElementById('contextGroupMenuToggle').addEventListener('click',close);toggle.addEventListener('click',()=>{const preset=document.getElementById('contextPresetToggle');if(preset.getAttribute('aria-expanded')==='true')preset.click()});
  const previousOpen=openObjectContextMenu;openObjectContextMenu=function(...args){close();previousOpen(...args);const objects=items();copyStyle.disabled=blocked()||objects.length!==1;pasteStyle.disabled=blocked()||!compatible(objects)};
  const previousClose=closeObjectContextMenu;closeObjectContextMenu=function(){close();previousClose()};
  copyStyle.onclick=()=>{const objects=items();if(blocked()||objects.length!==1)return;const o=objects[0];clipboard={kind:kind(o),values:Object.fromEntries(fields.filter(k=>Object.hasOwn(o,k)).map(k=>[k,o[k]]))};closeObjectContextMenu();notify('見た目をコピーしました')};
