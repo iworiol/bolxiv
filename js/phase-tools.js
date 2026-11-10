@@ -410,7 +410,7 @@
     button.disabled=true;
     const hint=document.createElement('div');
     hint.className='phase-content-copy-hint';
-    hint.textContent='同じ画像フィールドを使うフェーズを2〜4個選択してください';
+    hint.textContent='フィールド形状が「画像」で、同じフィールドを使うフェーズを2〜4個選択してください。画像（2×2）のフェーズは対象外です。';
     menu.append(button,hint);
     continue;
    }
@@ -530,7 +530,7 @@
    const next=gesture;if(!next||event.pointerId!==next.id)return;
    if(next.board!==data||next.phase!==current()||boardReadOnly||phaseComparisonActive()){clear();return}
    event.preventDefault();if(!next.moved&&Math.hypot(event.clientX-next.x,event.clientY-next.y)<8)return;
-   if(id==='contentOptions'&&!next.armed){
+   if(['contentOptions','pages','objectList'].includes(id)&&!next.armed){
     clearTimeout(next.timer);next.moved=true;consumeClick=true;
     const scroller=scrollHost();
     if(scroller)scroller.scrollTop+=(next.lastY??next.y)-event.clientY;
@@ -552,7 +552,7 @@
   for(const name of ['resize','blur'])window.addEventListener(name,clear);
  }
  window.bindTouchListReorder=bindTouchListReorder;
- for(const definition of [['objectList','.object-row','.object-index,.object-group-disclosure,.phone-row-actions','application/x-tactica-layer'],['pages','.page-tab,.phase-group-heading','.page-index,.phase-group-range,.phase-group-menu-trigger','application/x-tactica-page'],['contentOptions','.content-options-scroll>.content-option-row','.content-option-index','application/x-tactica-content']])bindTouchListReorder(definition);
+ for(const definition of [['objectList','.object-row','.object-index,.object-group-disclosure,.phone-row-actions','application/x-tactica-layer'],['pages','.page-tab,.phase-group-heading','.page-index,.phase-group-range,.phase-group-menu-trigger,.phone-row-actions','application/x-tactica-page'],['contentOptions','.content-options-scroll>.content-option-row','.content-option-index','application/x-tactica-content']])bindTouchListReorder(definition);
  bindTouchListReorder(['userPresetManager','.preset-manager-row','.preset-manager-leading,.preset-manager-menu','application/x-bolxiv-user-preset-order']);
 })();
 
@@ -867,7 +867,7 @@
    row.oncontextmenu=event=>{if(event.target.closest('input,textarea'))return;event.preventDefault();event.stopPropagation();openGroupMenu(item.id,event.clientX,event.clientY)};
    grip.setAttribute('aria-label',item.name+'全体を並べ替え');
    if(!data.activePhaseGroup&&data.pageGroupIds[data.page]===item.id){const current=document.createElement('span');current.className='phase-group-current';current.textContent=String(data.page+1).padStart(2,'0');current.setAttribute('aria-label','表示中のフェーズ '+(data.page+1));name.append(current)}
-   if(item.id===data.activePhaseGroup){const menuButton=button('…',()=>{const bounds=menuButton.getBoundingClientRect();openGroupMenu(item.id,bounds.left,bounds.bottom)});menuButton.className='phase-group-menu-trigger';menuButton.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>';menuButton.title='グループの操作';menuButton.setAttribute('aria-label',item.name+'の操作メニュー');menuButton.setAttribute('aria-haspopup','menu');menuButton.setAttribute('aria-controls','phaseGroupMenu');menuButton.setAttribute('aria-expanded','false');menuButton.addEventListener('pointerdown',event=>event.stopPropagation());row.insertBefore(menuButton,ungroup)}
+   {const menuButton=button('…',()=>{const bounds=menuButton.getBoundingClientRect();openGroupMenu(item.id,bounds.left,bounds.bottom)});menuButton.className='phase-group-menu-trigger';menuButton.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>';menuButton.title='グループの操作';menuButton.setAttribute('aria-label',item.name+'の操作メニュー');menuButton.setAttribute('aria-haspopup','menu');menuButton.setAttribute('aria-controls','phaseGroupMenu');menuButton.setAttribute('aria-expanded','false');menuButton.addEventListener('pointerdown',event=>event.stopPropagation());row.insertBefore(menuButton,ungroup)}
    ungroup.disabled=boardReadOnly||phaseComparisonActive();ungroup.addEventListener('pointerdown',event=>event.stopPropagation());
    row.onclick=event=>{if(event.target.closest('button'))return;showGroup(item.id,true)};
    row.classList.toggle('group-expanded',!item.collapsed&&count>0);

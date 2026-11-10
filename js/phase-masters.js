@@ -125,6 +125,21 @@ window.Bolxiv.phaseMasters=(()=>{
  function moveGroup(from,target,after=false){const layout=units(),moving=layout.find(unit=>unit.group?.id===from),to=layout.find(unit=>unit.group?.id===target||unit.group&&unit.items.some(m=>m.id===target)||unit.item?.id===target);if(!moving||moving===to)return;record();layout.splice(layout.indexOf(moving),1);layout.splice(target===INITIAL?0:to?layout.indexOf(to)+(after?1:0):layout.length,0,moving);writeUnits(layout);refreshUI();persist()}
  function moveBeforeGroup(from,id){const moving=masters.find(m=>m.id===from);if(!moving||!masterGroups.some(g=>g.id===id))return;record();const layout=units();for(const unit of layout)if(unit.group)unit.items=unit.items.filter(m=>m.id!==from);const value=layout.filter(unit=>unit.group||unit.item.id!==from);delete moving.groupId;value.splice(value.findIndex(unit=>unit.group?.id===id),0,{item:moving});writeUnits(value);refreshUI();persist()}
  function moveToEnd(from,isGroup=false){if(isGroup){moveGroup(from,null);return}const moving=masters.find(m=>m.id===from);if(!moving)return;record();const layout=units();for(const unit of layout)if(unit.group)unit.items=unit.items.filter(m=>m.id!==from);const value=layout.filter(unit=>unit.group||unit.item.id!==from);delete moving.groupId;value.push({item:moving});writeUnits(value);refreshUI();persist()}
+ function unusedFieldIds(){
+  const used=new Set(contentBoards.flatMap(board=>board.pageMasterIds||[]));
+  return masters.filter(field=>!used.has(field.id)).map(field=>field.id);
+ }
+ function removeUnusedFields(confirmedIds){
+  const unused=new Set(unusedFieldIds().filter(id=>confirmedIds.includes(id)));
+  if(!active||!unused.size)return;
+  record();
+  const layout=units();
+  for(const unit of layout)if(unit.group)unit.items=unit.items.filter(field=>!unused.has(field.id));
+  writeUnits(layout.filter(unit=>unit.group||!unused.has(unit.item.id)));
+  if(unused.has(selectedId))selectedId=INITIAL;
+  showSelected();persist();
+  notify('未使用フィールドを'+unused.size+'件削除しました');
+ }
  function mergeDuplicates(){
   if(!active)return 0;commit();const first=new Map(),remap=new Map();
   for(const item of all()){const key=signature(item.settings,true);if(first.has(key))remap.set(item.id,first.get(key));else first.set(key,item.id)}
@@ -140,9 +155,10 @@ window.Bolxiv.phaseMasters=(()=>{
  }
  function combineImagePhases(){
   if(!canCombineImagePhases())return;
-  const indexes=selectedPhaseIndexes.slice().sort((a,b)=>a-b),first=indexes[0];
+  const indexes=selectedPhaseIndexes.slice(),first=indexes[0];
   const baseName='2×2 フェーズ',name=data.pageNames.includes(baseName)?nextCopiedPhaseName(baseName,data.pageNames):baseName;
   const source=settings(data,first),size=source.pageFieldSizes,guide=source.pageFieldGuides;
+  const tileSize={width:size.width/2,height:size.height/2};
   const items=[],shapes=[];
   for(const [tile,index] of indexes.entries()){
    const left=(tile%2)*320,top=Math.floor(tile/2)*320,objects=clone(data.pages[index]),groups=new Map();
@@ -163,9 +179,9 @@ window.Bolxiv.phaseMasters=(()=>{
   }
   const notes=indexes.map((index,tile)=>data.pageNotes[index]?['左上','右上','左下','右下'][tile]+' · '+data.pageNames[index]+'\n'+data.pageNotes[index]:'').filter(Boolean).join('\n\n');
   recordHistory();
-  const master=newMaster(name,{...source,pageBoardShapes:'image4',pageFieldSizes:{width:size.width/2,height:size.height/2},
+  const master=newMaster(name,{...source,pageBoardShapes:'image4',pageFieldSizes:tileSize,
    pageFieldTileImageIds:Array.from({length:4},(_,tile)=>tile<indexes.length?'':null),
-   pageFieldGuides:{...guide,reference:null,shapes}
+   pageFieldGuides:{...guide,reference:{...tileSize,shape:'image4'},shapes}
   });
   const index=data.pages.length;
   data.pages.push(items);data.pageNames.push(name);data.pageNotes.push(notes);data.pageGroupIds.push(null);data.pageMasterIds.push(master.id);
@@ -177,7 +193,7 @@ window.Bolxiv.phaseMasters=(()=>{
  masterGroups=(window.boardPhaseMasterGroupsInitial||[]).map(g=>({...g}));window.boardPhaseMasterGroupsInitial=null;const saved=window.boardPhaseMastersInitial||[];window.boardPhaseMastersInitial=null;
  for(const entry of saved){if(entry.id===INITIAL)continue;masters.push({id:entry.id,name:String(entry.name||'フィールド'),settings:clean(entry.settings),...(masterGroups.some(g=>g.id===entry.groupId)?{groupId:entry.groupId}:{})})}
  const original=data;for(const board of contentBoards){data=board;normalizePageNames();ensure(board,!firstRun&&!Array.isArray(board.pageMasterIds))}data=original;
- return {INITIAL,keys,all,get,ensure,apply,state,imageBoards,exportPayload,prepareImport,acceptImport,record,history:masterHistory,commit,enter,leave,select,add,cancelAddition,rename,remove,move,mergeDuplicates,assign,canCombineImagePhases,combineImagePhases,units,selectGroup,addGroup,renameGroup,toggleGroup,ungroup,moveIntoGroup,moveGroup,moveBeforeGroup,moveToEnd,groupRecords:()=>clone(masterGroups),get selectedGroupId(){return selectedGroupId},get active(){return active},get selectedId(){return selectedId},get locked(){return active&&(selectedId===INITIAL||!!selectedGroupId)},get canUndo(){return past.length>0},get canRedo(){return next.length>0},records:()=>clone(masters),restoreRecords:(value,groups=[])=>{masters=clone(value);masterGroups=clone(groups);selectedGroupId=null},paint:()=>refreshUI(),set confirmRemoval(fn){confirmRemoval=fn},set refresh(fn){refreshUI=fn},get editorBoard(){return editorBoard}};
+ return {INITIAL,keys,all,get,ensure,apply,state,imageBoards,exportPayload,prepareImport,acceptImport,record,history:masterHistory,commit,enter,leave,select,add,cancelAddition,rename,remove,move,mergeDuplicates,unusedFieldIds,removeUnusedFields,assign,canCombineImagePhases,combineImagePhases,units,selectGroup,addGroup,renameGroup,toggleGroup,ungroup,moveIntoGroup,moveGroup,moveBeforeGroup,moveToEnd,groupRecords:()=>clone(masterGroups),get selectedGroupId(){return selectedGroupId},get active(){return active},get selectedId(){return selectedId},get locked(){return active&&(selectedId===INITIAL||!!selectedGroupId)},get canUndo(){return past.length>0},get canRedo(){return next.length>0},records:()=>clone(masters),restoreRecords:(value,groups=[])=>{masters=clone(value);masterGroups=clone(groups);selectedGroupId=null},paint:()=>refreshUI(),set confirmRemoval(fn){confirmRemoval=fn},set refresh(fn){refreshUI=fn},get editorBoard(){return editorBoard}};
 })();
 
 window.Bolxiv.initializePhaseMasterUI=()=>{
@@ -206,7 +222,7 @@ window.Bolxiv.initializePhaseMasterUI=()=>{
  const groupPanel=document.createElement('section');groupPanel.id='phaseMasterGroupProperties';groupPanel.className='accordion-group content-properties';const groupTitle=document.createElement('button');groupTitle.type='button';groupTitle.className='accordion-toggle';groupTitle.textContent='グループプロパティ';groupTitle.setAttribute('aria-expanded','true');groupPanel.append(groupTitle);const groupBody=document.createElement('div');groupBody.className='phase-master-phase-body';groupBody.id='phaseMasterGroupBody';groupTitle.setAttribute('aria-controls',groupBody.id);const originalGroup=$('#phaseGroupProperties');if(originalGroup)groupBody.append(originalGroup);groupBody.append(groupSettings);groupPanel.append(groupBody);$('#contentPanel').append(groupPanel);groupTitle.onclick=()=>{setPanelExpanded(groupTitle,groupBody,groupBody.hidden,{manageDisplay:false,hiddenClass:false,frame:groupPanel,collapsedClass:'phase-properties-collapsed'});window.dispatchEvent(new Event('phase-properties-toggle'))};
  let draggingMaster=null,draggingMasterGroup=null;function clearMasterDrop(){$('#phaseMasters').classList.remove('phase-drop-at-end');for(const row of $('#phaseMasters').children)row.classList.remove('drop-before','drop-after','drag-over');}$('#phaseMasters').ondragend=()=>{draggingMaster=null;draggingMasterGroup=null;clearMasterDrop()};$('#phaseMasters').ondragleave=e=>{if(!$('#phaseMasters').contains(e.relatedTarget))clearMasterDrop()};
  const masterList=$('#phaseMasters');masterList.addEventListener('dragover',e=>{if(e.target!==masterList||!e.dataTransfer.types.some(t=>['application/x-phase-master','application/x-phase-master-group'].includes(t)))return;e.preventDefault();clearMasterDrop();masterList.classList.add('phase-drop-at-end')});masterList.addEventListener('drop',e=>{if(e.target!==masterList)return;e.preventDefault();const group=e.dataTransfer.getData('application/x-phase-master-group'),item=e.dataTransfer.getData('application/x-phase-master');clearMasterDrop();if(group||item)pm.moveToEnd(group||item,!!group)});
- const deletion=createConfirmationView({id:'deletePhaseMasterDialog',cancelId:'deletePhaseMasterNo',confirmId:'deletePhaseMasterYes',captureEscape:true,onConfirm(id){if(pm.active&&id&&pm.get(id).id===id){pm.select(id);pm.remove(true)}}});
+ const deletion=createConfirmationView({id:'deletePhaseMasterDialog',cancelId:'deletePhaseMasterNo',confirmId:'deletePhaseMasterYes',captureEscape:true,onConfirm(id){if(Array.isArray(id)){pm.removeUnusedFields(id);return}if(pm.active&&id&&pm.get(id).id===id){pm.select(id);pm.remove(true)}}});
  pm.confirmRemoval=(id,count)=>deletion.show('フィールド「'+pm.get(id).name+'」は'+count+'フェーズで使用されています。削除すると使用先は初期フィールドに切り替わります。削除しますか？',id);
  const menu=document.createElement('div');menu.id='phaseMasterMenu';menu.className='object-context-menu';menu.hidden=true;menu.setAttribute('role','menu');document.body.append(menu);
  function createMaster(copy){pm.add(copy);renameInList(pm.selectedId,true)}
@@ -225,7 +241,7 @@ window.Bolxiv.initializePhaseMasterUI=()=>{
  trigger.onclick=()=>{if(!popup.hidden){close();return}if(blocked())return;owner=data;addPhoneMenuClose(popup,()=>close(true));popup.hidden=false;trigger.setAttribute('aria-expanded','true');const r=trigger.getBoundingClientRect();popup.style.left=Math.max(8,Math.min(r.left,innerWidth-popup.offsetWidth-8))+'px';popup.style.top=Math.max(8,r.bottom+4+popup.offsetHeight<=innerHeight?r.bottom+4:r.top-popup.offsetHeight-4)+'px'};
  trigger.addEventListener('keydown',e=>{if(e.key==='ArrowDown'){e.preventDefault();if(popup.hidden)trigger.click();popup.querySelector('button:not(:disabled)')?.focus()}});document.addEventListener('pointerdown',e=>{if(!popup.contains(e.target)&&!trigger.contains(e.target))close()},true);window.addEventListener('keydown',e=>{if(!popup.hidden&&e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();close(true)}},true);window.addEventListener('resize',()=>close());
  }
- const directPhaseAdd=$('#addPage').onclick,directPhaseGroup=$('#addPhaseGroup').onclick;$('#addPhaseGroup').hidden=true;$('#addPhaseGroup').style.setProperty('display','none','important');addMenu($('#addPage'),'phaseAddMenu',[['フェーズを追加',()=>directPhaseAdd.call($('#addPage')),'item'],['グループを追加',()=>directPhaseGroup.call($('#addPhaseGroup')),'group']]);addMenu($('#addPhaseMaster'),'masterAddMenu',[['フィールドを追加',()=>createMaster(false),'item'],['グループを追加',createMasterGroup,'group'],[null],['同じ設定のフィールドを統合',()=>pm.mergeDuplicates(),'merge']],true);
+ const directPhaseAdd=$('#addPage').onclick,directPhaseGroup=$('#addPhaseGroup').onclick;$('#addPhaseGroup').hidden=true;$('#addPhaseGroup').style.setProperty('display','none','important');addMenu($('#addPage'),'phaseAddMenu',[['フェーズを追加',()=>directPhaseAdd.call($('#addPage')),'item'],['グループを追加',()=>directPhaseGroup.call($('#addPhaseGroup')),'group']]);addMenu($('#addPhaseMaster'),'masterAddMenu',[['フィールドを追加',()=>createMaster(false),'item'],['グループを追加',createMasterGroup,'group'],[null],['同じ設定のフィールドを統合',()=>pm.mergeDuplicates(),'merge'],['未使用フィールドを一括削除',()=>{const ids=pm.unusedFieldIds();if(ids.length)deletion.show('未使用フィールド'+ids.length+'件を削除しますか？',ids);else notify('未使用フィールドはありません')},'remove-unused']],true);
  function masterGroupMenu(event,id,opener){event.preventDefault();const r=(opener||event.target).getBoundingClientRect();pm.selectGroup(id);menu.replaceChildren();const units=pm.units(),at=units.findIndex(u=>u.group?.id===id),target=unit=>unit.group?.id||unit.item.id;
  for(const [label,action,disabled]of [['名前変更',()=>renameInList(id,false,true),false],['前へ移動',()=>pm.moveGroup(id,target(units[at-1]),false),at<=0],['後ろへ移動',()=>pm.moveGroup(id,target(units[at+1]),true),at===units.length-1],['グループ解除',()=>pm.ungroup(id),false]]){const button=createMenuAction({label,disabled,shortcut:label==='名前変更'?'F2':null,onInvoke(){closeMenu();action()}});menu.append(button)}addPhoneMenuClose(menu,closeMenu);menu.hidden=false;menu.style.left=Math.max(4,Math.min(event.clientX||r.left,innerWidth-menu.offsetWidth-4))+'px';menu.style.top=Math.max(4,Math.min(event.clientY||r.bottom,innerHeight-menu.offsetHeight-4))+'px';menu.querySelector('button:not(:disabled)')?.focus();
  }

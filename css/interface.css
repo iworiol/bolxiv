@@ -975,8 +975,9 @@
 @media(max-width:850px){
   :is(#pages,#phaseMasters) .page-tab-name,#pages .page-index{-webkit-user-select:none!important;user-select:none!important;-webkit-touch-callout:none}
   #pages .page-index,#objectList .object-index,#contentOptions .content-option-index{touch-action:none!important;cursor:grab;min-width:24px;align-self:stretch;display:flex;align-items:center;justify-content:center;-webkit-user-select:none!important;user-select:none!important;-webkit-touch-callout:none}
-  :is(#pages,#phaseMasters) .page-tab :is(.page-tab-edit,.page-tab-x),#objectList .object-row :is(.object-delete,.object-toggle),#contentOptions .content-options-scroll>.content-option-row .content-row-action{touch-action:none!important;-webkit-user-select:none!important;user-select:none!important;-webkit-touch-callout:none}
-  :is(#pages,#phaseMasters) .page-tab input[type="checkbox"],#objectList .object-row input[type="checkbox"]{touch-action:none!important}
+  #phaseMasters .page-tab :is(.page-tab-edit,.page-tab-x),#contentOptions .content-options-scroll>.content-option-row .content-row-action{touch-action:none!important;-webkit-user-select:none!important;user-select:none!important;-webkit-touch-callout:none}
+  #pages .page-tab :is(.page-tab-edit,.page-tab-x,input[type="checkbox"]),#objectList .object-row :is(.object-delete,.object-toggle,input[type="checkbox"]){touch-action:pan-y!important;-webkit-user-select:none!important;user-select:none!important;-webkit-touch-callout:none}
+  #phaseMasters .page-tab input[type="checkbox"]{touch-action:none!important}
   :is(#pages,#phaseMasters) .page-tab.dragging,#objectList .object-row.dragging,#contentOptions .content-option-row.dragging{opacity:.55}
  }
 
@@ -1045,7 +1046,7 @@
 .phase-group-heading .phase-group-range{cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
 .phase-group-heading>.phase-group-number-space{flex:0 0 16px;width:16px;min-width:16px;margin-right:-6px}
 .phase-group-heading>.phase-group-toggle{flex:0 0 26px;width:26px;min-width:26px;padding:0;text-align:center}
-@media(max-width:850px){.phase-group-heading>.phase-group-toggle{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}}
+@media(max-width:850px){.phase-group-heading>.phase-group-toggle{touch-action:pan-y;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}}
 .phase-group-heading>.phase-select-check{visibility:hidden;margin-right:-4px}
 .phase-group-heading>.phase-group-name{padding:0}
 .app .layout :is(#pages,#phaseMasters) .phase-group-heading>.phase-group-menu-trigger{display:grid;place-items:center;flex:0 0 26px;width:26px;padding:0;border-radius:4px;background:transparent!important}
@@ -1154,7 +1155,7 @@
  body .app .layout :is(:is(#pages,#phaseMasters),#objectList,#contentOptions) :is(.phone-row-actions,.phase-group-menu-trigger),body .app .layout :is(:is(#pages,#phaseMasters),#objectList,#contentOptions) :is(.phone-row-actions,.phase-group-menu-trigger):is(:hover,:focus,:focus-visible,:active,.phone-control-pressed){background:transparent!important;color:#33445f!important;-webkit-text-fill-color:#33445f!important;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;filter:none!important}
  .app .layout :is(#pages,#phaseMasters,#objectList,#contentOptions) .phone-row-actions{display:grid!important;place-items:center;flex:0 0 28px;width:28px;height:28px;padding:4px;border:0!important;border-radius:4px;background:transparent!important;color:#33445f!important}
  .app .layout .phone-row-actions[hidden]{display:none!important}
- .app .layout #pages .page-tab>.phone-row-actions{touch-action:manipulation}
+ .app .layout #pages .page-tab>.phone-row-actions:disabled{touch-action:pan-y}
  .app .layout.phase-multi-select-mode #pages .page-tab:not(.renaming)>.phone-row-actions:not([hidden]){display:grid!important}
  .phone-row-actions svg{display:block;width:18px;height:18px;pointer-events:none}
  .app .layout :is(#pages,#phaseMasters) .page-tab:not(.renaming) :is(.page-tab-edit,.page-tab-x),.app .layout #objectList .object-row .object-delete,.app .layout #contentOptions .content-option-row:not(:has(input))>.content-row-action{display:none!important}
@@ -1360,6 +1361,9 @@ body .app .layout #contentSelect::after{
 .object-group-control.object-group-context{border-width:2px;pointer-events:none}
 .obj.group-member-selected.selected-many{outline-width:1px;outline-color:#ffc477}
 .obj.group-member-selected.selected-many::after{border-width:1px;border-color:#ffc477}
+.phone-content-preview .object-controls{display:none}
+.phone-content-preview .obj:is(.selected,.selected-many){outline:none!important}
+.phone-content-preview .obj.selected-many::after{content:none!important}
 .group-member-selection.targetcircle-multi-control>.targetcircle-selection-frame{border:1px solid #ffc477}
 .controlbox.locked-selection-control.group-member-selection{border-width:1px;border-color:#ffc477}
 .controlbox.group-member-selection :is(.stack-control-frame,.targetcircle-control-frame,.aoe-control-frame){border-width:1px;border-color:#ffc477}
@@ -1693,7 +1697,7 @@ body .app .layout #objectList>.object-group-row>.object-delete{grid-column:5;gri
 .left>#userPresetManager .preset-manager-heading h2{white-space:nowrap}
 
 .content-options>.content-options-scroll{box-sizing:border-box;padding-block:4px;scroll-padding-block:4px}
-@media(max-width:850px){.content-options>.content-options-scroll{max-height:min(355px,var(--content-list-available,45dvh));overscroll-behavior-y:contain;touch-action:pan-y} .content-options-scroll .phone-row-actions{touch-action:pan-y}}
+@media(max-width:850px){#contentOptions{max-height:var(--content-options-viewport-height,calc(100dvh - 190px))}.content-options>.content-options-scroll{max-height:min(355px,45dvh);overscroll-behavior-y:contain;touch-action:pan-y} .content-options-scroll .phone-row-actions{touch-action:pan-y}}
 
 #contextGroupMenuToggle[aria-expanded="true"]{background:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
 
@@ -2262,7 +2266,7 @@ body.phase-master-editing .app .layout :is(.content-heading-row,.right .board-ti
 
 /* Phase list/properties use the same phone switching header as object panels. */
 @media(max-width:850px){
- body .app .layout #contentPanel.phone-phase-list-tabbed>.phone-list-property-inactive{display:none!important}
+ body .app .layout #contentPanel.phone-phase-list-tabbed>:is(.page-controls,#phaseMasterAssignment,#phaseMasterGroupProperties).phone-list-property-inactive{display:none!important}
  body .app .layout #contentPanel.phone-phase-list-tabbed>#phasePropertyResize{display:none!important}
  body .app .layout #contentPanel.phone-phase-list-tabbed>.phone-list-property-group{flex:1 1 0!important;min-height:0!important;max-height:none!important}
  body .app .layout #contentPanel.phone-phase-list-tabbed>.phone-list-property-group>.accordion-toggle,body .app .layout #contentPanel.phone-phase-list-tabbed>.page-controls>.phase-heading-row{display:none!important}
