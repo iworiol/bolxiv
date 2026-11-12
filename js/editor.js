@@ -47,7 +47,7 @@
    const button=document.createElement('button');button.type='button';button.textContent=label;button.dataset.action=action;if(action==='paste')button.dataset.shortcut='Ctrl+V';if(action==='select-all')button.dataset.shortcut='Ctrl+A';button.setAttribute('role','menuitem');
    button.disabled=action==='paste'? !editing||!clipboardObjects.length:action==='select-all'? !editing||!current().length:false;
    button.onclick=()=>{if(button.disabled)return;const valid=openedBoard===data&&openedPhase===current();close();if(!valid)return;
-    if(action==='paste')pasteClipboardObjects();
+    if(action==='paste'){pasteClipboardObjects();stage.focus({preventScroll:true})}
     else if(action==='select-all')selectAllObjects()
     else if(action==='center')setBoardDisplayZoom(boardDisplayZoom,false);
     else fitBoardDisplayZoom();
@@ -200,7 +200,7 @@ changeLog.className='operation-guide';
 
 changeLog.setAttribute('aria-labelledby','changeLogTitle');
 
-changeLog.innerHTML='<div class="operation-guide-heading"><h2 id="changeLogTitle">更新履歴</h2><button type="button" class="btn" autofocus>閉じる</button></div><div class="operation-guide-body"><p><span class="change-log-version">2026/11/10　Ver.1.1.0</span><span class="change-log-description">オブジェクトグループのメニュー拡充、AoEロックオン系に明るさ設定追加、フィールド設定に2×2の区画ごとの画像設定機能を追加、グリッド線選択肢追加、フェーズの2×2合成機能追加、SVG画像としてプリセット登録する機能追加、AoE追加、未使用フィールド一括削除機能追加、UI調整、不具合修正</span></p><p><span class="change-log-version">2026/11/07　Ver.1.0.0</span><span class="change-log-description">正式版公開</span></p><p><span class="change-log-version">2026/11/06　Ver.0.9.5</span><span class="change-log-description">UI調整、処理負荷改善</span></p><p><span class="change-log-version">2026/11/05　Ver.0.9.4</span><span class="change-log-description">ダウンロード準備、UI調整、不具合修正、要望・不具合報告メニュー追加</span></p><p><span class="change-log-version">2026/11/05　Ver.0.9.3</span><span class="change-log-description">オフライン利用方法の準備、ダウンロードページの準備、UI調整、不具合修正</span></p><p><span class="change-log-version">2026/11/03　Ver.0.9.2</span><span class="change-log-description">UI調整、処理改善、他修正</span></p><p><span class="change-log-version">2026/11/03　Ver.0.9.1</span><span class="change-log-description">UI調整、不具合修正</span></p><p><span class="change-log-version">2026/11/02　Ver.0.9.0</span><span class="change-log-description">画像読み込み機能追加、フィールド機能追加(ガイド統合)、メニュー強化</span></p><p><span class="change-log-version">2026/10/31　Ver.0.8.2</span><span class="change-log-description">不具合修正</span></p><p><span class="change-log-version">2026/10/31　Ver.0.8.1</span><span class="change-log-description">UI等もろもろ調整</span></p><p><span class="change-log-version">2026/10/30　Ver.0.8.0</span><span class="change-log-description">キャンバスのガイド機能正式実装、印刷機能をスマホ版も拡充、フィールド設定コピー機能追加、UI調整</span></p><p><span class="change-log-version">2026/10/28　Ver.0.7.1</span><span class="change-log-description">印刷機能拡充(PC版のみ)、キャンバスのガイド機能仮実装、UI調整</span></p><p><span class="change-log-version">2026/10/26　Ver.0.7.0</span><span class="change-log-description">プリセット機能正式追加、UI調整</span></p><p><span class="change-log-version">2026/10/25　Ver.0.6.2</span><span class="change-log-description">オブジェクト追加、画像・印刷機能にノート表示追加</span></p><p><span class="change-log-version">2026/10/25　Ver.0.6.1</span><span class="change-log-description">UI調整</span></p><p><span class="change-log-version">2026/10/25　Ver.0.6.0</span><span class="change-log-description">オブジェクトのグループ化対応、印刷機能追加(PNG生成と統合)、プリセット機能仮実装</span></p><p><span class="change-log-version">2026/10/23　Ver.0.5.2</span><span class="change-log-description">UI調整</span></p><p><span class="change-log-version">2026/10/22　Ver.0.5.1</span><span class="change-log-description">UI調整</span></p><p><span class="change-log-version">2026/10/19　Ver.0.5.0</span><span class="change-log-description">コンテンツを履歴操作に追加、PNG生成モード追加、レイアウト少し見直し、その他修正</span></p><p><span class="change-log-version">2026/10/18　Ver.0.4.1</span><span class="change-log-description">ツールの内部構成変更、その他修正</span></p><p><span class="change-log-version">2026/10/18　Ver.0.4.0</span><span class="change-log-description">チュートリアル追加、フェーズグループ化機能追加、メモリ使用量削減、JSONファイルサイズ削減</span></p><p><span class="change-log-version">2026/10/17　Ver.0.3.0</span><span class="change-log-description">コンテンツ間フェーズコピー機能追加、右クリック・長押し操作メニュー各種追加、文字サイズ変更、処理負荷改善</span></p><p><span class="change-log-version">2026/10/15　Ver.0.2.0</span><span class="change-log-description">フェーズノート追加、構成見直し、その他修正&amp;見直し</span></p><p><span class="change-log-version">2026/10/14　Ver.0.1.1</span><span class="change-log-description">見た目見直し</span></p><p><span class="change-log-version">2026/10/12　Ver.0.1.0</span><span class="change-log-description">初版</span></p></div>';
+changeLog.innerHTML='<div class="operation-guide-heading"><h2 id="changeLogTitle">更新履歴</h2><button type="button" class="btn" autofocus>閉じる</button></div><div class="operation-guide-body"><p><span class="change-log-version">2026/11/12　Ver.1.2.0</span><span class="change-log-description">配置済みSVGプリセットの再登録機能追加、グループ内の全選択機能追加、オブジェクトグループの位置設定追加、フェーズのDeleteキー削除対応、UI調整、不具合修正</span></p><p><span class="change-log-version">2026/11/10　Ver.1.1.0</span><span class="change-log-description">オブジェクトグループのメニュー拡充、AoEロックオン系に明るさ設定追加、フィールド設定に2×2の区画ごとの画像設定機能を追加、グリッド線選択肢追加、フェーズの2×2合成機能追加、SVG画像としてプリセット登録する機能追加、AoE追加、未使用フィールド一括削除機能追加、UI調整、不具合修正</span></p><p><span class="change-log-version">2026/11/07　Ver.1.0.0</span><span class="change-log-description">正式版公開</span></p><p><span class="change-log-version">2026/11/06　Ver.0.9.5</span><span class="change-log-description">UI調整、処理負荷改善</span></p><p><span class="change-log-version">2026/11/05　Ver.0.9.4</span><span class="change-log-description">ダウンロード準備、UI調整、不具合修正、要望・不具合報告メニュー追加</span></p><p><span class="change-log-version">2026/11/05　Ver.0.9.3</span><span class="change-log-description">オフライン利用方法の準備、ダウンロードページの準備、UI調整、不具合修正</span></p><p><span class="change-log-version">2026/11/03　Ver.0.9.2</span><span class="change-log-description">UI調整、処理改善、他修正</span></p><p><span class="change-log-version">2026/11/03　Ver.0.9.1</span><span class="change-log-description">UI調整、不具合修正</span></p><p><span class="change-log-version">2026/11/02　Ver.0.9.0</span><span class="change-log-description">画像読み込み機能追加、フィールド機能追加(ガイド統合)、メニュー強化</span></p><p><span class="change-log-version">2026/10/31　Ver.0.8.2</span><span class="change-log-description">不具合修正</span></p><p><span class="change-log-version">2026/10/31　Ver.0.8.1</span><span class="change-log-description">UI等もろもろ調整</span></p><p><span class="change-log-version">2026/10/30　Ver.0.8.0</span><span class="change-log-description">キャンバスのガイド機能正式実装、印刷機能をスマホ版も拡充、フィールド設定コピー機能追加、UI調整</span></p><p><span class="change-log-version">2026/10/28　Ver.0.7.1</span><span class="change-log-description">印刷機能拡充(PC版のみ)、キャンバスのガイド機能仮実装、UI調整</span></p><p><span class="change-log-version">2026/10/26　Ver.0.7.0</span><span class="change-log-description">プリセット機能正式追加、UI調整</span></p><p><span class="change-log-version">2026/10/25　Ver.0.6.2</span><span class="change-log-description">オブジェクト追加、画像・印刷機能にノート表示追加</span></p><p><span class="change-log-version">2026/10/25　Ver.0.6.1</span><span class="change-log-description">UI調整</span></p><p><span class="change-log-version">2026/10/25　Ver.0.6.0</span><span class="change-log-description">オブジェクトのグループ化対応、印刷機能追加(PNG生成と統合)、プリセット機能仮実装</span></p><p><span class="change-log-version">2026/10/23　Ver.0.5.2</span><span class="change-log-description">UI調整</span></p><p><span class="change-log-version">2026/10/22　Ver.0.5.1</span><span class="change-log-description">UI調整</span></p><p><span class="change-log-version">2026/10/19　Ver.0.5.0</span><span class="change-log-description">コンテンツを履歴操作に追加、PNG生成モード追加、レイアウト少し見直し、その他修正</span></p><p><span class="change-log-version">2026/10/18　Ver.0.4.1</span><span class="change-log-description">ツールの内部構成変更、その他修正</span></p><p><span class="change-log-version">2026/10/18　Ver.0.4.0</span><span class="change-log-description">チュートリアル追加、フェーズグループ化機能追加、メモリ使用量削減、JSONファイルサイズ削減</span></p><p><span class="change-log-version">2026/10/17　Ver.0.3.0</span><span class="change-log-description">コンテンツ間フェーズコピー機能追加、右クリック・長押し操作メニュー各種追加、文字サイズ変更、処理負荷改善</span></p><p><span class="change-log-version">2026/10/15　Ver.0.2.0</span><span class="change-log-description">フェーズノート追加、構成見直し、その他修正&amp;見直し</span></p><p><span class="change-log-version">2026/10/14　Ver.0.1.1</span><span class="change-log-description">見た目見直し</span></p><p><span class="change-log-version">2026/10/12　Ver.0.1.0</span><span class="change-log-description">初版</span></p></div>';
 
 document.body.append(changeLog);
 
@@ -481,7 +481,7 @@ const releaseBody=downloadDialog.querySelector('.operation-guide-body');
 const releaseHistorySection=document.createElement('section');releaseHistorySection.className='release-history';
 const historyTitle=document.createElement('h3');historyTitle.textContent='更新履歴';releaseHistorySection.append(historyTitle);
 while(releaseBody.firstChild)releaseHistorySection.append(releaseBody.firstChild);
-releaseBody.innerHTML='<p class="download-status" role="note">最新版Version 1.1.0のツール本体をダウンロードできます。</p><p>PCで直接開く場合も、PC経由でスマホから使う場合も、起動ファイルを含む同じZIPを使用します。</p><h3>ダウンロード</h3><div data-download-latest><article class="download-release"><div class="download-release-heading"><h4>Version 1.1.0</h4><a class="btn" data-download-version="1.1.0" href="https://iworiol.github.io/downloads/BOARD_OF_LIGHT_XIV/BOARD_OF_LIGHT_XIV_1.1.0.zip" download="BOARD_OF_LIGHT_XIV_1.1.0.zip">ZIPをダウンロード</a></div><p>2026/11/10　2×2合成・SVGプリセット・AoE素材などを追加</p></article></div><details><summary>過去の正式版</summary><article class="download-release"><div class="download-release-heading"><h4>Version 1.0.0</h4><a class="btn" data-download-version="1.0.0" href="https://iworiol.github.io/downloads/BOARD_OF_LIGHT_XIV/BOARD_OF_LIGHT_XIV_1.0.0.zip" download="BOARD_OF_LIGHT_XIV_1.0.0.zip">ZIPをダウンロード</a></div><p>2026/11/07　正式版公開</p><p>ツール本体とWindows用のローカルサーバー起動ファイルを同梱しています。ZIPを展開してから利用してください。</p></article><p>0.9.x以前は更新履歴のみ掲載します。</p></details><p>起動・更新の手順は、ヘルプの「オフライン利用方法」を確認してください。</p>';
+releaseBody.innerHTML='<p class="download-status" role="note">最新版Version 1.2.0のツール本体をダウンロードできます。</p><p>PCで直接開く場合も、PC経由でスマホから使う場合も、起動ファイルを含む同じZIPを使用します。</p><h3>ダウンロード</h3><div data-download-latest><article class="download-release"><div class="download-release-heading"><h4>Version 1.2.0</h4><a class="btn" data-download-version="1.2.0" href="https://iworiol.github.io/downloads/BOARD_OF_LIGHT_XIV/BOARD_OF_LIGHT_XIV_1.2.0.zip" download="BOARD_OF_LIGHT_XIV_1.2.0.zip">ZIPをダウンロード</a></div><p>2026/11/12　SVGプリセット再登録・グループ操作拡充・UI調整・不具合修正</p></article></div><details><summary>過去の正式版</summary><article class="download-release"><div class="download-release-heading"><h4>Version 1.1.0</h4><a class="btn" data-download-version="1.1.0" href="https://iworiol.github.io/downloads/BOARD_OF_LIGHT_XIV/BOARD_OF_LIGHT_XIV_1.1.0.zip" download="BOARD_OF_LIGHT_XIV_1.1.0.zip">ZIPをダウンロード</a></div><p>2026/11/10　2×2合成・SVGプリセット・AoE素材などを追加</p></article><article class="download-release"><div class="download-release-heading"><h4>Version 1.0.0</h4><a class="btn" data-download-version="1.0.0" href="https://iworiol.github.io/downloads/BOARD_OF_LIGHT_XIV/BOARD_OF_LIGHT_XIV_1.0.0.zip" download="BOARD_OF_LIGHT_XIV_1.0.0.zip">ZIPをダウンロード</a></div><p>2026/11/07　正式版公開</p><p>ツール本体とWindows用のローカルサーバー起動ファイルを同梱しています。ZIPを展開してから利用してください。</p></article><p>0.9.x以前は更新履歴のみ掲載します。</p></details><p>起動・更新の手順は、ヘルプの「オフライン利用方法」を確認してください。</p>';
 releaseBody.append(releaseHistorySection);
 downloadDialog.addEventListener('close',()=>{releaseBody.querySelector('details').open=false});
 
@@ -530,11 +530,47 @@ document.addEventListener('keydown',e=>{const dialog=operationGuide.open?operati
  document.addEventListener('keydown',e=>{if(e.code!=='Space'||inputTarget(e.target)||inputTarget(document.activeElement)||drag&&!gesture)return;e.preventDefault();e.stopImmediatePropagation();spaceHeld=true;update()},true);
  document.addEventListener('keyup',e=>{if(e.code!=='Space'||!spaceHeld)return;e.preventDefault();e.stopImmediatePropagation();spaceHeld=false;update()},true);
  document.addEventListener('focusin',e=>{if(inputTarget(e.target)){spaceHeld=false;update()}});
- document.addEventListener('pointerdown',e=>{if(e.button!==0||!(e.target instanceof Element)||inputTarget(e.target)||!viewport.contains(e.target))return;if(Array.from(document.querySelectorAll('[role="menu"]:not([hidden])')).some(menu=>menu.getClientRects().length))return;const touchPan=e.pointerType==='touch'&&matchMedia('(max-width:850px)').matches&&!tapPlacementArmed&&!document.querySelector('.layout').classList.contains('phone-content-open')&&!document.querySelector('.layout').classList.contains('phone-materials-open')&&(phaseComparisonActive()||!e.target.closest('.obj,.controlbox,button'))&&(viewport.scrollWidth>viewport.clientWidth+1||viewport.scrollHeight>viewport.clientHeight+1);if(!update()&&!touchPan)return;const rect=viewport.getBoundingClientRect(),left=rect.left+viewport.clientLeft,top=rect.top+viewport.clientTop;if(e.clientX<left||e.clientX>=left+viewport.clientWidth||e.clientY<top||e.clientY>=top+viewport.clientHeight)return;e.preventDefault();e.stopImmediatePropagation();gesture={id:e.pointerId,touch:touchPan,x:e.clientX,y:e.clientY,left:viewport.scrollLeft,top:viewport.scrollTop,moved:false};viewport.setPointerCapture(e.pointerId);viewport.classList.add('comparison-panning')},true);
- document.addEventListener('pointermove',e=>{if(!gesture||gesture.id!==e.pointerId)return;e.preventDefault();e.stopImmediatePropagation();gesture.moved=gesture.moved||Math.hypot(e.clientX-gesture.x,e.clientY-gesture.y)>3;viewport.scrollLeft=gesture.left-(e.clientX-gesture.x);viewport.scrollTop=gesture.top-(e.clientY-gesture.y)},true);
- for(const name of ['pointerup','pointercancel'])document.addEventListener(name,e=>{if(!gesture||gesture.id!==e.pointerId)return;e.preventDefault();e.stopImmediatePropagation();finish()},true);
+ document.addEventListener('pointerdown',e=>{
+  if(e.button!==0||!(e.target instanceof Element)||inputTarget(e.target)||!viewport.contains(e.target))return;
+  if(gesture){
+   if(gesture.id!==e.pointerId){finish();if(e.pointerType==='touch')e.stopImmediatePropagation()}
+   return;
+  }
+  if(Array.from(document.querySelectorAll('[role="menu"]:not([hidden])')).some(menu=>menu.getClientRects().length))return;
+  const object=e.target.closest('#objects .obj');
+  const unselected=object&&!boardReadOnly&&!phaseComparisonActive()&&!selectedIds.includes(object.dataset.id);
+  const overflow=viewport.scrollWidth>viewport.clientWidth+1||viewport.scrollHeight>viewport.clientHeight+1;
+  const touchPan=e.pointerType==='touch'&&e.isPrimary&&matchMedia('(max-width:850px)').matches&&!tapPlacementArmed&&!document.querySelector('.layout').matches('.phone-content-open,.phone-materials-open')&&
+   (unselected||overflow&&(phaseComparisonActive()||!e.target.closest('.obj,.controlbox,button')));
+  if(!update()&&!touchPan)return;
+  const rect=viewport.getBoundingClientRect(),left=rect.left+viewport.clientLeft,top=rect.top+viewport.clientTop;
+  if(e.clientX<left||e.clientX>=left+viewport.clientWidth||e.clientY<top||e.clientY>=top+viewport.clientHeight)return;
+  const objectId=touchPan&&unselected?object.dataset.id:null;
+  if(!objectId)e.preventDefault();
+  e.stopImmediatePropagation();
+  gesture={id:e.pointerId,touch:touchPan,objectId,board:data,page:current(),x:e.clientX,y:e.clientY,left:viewport.scrollLeft,top:viewport.scrollTop,moved:false};
+  if(!objectId){viewport.setPointerCapture(e.pointerId);viewport.classList.add('comparison-panning')}
+ },true);
+ document.addEventListener('pointermove',e=>{
+  if(!gesture||gesture.id!==e.pointerId)return;
+  const dx=e.clientX-gesture.x,dy=e.clientY-gesture.y;
+  if(gesture.objectId&&!gesture.moved&&Math.hypot(dx,dy)<6)return;
+  e.preventDefault();e.stopImmediatePropagation();
+  if(gesture.objectId&&!gesture.moved){viewport.setPointerCapture(e.pointerId);viewport.classList.add('comparison-panning')}
+  gesture.moved=gesture.moved||Math.hypot(dx,dy)>3;
+  viewport.scrollLeft=gesture.left-dx;viewport.scrollTop=gesture.top-dy;
+ },true);
+ for(const name of ['pointerup','pointercancel'])document.addEventListener(name,e=>{
+  if(!gesture||gesture.id!==e.pointerId)return;
+  const previous=gesture;e.preventDefault();e.stopImmediatePropagation();finish();
+  if(name!=='pointerup'||!previous.objectId||previous.moved||previous.board!==data||previous.page!==current()||boardReadOnly||phaseComparisonActive())return;
+  individualGroupSelection=null;
+  selected=previous.objectId;selectedIds=objectGroupIds(selected);pendingLayerRevealId=selected;
+  renderSelectionOnly();
+ },true);
+ document.addEventListener('contextmenu',e=>{if(gesture?.objectId&&!gesture.moved)finish()},true);
  document.addEventListener('click',e=>{if(suppressClick&&viewport.contains(e.target)){suppressClick=false;e.preventDefault();e.stopImmediatePropagation()}},true);
- viewport.addEventListener('lostpointercapture',finish);window.addEventListener('blur',()=>{spaceHeld=false;update()});
+ viewport.addEventListener('lostpointercapture',e=>{if(e.target===viewport)finish()});window.addEventListener('blur',()=>{spaceHeld=false;finish();update()});
  const resize=new ResizeObserver(update);resize.observe(viewport);resize.observe(space);
  new MutationObserver(update).observe(document.body,{attributes:true,attributeFilter:['class']});update();
 })();
@@ -620,8 +656,8 @@ const historyLabelCache=[];
 // ===== js/runtime/objects-setup.js =====
 // Initialization stage: objects-setup. Load order is owned by bolxiv.js.
 for(let id of ['contextVisibility','contextEditable'])$('#'+id).onclick=()=>{let button=$('#'+id),ids=JSON.parse($('#objectContextMenu').dataset.ids||'[]');closeObjectContextMenu();setObjectState(ids,button.dataset.key,button.dataset.value==='true')};
-$('#contextCopy').onclick=()=>{const ids=JSON.parse($('#objectContextMenu').dataset.ids||'[]');closeObjectContextMenu();copyObjectsToClipboard(ids)};
-$('#contextPaste').onclick=()=>{closeObjectContextMenu();pasteClipboardObjects()};
+$('#contextCopy').onclick=event=>{const ids=JSON.parse($('#objectContextMenu').dataset.ids||'[]'),surface=objectShortcutSurface(event.currentTarget);closeObjectContextMenu();copyObjectsToClipboard(ids);surface.tabIndex=-1;surface.focus({preventScroll:true})};
+$('#contextPaste').onclick=event=>{const surface=objectShortcutSurface(event.currentTarget);closeObjectContextMenu();pasteClipboardObjects();surface.tabIndex=-1;surface.focus({preventScroll:true})};
 
 function swapObjectPositions(ids){if(ids.length!==2)return;let items=ids.map(id=>current().find(o=>o.id===id));if(boardReadOnly||phaseComparisonActive()||items.some(item=>!item||item.locked))return;recordHistory();let x=items[0].x,y=items[0].y;items[0].x=items[1].x;items[0].y=items[1].y;items[1].x=x;items[1].y=y;renderAndSave()}
 $('#contextSwapPosition').onclick=()=>{const ids=JSON.parse($('#objectContextMenu').dataset.ids||'[]');closeObjectContextMenu();swapObjectPositions(ids)};
@@ -681,7 +717,7 @@ document.querySelector('.left').addEventListener('click',e=>{if(e.target.closest
 document.addEventListener('dragstart',e=>{if(e.target.closest('.left'))setTapPlacementArmed(false)});
 
 document.addEventListener('pointerdown',e=>{
- if(!tapPlacementArmed||phaseComparisonActive()||e.button!==0||!stage.contains(e.target)||e.target.closest('.obj,.controlbox')||e.target.closest('input,button,textarea'))return;
+ if(!tapPlacementArmed||phaseComparisonActive()||e.button!==0||!stage.contains(e.target)||e.target.closest('input,button,textarea'))return;
  e.preventDefault();e.stopImmediatePropagation();tapPlacementGesture={id:e.pointerId,x:e.clientX,y:e.clientY,touch:e.pointerType==='touch'};if(tapPlacementGesture.touch)showTouchPlacementPreview(placementToolPayload(),e.clientX,e.clientY,0);stage.setPointerCapture(e.pointerId);
 },true);
 
@@ -705,7 +741,7 @@ stage.addEventListener('drop',e=>{if(!Array.from(e.dataTransfer.types).includes(
 
 document.querySelector('.object-layout-rect').addEventListener('pointerdown',e=>{if(data.activePhaseGroup||e.button!==0||![stage,objectClip,layer,document.getElementById('boardZoomSpace'),e.currentTarget].includes(e.target)&&e.target.className!=='axis'&&e.target.className!=='centerpoint')return;e.preventDefault();let additive=e.shiftKey;if(!additive){selected=null;selectedIds=[];renderSelectionOnly()}let box=document.createElement('div');box.className='selection-marquee';let surface=document.getElementById('boardZoomSpace');surface.appendChild(box);drag={mode:'marquee',surface,startX:e.clientX,startY:e.clientY,lastX:e.clientX,lastY:e.clientY,additive,initialIds:selectedIds.slice(),box,moved:false}});
 
-document.addEventListener('pointerdown',e=>{if((window.Bolxiv?.pngPreview?.active||matchMedia('(max-width:850px)').matches&&document.getElementById('objectLayerPanel')?.dataset.objectTab==='properties')&&e.target.closest('#undo,#redo'))return;if(e.target.closest('#importObjectImage,#editModeToggle,#objectContextMenu,#layerContextMenu,#presetPanel,#userPresetManager,.left .object-pane-actions,.preset-manage,[aria-controls="presetPanel"],.phone-material-toggle,.phone-content-close,.phone-content-backdrop,.right,.battle,.phone-view-content,dialog,[role="menu"],.obj,.controlbox,.color-popover,.color-picker,.native-color-picker,.phone-phase-navigation')||!selectedIds.length)return;if(stage.contains(e.target)){let r=stage.getBoundingClientRect(),shape=activeBoardShape(),fw=data.pageFieldSizes?.[data.page]?.width||538,fh=data.pageFieldSizes?.[data.page]?.height||(shape==='landscape'?320:538),dx=(e.clientX-r.left-r.width/2)/(r.width*fw/1280),dy=(e.clientY-r.top-r.height/2)/(r.height*fh/1280);if(shape==='none'||(shape==='circle'?dx*dx+dy*dy<=1:Math.abs(dx)<=1&&Math.abs(dy)<=1))return}selected=null;selectedIds=[];renderSelectionOnly()},true);
+document.addEventListener('pointerdown',e=>{if(e.target.closest('#undo,#redo'))return;if(e.target.closest('#importObjectImage,#editModeToggle,#objectContextMenu,#layerContextMenu,#presetPanel,#userPresetManager,.left .object-pane-actions,.preset-manage,[aria-controls="presetPanel"],.phone-material-toggle,.phone-material-pin,.phone-content-close,.phone-content-backdrop,.right,.battle,.phone-view-content,dialog,[role="menu"],.obj,.controlbox,.color-popover,.color-picker,.native-color-picker,.phone-phase-navigation')||!selectedIds.length)return;if(stage.contains(e.target)){let r=stage.getBoundingClientRect(),shape=activeBoardShape(),fw=data.pageFieldSizes?.[data.page]?.width||538,fh=data.pageFieldSizes?.[data.page]?.height||(shape==='landscape'?320:538),dx=(e.clientX-r.left-r.width/2)/(r.width*fw/1280),dy=(e.clientY-r.top-r.height/2)/(r.height*fh/1280);if(shape==='none'||(shape==='circle'?dx*dx+dy*dy<=1:Math.abs(dx)<=1&&Math.abs(dy)<=1))return}selected=null;selectedIds=[];renderSelectionOnly()},true);
 
 document.addEventListener('pointerdown',e=>{if(drag&&(drag.mode==='move'||drag.mode.startsWith('resize-'))){drag.shiftGuidesDisabled=e.shiftKey;clearAlignmentGuides();drag.alignmentPrevious=alignmentSnapshot()}});
 
@@ -730,6 +766,7 @@ function rememberObjectDragCancellation(){
  drag.cancelState={board:data,history:history.slice(),future:future.slice()};
 }
 function cancelObjectDrag(){
+ if(drag?.mode==='pending-ctrl-object'){drag=null;return true}
  if(!drag||drag.mode==='marquee'||drag.mode==='group-scale'||drag.mode==='group-rotate')return false;
  rememberObjectDragCancellation();const cancelled=drag,state=cancelled.cancelState;drag=null;
  if(state.board===data){
@@ -744,7 +781,16 @@ function cancelObjectDrag(){
  renderAndSave();return true;
 }
 // End object gesture cancellation state.
-document.addEventListener('pointermove',e=>{if(!drag||drag.pointerId!==undefined&&drag.pointerId!==e.pointerId)return;rememberObjectDragCancellation();if(drag.mode==='move'&&drag.pointerType==='touch'&&!drag.moved&&Math.hypot(e.clientX-drag.startX,e.clientY-drag.startY)<6)return;drag.shiftGuidesDisabled=e.shiftKey;drag.lastX=e.clientX;drag.lastY=e.clientY;let r=stage.getBoundingClientRect();if(drag.mode==='marquee'){let surface=drag.surface.getBoundingClientRect(),x1=drag.startX-surface.left,y1=drag.startY-surface.top,x2=e.clientX-surface.left,y2=e.clientY-surface.top;drag.moved=Math.abs(e.clientX-drag.startX)>3||Math.abs(e.clientY-drag.startY)>3;drag.box.style.left=Math.min(x1,x2)+'px';drag.box.style.top=Math.min(y1,y2)+'px';drag.box.style.width=Math.abs(x2-x1)+'px';drag.box.style.height=Math.abs(y2-y1)+'px';return}if(drag.mode==='move'&&!drag.beforeData&&(e.clientX!==drag.startX||e.clientY!==drag.startY))drag.beforeData=JSON.stringify(data);drag.moved=drag.mode==='move'?(drag.moved||e.clientX!==drag.startX||e.clientY!==drag.startY):true;if(drag.mode==='move'){setMoveCopyMode(e.ctrlKey);stage.classList.toggle('ctrl-copy',drag.ctrlAtStart&&e.ctrlKey);let boardWidth=layer.clientWidth||stage.clientWidth,boardHeight=layer.clientHeight||stage.clientHeight,scaleX=r.width/stage.offsetWidth,scaleY=r.height/stage.offsetHeight,dx=(e.clientX-drag.startX)/scaleX,dy=(e.clientY-drag.startY)/scaleY,loX=-Infinity,hiX=Infinity,loY=-Infinity,hiY=Infinity;for(let p of drag.starts){let o=current().find(x=>x.id===p.id),ex=extents(o,r),mx=Math.min(12,ex.w),my=Math.min(12,ex.h),px=p.x/100*boardWidth,py=p.y/100*boardHeight;loX=Math.max(loX,mx-ex.w-px);hiX=Math.min(hiX,boardWidth-mx+ex.w-px);loY=Math.max(loY,my-ex.h-py);hiY=Math.min(hiY,boardHeight-my+ex.h-py)}dx=steppedObjectMove(dx,loX,hiX);dy=steppedObjectMove(dy,loY,hiY);if(!e.shiftKey){let snapped=snappedObjectMove(objectMoveAlignmentSnapshot(),drag.starts,dx,dy,boardWidth,boardHeight,loX,hiX,loY,hiY);dx=snapped.dx;dy=snapped.dy;}for(let p of drag.starts){let o=current().find(x=>x.id===p.id);o.x=p.x+dx/boardWidth*100;o.y=p.y+dy/boardHeight*100;let el=layer.querySelector(`[data-id="${o.id}"]`);if(el){el.style.left=o.x+'%';el.style.top=o.y+'%';updateObjectTileClip(o,el);if(o.type==='targetcircle')refreshTargetCircleTriangle(o,el)}}let box=controls.querySelector('.controlbox'),o=current().find(x=>x.id===selected);if(box&&o){box.style.left=o.x+'%';box.style.top=o.y+'%'}renderObjectGroupControls();updateAlignmentGuides(drag.ids);scheduleBoardSave()}else{let o=current().find(x=>x.id===drag.id);if(!o)return;let ox=r.left+drag.ox/100*r.width,oy=r.top+drag.oy/100*r.height,dx=e.clientX-ox,dy=e.clientY-oy;let mdx=e.clientX-drag.startX,mdy=e.clientY-drag.startY;if(drag.mode==='resize-aoe-box'){const scaleX=r.width/stage.offsetWidth,scaleY=r.height/stage.offsetHeight,next=resizedAoeBox(drag,mdx/scaleX,mdy/scaleY);o.width=next.width;o.height=next.height;o.x=drag.ox+next.dx/(layer.clientWidth||stage.clientWidth)*100;o.y=drag.oy+next.dy/(layer.clientHeight||stage.clientHeight)*100;}if(drag.mode==='resize-donut-inner'){
+document.addEventListener('pointermove',e=>{if(!drag||drag.pointerId!==undefined&&drag.pointerId!==e.pointerId)return;
+ if(drag.mode==='pending-ctrl-object'){
+  const pending=drag;
+  if(Math.hypot(e.clientX-pending.startX,e.clientY-pending.startY)<4)return;
+  drag=null;
+  if(pending.board!==data||pending.page!==current()||boardReadOnly||phaseComparisonActive())return;
+  pending.start();
+  if(drag?.mode!=='move')return;
+ }
+ rememberObjectDragCancellation();if(drag.mode==='move'&&drag.pointerType==='touch'&&!drag.moved&&Math.hypot(e.clientX-drag.startX,e.clientY-drag.startY)<6)return;drag.shiftGuidesDisabled=e.shiftKey;drag.lastX=e.clientX;drag.lastY=e.clientY;let r=stage.getBoundingClientRect();if(drag.mode==='marquee'){let surface=drag.surface.getBoundingClientRect(),x1=drag.startX-surface.left,y1=drag.startY-surface.top,x2=e.clientX-surface.left,y2=e.clientY-surface.top;drag.moved=Math.abs(e.clientX-drag.startX)>3||Math.abs(e.clientY-drag.startY)>3;drag.box.style.left=Math.min(x1,x2)+'px';drag.box.style.top=Math.min(y1,y2)+'px';drag.box.style.width=Math.abs(x2-x1)+'px';drag.box.style.height=Math.abs(y2-y1)+'px';return}if(drag.mode==='move'&&!drag.beforeData&&(e.clientX!==drag.startX||e.clientY!==drag.startY))drag.beforeData=JSON.stringify(data);drag.moved=drag.mode==='move'?(drag.moved||e.clientX!==drag.startX||e.clientY!==drag.startY):true;if(drag.mode==='move'){setMoveCopyMode(e.ctrlKey);stage.classList.toggle('ctrl-copy',drag.ctrlAtStart&&e.ctrlKey);let boardWidth=layer.clientWidth||stage.clientWidth,boardHeight=layer.clientHeight||stage.clientHeight,scaleX=r.width/stage.offsetWidth,scaleY=r.height/stage.offsetHeight,dx=(e.clientX-drag.startX)/scaleX,dy=(e.clientY-drag.startY)/scaleY,loX=-Infinity,hiX=Infinity,loY=-Infinity,hiY=Infinity;for(let p of drag.starts){let o=current().find(x=>x.id===p.id),ex=extents(o,r),mx=Math.min(12,ex.w),my=Math.min(12,ex.h),px=p.x/100*boardWidth,py=p.y/100*boardHeight;loX=Math.max(loX,mx-ex.w-px);hiX=Math.min(hiX,boardWidth-mx+ex.w-px);loY=Math.max(loY,my-ex.h-py);hiY=Math.min(hiY,boardHeight-my+ex.h-py)}dx=steppedObjectMove(dx,loX,hiX);dy=steppedObjectMove(dy,loY,hiY);if(!e.shiftKey){let snapped=snappedObjectMove(objectMoveAlignmentSnapshot(),drag.starts,dx,dy,boardWidth,boardHeight,loX,hiX,loY,hiY);dx=snapped.dx;dy=snapped.dy;}for(let p of drag.starts){let o=current().find(x=>x.id===p.id);o.x=p.x+dx/boardWidth*100;o.y=p.y+dy/boardHeight*100;let el=layer.querySelector(`[data-id="${o.id}"]`);if(el){el.style.left=o.x+'%';el.style.top=o.y+'%';updateObjectTileClip(o,el);if(o.type==='targetcircle')refreshTargetCircleTriangle(o,el)}}let box=controls.querySelector('.controlbox'),o=current().find(x=>x.id===selected);if(box&&o){box.style.left=o.x+'%';box.style.top=o.y+'%'}renderObjectGroupControls();updateAlignmentGuides(drag.ids);scheduleBoardSave()}else{let o=current().find(x=>x.id===drag.id);if(!o)return;let ox=r.left+drag.ox/100*r.width,oy=r.top+drag.oy/100*r.height,dx=e.clientX-ox,dy=e.clientY-oy;let mdx=e.clientX-drag.startX,mdy=e.clientY-drag.startY;if(drag.mode==='resize-aoe-box'){const scaleX=r.width/stage.offsetWidth,scaleY=r.height/stage.offsetHeight,next=resizedAoeBox(drag,mdx/scaleX,mdy/scaleY);o.width=next.width;o.height=next.height;o.x=drag.ox+next.dx/(layer.clientWidth||stage.clientWidth)*100;o.y=drag.oy+next.dy/(layer.clientHeight||stage.clientHeight)*100;}if(drag.mode==='resize-donut-inner'){
  const scaleX=r.width/stage.offsetWidth,scaleY=r.height/stage.offsetHeight,cx=r.left+o.x/100*r.width,cy=r.top+o.y/100*r.height;
  const radius=Math.hypot((e.clientX-cx)/scaleX,(e.clientY-cy)/scaleY);
  setDonutInnerDiameter(o,radius*2);syncDonutInnerInputs(o);
@@ -765,7 +811,19 @@ document.addEventListener('keydown',e=>{if(e.key==='Control')setMoveCopyMode(tru
 
 document.addEventListener('keyup',e=>{if(e.key==='Control')setMoveCopyMode(false)});
 
-document.addEventListener('pointerup',e=>{if(drag?.pointerId!==undefined&&drag.pointerId!==e.pointerId)return;const refreshTouchSelection=e.pointerType==='touch'&&drag?.mode==='move'&&drag.moved;setMoveCopyMode(e.ctrlKey);clearAlignmentGuides();if(drag?.mode==='marquee'){let activeDrag=drag,box=activeDrag.box;box?.remove();if(activeDrag.moved){let left=Math.min(activeDrag.startX,e.clientX),top=Math.min(activeDrag.startY,e.clientY),right=Math.max(activeDrag.startX,e.clientX),bottom=Math.max(activeDrag.startY,e.clientY),boardBounds=stage.getBoundingClientRect(),viewport=document.querySelector('.object-layout-rect'),viewportRect=viewport.getBoundingClientRect(),viewportBounds={left:viewportRect.left+viewport.clientLeft,top:viewportRect.top+viewport.clientTop,right:viewportRect.left+viewport.clientLeft+viewport.clientWidth,bottom:viewportRect.top+viewport.clientTop+viewport.clientHeight},hits=current().filter(o=>{if(o.visible===false)return false;let node=Array.from(layer.children).find(el=>el.dataset.id===o.id);if(!node)return false;let b=node.getBoundingClientRect();return marqueeContainsVisibleObject(b,{left,top,right,bottom},boardBounds,viewportBounds)}).map(o=>o.id);selectedIds=activeDrag.additive?[...new Set([...activeDrag.initialIds,...hits])]:hits;selected=selectedIds[selectedIds.length-1]||null}if(e.pointerType==='mouse'&&selectedIds.length===1)pendingLayerRevealId=selectedIds[0];drag=null;renderSelectionOnly();return}let shouldRender=false,copiedLayerIds=[],structuralChange=!!(drag?.mode==='move'&&drag.ctrlAtStart);if(drag?.mode==='move'&&drag.ctrlAtStart){let validClone=drag.moved&&e.ctrlKey&&!drag.ctrlBroken;if(!validClone){current().splice(0,current().length,...current().filter(item=>!drag.ids.includes(item.id)));selectedIds=drag.originalIds;selected=selectedIds[selectedIds.length-1]||null}else{recordHistory(drag.beforeData);save();renderInspector();copiedLayerIds=drag.ids.slice()}shouldRender=true}else if(drag?.moved){recordHistory(drag.beforeData);save();renderInspector()}drag=null;stage.classList.remove('ctrl-copy');if(refreshTouchSelection)shouldRender=true;if(shouldRender){if(structuralChange)renderAndSave();else renderSelectionOnly()}if(copiedLayerIds.length)revealMovedLayers(copiedLayerIds)});
+document.addEventListener('pointerup',e=>{if(drag?.pointerId!==undefined&&drag.pointerId!==e.pointerId)return;
+ if(drag?.mode==='pending-ctrl-object'){
+  const pending=drag;
+  drag=null;
+  if(pending.board!==data||pending.page!==current()||boardReadOnly||phaseComparisonActive()||!current().some(o=>o.id===pending.id))return;
+  individualGroupSelection=null;
+  selectedIds=toggleObjectGroup(pending.id);
+  selected=selectedIds.includes(pending.id)?pending.id:selectedIds.at(-1)||null;
+  pendingLayerRevealId=selected;
+  renderSelectionOnly();
+  return;
+ }
+ const refreshTouchSelection=e.pointerType==='touch'&&drag?.mode==='move'&&drag.moved;setMoveCopyMode(e.ctrlKey);clearAlignmentGuides();if(drag?.mode==='marquee'){let activeDrag=drag,box=activeDrag.box;box?.remove();if(activeDrag.moved){let left=Math.min(activeDrag.startX,e.clientX),top=Math.min(activeDrag.startY,e.clientY),right=Math.max(activeDrag.startX,e.clientX),bottom=Math.max(activeDrag.startY,e.clientY),boardBounds=stage.getBoundingClientRect(),viewport=document.querySelector('.object-layout-rect'),viewportRect=viewport.getBoundingClientRect(),viewportBounds={left:viewportRect.left+viewport.clientLeft,top:viewportRect.top+viewport.clientTop,right:viewportRect.left+viewport.clientLeft+viewport.clientWidth,bottom:viewportRect.top+viewport.clientTop+viewport.clientHeight},hits=current().filter(o=>{if(o.visible===false)return false;let node=Array.from(layer.children).find(el=>el.dataset.id===o.id);if(!node)return false;let b=node.getBoundingClientRect();return marqueeContainsVisibleObject(b,{left,top,right,bottom},boardBounds,viewportBounds)}).map(o=>o.id);selectedIds=activeDrag.additive?[...new Set([...activeDrag.initialIds,...hits])]:hits;selected=selectedIds[selectedIds.length-1]||null}if(e.pointerType==='mouse'&&selectedIds.length===1)pendingLayerRevealId=selectedIds[0];drag=null;renderSelectionOnly();return}let shouldRender=false,copiedLayerIds=[],structuralChange=!!(drag?.mode==='move'&&drag.ctrlAtStart);if(drag?.mode==='move'&&drag.ctrlAtStart){let validClone=drag.moved&&e.ctrlKey&&!drag.ctrlBroken;if(!validClone){current().splice(0,current().length,...current().filter(item=>!drag.ids.includes(item.id)));selectedIds=drag.originalIds;selected=selectedIds[selectedIds.length-1]||null}else{recordHistory(drag.beforeData);save();renderInspector();copiedLayerIds=drag.ids.slice()}shouldRender=true}else if(drag?.moved){recordHistory(drag.beforeData);save();renderInspector()}drag=null;stage.classList.remove('ctrl-copy');if(refreshTouchSelection)shouldRender=true;if(shouldRender){if(structuralChange)renderAndSave();else renderSelectionOnly()}if(copiedLayerIds.length)revealMovedLayers(copiedLayerIds)});
 
 document.addEventListener('pointercancel',e=>{if(!drag||drag.pointerId!==undefined&&drag.pointerId!==e.pointerId)return;if(cancelObjectDrag())return;const cancelled=drag;drag=null;cancelled.box?.remove();clearAlignmentGuides();stage.classList.remove('ctrl-copy');if(cancelled.beforeData)data=JSON.parse(cancelled.beforeData);else if(cancelled.moved){recordHistory();save()}selected=null;selectedIds=[];renderAndSave()});
 
@@ -778,6 +836,30 @@ document.addEventListener('pointerdown',finishKeyboardNudge,true);
 window.addEventListener('blur',finishKeyboardNudge);
 
 // Object-only shortcuts yield to inputs, other panes, dialogs and dedicated editors.
+function clipboardShortcutOwner(target){
+ if(!(target instanceof Element))return null;
+ if(target.isContentEditable||target.closest('input,select,textarea'))return 'native';
+ if(document.querySelector('dialog:modal')||window.Bolxiv?.pngPreview?.active||boardReadOnly||phaseComparisonActive()||data.activePhaseGroup)return null;
+ if(window.Bolxiv?.fieldGuideEditor?.active){
+  if(window.Bolxiv.phaseMasters?.selectedGroupId)return null;
+  return target.closest('#stage,#fieldGuideEditor .guide-editor-canvas,#guideShapeMenu')?'guides':null;
+ }
+ if(window.Bolxiv?.phaseMasters?.active||target.closest('dialog'))return null;
+ return target.closest('#stage,#objectList,#objectContextMenu,#layerContextMenu,#canvasContextMenu')?'objects':null;
+}
+function objectShortcutSurface(target){
+ const menu=target.closest('#objectContextMenu,#layerContextMenu');
+ return target.closest('#objectList')||menu?._opener?.closest('#objectList')?document.getElementById('objectList'):stage;
+}
+document.addEventListener('keydown',event=>{
+ if(event.defaultPrevented||event.isComposing||event.altKey||event.shiftKey||!(event.ctrlKey||event.metaKey)||drag)return;
+ const key=event.key.toLowerCase();if(!['c','v'].includes(key)||clipboardShortcutOwner(event.target)!=='objects')return;
+ if(key==='c'?!selectedIds.length:!clipboardObjects.length)return;
+ event.preventDefault();event.stopImmediatePropagation();const surface=objectShortcutSurface(event.target);
+ closeObjectContextMenu();document.getElementById('canvasContextMenu')?.dispatchEvent(new Event('dismiss-canvas-menu'));
+ if(key==='c')copyObjectsToClipboard(selectedIds);else pasteClipboardObjects();
+ surface.tabIndex=-1;surface.focus({preventScroll:true});
+});
 document.addEventListener('keydown',event=>{
  if(event.defaultPrevented||event.isComposing||event.altKey||!(event.ctrlKey||event.metaKey)||event.target.isContentEditable||event.target.closest('input,select,textarea,dialog,#pages,#contentOptions,.left,#userPresetManager,[role="separator"]'))return;
  const key=event.key.toLowerCase();if(!['a','d','g'].includes(key)||key!=='g'&&event.shiftKey)return;
@@ -789,7 +871,31 @@ document.addEventListener('keydown',event=>{
 
 document.addEventListener('keydown',e=>{if(e.defaultPrevented||e.ctrlKey||e.metaKey||e.altKey||e.target.isContentEditable||e.target.closest('input,select,textarea,button,dialog,[role="separator"],[role="menu"],#pages')||document.querySelector('.comparison-pan-enabled'))return;if(nudgeSelectedObjects(e.key,e.repeat,e.shiftKey?10:1)){e.preventDefault();e.stopImmediatePropagation()}});
 
-document.addEventListener('keydown',e=>{if(e.target.matches('input,select,textarea')||e.target.isContentEditable)return;if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='c'){if(selectedIds.length){e.preventDefault();copyObjectsToClipboard(selectedIds)}}else if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='v'){if(clipboardObjects.length){e.preventDefault();pasteClipboardObjects()}}if((e.key==='ArrowUp'||e.key==='ArrowDown')&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&e.target.closest('#pages')){let next=data.page+(e.key==='ArrowUp'?-1:1);if(next>=0&&next<data.pages.length){e.preventDefault();selectPhase(next);document.querySelector('#pages .page-tab.active')?.focus()}}if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();if(e.shiftKey)redo();else undo()}else if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='y'){e.preventDefault();redo()}else if(e.key==='Delete'||e.key==='Backspace')deleteSelected();else if(e.key==='Escape'){cancelObjectDrag();pendingImage=null;tool='select';document.querySelectorAll('.tool').forEach(x=>x.classList.remove('active'));stage.style.removeProperty('cursor')}});
+stage.tabIndex=-1;
+stage.addEventListener('pointerdown',event=>{
+ if(event.pointerType==='mouse'&&event.button===0&&!event.target.closest('input,textarea,select,button,[contenteditable="true"]'))stage.focus({preventScroll:true});
+},true);
+document.getElementById('objectList').addEventListener('pointerdown',event=>{
+ if(event.pointerType!=='mouse'||event.button!==0||event.target.closest('input,textarea,select,button,[contenteditable="true"]'))return;
+ if(event.target.closest('.object-row')){
+  event.currentTarget.tabIndex=-1;
+  event.currentTarget.focus({preventScroll:true});
+ }
+},true);
+document.addEventListener('keydown',event=>{
+ if(event.defaultPrevented||event.isComposing||event.ctrlKey||event.metaKey||event.altKey||event.shiftKey||boardReadOnly||phaseComparisonActive())return;
+ const target=event.target;
+ if(!(target instanceof Element)||target.closest('input,select,textarea,[contenteditable="true"],dialog,[role="menu"]'))return;
+ if(event.key!=='Delete'&&event.key!=='Backspace')return;
+ if(clipboardShortcutOwner(target)==='objects'&&target.closest('#stage,#objectList')){
+  event.preventDefault();deleteSelected();return;
+ }
+ if(event.key!=='Delete'||event.repeat||selectedPhaseIndexes.length>1||window.Bolxiv?.phaseMasters?.active||window.Bolxiv?.pngPreview?.active)return;
+ const row=target.closest('#pages .page-tab:not(.renaming)');
+ const button=row?.querySelector('.page-tab-x:not(:disabled)');
+ if(button){event.preventDefault();button.click()}
+});
+document.addEventListener('keydown',e=>{if(e.target.matches('input,select,textarea')||e.target.isContentEditable)return;if((e.key==='ArrowUp'||e.key==='ArrowDown')&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&e.target.closest('#pages')){let next=data.page+(e.key==='ArrowUp'?-1:1);if(next>=0&&next<data.pages.length){e.preventDefault();selectPhase(next);document.querySelector('#pages .page-tab.active')?.focus()}}if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();if(e.shiftKey)redo();else undo()}else if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='y'){e.preventDefault();redo()}else if(e.key==='Escape'){cancelObjectDrag();pendingImage=null;tool='select';document.querySelectorAll('.tool').forEach(x=>x.classList.remove('active'));stage.style.removeProperty('cursor')}});
 
 $('#undo').onclick=undo;
 

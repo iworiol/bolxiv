@@ -30,7 +30,8 @@
  .phone-view-content .page-controls { display:flex; flex-direction:column; margin-top:8px!important; height:auto!important; min-height:36px!important; }
  .phone-view-content .phase-heading-row { flex:none; }
  .phone-view-content>.content-select-row { flex:none; }
- .phone-view-content:has(#toggleBattlePages[aria-expanded="false"]) .content-options { top:auto; bottom:calc(100% + 3px); }
+ #contentOptions[data-opens-above="true"]{top:auto;bottom:calc(100% + 3px)}
+ #contentOptions[data-opens-above="false"]{top:calc(100% + 3px);bottom:auto}
  .board-read-only .app .layout .right .phone-view-content>.page-controls:has(#toggleBattlePages[aria-expanded="true"]) { flex:1 1 0!important; height:auto!important; min-height:36px!important; margin-bottom:0!important; }
  .board-read-only .app .layout .right .phone-view-content>.page-controls:has(#toggleBattlePages[aria-expanded="false"]) { flex:0 0 36px!important; margin-bottom:0!important; }
  .phone-view-content #toggleBattlePages { width:100%; min-height:36px; }
@@ -792,20 +793,24 @@
 @media(min-width:851px){.board-read-only .app .layout.desktop-phase-tools #desktopPhasePanelTitle:disabled{opacity:1!important;color:#33445f!important;-webkit-text-fill-color:#33445f!important}}
 
 /* ===== css/phone-object-tabs.css ===== */
+.app{--panel-heading-height:36px}
 .panel-view-header{display:none}
+.panel-view-header>button[hidden]{display:none!important}
 @media(max-width:850px){
  .app .layout[data-phone-pane="canvas"] #objectLayerPanel#objectLayerPanel#objectLayerPanel.phone-object-tabbed>.property-group{grid-column:1/3!important;grid-row:2!important;width:100%!important}
  .app .layout[data-phone-pane="canvas"] #objectLayerPanel#objectLayerPanel#objectLayerPanel.phone-object-tabbed[data-object-tab="list"]>.property-group:not(.layer-list-group),
  .app .layout[data-phone-pane="canvas"] #objectLayerPanel#objectLayerPanel#objectLayerPanel.phone-object-tabbed[data-object-tab="properties"]>.layer-list-group{display:none!important}
  .app .layout[data-phone-pane="canvas"] #objectLayerPanel#objectLayerPanel#objectLayerPanel#objectLayerPanel.phone-object-tabbed :is(#toggleLayers,#toggleInspector){display:none!important}
- .phone-object-tabbed>.property-group>.panel-view-header,.phone-phase-list-tabbed>.phone-list-property-group>.panel-view-header{display:flex;align-items:center;flex:0 0 auto;gap:6px;min-height:36px;padding:3px 6px 3px 11px;background:#eef2f7;color:#33445f}
- .phone-object-tabs-title{flex:1;min-width:0;font-size:14px;overflow-wrap:anywhere;line-height:1.4}
+ .phone-object-tabbed>.property-group>.panel-view-header,.phone-phase-list-tabbed>.phone-list-property-group>.panel-view-header{display:flex;align-items:center;flex:0 0 auto;gap:6px;min-height:var(--panel-heading-height);padding:3px 6px 3px 11px;background:#eef2f7;color:#33445f}
+ .phone-object-tabs-title{flex:1;min-width:0;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.4}
  .phone-object-tabs button{display:grid;place-items:center;flex:none;width:26px;height:26px;min-height:26px;border:1px solid #d0d4da;border-radius:6px;background:#eef2f7;color:#33445f;padding:3px;font-size:14px}
  .phone-object-tabs button svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
  .app .layout .phone-object-tabs .phone-object-collapse{border:0!important;background:#eef2f7!important;color:#33445f!important;-webkit-text-fill-color:#33445f!important;box-shadow:none!important}
  .app .layout .phone-object-tabs button{background:#eef2f7!important;color:#33445f!important;-webkit-text-fill-color:#33445f!important}
  .app .layout .phone-object-tabs button:active{background:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
  .phone-object-tabs-title{cursor:pointer;-webkit-tap-highlight-color:transparent}
+ .phone-object-tabs[data-collapsible="false"]>.phone-object-collapse{display:none!important}
+ .phone-object-tabs[data-collapsible="false"]>.phone-object-tabs-title{cursor:default;pointer-events:none}
  body .app .layout .phone-object-tabs:has(:is(.phone-object-tabs-title,.phone-object-collapse):is(:active,.phone-control-pressed)){background:var(--press-bg,var(--blue))!important;color:var(--press-fg,#fff)!important;-webkit-text-fill-color:var(--press-fg,#fff)!important}
  body .app .layout .phone-object-tabs,body .app .layout .phone-object-tabs button,body .app .layout .phone-object-tabs button:is(:hover,:focus,:focus-visible,:active,.phone-control-pressed){background:#eef2f7!important;color:#33445f!important;-webkit-text-fill-color:#33445f!important;-webkit-tap-highlight-color:transparent}
  body .app .layout .phone-object-tabs *,body .app .layout .phone-object-tabs button:is(:active,.phone-control-pressed) *{color:#33445f!important;-webkit-text-fill-color:#33445f!important}
@@ -1236,9 +1241,9 @@ body .app .layout #contentSelect::after{
 /* One shared reader disclosure for phase selection and notes. */
 .phone-reader-tabs{display:none}
 @media(max-width:850px){
- .board-read-only .phone-view-content:not(.png-reader-controls)>.phone-reader-tabs{display:flex;align-items:center;flex:0 0 38px;height:38px;margin-top:8px;padding:0 5px 0 11px;gap:6px;border:1px solid #d0d4da;border-radius:7px 7px 0 0;background:#eef2f7;color:#33445f}
+ .board-read-only .phone-view-content:not(.png-reader-controls)>.phone-reader-tabs{display:flex;align-items:center;flex:0 0 var(--panel-heading-height);height:var(--panel-heading-height);margin-top:8px;padding:0 5px 0 11px;gap:6px;border:1px solid #d0d4da;border-radius:7px 7px 0 0;background:#eef2f7;color:#33445f}
  .phone-reader-tabs button{font:inherit;color:inherit;background:transparent;padding:0;border:0}
- .phone-reader-title{flex:1;min-width:0;text-align:left;height:36px}
+ .phone-reader-title{flex:1;min-width:0;text-align:left;height:100%}
  .phone-reader-switch,.phone-reader-collapse{display:grid;place-items:center;flex:0 0 28px;width:28px;height:28px;border-radius:4px!important}
  .phone-reader-switch svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
  .phone-reader-collapse{font-size:16px!important;font-weight:700!important}
@@ -1707,7 +1712,7 @@ body .app .layout #objectList>.object-group-row>.object-delete{grid-column:5;gri
 @media(min-width:851px){
 .app .layout>.left:not(.preset-registering):not(.pinned):not(.palette-hover-open):not(:focus-within)>.material-categories-scroll{padding-right:0;scrollbar-gutter:auto}
 .app .layout>.left:not(.preset-registering):not(.pinned):not(.palette-hover-open):not(:focus-within) .accordion-group{border:0!important;overflow:visible!important;background:transparent!important;box-shadow:none!important}
-.app .layout>.left:not(.preset-registering):not(.pinned):not(.palette-hover-open):not(:focus-within) .accordion-group>.accordion-toggle[data-rail-icon][aria-expanded]{box-sizing:border-box;width:34px!important;min-width:34px!important;max-width:34px!important;height:34px!important;min-height:34px!important;max-height:34px!important;border:1px solid #999!important;border-radius:7px!important}
+.app .layout>.left:not(.preset-registering):not(.pinned):not(.palette-hover-open):not(:focus-within) .accordion-group>.accordion-toggle[data-rail-icon][aria-expanded]{box-sizing:border-box;width:36px!important;min-width:36px!important;max-width:36px!important;height:36px!important;min-height:36px!important;max-height:36px!important;border:1px solid #999!important;border-radius:7px!important}
 }
 
 @media(max-width:850px){.left>#userPresetManager .preset-manager-title-icon{display:none}}
@@ -1853,7 +1858,7 @@ body .app .layout #objectList>.object-group-row>.object-delete{grid-column:5;gri
 #fieldGuideEditor #fieldGuideSettings .field-guide-check input,#fieldGuideEditor .guide-hide-objects input,#fieldGuideEditor input[type="range"]{accent-color:auto}
 #fieldGuideEditor .guide-properties-body .layout-background-colors .color-trigger{padding-left:4px;padding-right:4px;gap:4px}
 .field-guide-editing #editModeToggle:disabled{opacity:.45;}
-.field-guide-editing .phone-phase-navigation{display:none!important}
+.field-guide-editing:not(.phase-master-editing) .phone-phase-navigation{display:none!important}
 .field-guide-editing .left :is(.tool,.icon-choice){opacity:.45;cursor:not-allowed}
 #fieldGuideEditor.guide-editor-dialog .btn:not(:where(.guide-editor-properties *)){background:#eef2f7!important;color:#33445f!important;-webkit-text-fill-color:#33445f!important;border:1px solid #cbd3df!important}
 #fieldGuideEditor.guide-editor-dialog .btn.primary,#fieldGuideEditor.guide-editor-dialog .btn[aria-pressed="true"]:not(:where(.guide-editor-properties *)),#fieldGuideEditor.guide-editor-dialog .btn:not(:where(.guide-editor-properties *)):enabled:is(:hover:not(:where(.phone-touch-mode *)),:active){background:var(--blue,#3182ce)!important;color:white!important;-webkit-text-fill-color:white!important;border-color:var(--blue,#3182ce)!important}
@@ -1941,6 +1946,13 @@ body .app .layout #contentPanel :is(.desktop-phase-shared-heading,.phone-phase-t
  #fieldGuideEditor.guide-editor-phone[open],#fieldGuideEditor.guide-editor-phone>.guide-editor-content{display:contents}
  #fieldGuideEditor.guide-editor-phone>.guide-editor-heading,#fieldGuideEditor.guide-editor-phone .guide-editor-preview{display:none!important}
  #fieldGuideEditor.guide-editor-phone .guide-editor-properties{grid-row:2;grid-column:1/-1;margin:0;min-height:0;align-self:stretch}
+ #fieldGuideEditor.guide-editor-phone .guide-properties-title{display:none}
+ #fieldGuideEditor.guide-editor-phone .phone-guide-properties-header{display:flex;align-items:center;flex:0 0 var(--panel-heading-height);box-sizing:border-box;height:var(--panel-heading-height);gap:6px;padding:3px 6px 3px 11px;border-bottom:1px solid #cbd3df;background:#eef2f7;color:#33445f}
+ #fieldGuideEditor.guide-editor-phone .phone-guide-properties-header>.phone-object-collapse{margin-left:auto}
+ #fieldGuideEditor.guide-editor-phone .phone-guide-properties-header>#editFieldGuides{display:none}
+ body.field-guide-editing .layout[data-phone-pane="canvas"] #objectLayerPanel#objectLayerPanel#objectLayerPanel:has(#fieldGuideEditor.phone-properties-collapsed){grid-template-rows:minmax(0,1fr) 38px!important}
+ #fieldGuideEditor.guide-editor-phone.phone-properties-collapsed .guide-editor-properties{height:38px;min-height:38px}
+ #fieldGuideEditor.guide-editor-phone.phone-properties-collapsed .phone-guide-properties-header{border-bottom:0}
  #fieldGuideEditor.guide-editor-phone :is(#guideUndo,#guideRedo){display:none!important}
  body.field-guide-editing #stage>.guide-editor-overlay{z-index:100;pointer-events:auto}
  body.field-guide-editing:has(#guideHideObjects:checked) #stage>.object-clip{visibility:hidden!important}
@@ -2275,6 +2287,7 @@ body.phase-master-editing .app .layout :is(.content-heading-row,.right .board-ti
  .phone-phase-list-tabbed .phone-object-tabs>.phone-list-property-change{margin-right:auto}
  .phone-phase-list-tabbed .phone-object-tabs>.phase-heading-actions{position:static;display:flex}
  .app .phone-phase-list-tabbed .phone-object-tabs>.phone-object-collapse{margin-left:0!important}
+ .phone-phase-list-tabbed .phone-object-tabs[data-collapsible="false"]::after{content:"";flex:0 0 26px;width:26px;height:26px;pointer-events:none}
 }
 
 /* Frame sizing belongs to the panel, not each screen's collapse handler. */
@@ -2284,7 +2297,7 @@ body.phase-master-editing .app .layout :is(.content-heading-row,.right .board-ti
  :is(.phone-phase-list-tabbed,.phone-object-tabbed,.output-selection-tabbed) [data-panel-scroll]{min-height:0;overflow-y:auto}
 }
 
-@media(max-width:850px){.output-selection-tabbed>.output-tab-group>.output-switch-tabs{display:flex;align-items:center;gap:6px;min-height:36px;padding:3px 6px 3px 11px;background:#eef2f7;color:#33445f}.output-selection-tabbed>.output-tab-inactive{display:none!important}}
+@media(max-width:850px){.output-selection-tabbed>.output-tab-group>.output-switch-tabs{display:flex;align-items:center;gap:6px;min-height:var(--panel-heading-height);padding:3px 6px 3px 11px;background:#eef2f7;color:#33445f}.output-selection-tabbed>.output-tab-inactive{display:none!important}}
 
 .board-read-only:not(.png-preview-active) :is(.phone-content-icon,.phone-content-close,.phone-content-backdrop){display:none!important}
 
@@ -2402,3 +2415,6 @@ body.phase-master-editing .app .layout :is(.content-heading-row,.right .board-ti
 }
 
 .image4-image-actions svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+
+/* Bulk numeric properties: mixed values keep their layout and use an orange accent. */
+#inspector input[type="range"].property-value-mixed{accent-color:#d97706}
