@@ -270,15 +270,33 @@ function placeBuiltinFieldMarkers(cx,cy){
 ;
 // ===== js/canvas/palette-drag-state.js =====
 (()=>{
- const pane=document.querySelector('.left');
- function clear(){pane.querySelectorAll('.palette-dragging').forEach(button=>button.classList.remove('palette-dragging'))}
+ const pane=document.querySelector('.left');let nativeDragImage=null;
+ function clear(){nativeDragImage?.remove();nativeDragImage=null;pane.querySelectorAll('.palette-dragging').forEach(button=>button.classList.remove('palette-dragging'))}
  pane.addEventListener('dragstart',e=>{
  clear();const button=e.target.closest('.tool[data-tool],.icon-choice');if(!button)return;button.classList.add('palette-dragging');
+ if(button.classList.contains('user-preset')){
+  const bitmap=userPresetLibrary.dragImage(button.dataset.presetId);
+  if(!bitmap){e.preventDefault();clear();notify('プリセットのプレビューを準備中です。少し待ってからもう一度ドラッグしてください。');return}
+  // A flat bitmap has no transformed DOM bounds for Chromium to include.
+  const image=document.createElement('canvas');image.width=image.height=48;image.className='palette-native-drag-image';image.setAttribute('aria-hidden','true');
+  image.style.cssText='position:fixed;left:-10000px;top:0;width:48px;height:48px;pointer-events:none;border:0;padding:0;margin:0;';
+  image.getContext('2d').drawImage(bitmap,0,0,48,48);document.body.append(image);nativeDragImage=image;e.dataTransfer.setDragImage(image,24,24);return;
+ }
+
  const artwork=button.querySelector('.preset-thumbnail')||button.querySelector('img,.glyph');if(!artwork||!e.dataTransfer)return;
  const preview=document.createElement('div');preview.style.cssText='position:fixed;left:-10000px;top:0;width:48px;height:48px;display:grid;place-items:center;background:transparent;border:0;box-shadow:none;pointer-events:none;';
  const clone=artwork.cloneNode(true);clone.style.cssText='display:grid;place-items:center;width:48px;height:48px;max-width:none;max-height:none;background:transparent;border:0;box-shadow:none;color:#f39c12;font-size:32px;';
- if(artwork.classList.contains('preset-thumbnail')&&!artwork.querySelector('.user-preset-scene')){clone.style.display='block';clone.style.position='relative';for(const img of clone.querySelectorAll('img')){img.style.position='absolute';img.style.width=img.style.height=(48*8/26)+'px';img.style.maxWidth=img.style.maxHeight='none';img.style.transform='translate(-50%,-50%)'}}
- const svg=clone.querySelector('svg');if(svg){svg.style.width='48px';svg.style.height='48px'}preview.append(clone);document.body.append(preview);e.dataTransfer.setDragImage(preview,24,24);setTimeout(()=>preview.remove(),0);
+ if(artwork.classList.contains('preset-thumbnail')){
+  // Thumbnail scenes use a 26px coordinate system. Scale the whole frame,
+  // keeping the artwork center aligned with the 48px drag image hotspot.
+  clone.style.cssText='display:block;position:absolute;left:0;top:0;width:26px;height:26px;transform:scale('+(48/26)+');transform-origin:0 0;background:transparent;border:0;box-shadow:none;';
+  preview.style.display='block';
+  if(!artwork.querySelector('.user-preset-scene'))for(const img of clone.querySelectorAll('img')){
+   if(artwork.closest('.builtin-preset')){img.style.position='absolute';img.style.width=img.style.height='8px';img.style.maxWidth=img.style.maxHeight='none';img.style.transform='translate(-50%,-50%)'}
+  }
+ }else{const svg=clone.querySelector('svg');if(svg){svg.style.width='48px';svg.style.height='48px'}}
+ preview.append(clone);
+ document.body.append(preview);e.dataTransfer.setDragImage(preview,24,24);setTimeout(()=>preview.remove(),0);
 });
  document.addEventListener('dragend',clear);document.addEventListener('drop',clear);window.addEventListener('blur',clear);
 })();
@@ -724,7 +742,7 @@ function confirmPhoneLayerDeletion(id,individual=false){
   ],
   [
     ".list-drag-grip",
-    "つかんで上下に動かすと、リストを並べ替えます。"
+    "長押しして動かすと並べ替えます。すぐ縦に動かすとスクロールします。"
   ],
   [
     ".phase-group-toggle",
@@ -855,6 +873,7 @@ function confirmPhoneLayerDeletion(id,individual=false){
     if(guides&&selector==='#redo')description='元に戻した操作をやり直します。';
     if(selector==='#outputPrintButton')description='用紙プレビューの設定で印刷します。PDF保存は印刷画面で選びます。';
     if(selector==='#toggleBattlePages')description='フェーズリストを開閉します。';
+    if(selector==='.list-drag-grip'&&matchMedia('(min-width:851px)').matches)description='つかんで上下に動かすと、リストを並べ替えます。';
     if(selector==='.phase-select-check'&&(png||boardReadOnly))description='フェーズをチェックして並べて表示します。';
     if(selector==='#fitBoardZoom')description='全体が収まる倍率で表示します。出力サイズは変わりません。';
     if(selector.startsWith('.phone-phase-navigation'))description=(selector.includes('first-child')?'前':'次')+'の'+(fieldMode?'フィールド':'フェーズ')+'へ移動します。';
@@ -869,7 +888,8 @@ function confirmPhoneLayerDeletion(id,individual=false){
    ['.phone-reader-switch',png?'⇄で、フェーズリストと'+outputProperties+'を切り替えます。':'⇄で、フェーズリストとノートを切り替えます。'],
    ['.phone-reader-collapse',png?outputProperties+'欄を開閉します。':'フェーズリスト／ノートの共通枠を開閉します。'],
    ['#objectLayerPanel .phone-list-property-change','オブジェクトリストとオブジェクトプロパティを切り替えます。'],
-   ['#objectLayerPanel .phone-object-collapse','オブジェクト欄を開閉します。'],
+   ['#objectLayerPanel .phone-object-collapse',fieldMode?'フィールドプロパティを開閉します。閉じると編集用の盤面が広がります。':'オブジェクト欄を開閉します。'],
+   ['#inspector .property-value-mixed','オレンジは設定値が混在する項目です。最初の選択値を表示し、操作すると編集可能な対象をそろえます。'],
   ]){const node=find(selector);if(node)contextual.push({selector,description,node})}
   const helpTitles={
    '.output-selection-tabbed .phone-list-property-change':'フェーズリスト・出力設定の切り替え','.output-selection-tabbed .phone-object-collapse':'出力の欄を開閉',
@@ -886,7 +906,7 @@ function confirmPhoneLayerDeletion(id,individual=false){
    '.phone-display-menu-toggle':'キャンバスの表示設定','#fitBoardZoom':'キャンバス全体を表示','#zoomOut':'キャンバスを縮小','#zoomIn':'キャンバスを拡大',
    '.phone-reader-switch':png?'フェーズリスト・'+outputProperties+'の切り替え':'フェーズリスト・ノートの切り替え',
    '.phone-reader-collapse':png?outputProperties+'欄を開閉':'フェーズリスト・ノート欄を開閉',
-   '#objectLayerPanel .phone-list-property-change':'オブジェクトリスト・プロパティの切り替え','#objectLayerPanel .phone-object-collapse':'オブジェクト欄を開閉'
+   '#objectLayerPanel .phone-list-property-change':'オブジェクトリスト・プロパティの切り替え','#objectLayerPanel .phone-object-collapse':fieldMode?'フィールドプロパティを開閉':'オブジェクト欄を開閉','#inspector .property-value-mixed':'設定値の混在'
   };
   // Follow the same top-to-bottom, left-to-right order as the current screen.
   const anchorFor=entry=>entry.node||find(entry.selector==='help-object-visibility'?'#visibleInput':entry.selector==='help-object-lock'?'#editableInput':entry.selector==='help-number-step'?'.phone-number-step-buttons':'.page-tab-input,.content-option-input');
@@ -1190,9 +1210,16 @@ const userPresetLibrary=(()=>{
  function liveThumbnail(items){return createPresetArtworkThumbnail(items)}
  const thumbnailCache=new Map(),thumbnailJobs=[];let thumbnailRunning=false;
  function thumbnailImage(url){const image=new Image();image.src=url;image.alt='';image.style.cssText='display:block;width:26px!important;height:26px!important;max-width:none!important;max-height:none!important';return image}
- function scheduleThumbnail(){if(thumbnailRunning||!thumbnailJobs.length)return;thumbnailRunning=true;const run=async()=>{const job=thumbnailJobs.shift(),host=document.createElement('div');host.className='left pinned';host.setAttribute('aria-hidden','true');host.style.cssText='display:block!important;position:fixed!important;left:-10000px!important;top:0!important;width:26px!important;height:26px!important;padding:0!important;border:0!important;overflow:hidden!important;pointer-events:none!important';const source=liveThumbnail(job.items);source.style.cssText='display:block;position:relative;width:26px;height:26px;overflow:hidden';host.append(source);document.body.append(host);try{const bitmap=await rasterizePngSource(source,3);job.url=bitmap.toDataURL('image/png');for(const node of job.nodes)if(node.isConnected)node.replaceChildren(thumbnailImage(job.url))}catch{thumbnailCache.delete(job.key)}finally{host.remove();job.nodes.clear();thumbnailRunning=false;scheduleThumbnail()}};if(window.requestIdleCallback)requestIdleCallback(run,{timeout:1000});else setTimeout(run,0)}
- function thumbnail(items){if(matchMedia('(min-width:851px)').matches)return liveThumbnail(items);const key=JSON.stringify(items);let cached=thumbnailCache.get(key);if(cached?.url){const thumb=document.createElement('span');thumb.className='preset-thumbnail';thumb.setAttribute('aria-hidden','true');thumb.append(thumbnailImage(cached.url));return thumb}const thumb=liveThumbnail(items);if(!cached){cached={key,items:JSON.parse(key),nodes:new Set(),url:null};thumbnailCache.set(key,cached);thumbnailJobs.push(cached);if(thumbnailCache.size>200)thumbnailCache.delete(thumbnailCache.keys().next().value)}cached.nodes.add(thumb);scheduleThumbnail();return thumb}
- function render(){grid.replaceChildren();empty.hidden=presets.length>0;for(const preset of presets){const button=document.createElement('button');button.type='button';button.className='icon-choice user-preset';button.dataset.presetId=preset.id;button.title=preset.name;button.setAttribute('aria-label',preset.name);button.draggable=true;button.disabled=blocked();button.append(thumbnail(preset.items));const icon={name:preset.name,userPresetId:preset.id};button.onclick=()=>{if(!blocked())selectPlacementIcon(icon)};button.ondragstart=e=>{if(blocked()){e.preventDefault();return}selectPlacementIcon(icon,false);e.dataTransfer.setData('application/x-tactica',JSON.stringify({type:'icon',...icon}));e.dataTransfer.effectAllowed='copy'};
+ function scheduleThumbnail(){if(thumbnailRunning||!thumbnailJobs.length)return;thumbnailRunning=true;const run=async()=>{const job=thumbnailJobs.shift(),host=document.createElement('div');host.className='left pinned';host.setAttribute('aria-hidden','true');host.style.cssText='display:block!important;position:fixed!important;left:-10000px!important;top:0!important;width:26px!important;height:26px!important;padding:0!important;border:0!important;overflow:hidden!important;pointer-events:none!important';const source=liveThumbnail(job.items);source.style.cssText='display:block;position:relative;width:26px;height:26px;overflow:hidden';host.append(source);document.body.append(host);try{const bitmap=await rasterizePngSource(source,3);job.bitmap=bitmap;job.url=bitmap.toDataURL('image/png');for(const node of job.nodes)if(node.isConnected)node.replaceChildren(thumbnailImage(job.url))}catch{thumbnailCache.delete(job.key)}finally{host.remove();job.nodes.clear();thumbnailRunning=false;scheduleThumbnail()}};if(window.requestIdleCallback)requestIdleCallback(run,{timeout:1000});else setTimeout(run,0)}
+ function thumbnail(items){
+  const desktop=matchMedia('(min-width:851px)').matches,key=JSON.stringify(items);let cached=thumbnailCache.get(key);
+  if(!cached){cached={key,items:JSON.parse(key),nodes:new Set(),url:null,bitmap:null};thumbnailCache.set(key,cached);thumbnailJobs.push(cached);if(thumbnailCache.size>200)thumbnailCache.delete(thumbnailCache.keys().next().value)}
+  if(!desktop&&cached.url){const thumb=document.createElement('span');thumb.className='preset-thumbnail';thumb.setAttribute('aria-hidden','true');thumb.append(thumbnailImage(cached.url));return thumb}
+  const thumb=liveThumbnail(items);if(!desktop)cached.nodes.add(thumb);scheduleThumbnail();return thumb;
+ }
+
+ function dragImage(id){const preset=presets.find(p=>p.id===id);if(!preset)return null;const key=JSON.stringify(preset.items),cached=thumbnailCache.get(key);if(!cached)thumbnail(preset.items);return cached?.bitmap||null}
+ function render(){grid.replaceChildren();empty.hidden=presets.length>0;for(const preset of presets){const button=document.createElement('button');button.type='button';button.className='icon-choice user-preset';button.dataset.presetId=preset.id;button.title=preset.name;button.setAttribute('aria-label',preset.name);button.draggable=true;button.disabled=blocked();button.append(thumbnail(preset.items));button.onpointerenter=()=>{if(matchMedia('(min-width:851px)').matches)dragImage(preset.id)};const icon={name:preset.name,userPresetId:preset.id};button.onclick=()=>{if(!blocked())selectPlacementIcon(icon)};button.ondragstart=e=>{if(blocked()){e.preventDefault();return}selectPlacementIcon(icon,false);e.dataTransfer.setData('application/x-tactica',JSON.stringify({type:'icon',...icon}));e.dataTransfer.effectAllowed='copy'};
   function actions(){show(button,[['名前変更',()=>renamePreset(preset),blocked()],['削除',()=>deletePreset(preset.id),blocked()]])}
   button.oncontextmenu=e=>{e.preventDefault();e.stopPropagation();if(!matchMedia('(max-width:850px)').matches)actions()};grid.append(button)}}
  let editingPreset=null,presetDraft=null;
@@ -1287,7 +1314,7 @@ const userPresetLibrary=(()=>{
  function confirmPresetReplace(count){return new Promise(resolve=>{presetReplaceDialog.querySelector('[data-preset-import-summary]').textContent='現在のユーザープリセット（'+presets.length+'件）を、読み込んだデータ（'+count+'件）に置き換えます。';let done=false;const finish=accepted=>{if(done)return;done=true;presetReplaceDialog.oncancel=null;presetReplaceDialog.onclose=null;presetReplaceDialog.close();resolve(accepted)};presetReplaceDialog.querySelector('[data-preset-import-cancel]').onclick=()=>finish(false);presetReplaceDialog.querySelector('[data-preset-import-confirm]').onclick=()=>finish(true);presetReplaceDialog.oncancel=event=>{event.preventDefault();finish(false)};presetReplaceDialog.onclose=()=>finish(false);presetReplaceDialog.showModal()})}
  function choosePresetImport(mode){if(blocked()||editingPreset){notify('編集モードで名前入力を終えてから読み込んでください');return}presetImportMode=mode==='replace'?'replace':'append';presetImportInput.value='';presetImportInput.click()}
  presetImportInput.onchange=async()=>{const file=presetImportInput.files[0],mode=presetImportMode;if(!file)return;try{const imported=await withDesktopDisplayBusy(async()=>parsePresetFile(await file.text()));if(mode==='replace'&&!await confirmPresetReplace(imported.length))return;if(blocked()||editingPreset)throw new Error('編集モードで名前入力を終えてから読み込んでください');if(mode==='append'&&!imported.length){notify('追加するプリセットがありません');return}if(save(mode==='append'?[...presets,...imported]:imported,{label:mode==='append'?'追加読み込み':'全置き換え'})){if(activeIcon?.userPresetId&&!presets.some(preset=>preset.id===activeIcon.userPresetId)){setTapPlacementArmed(false);selectPlacementTool('select')}importedPresetToReveal=imported[0]?.id||null;requestAnimationFrame(revealImportedPreset);notify((mode==='append'?imported.length+'件のユーザープリセットを追加しました':'ユーザープリセットを'+imported.length+'件に置き換えました')+(imported[0]?'（先頭：「'+imported[0].name+'」）':''))}}catch(error){console.error('Preset import failed',error);notifyFailure('ユーザープリセットを読み込めませんでした',{error,retained:'保存済みのプリセットは変更していません',action:'ユーザープリセット用JSONを選び直してください。コンテンツ用JSONはコンテンツの読み込み項目を選んでください'})}finally{presetImportInput.value=''}};
- document.addEventListener('board-view-mode-changed',()=>{render();syncPresetHistory()});document.addEventListener('keydown',event=>{if(manager.hidden||editingPreset||!materialPane.contains(event.target)||event.target.closest('input,textarea,[contenteditable="true"]')||!(event.ctrlKey||event.metaKey))return;const key=event.key.toLowerCase();if(key==='z'||key==='y'){event.preventDefault();event.stopImmediatePropagation();restorePresetHistory(key==='y'||event.shiftKey)}},true);render();syncPresetHistory();return {place,exportAll:exportPresets,chooseImport:choosePresetImport,registerSelection:(asSvg=false)=>{if(selectionHasImportedImages()){notify('画像を含む選択はプリセットに登録できません');return}const originals=current().filter(o=>selectedIds.includes(o.id));if(blocked()||(originals.length<2&&!(asSvg&&originals.length===1&&originals[0].type==='icon'&&originals[0].svgPreset===true)))return;const layout=document.querySelector('.layout'),phone=matchMedia('(max-width:850px)').matches,wasManaging=!manager.hidden,wasOpen=phone?layout.classList.contains('phone-materials-open'):materialPane.matches('.pinned,.palette-hover-open,:focus-within'),scroll=wasManaging?manager.scrollTop:materialCategories.scrollTop;const restore=()=>{if(!wasManaging)closeManager();if(wasManaging)manager.scrollTop=scroll;else materialCategories.scrollTop=scroll;if(!wasOpen){if(materialPane.contains(document.activeElement))document.activeElement.blur();materialPane.dispatchEvent(new Event('reset-material-hover'));if(phone)document.dispatchEvent(new Event('close-material-pane'))}else if(!phone)manage.focus({preventScroll:true})};if(matchMedia('(max-width:850px)').matches&&!document.querySelector('.layout').classList.contains('phone-materials-open'))document.querySelector('.phone-material-pin')?.click();manage.focus({preventScroll:true});openManager();try{registerSelection(restore,asSvg)}catch(error){restore();notifyFailure('SVG画像を登録できませんでした',{error})}},thumbnail:id=>{const p=presets.find(p=>p.id===id);return p?liveThumbnail(p.items):null}};
+ document.addEventListener('board-view-mode-changed',()=>{render();syncPresetHistory()});document.addEventListener('keydown',event=>{if(manager.hidden||editingPreset||!materialPane.contains(event.target)||event.target.closest('input,textarea,[contenteditable="true"]')||!(event.ctrlKey||event.metaKey))return;const key=event.key.toLowerCase();if(key==='z'||key==='y'){event.preventDefault();event.stopImmediatePropagation();restorePresetHistory(key==='y'||event.shiftKey)}},true);render();syncPresetHistory();return {dragImage,place,exportAll:exportPresets,chooseImport:choosePresetImport,registerSelection:(asSvg=false)=>{if(selectionHasImportedImages()){notify('画像を含む選択はプリセットに登録できません');return}const originals=current().filter(o=>selectedIds.includes(o.id));if(blocked()||(originals.length<2&&!(asSvg&&originals.length===1&&originals[0].type==='icon'&&originals[0].svgPreset===true)))return;const layout=document.querySelector('.layout'),phone=matchMedia('(max-width:850px)').matches,wasManaging=!manager.hidden,wasOpen=phone?layout.classList.contains('phone-materials-open'):materialPane.matches('.pinned,.palette-hover-open,:focus-within'),scroll=wasManaging?manager.scrollTop:materialCategories.scrollTop;const restore=()=>{if(!wasManaging)closeManager();if(wasManaging)manager.scrollTop=scroll;else materialCategories.scrollTop=scroll;if(!wasOpen){if(materialPane.contains(document.activeElement))document.activeElement.blur();materialPane.dispatchEvent(new Event('reset-material-hover'));if(phone)document.dispatchEvent(new Event('close-material-pane'))}else if(!phone)manage.focus({preventScroll:true})};if(matchMedia('(max-width:850px)').matches&&!document.querySelector('.layout').classList.contains('phone-materials-open'))document.querySelector('.phone-material-pin')?.click();manage.focus({preventScroll:true});openManager();try{registerSelection(restore,asSvg)}catch(error){restore();notifyFailure('SVG画像を登録できませんでした',{error})}},thumbnail:id=>{const p=presets.find(p=>p.id===id);return p?liveThumbnail(p.items):null}};
 })();
 // Desktop keeps history/save status together and the mode next to the menu.
 (function placeDesktopModeBesideMenu(){

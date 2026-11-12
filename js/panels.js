@@ -622,11 +622,11 @@ function createPhoneListPropertyBar(options){return createPanelView(options)}
   {title:'元に戻す・やり直す',text:'ノート欄の外をクリックし、左上の「元に戻す」、続けて「やり直す」を押してください。入力したノートが戻れば完了です。',target:()=>get(session.sawUndo?'redo':'undo'),enter:()=>{session.note=data.pageNotes[data.page];session.notePage=data.page;session.sawUndo=false},done:()=>{const note=data.pageNotes?.[session.notePage]||'';if(note!==session.note)session.sawUndo=true;return session.sawUndo&&note===session.note}}
  ];
  const mobileSteps=[
-  {...steps[0],text:'「マテリアル」を開き、「AoE」の円範囲をタップします。一覧の外をタップして閉じ、キャンバスの空いている場所をタップして配置してください。',target:()=>document.querySelector('.layout').classList.contains('phone-materials-open')?document.querySelector('.left .tool[data-tool="circle"]'):document.querySelector('.phone-material-pin')},
+  {...steps[0],text:'オブジェクト欄の見出し左の図形ボタンを押し、的のアイコン「AoE」から円範囲をタップします。続いてキャンバスをタップして配置してください。',target:()=>document.querySelector('.layout').classList.contains('phone-materials-open')?document.querySelector('.left .tool[data-tool="circle"]'):document.querySelector('.phone-material-pin')},
   {...steps[1],enter:()=>{const item=circle();if(item){selected=item.id;selectedIds=[item.id];renderSelectionOnly()}const host=get('objectLayerPanel');if(host.dataset.objectTab!=='properties')get('toggleLayers').parentElement.querySelector('.phone-list-property-change').click();if(get('toggleInspector').getAttribute('aria-expanded')!=='true')get('toggleInspector').click()},text:'円範囲をタップして選び、画面下の「プロパティ」でサイズのスライダーを右へ動かし、150px以上にします。「リスト」が表示中なら切り替えボタン、「＋」ならそれを押して欄を開いてください。',target:()=>get('widthInput')?.getClientRects().length?get('widthInput'):document.querySelector('#objectLayerPanel .phone-object-tabs .phone-list-property-change')},
-  {...steps[2],title:'指で移動する',text:'円範囲を指でドラッグして、別の場所へ動かしてください。',target:()=>document.querySelector('#objects .obj')},
+  {...steps[2],enter:()=>{steps[2].enter();const item=circle();if(item){selected=item.id;selectedIds=[item.id];renderSelectionOnly()}},title:'指で移動する',text:'選択した円範囲の十字矢印をつかみ、別の場所へ動かしてください。',target:()=>document.querySelector('.move-handle')||document.querySelector('#objects .obj')},
   {...steps[3],text:'キャンバス左側の矢印からコンテンツを開き、フェーズリスト見出しの複製から「このコンテンツに複製」をタップしてください。',target:()=>document.querySelector('.layout').classList.contains('phone-content-open')?get('copyPage'):document.querySelector('.phone-content-icon')},
-  {...steps[4],text:'コンテンツを開き、フェーズリスト見出しの切り替えボタンで「プロパティ」を表示します。「＋」なら欄を開き、下の「フェーズノート」に「ここで集合」など短いメモを入力してください。',target:phaseNoteTarget},
+  {...steps[4],text:'コンテンツを開き、フェーズリスト見出しの切り替えボタンで「プロパティ」を表示し、下の「フェーズノート」に「ここで集合」など短いメモを入力してください。',target:phaseNoteTarget},
   {...steps[5],text:'キーボードを閉じ、コンテンツを開いたまま画面上部の「元に戻す」、続けて「やり直す」をタップしてください。ノートが元どおりになれば完了です。',target:()=>get(session.sawUndo?'redo':'undo')}
  ];
  let activeSteps=steps;

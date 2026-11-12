@@ -322,7 +322,7 @@ function restoreHistorySelection(wasIndividual){
  individualGroupSelection=wasIndividual&&selected?{board:data,page:current(),id:selected}:null;
  const panel=document.getElementById('objectLayerPanel');
  if(!selectedIds.length&&matchMedia('(max-width:850px)').matches&&panel?.dataset.objectTab==='properties'){
-  document.getElementById('toggleInspector').parentElement.querySelector('.phone-object-tabs button')?.click();
+  document.getElementById('toggleInspector').parentElement.querySelector('.phone-list-property-change')?.click();
  }
 }
 function undo(){if(window.Bolxiv?.phaseMasters?.active){window.Bolxiv.phaseMasters.history(false);return}if(window.Bolxiv?.pngPreview?.active){applyOutputNoteHistory(false);return}if(boardReadOnly)return;if(phaseComparisonActive())return;commitPendingHistory();pendingHistoryState=null;pendingHistoryOwner=null;let page=data.page,currentState=JSON.stringify(data);while(history.length&&history[history.length-1]===currentState)history.pop();if(!history.length)return;future.push(currentState);const restoredState=history.pop(),message=historyResultMessage(restoredState,currentState,'元に戻しました');const previousBoard=data,wasIndividual=individualGroupSelectionActive();data=cloneBoardSaveState(historySnapshot(restoredState));data.title=previousBoard.title;replaceContentHistoryBoard(previousBoard,data);data.page=Math.max(0,Math.min(page,data.pages.length-1));restoreHistorySelection(wasIndividual);contentBoards[activeContent]=data;render();scheduleObjectPropertySave();notify(message)}
