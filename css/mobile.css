@@ -467,6 +467,7 @@
 .phone-material-pin {
   display:none!important;
 }
+.phone-material-category-tabs{display:none}
 @media(max-width:850px) {
   .layout[data-phone-pane="canvas"] .board-display-toolbar>.phone-material-pin {
     display:grid!important;
@@ -511,8 +512,9 @@
   .phone-materials-open>.left .accordion-panel[hidden] {
     display:none!important;
   }
-  .phone-material-pin[aria-expanded="true"] {
+  .phone-phase-navigation>.phone-material-pin[aria-expanded="true"] {
     background:var(--blue)!important;
+    color:#fff!important;
   }
   .phone-material-pin svg path {
     fill:none;
@@ -1713,21 +1715,22 @@
   .app .layout .right .board-title-row>.phone-icon-help-toggle[aria-expanded="true"] {
     background:var(--blue)!important;
   }
-  .app .layout.phone-materials-open>.left:not(.preset-managing)>.material-categories-scroll>.phone-material-help {
+  .app .layout.phone-materials-open>.left:not(.preset-managing)>.object-pane-actions>.phone-material-help {
     display:block;
-    flex:none;
-    width:100%;
-    margin:0 0 12px;
+    order:1;
+    flex:1;
+    min-width:0;
+    margin:0 0 0 6px;
     padding:0 2px;
     color:#000;
-    font-size:14px;
-    line-height:1.7;
+    font-size:12px;
+    line-height:1.4;
   }
   .phone-material-help p {
     margin:0;
   }
   .phone-material-help p+p {
-    margin-top:6px;
+    margin-top:2px;
   }
   .app .layout .battle .content-heading-row>#toggleContent,
  .app .layout :is(.battle,.phone-view-content) .phase-heading-row>#toggleBattlePages,
@@ -2055,17 +2058,17 @@ body:not(.board-read-only) .page-list-box>.page-tab-actions {
 
 @media(min-width:851px){
  .app .layout>.left{transition:width .18s ease,padding-top .18s ease,padding-right .18s ease,padding-bottom .18s ease}
- .app .layout>.left :is(#leftRailToggle,#categoryModeToggle),
- .app .layout>.left .accordion-toggle[data-rail-icon]{box-sizing:border-box;height:34px!important;min-height:34px!important;max-height:34px!important}
- .app .layout>.left :is(#leftRailToggle,#categoryModeToggle),
- .app .layout>.left:not(.palette-hover-open):not(:focus-within):not(.pinned) .accordion-toggle[data-rail-icon]{width:34px!important;min-width:34px!important;max-width:34px!important;height:34px!important;min-height:34px!important;max-height:34px!important;padding:0!important;border-radius:6px;flex:0 0 34px}
+ .app .layout>.left :is(#leftRailToggle,#categoryModeToggle){box-sizing:border-box;height:34px!important;min-height:34px!important;max-height:34px!important}
+ .app .layout>.left .accordion-toggle[data-rail-icon]{box-sizing:border-box}
+ .app .layout>.left :is(#leftRailToggle,#categoryModeToggle){width:34px!important;min-width:34px!important;max-width:34px!important;padding:0!important;border-radius:6px;flex:0 0 34px}
+ .app .layout>.left:not(.palette-hover-open):not(:focus-within):not(.pinned) .accordion-toggle[data-rail-icon]{width:36px!important;min-width:36px!important;max-width:36px!important;height:36px!important;min-height:36px!important;max-height:36px!important;padding:0!important;border-radius:6px;flex:0 0 36px}
  .app .layout>.left:not(.palette-hover-open):not(:focus-within):not(.pinned) .accordion-toggle[data-rail-icon]{margin-left:3px;margin-right:0}
  .app .layout>.left:not(.palette-hover-open):not(:focus-within):not(.pinned) .object-pane-actions{justify-content:flex-start;padding-left:3px}
  .app .layout>.left:is(.pinned,.palette-hover-open,:focus-within){padding-left:10px!important}
- .app .layout>.left:is(.pinned,.palette-hover-open,:focus-within) .accordion-toggle[data-rail-icon]{padding-left:4px!important;white-space:nowrap;display:flex;align-items:center;gap:8px;overflow:hidden}
+ .app .layout>.left:is(.pinned,.palette-hover-open,:focus-within) .accordion-toggle[data-rail-icon]{padding-left:5px!important;white-space:nowrap;display:flex;align-items:center;gap:8px;overflow:hidden}
  .app .layout>.left:is(.pinned,.palette-hover-open,:focus-within) .accordion-toggle[data-rail-icon]>.palette-category-icon{display:block;width:24px;height:24px;flex:none;margin:0}
  .app .layout>.left:is(.pinned,.palette-hover-open,:focus-within) .accordion-toggle[data-rail-icon]::after{float:none;flex:none;margin-left:auto}
- /* Keep the category heading's border inside its fixed 34px box. */
+ /* Keep the category heading's border inside its fixed 36px box. */
  .app .layout>.left:is(.pinned,.palette-hover-open,:focus-within) .accordion-group:has(>.accordion-toggle[data-rail-icon][aria-expanded="true"]){border:0!important;box-shadow:none;outline:1px solid #d0d4da;outline-offset:-1px}
  .app .layout>.left:is(.pinned,.palette-hover-open,:focus-within) .accordion-toggle[data-rail-icon][aria-expanded="true"]{border:1px solid #d0d4da!important;border-radius:6px 6px 0 0!important}
 }
@@ -2082,6 +2085,9 @@ body:not(.board-read-only) .page-list-box>.page-tab-actions {
 /* ===== css/palette-touch-behavior.css ===== */
 .left .tool,.left .icon-choice {
   touch-action:none;
+}
+@media(max-width:850px){
+ .left .tool,.left .icon-choice{touch-action:pan-y}
 }
 
 /* ===== css/palette-placement-preview.css ===== */
@@ -2246,5 +2252,31 @@ body:not(.board-read-only) .page-list-box>.page-tab-actions {
 @media(max-width:850px){.app>.layout.phone-materials-open>.left #enemyPanel:not([hidden]):not(.hidden){display:grid!important}}
 
 @media(max-width:850px){#objectControls .controlbox .move-handle[data-edge-placement]::before{left:50%;top:50%;bottom:auto;height:var(--move-connector-length);transform-origin:0 0;transform:translate(var(--move-connector-x),var(--move-connector-y)) rotate(var(--move-connector-angle))}}
+@media(max-width:850px){
+ .app .layout>.left #categoryModeToggle{display:none!important}
+ .app .layout.phone-materials-open>.left:not(.preset-managing)>.phone-material-category-tabs{display:flex;flex:0 0 auto;gap:4px;overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;touch-action:pan-x;margin-bottom:0;padding:3px;box-sizing:border-box;border:1px solid #d0d4da;border-radius:6px 6px 0 0;background:#eef2f7}
+ .phone-material-category-tabs>button{display:grid;place-items:center;box-sizing:border-box;flex:0 0 32px;width:32px;min-width:32px;height:32px;min-height:32px;padding:5px}
+ .app .layout>.left .phone-material-category-tabs>button:not([aria-selected="true"]){background:transparent!important;border-color:#cbd3df!important;color:#33445f!important;-webkit-text-fill-color:#33445f!important}
+ .phone-material-category-icon,.phone-material-category-icon svg{display:block;width:20px;height:20px;pointer-events:none}
+ .app .layout>.left .phone-material-category-tabs>button[aria-selected="true"]{background:var(--blue)!important;border-color:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+ .app .layout.phone-materials-open>.left .material-categories-scroll>.accordion-group:has(>.accordion-toggle[aria-expanded="false"]){display:none!important}
+ .app .layout.phone-materials-open>.left .material-categories-scroll>.accordion-group{margin:0!important;border:0!important;outline:0!important;box-shadow:none!important;background:transparent!important}
+ .app .layout.phone-materials-open>.left .material-categories-scroll>.accordion-group>.accordion-toggle{display:none!important}
+ .app .layout.phone-materials-open>.left:not(.preset-managing)>.material-categories-scroll{margin-right:0;padding-right:0;border:1px solid #d0d4da;border-top:0;border-radius:0 0 6px 6px;background:#fff}
+ .app .layout.phone-materials-open>.left .material-categories-scroll>.accordion-group>.accordion-panel{border:0!important;border-radius:0!important;background:transparent!important}
+ #objectLayerPanel .phone-object-tabs:has(>.phone-material-pin){padding-left:4px}
+ .app .layout.phone-materials-open>.left :is(.tools,.icon-grid,#enemyPanel){grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:2px}
+ body .app .layout #objectLayerPanel .phone-object-tabs>.phone-material-pin:not([hidden]){display:grid!important;position:static;width:28px;height:28px;min-height:28px;padding:5px;place-items:center;background:#fff!important;color:#000!important;-webkit-text-fill-color:#000!important;border:1px solid #999;border-radius:6px}
+ #objectLayerPanel .phone-object-tabs>.phone-material-pin svg{width:16px;height:16px;pointer-events:none}
+ .app>.layout[data-phone-pane="canvas"].phone-materials-open>.left{
+  left:0!important;
+  right:0!important;
+  width:100%!important;
+  top:var(--phone-material-top)!important;
+  bottom:0!important;
+  border-radius:0!important;
+  box-shadow:0 -2px 8px #0003;
+ }
+}
 
 @media(max-width:850px){.app>.top>.brand strong{overflow:hidden;text-overflow:ellipsis}}

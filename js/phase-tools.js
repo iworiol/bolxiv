@@ -34,6 +34,10 @@
  
  let owner=null,ownerPage=-1,ownerContent=-1,activeTool='select',shapeId=null,gesture=null,lastCommitted='',ownHistory=false,guideZoom=100,embeddedHost=null,hiddenSiblings=[];
  const desktopEditor=matchMedia('(min-width:851px)');
+ const propertyTitle=propertyPane.querySelector('.guide-properties-title');propertyBody.id='guidePropertiesBody';propertyTitle.setAttribute('aria-controls',propertyBody.id);propertyTitle.setAttribute('aria-expanded','true');
+ let phonePropertiesExpanded=viewSettings.phoneFieldPropertiesExpanded!==false;
+ const phonePropertyView=createPanelView({heading:propertyTitle,group:propertyPane,body:propertyBody,scroll:propertyBody,onToggle(){if(desktopEditor.matches)return;phonePropertiesExpanded=!phonePropertiesExpanded;rememberViewSetting('phoneFieldPropertiesExpanded',phonePropertiesExpanded);syncPhoneProperties()}});phonePropertyView.bar.classList.add('phone-guide-properties-header');
+ function syncPhoneProperties(){const phone=!desktopEditor.matches,open=!phone||phonePropertiesExpanded;setPanelExpanded(propertyTitle,propertyBody,open,{display:'block',frame:propertyPane,collapsedClass:'phone-properties-collapsed'});dialog.classList.toggle('phone-properties-collapsed',phone&&!open);const label=window.Bolxiv.phaseMasters?.active?'フィールドプロパティ':propertyTitle.childNodes[0].textContent;phonePropertyView.update({markup:'<strong>'+label+'</strong>',label,nextLabel:'',switchable:false,expanded:open})}
  let phoneLayoutState=null;
  function unmountEditor(){if(phoneLayoutState){canvas.append(overlay,guideControls);const previous=phoneLayoutState,layout=document.querySelector('.layout');layout.dataset.phonePane=previous.pane;layout.classList.toggle('phone-content-open',previous.content);layout.classList.toggle('phone-materials-open',previous.materials);const restore=()=>{for(const item of previous.scrolls){item.node.scrollTop=item.top;item.node.scrollLeft=item.left}};restore();requestAnimationFrame(restore);phoneLayoutState=null}if(embeddedHost)embeddedHost.classList.remove('guide-editor-host');for(const [node,inert] of hiddenSiblings)node.inert=inert;hiddenSiblings=[];embeddedHost=null;dialog.classList.remove('guide-editor-embedded','guide-editor-phone')}
  function mountEditor(){
@@ -61,7 +65,7 @@
  for(const [id,label,action] of [['groupGuideShapes','グループ化',groupGuides],['ungroupGuideShapes','グループ解除',ungroupGuides],['editGuideMember','個別編集',()=>editGuideMember()],['finishGuideMemberEdit','グループに戻る',finishGuideMemberEdit]]){const button=document.createElement('button');button.id=id;button.type='button';button.className='btn';button.textContent=label;button.onclick=action;groupActions.append(button)}
  const phaseSelect=dialog.querySelector('#guideEditorPhase'),entryButton=entry.querySelector('button');
  dialog.querySelector('#finishFieldGuides').hidden=true;
- function placeEntry(){syncEntry();if(!desktopEditor.matches&&dialog.open){dialog.querySelector('.guide-properties-title').append(entryButton);return}const collapse=document.getElementById(desktopEditor.matches?'desktopPhaseSectionToggle':'phonePhaseSectionToggle');collapse.before(entryButton)}
+ function placeEntry(){syncEntry();syncPhoneProperties();if(!desktopEditor.matches&&dialog.open){phonePropertyView.bar.insertBefore(entryButton,phonePropertyView.collapse);return}const collapse=document.getElementById(desktopEditor.matches?'desktopPhaseSectionToggle':'phonePhaseSectionToggle');collapse.before(entryButton)}
  desktopEditor.addEventListener('change',placeEntry);placeEntry();
  function syncEntry(){
   const active=dialog.open,phone=!desktopEditor.matches;
@@ -227,6 +231,7 @@
   if(event.key==='Escape'){event.preventDefault();event.stopImmediatePropagation();if(!guideMenu.hidden)closeGuideMenu();else if(!zoomMenu.hidden)closeZoomMenu(true);else if(dialog.querySelector('.color-popover:not([hidden])'))closeColorPopovers();else if(paletteGesture)cancelPalette();else if(gesture)cancelPointer();else{activeTool='select';selectGuides([]);drawOverlay();sync()}return}
   if(guideMenu.contains(event.target)||zoomMenu.contains(event.target)||zoomToolbar.contains(event.target))return;const input=event.target.closest?.('input,select,textarea');if(input)return;
   const key=event.key.toLowerCase(),modifier=event.ctrlKey||event.metaKey;
+  if(modifier&&['c','v','x'].includes(key)&&clipboardShortcutOwner(event.target)!=='guides')return;
   if(modifier&&key==='g'){event.preventDefault();event.stopImmediatePropagation();if(event.shiftKey)ungroupGuides();else groupGuides();return}
   if(modifier&&key==='z'){event.preventDefault();event.stopImmediatePropagation();historyAction(event.shiftKey);return}
   if(modifier&&key==='y'){event.preventDefault();event.stopImmediatePropagation();historyAction(true);return}
@@ -255,7 +260,7 @@
   for(const group of settings.querySelectorAll('.coordinate-control'))for(const button of group.querySelectorAll('.phone-number-step-buttons button'))button.disabled=group.querySelector('input[type="range"]').disabled;
   if(color.dataset.color!==value.color){color.innerHTML=colorPickerMarkup('fieldGuides',value.color);color.dataset.color=value.color}color.querySelector('[data-color-trigger]').disabled=blocked||!enabled;
   if(session&&(session.board!==data||session.page!==data.page))session=null;
-  entryButton.disabled=!dialog.open&&!allowed();entryButton.dataset.guideActive=String(dialog.open);syncEntry();
+  entryButton.disabled=!dialog.open&&!allowed();entryButton.dataset.guideActive=String(dialog.open);syncEntry();syncPhoneProperties();
   if(!dialog.open)return;
   const title=document.getElementById('selectionTitle'),guideTitle=dialog.querySelector('#guideEditorTitle');if(guideTitle.innerHTML!==title.innerHTML)guideTitle.replaceChildren(...[...title.childNodes].map(node=>node.cloneNode(true)));guideTitle.title=title.textContent;
   const picked=selectedGuides(),selected=picked.length===1?picked[0]:null,group=selectedGuideGroup();if(individualGuideGroup&&!picked.some(s=>s.objectGroupId===individualGuideGroup))individualGuideGroup=null;
@@ -404,7 +409,7 @@
   const actions=selectedPhaseIndexes.length?[['combine','2×2フェーズにまとめる']]:[['rename','名前変更'],['copy','複製'],['cross-copy','別コンテンツへ複製'],['previous','前へ移動'],['next','後ろへ移動'],['delete','削除']];
   for(const [action,label] of actions){
    if(action==='copy'||action==='field-copy'||action==='previous'||action==='delete'){const separator=document.createElement('div');separator.className='context-separator';separator.setAttribute('role','separator');menu.append(separator)}
-   const button=createMenuAction({label,shortcut:action==='rename'?'F2':null});button.dataset.action=action;
+   const button=createMenuAction({label,shortcut:action==='rename'?'F2':action==='delete'?'Delete':null});button.dataset.action=action;
    button.disabled=boardReadOnly||(action!=='combine'&&phaseComparisonActive())||!!window.Bolxiv.pngPreview?.active||(action==='field-paste'&&!fieldClipboard)||(action==='previous'&&index===0&&!data.pageGroupIds[index])||(action==='next'&&index===data.pages.length-1&&!data.pageGroupIds[index]);
    if(action==='combine'&&!window.Bolxiv.phaseMasters.canCombineImagePhases()){
     button.disabled=true;

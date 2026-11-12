@@ -315,20 +315,19 @@ function applyOutputNoteHistory(forward=false){
 
 function updateHistoryButtons(state=JSON.stringify(data)){const pm=window.Bolxiv?.phaseMasters;if(pm?.active){for(const [id,available,action,key]of [['undo',pm.canUndo,'元に戻す','Ctrl+Z'],['redo',pm.canRedo,'やり直す','Ctrl+Y']]){const button=document.getElementById(id);if(!button)continue;button.disabled=!available;button.setAttribute('aria-disabled',String(!available));button.title=available?'フィールドの操作を'+action+' ('+key+')':'フィールドに'+(id==='undo'?'元に戻せる':'やり直せる')+'操作はありません';button.setAttribute('aria-label',button.title)}return}commitPendingHistory(state);let undoButton=document.getElementById('undo'),redoButton=document.getElementById('redo');if(!undoButton||!redoButton)return;const output=!!window.Bolxiv?.pngPreview?.active;undoButton.disabled=output?!outputNoteHistoryTarget(false):phaseComparisonActive()||history.length===0;redoButton.disabled=output?!outputNoteHistoryTarget(true):phaseComparisonActive()||future.length===0;undoButton.setAttribute('aria-disabled',String(undoButton.disabled));redoButton.setAttribute('aria-disabled',String(redoButton.disabled));let undoState;for(let i=history.length-1;i>=0;i--){if(!sameHistoryState(history[i],state)){undoState=history[i];break}}const redoState=future[future.length-1];const comparison=phaseComparisonActive()&&!output;undoButton.title=comparison?'並列表示中は元に戻せません':undoState?'このコンテンツの操作を元に戻す (Ctrl+Z)\n対象：'+historyActionLabel(undoState,state):'このコンテンツに元に戻せる操作はありません';redoButton.title=comparison?'並列表示中はやり直せません':redoState?'このコンテンツの操作をやり直す (Ctrl+Y)\n対象：'+historyActionLabel(state,redoState):'このコンテンツにやり直せる操作はありません';undoButton.setAttribute('aria-label',undoButton.title);redoButton.setAttribute('aria-label',redoButton.title)}
 
-// Keep the mobile inspector on surviving objects when applying history.
-function restoreHistorySelection(){
+function restoreHistorySelection(wasIndividual){
+ const ids=new Set(current().map(object=>object.id));
+ selectedIds=selectedIds.filter(id=>ids.has(id));
+ selected=selectedIds.includes(selected)?selected:selectedIds.at(-1)||null;
+ individualGroupSelection=wasIndividual&&selected?{board:data,page:current(),id:selected}:null;
  const panel=document.getElementById('objectLayerPanel');
- if(matchMedia('(max-width:850px)').matches&&panel?.dataset.objectTab==='properties'){
-  const ids=new Set(current().map(object=>object.id));
-  selectedIds=selectedIds.filter(id=>ids.has(id));
-  selected=selectedIds.includes(selected)?selected:selectedIds[selectedIds.length-1]||null;
-  if(!selectedIds.length)document.getElementById('toggleInspector').parentElement.querySelector('.phone-object-tabs button')?.click();
- }else{selected=null;selectedIds=[]}
+ if(!selectedIds.length&&matchMedia('(max-width:850px)').matches&&panel?.dataset.objectTab==='properties'){
+  document.getElementById('toggleInspector').parentElement.querySelector('.phone-object-tabs button')?.click();
+ }
 }
+function undo(){if(window.Bolxiv?.phaseMasters?.active){window.Bolxiv.phaseMasters.history(false);return}if(window.Bolxiv?.pngPreview?.active){applyOutputNoteHistory(false);return}if(boardReadOnly)return;if(phaseComparisonActive())return;commitPendingHistory();pendingHistoryState=null;pendingHistoryOwner=null;let page=data.page,currentState=JSON.stringify(data);while(history.length&&history[history.length-1]===currentState)history.pop();if(!history.length)return;future.push(currentState);const restoredState=history.pop(),message=historyResultMessage(restoredState,currentState,'元に戻しました');const previousBoard=data,wasIndividual=individualGroupSelectionActive();data=cloneBoardSaveState(historySnapshot(restoredState));data.title=previousBoard.title;replaceContentHistoryBoard(previousBoard,data);data.page=Math.max(0,Math.min(page,data.pages.length-1));restoreHistorySelection(wasIndividual);contentBoards[activeContent]=data;render();scheduleObjectPropertySave();notify(message)}
 
-function undo(){if(window.Bolxiv?.phaseMasters?.active){window.Bolxiv.phaseMasters.history(false);return}if(window.Bolxiv?.pngPreview?.active){applyOutputNoteHistory(false);return}if(boardReadOnly)return;if(phaseComparisonActive())return;commitPendingHistory();pendingHistoryState=null;pendingHistoryOwner=null;let page=data.page,currentState=JSON.stringify(data);while(history.length&&history[history.length-1]===currentState)history.pop();if(!history.length)return;future.push(currentState);const restoredState=history.pop(),message=historyResultMessage(restoredState,currentState,'元に戻しました');const previousBoard=data;data=cloneBoardSaveState(historySnapshot(restoredState));data.title=previousBoard.title;replaceContentHistoryBoard(previousBoard,data);data.page=Math.max(0,Math.min(page,data.pages.length-1));restoreHistorySelection();contentBoards[activeContent]=data;render();scheduleObjectPropertySave();notify(message)}
-
-function redo(){if(window.Bolxiv?.phaseMasters?.active){window.Bolxiv.phaseMasters.history(true);return}if(window.Bolxiv?.pngPreview?.active){applyOutputNoteHistory(true);return}if(boardReadOnly)return;if(phaseComparisonActive())return;commitPendingHistory();pendingHistoryState=null;pendingHistoryOwner=null;if(!future.length)return;let page=data.page;const previousState=JSON.stringify(data),restoredState=future.pop(),message=historyResultMessage(previousState,restoredState,'やり直しました');history.push(previousState);const previousBoard=data;data=cloneBoardSaveState(historySnapshot(restoredState));data.title=previousBoard.title;replaceContentHistoryBoard(previousBoard,data);data.page=Math.max(0,Math.min(page,data.pages.length-1));restoreHistorySelection();contentBoards[activeContent]=data;render();scheduleObjectPropertySave();notify(message)}
+function redo(){if(window.Bolxiv?.phaseMasters?.active){window.Bolxiv.phaseMasters.history(true);return}if(window.Bolxiv?.pngPreview?.active){applyOutputNoteHistory(true);return}if(boardReadOnly)return;if(phaseComparisonActive())return;commitPendingHistory();pendingHistoryState=null;pendingHistoryOwner=null;if(!future.length)return;let page=data.page;const previousState=JSON.stringify(data),restoredState=future.pop(),message=historyResultMessage(previousState,restoredState,'やり直しました');history.push(previousState);const previousBoard=data,wasIndividual=individualGroupSelectionActive();data=cloneBoardSaveState(historySnapshot(restoredState));data.title=previousBoard.title;replaceContentHistoryBoard(previousBoard,data);data.page=Math.max(0,Math.min(page,data.pages.length-1));restoreHistorySelection(wasIndividual);contentBoards[activeContent]=data;render();scheduleObjectPropertySave();notify(message)}
 
 ;
 // ===== js/contents.js =====
@@ -383,8 +382,11 @@ function fitContentOptionsViewport(options){
  if(!matchMedia('(max-width:850px)').matches)return;
  const viewport=window.visualViewport,top=viewport?.offsetTop||0,bottom=top+(viewport?.height||innerHeight);
  const anchor=options.parentElement.getBoundingClientRect();
- const opensAbove=!!options.closest('.phone-view-content')?.querySelector('#toggleBattlePages[aria-expanded="false"]');
- const available=Math.max(0,Math.floor((opensAbove?anchor.top-top:bottom-anchor.bottom)-8));
+ const above=Math.max(0,anchor.top-top-11),below=Math.max(0,bottom-anchor.bottom-11),list=options.querySelector('.content-options-scroll'),style=getComputedStyle(options),pixels=value=>parseFloat(value)||0;
+ const chrome=options.offsetHeight-(list?.offsetHeight||0),desired=Math.min(355,(bottom-top)*.45,list?.scrollHeight||0)+Math.max(chrome,pixels(style.paddingTop)+pixels(style.paddingBottom)+pixels(style.borderTopWidth)+pixels(style.borderBottomWidth));
+ const opensAbove=below<desired&&above>below;
+ options.dataset.opensAbove=String(opensAbove);
+ const available=Math.floor(opensAbove?above:below);
  const height=available+'px';
  if(options.style.getPropertyValue('--content-options-viewport-height')!==height)options.style.setProperty('--content-options-viewport-height',height);
 }
