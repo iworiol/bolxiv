@@ -2312,10 +2312,10 @@ body.phase-master-editing .app .layout :is(.content-heading-row,.right .board-ti
 .usage-scene-guide p{font-size:14px;line-height:1.8;overflow-wrap:anywhere}
 .usage-scene-guide .usage-download-status{padding:10px 12px;margin:16px 0;background:#eef5fb;border-left:3px solid #76badb;border-radius:4px;color:#33445f;font-size:13px}
 .usage-scene-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:20px 0;padding:0;list-style:none}
-.usage-scene-steps>li{min-width:0;padding:16px;border:1px solid #c9d9e7;border-radius:8px;background:#fff}
+.usage-scene-steps>li,.screen-overview-case{min-width:0;padding:16px;border:1px solid #c9d9e7;border-radius:8px;background:#fff}
 .usage-step-heading{display:grid;grid-template-columns:30px minmax(0,1fr);align-items:center;gap:6px 8px}
 .usage-step-number{display:grid;place-items:center;width:28px;height:28px;border:1px solid #83bddf;border-radius:7px;background:#eaf4fb;color:#23446a;font-size:16px;font-weight:700}
-.usage-scene-guide .usage-step-heading h4{font-size:16px;color:#25395f;line-height:1.5;margin:0}
+.usage-scene-guide .usage-step-heading :is(h4,h5){font-size:16px;color:#25395f;line-height:1.5;margin:0}
 .usage-connection{grid-column:2;font-size:12px;color:#326b92}
 .usage-connection-local{color:#49645e}
 .usage-scene-art{display:block;width:100%;height:230px;margin:12px 0;overflow:hidden;border-radius:6px}
@@ -2331,7 +2331,7 @@ body.phase-master-editing .app .layout :is(.content-heading-row,.right .board-ti
  .usage-scene-guide .operation-guide-body{padding:14px}
  .usage-scene-guide .usage-scene-intro h3{font-size:21px}
  .usage-scene-steps{grid-template-columns:minmax(0,1fr);gap:16px;margin:16px 0}
- .usage-scene-steps>li{padding:14px}
+ .usage-scene-steps>li,.screen-overview-case{padding:14px}
  .usage-scene-art{height:230px}
 }
 
@@ -2418,3 +2418,7 @@ body.phase-master-editing .app .layout :is(.content-heading-row,.right .board-ti
 
 /* Bulk numeric properties: mixed values keep their layout and use an orange accent. */
 #inspector input[type="range"].property-value-mixed{accent-color:#d97706}
+
+/* Screen overview shares the help dialog, contents, case navigation and typography. */
+.screen-overview-art text{font-family:inherit}
+.screen-overview-description{max-width:720px;margin:12px auto!important}

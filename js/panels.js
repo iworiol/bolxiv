@@ -618,7 +618,7 @@ function createPhoneListPropertyBar(options){return createPanelView(options)}
   {title:'サイズを変える',text:'円範囲をクリックして選び、右側のプロパティで「サイズ」を150px以上にしてください。スライダーでも数値入力でも変更できます。',target:()=>get('widthSpin')||document.querySelector('#objects .obj'),done:()=>!!circle()&&circle().width>=150},
   {title:'矢印キーで移動する',text:'キャンバス上の円範囲をクリックして選び、上下左右キーで動かしてください。数値欄を入力中なら、先に円範囲をクリックします。',target:()=>document.querySelector('#objects .obj'),enter:()=>{const item=circle();session.position=item?{x:item.x,y:item.y}:null},done:()=>{const item=circle();return !!item&&!!session.position&&(Math.abs(item.x-session.position.x)>.001||Math.abs(item.y-session.position.y)>.001)}},
   {title:'フェーズを複製する',text:'フェーズリスト見出し右側の複製を押し、「このコンテンツに複製」を選んでください。配置と設定を引き継いだ次のフェーズを作れます。',target:()=>get('copyPage'),enter:()=>{session.sourcePage=data.page;session.sourceId=circle()?.id},done:()=>data.pages.length>=2&&data.page!==session.sourcePage&&!!circle()&&circle().id!==session.sourceId},
-  {title:'ノートを残す',text:'コンテンツペインの「フェーズプロパティ」を開き、下の「フェーズノート」に「ここで集合」など短いメモを入力してください。ノートはフェーズごとに保存されます。',target:phaseNoteTarget,done:()=>!!data.pageNotes?.[data.page]?.trim()},
+  {title:'ノートを残す',text:'コンテンツ管理ペインの「フェーズプロパティ」を開き、下の「フェーズノート」に「ここで集合」など短いメモを入力してください。ノートはフェーズごとに保存されます。',target:phaseNoteTarget,done:()=>!!data.pageNotes?.[data.page]?.trim()},
   {title:'元に戻す・やり直す',text:'ノート欄の外をクリックし、左上の「元に戻す」、続けて「やり直す」を押してください。入力したノートが戻れば完了です。',target:()=>get(session.sawUndo?'redo':'undo'),enter:()=>{session.note=data.pageNotes[data.page];session.notePage=data.page;session.sawUndo=false},done:()=>{const note=data.pageNotes?.[session.notePage]||'';if(note!==session.note)session.sawUndo=true;return session.sawUndo&&note===session.note}}
  ];
  const mobileSteps=[

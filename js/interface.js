@@ -378,11 +378,7 @@ function placeBuiltinFieldMarkers(cx,cy){
  
  document.addEventListener('close-material-pane',closeMaterials);
  mobile.addEventListener('change',closeMaterials);
- // Reveal the canvas after a tap selection. Long-press uses a synthetic click
- // and must keep the palette in place while its pointer is captured.
- materialPane.addEventListener('click',event=>{
-  if(mobile.matches&&event.isTrusted&&tapPlacementArmed&&event.target.closest('.tool[data-tool],.icon-choice'))closeMaterials();
- });
+ // Selection keeps the palette open for re-selection; placement completion closes it.
  let materialDismissClick=false;
  document.addEventListener('pointerdown',event=>{
   materialDismissClick=false;
@@ -484,7 +480,7 @@ function confirmPhoneLayerDeletion(id,individual=false){
  }
  new ResizeObserver(schedulePreview).observe(preview);
  const renderBeforeContentPreview=render;render=function(){renderBeforeContentPreview();if(!preview.hidden)schedulePreview()};
- const backdrop=document.createElement('button');backdrop.type='button';backdrop.className='phone-content-backdrop';backdrop.hidden=true;backdrop.setAttribute('aria-label','コンテンツパネルを閉じる');layout.append(backdrop);
+ const backdrop=document.createElement('button');backdrop.type='button';backdrop.className='phone-content-backdrop';backdrop.hidden=true;backdrop.setAttribute('aria-label','コンテンツ管理ペインを閉じる');layout.append(backdrop);
  let visible=false,closing=false,panelAnimation=null,backdropAnimation=null,closeAnimation=null;
  const duration=(closing=false)=>reducedMotion.matches?0:closing?120:200;
  // The phone pane is width:calc(100% - 28px). CSS units avoid a forced layout
@@ -531,7 +527,7 @@ function confirmPhoneLayerDeletion(id,individual=false){
   }).catch(()=>{});
  }
  backdrop.onclick=close;
- const closeButton=document.createElement('button');closeButton.type='button';closeButton.className='phone-content-close';closeButton.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" width="24" height="24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><path d="M15 5l-7 7 7 7"/></svg>';closeButton.setAttribute('aria-label','コンテンツパネルを閉じる');closeButton.title='コンテンツパネルを閉じる';closeButton.onclick=()=>close(true);layout.append(closeButton);
+ const closeButton=document.createElement('button');closeButton.type='button';closeButton.className='phone-content-close';closeButton.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" width="24" height="24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><path d="M15 5l-7 7 7 7"/></svg>';closeButton.setAttribute('aria-label','コンテンツ管理ペインを閉じる');closeButton.title='コンテンツ管理ペインを閉じる';closeButton.onclick=()=>close(true);layout.append(closeButton);
  document.addEventListener('keydown',event=>{
   if(!mobile.matches||!layout.classList.contains('phone-content-open')||event.target.closest?.('#phoneIconHelp,dialog.confirm-dialog'))return;
   if(event.target.closest('input,select,textarea,[contenteditable="true"],dialog'))return;
@@ -573,7 +569,7 @@ function confirmPhoneLayerDeletion(id,individual=false){
   ],
   [
     ".phone-content-close",
-    "コンテンツペインを閉じます。"
+    "コンテンツ管理ペインを閉じます。"
   ],
   [
     ".phone-material-pin",
@@ -868,7 +864,7 @@ function confirmPhoneLayerDeletion(id,individual=false){
     if(content&&!node.closest('.battle,.phone-content-close,.phone-phase-navigation,.header-mode-status'))continue;
     if(selector==='.phone-content-icon')description=png?'出力画面の設定欄でノートを編集します。':'コンテンツ・フェーズ・設定・ノートを開きます。';
     if(selector==='#editFieldGuides')description=guides?'見出し横の切替ボタンでコンテンツへ戻ります。':'見出し横の切替ボタンでフィールドへ移ります。';
-    if(fieldMode&&selector==='.phone-content-icon')description='フィールドペインを開きます。＋メニューから追加・統合・未使用フィールドの一括削除ができます。';if(fieldMode&&selector==='.phone-content-close')description='フィールドペインを閉じ、選択中のフィールドの編集画面へ戻ります。';
+    if(fieldMode&&selector==='.phone-content-icon')description='フィールド管理ペインを開きます。＋メニューから追加・統合・未使用フィールドの一括削除ができます。';if(fieldMode&&selector==='.phone-content-close')description='フィールド管理ペインを閉じ、選択中のフィールドの編集画面へ戻ります。';
     if(fieldMode&&selector==='#undo')description='フィールド・ガイドの編集や、フィールドの追加・整理を元に戻します。';
     if(guides&&selector==='#redo')description='元に戻した操作をやり直します。';
     if(selector==='#outputPrintButton')description='用紙プレビューの設定で印刷します。PDF保存は印刷画面で選びます。';
@@ -895,7 +891,7 @@ function confirmPhoneLayerDeletion(id,individual=false){
    '.output-selection-tabbed .phone-list-property-change':'フェーズリスト・出力設定の切り替え','.output-selection-tabbed .phone-object-collapse':'出力の欄を開閉',
    '#contentPanel.phone-phase-list-tabbed .phone-list-property-change':'フェーズリスト・プロパティの切り替え','#contentPanel.phone-phase-list-tabbed .phone-object-collapse':'フェーズ欄を開閉',
    '#phaseMasterModeToggle':'コンテンツ／フィールドの切り替え','#editUsedField':'使用フィールドを編集','#addPhaseMaster':'フィールドの追加・整理','#duplicatePhaseMaster':'フィールドを複製','#phaseMasterSelect':'使用フィールドの選択','#editModeToggle':'モード切替','help-png-mode':'モード切替',
-   '.phone-menu-toggle':'操作メニュー','.phone-content-icon':fieldMode?'フィールドペインを開く':'コンテンツペインを開く','.phone-content-close':fieldMode?'フィールドペインを閉じる':'コンテンツペインを閉じる','.phone-material-pin':'マテリアルを開閉',
+   '.phone-menu-toggle':'操作メニュー','.phone-content-icon':fieldMode?'フィールド管理ペインを開く':'コンテンツ管理ペインを開く','.phone-content-close':fieldMode?'フィールド管理ペインを閉じる':'コンテンツ管理ペインを閉じる','.phone-material-pin':'マテリアルを開閉',
    '.preset-manage':'配置・プリセット管理の切り替え','#addPage':'フェーズを追加','#addPhaseGroup':'フェーズグループを追加','#copyPage':'フェーズを複製','#copyPageToContent':'別コンテンツへ複製',
    '#editFieldGuides':'コンテンツ／フィールドの切り替え','#phasePropertyResize':'ペインの高さ調整','#resetBoardZoom':'表示倍率を選ぶ','#guideHideObjects':'オブジェクトを一時的に隠す','#fieldGuide-ringScale':'同心円の大きさ','#fieldGuideOuterRing':'最外周を表示','#guideShapeFill':'ガイドの塗り','.guide-property-group[aria-label="線の見た目"]':'ガイド（共通）','.print-page-fields':'印刷の配置設定','#printSettingsReset':'印刷設定をリセット','#fieldGuideCircles':'同心円','#fieldGuideRays':'放射線','#duplicateGuideShape':'ガイドを複製','#deleteGuideShape':'ガイドを削除','.guide-selection-controls .aoe-box-handle':'サイズ変更ハンドル','#outputPrintReadability':'文字・線を強調','#outputPlainPaper':'普通紙向けの色調整','#outputPrintCutGuide':'切り取りガイド','#phonePhaseSwitch-toggle':'フェーズリスト・プロパティの切り替え','#phonePhaseSectionToggle':'フェーズ設定・ノート欄を開閉','#toggleBattlePages':'フェーズリストを開閉',
    '.phone-phase-navigation>button:first-child':fieldMode?'前のフィールドへ':'前のフェーズへ','.phone-phase-navigation>button:last-child':fieldMode?'次のフィールドへ':'次のフェーズへ',
