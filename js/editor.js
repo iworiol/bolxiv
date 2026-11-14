@@ -200,7 +200,7 @@ changeLog.className='operation-guide';
 
 changeLog.setAttribute('aria-labelledby','changeLogTitle');
 
-changeLog.innerHTML='<div class="operation-guide-heading"><h2 id="changeLogTitle">更新履歴</h2><button type="button" class="btn" autofocus>閉じる</button></div><div class="operation-guide-body"><p><span class="change-log-version">2026/11/12　Ver.1.2.0</span><span class="change-log-description">配置済みSVGプリセットの再登録機能追加、グループ内の全選択機能追加、オブジェクトグループの位置設定追加、フェーズのDeleteキー削除対応、UI調整、不具合修正</span></p><p><span class="change-log-version">2026/11/10　Ver.1.1.0</span><span class="change-log-description">オブジェクトグループのメニュー拡充、AoEロックオン系に明るさ設定追加、フィールド設定に2×2の区画ごとの画像設定機能を追加、グリッド線選択肢追加、フェーズの2×2合成機能追加、SVG画像としてプリセット登録する機能追加、AoE追加、未使用フィールド一括削除機能追加、UI調整、不具合修正</span></p><p><span class="change-log-version">2026/11/07　Ver.1.0.0</span><span class="change-log-description">正式版公開</span></p><p><span class="change-log-version">2026/11/06　Ver.0.9.5</span><span class="change-log-description">UI調整、処理負荷改善</span></p><p><span class="change-log-version">2026/11/05　Ver.0.9.4</span><span class="change-log-description">ダウンロード準備、UI調整、不具合修正、要望・不具合報告メニュー追加</span></p><p><span class="change-log-version">2026/11/05　Ver.0.9.3</span><span class="change-log-description">オフライン利用方法の準備、ダウンロードページの準備、UI調整、不具合修正</span></p><p><span class="change-log-version">2026/11/03　Ver.0.9.2</span><span class="change-log-description">UI調整、処理改善、他修正</span></p><p><span class="change-log-version">2026/11/03　Ver.0.9.1</span><span class="change-log-description">UI調整、不具合修正</span></p><p><span class="change-log-version">2026/11/02　Ver.0.9.0</span><span class="change-log-description">画像読み込み機能追加、フィールド機能追加(ガイド統合)、メニュー強化</span></p><p><span class="change-log-version">2026/10/31　Ver.0.8.2</span><span class="change-log-description">不具合修正</span></p><p><span class="change-log-version">2026/10/31　Ver.0.8.1</span><span class="change-log-description">UI等もろもろ調整</span></p><p><span class="change-log-version">2026/10/30　Ver.0.8.0</span><span class="change-log-description">キャンバスのガイド機能正式実装、印刷機能をスマホ版も拡充、フィールド設定コピー機能追加、UI調整</span></p><p><span class="change-log-version">2026/10/28　Ver.0.7.1</span><span class="change-log-description">印刷機能拡充(PC版のみ)、キャンバスのガイド機能仮実装、UI調整</span></p><p><span class="change-log-version">2026/10/26　Ver.0.7.0</span><span class="change-log-description">プリセット機能正式追加、UI調整</span></p><p><span class="change-log-version">2026/10/25　Ver.0.6.2</span><span class="change-log-description">オブジェクト追加、画像・印刷機能にノート表示追加</span></p><p><span class="change-log-version">2026/10/25　Ver.0.6.1</span><span class="change-log-description">UI調整</span></p><p><span class="change-log-version">2026/10/25　Ver.0.6.0</span><span class="change-log-description">オブジェクトのグループ化対応、印刷機能追加(PNG生成と統合)、プリセット機能仮実装</span></p><p><span class="change-log-version">2026/10/23　Ver.0.5.2</span><span class="change-log-description">UI調整</span></p><p><span class="change-log-version">2026/10/22　Ver.0.5.1</span><span class="change-log-description">UI調整</span></p><p><span class="change-log-version">2026/10/19　Ver.0.5.0</span><span class="change-log-description">コンテンツを履歴操作に追加、PNG生成モード追加、レイアウト少し見直し、その他修正</span></p><p><span class="change-log-version">2026/10/18　Ver.0.4.1</span><span class="change-log-description">ツールの内部構成変更、その他修正</span></p><p><span class="change-log-version">2026/10/18　Ver.0.4.0</span><span class="change-log-description">チュートリアル追加、フェーズグループ化機能追加、メモリ使用量削減、JSONファイルサイズ削減</span></p><p><span class="change-log-version">2026/10/17　Ver.0.3.0</span><span class="change-log-description">コンテンツ間フェーズコピー機能追加、右クリック・長押し操作メニュー各種追加、文字サイズ変更、処理負荷改善</span></p><p><span class="change-log-version">2026/10/15　Ver.0.2.0</span><span class="change-log-description">フェーズノート追加、構成見直し、その他修正&amp;見直し</span></p><p><span class="change-log-version">2026/10/14　Ver.0.1.1</span><span class="change-log-description">見た目見直し</span></p><p><span class="change-log-version">2026/10/12　Ver.0.1.0</span><span class="change-log-description">初版</span></p></div>';
+changeLog.innerHTML='<div class="operation-guide-heading"><h2 id="changeLogTitle">更新履歴</h2><button type="button" class="btn" autofocus>閉じる</button></div><div class="operation-guide-body"><p><span class="change-log-version">2026/11/14　Ver.1.2.1</span><span class="change-log-description">画面の見方追加、UI調整、不具合修正、処理負荷改善</span></p><p><span class="change-log-version">2026/11/12　Ver.1.2.0</span><span class="change-log-description">配置済みSVGプリセットの再登録機能追加、グループ内の全選択機能追加、オブジェクトグループの位置設定追加、フェーズのDeleteキー削除対応、UI調整、不具合修正</span></p><p><span class="change-log-version">2026/11/10　Ver.1.1.0</span><span class="change-log-description">オブジェクトグループのメニュー拡充、AoEロックオン系に明るさ設定追加、フィールド設定に2×2の区画ごとの画像設定機能を追加、グリッド線選択肢追加、フェーズの2×2合成機能追加、SVG画像としてプリセット登録する機能追加、AoE追加、未使用フィールド一括削除機能追加、UI調整、不具合修正</span></p><p><span class="change-log-version">2026/11/07　Ver.1.0.0</span><span class="change-log-description">正式版公開</span></p><p><span class="change-log-version">2026/11/06　Ver.0.9.5</span><span class="change-log-description">UI調整、処理負荷改善</span></p><p><span class="change-log-version">2026/11/05　Ver.0.9.4</span><span class="change-log-description">ダウンロード準備、UI調整、不具合修正、要望・不具合報告メニュー追加</span></p><p><span class="change-log-version">2026/11/05　Ver.0.9.3</span><span class="change-log-description">オフライン利用方法の準備、ダウンロードページの準備、UI調整、不具合修正</span></p><p><span class="change-log-version">2026/11/03　Ver.0.9.2</span><span class="change-log-description">UI調整、処理改善、他修正</span></p><p><span class="change-log-version">2026/11/03　Ver.0.9.1</span><span class="change-log-description">UI調整、不具合修正</span></p><p><span class="change-log-version">2026/11/02　Ver.0.9.0</span><span class="change-log-description">画像読み込み機能追加、フィールド機能追加(ガイド統合)、メニュー強化</span></p><p><span class="change-log-version">2026/10/31　Ver.0.8.2</span><span class="change-log-description">不具合修正</span></p><p><span class="change-log-version">2026/10/31　Ver.0.8.1</span><span class="change-log-description">UI等もろもろ調整</span></p><p><span class="change-log-version">2026/10/30　Ver.0.8.0</span><span class="change-log-description">キャンバスのガイド機能正式実装、印刷機能をスマホ版も拡充、フィールド設定コピー機能追加、UI調整</span></p><p><span class="change-log-version">2026/10/28　Ver.0.7.1</span><span class="change-log-description">印刷機能拡充(PC版のみ)、キャンバスのガイド機能仮実装、UI調整</span></p><p><span class="change-log-version">2026/10/26　Ver.0.7.0</span><span class="change-log-description">プリセット機能正式追加、UI調整</span></p><p><span class="change-log-version">2026/10/25　Ver.0.6.2</span><span class="change-log-description">オブジェクト追加、画像・印刷機能にノート表示追加</span></p><p><span class="change-log-version">2026/10/25　Ver.0.6.1</span><span class="change-log-description">UI調整</span></p><p><span class="change-log-version">2026/10/25　Ver.0.6.0</span><span class="change-log-description">オブジェクトのグループ化対応、印刷機能追加(PNG生成と統合)、プリセット機能仮実装</span></p><p><span class="change-log-version">2026/10/23　Ver.0.5.2</span><span class="change-log-description">UI調整</span></p><p><span class="change-log-version">2026/10/22　Ver.0.5.1</span><span class="change-log-description">UI調整</span></p><p><span class="change-log-version">2026/10/19　Ver.0.5.0</span><span class="change-log-description">コンテンツを履歴操作に追加、PNG生成モード追加、レイアウト少し見直し、その他修正</span></p><p><span class="change-log-version">2026/10/18　Ver.0.4.1</span><span class="change-log-description">ツールの内部構成変更、その他修正</span></p><p><span class="change-log-version">2026/10/18　Ver.0.4.0</span><span class="change-log-description">チュートリアル追加、フェーズグループ化機能追加、メモリ使用量削減、JSONファイルサイズ削減</span></p><p><span class="change-log-version">2026/10/17　Ver.0.3.0</span><span class="change-log-description">コンテンツ間フェーズコピー機能追加、右クリック・長押し操作メニュー各種追加、文字サイズ変更、処理負荷改善</span></p><p><span class="change-log-version">2026/10/15　Ver.0.2.0</span><span class="change-log-description">フェーズノート追加、構成見直し、その他修正&amp;見直し</span></p><p><span class="change-log-version">2026/10/14　Ver.0.1.1</span><span class="change-log-description">見た目見直し</span></p><p><span class="change-log-version">2026/10/12　Ver.0.1.0</span><span class="change-log-description">初版</span></p></div>';
 
 document.body.append(changeLog);
 
@@ -304,7 +304,7 @@ const offlineUsageCases=[
     5
    ]
   ],
-  "note": "<h4>終了するとき・つながらないとき</h4><p>使い終えたらPCの起動ウィンドウを閉じるか、そこでCtrl+Cを押します。次回は同じ起動ファイルを実行してからスマホで開きます。</p><p>つながらなければ、PC・サーバーが起動中か、端末間の接続が可能か、URLが表示どおりか、Windowsで通信が許可されているかを確認します。PCとスマホの作成データは自動同期されません。移動にはコンテンツJSONとユーザープリセット専用JSONを使います。</p>"
+  "note": "<h4>編集の区切りでJSONを保存します</h4><p>スマホ側の「エクスポート」から、コンテンツをJSONに保存します。ユーザープリセットを登録・変更した場合は、専用JSONも別に保存します。編集を終えるときやブラウザーを閉じる前、作業の途中にも適宜保存し、保存先にファイルがあることを確認します。ブラウザー内の自動保存とは別のバックアップです。</p><h4>接続先のURLが変わることがあります</h4><p>PCの再起動や接続するWi-Fiの変更などで、PCのIPアドレスが変わる場合があります。次回も起動ウィンドウの「Phone URLs」を確認します。IPアドレスやポート番号が変わると、スマホのブラウザーでは別の保存先として扱われ、以前のデータが表示されないことがあります。元のデータが消えたとは限りません。保存したJSONを新しい接続先で読み込めば、続きから編集できます。</p><h4>終了するとき・つながらないとき</h4><p>JSONの保存を確認したら、PCの起動ウィンドウを閉じるか、そこでCtrl+Cを押します。つながらなければ、PC・サーバーが起動中か、端末間の接続が可能か、URLが表示どおりか、Windowsで通信が許可されているかを確認します。PCとスマホの作成データは自動同期されません。</p>"
  },
  {
   "id": "usagePhoneCase",
@@ -444,11 +444,31 @@ const offlineUsageCases=[
   "note": "<h4>更新を確認できないとき</h4><p>起動時にファイル不一致の案内が出たら、新旧のファイルが混在していないか確認します。古いVersionのツールで新しいVersionのJSONを読み込めるとは限らないため、更新前のJSONを保持してください。</p>"
  }
 ];
-function offlineUsageArtwork(scene){const cell=scene%12,x=cell%3*724,y=Math.floor(cell/3)*724,sheet=scene>=12?'detail':'base';return `<svg class="usage-scene-art" viewBox="0 0 724 724" aria-hidden="true" focusable="false"><svg width="724" height="724" viewBox="${x} ${y} 724 724" overflow="hidden"><image data-guide-sheet="${sheet}" width="2172" height="2896"/></svg></svg>`}
+let offlineUsageArtworkSerial=0;
+// These two rows of the detail sheet cross the nominal 724px cell boundary.
+// Split at the whitespace between illustrations, keeping both neighboring drawings whole.
+const offlineUsageArtworkCrops={19:[724,1448,656,724],20:[1380,1448,792,724],22:[724,2172,676,724],23:[1400,2172,772,724]};
+function offlineUsageArtwork(scene){const cell=scene%12,[x,y,w,h]=offlineUsageArtworkCrops[scene]||[cell%3*724,Math.floor(cell/3)*724,724,724],sheet=scene>=12?'detail':'base',clip='usage-art-clip-'+offlineUsageArtworkSerial++;return `<svg class="usage-scene-art" viewBox="0 0 ${w} ${h}" aria-hidden="true" focusable="false"><defs><clipPath id="${clip}" clipPathUnits="userSpaceOnUse"><rect width="${w}" height="${h}"/></clipPath></defs><g clip-path="url(#${clip})"><image data-guide-sheet="${sheet}" x="${-x}" y="${-y}" width="2172" height="2896"/></g></svg>`}
 function offlineUsageCaseHTML(item){return `<header class="usage-scene-intro"><span class="usage-scene-eyebrow">${item.tag}</span><h3>${item.title}</h3><p>${item.intro}</p></header><p class="usage-download-status">本体ZIPの配布入口は準備中です。公開後は、以下の手順で利用できます。</p><ol class="usage-scene-steps">${item.steps.map(([title,action,result,tip,scene],i)=>`<li><div class="usage-step-heading"><span class="usage-step-number" aria-hidden="true">${i+1}</span><h4>${title}</h4></div>${offlineUsageArtwork(scene)}<p>${action}</p><p class="usage-step-result"><strong>確認：</strong>${result}</p>${tip?`<p class="usage-scene-tip">${tip}</p>`:''}</li>`).join('')}</ol><section class="usage-data-note">${item.note}</section><p class="usage-art-caption">絵は操作のイメージです。画面や操作名は端末・環境で異なる場合があります。</p>`}
 usageGuide.innerHTML=`<div class="operation-guide-heading"><h2 id="usageSceneTitle">オフライン利用方法</h2><button id="closeUsageSceneGuide" type="button" class="btn" autofocus>閉じる</button></div><div class="operation-guide-body">${offlineUsageCases.map((item,i)=>i===0?offlineUsageCaseHTML(item):`<section id="${item.id}">${offlineUsageCaseHTML(item)}</section>`).join('')}</div>`;
 
 document.body.append(usageGuide);
+// Each help dialog keeps one DOM view per case; only visibility and scroll change.
+function bindIllustratedHelpCases({body,cases,links,initial=()=>0,onSelect=()=>{},exclusive=true,backLabel="← 一覧へ戻る"}){
+ function select(index,scroll=false){
+  for(const [i,item]of cases.entries()){item.hidden=exclusive&&i!==index;if(i===index)links[i].setAttribute('aria-current','true');else links[i].removeAttribute('aria-current')}
+  onSelect(cases[index]);body.scrollTop=0;
+  if(scroll)body.scrollTop=Math.max(0,cases[index].getBoundingClientRect().top-body.getBoundingClientRect().top-12);
+ }
+ cases.forEach((item,i)=>{
+  const heading=item.querySelector('h3');heading.tabIndex=-1;heading.classList.add('help-section-heading');
+  const text=document.createElement('span');text.textContent=heading.textContent;heading.replaceChildren(text);
+  const back=document.createElement('button');back.type='button';back.className='help-back-to-contents';back.textContent=backLabel;back.onclick=()=>{body.scrollTop=0;links[i].focus({preventScroll:true})};
+  const footer=document.createElement('p');footer.className='usage-case-footer';footer.append(back);item.append(footer);
+  links[i].onclick=event=>{event.preventDefault();select(i,true)};
+ });
+ const reset=()=>{if(exclusive){select(initial());return}for(const item of cases){item.hidden=false;onSelect(item)}for(const link of links)link.removeAttribute('aria-current');body.scrollTop=0};reset();return reset;
+}
 // A single retained detail view per case; selection changes visibility, never copies data or DOM.
 (()=>{
  const body=usageGuide.querySelector('.operation-guide-body'),first=document.createElement('section');first.id='usagePcCase';
@@ -459,19 +479,96 @@ document.body.append(usageGuide);
  const index=document.createElement('nav');index.className='help-contents';index.setAttribute('aria-label','利用シーン一覧');
  const title=document.createElement('p');title.className='help-contents-title';title.textContent='オフラインでの利用・更新方法';index.append(title);
  const list=document.createElement('ul');index.append(list);body.prepend(index);
- const links=[];
- function selectCase(selected,scroll=false){for(const [i,item] of cases.entries()){item.hidden=i!==selected;if(i===selected)links[i].setAttribute('aria-current','true');else links[i].removeAttribute('aria-current')}body.scrollTop=0;if(scroll)body.scrollTop=Math.max(0,cases[selected].getBoundingClientRect().top-body.getBoundingClientRect().top-12)}
- cases.forEach((item,i)=>{
-  const heading=item.querySelector('h3'),label=heading.textContent;heading.tabIndex=-1;heading.classList.add('help-section-heading');
-  const text=document.createElement('span');text.textContent=label;heading.replaceChildren(text);
-  const back=document.createElement('button');back.type='button';back.className='help-back-to-contents';back.textContent='← 一覧へ戻る';back.onclick=()=>{body.scrollTop=0;links[i].focus({preventScroll:true})};const footer=document.createElement('p');footer.className='usage-case-footer';footer.append(back);item.append(footer);
-  const row=document.createElement('li'),link=document.createElement('a');link.href='#'+item.id;link.textContent=label;
-  link.onclick=event=>{event.preventDefault();selectCase(i,true)};row.append(link);list.append(row);links.push(link);
- });
- usageGuide.showCaseIndex=()=>selectCase(0);selectCase(0);
+ const links=cases.map(item=>{const row=document.createElement('li'),link=document.createElement('a');link.href='#'+item.id;link.textContent=item.querySelector('h3').textContent;row.append(link);list.append(row);return link});
+ usageGuide.showCaseIndex=bindIllustratedHelpCases({body,cases,links});
 })();
 
 document.getElementById('closeUsageSceneGuide').onclick=()=>usageGuide.close();
+
+// ===== Screen overview: one highlighted area, with ordinary HTML explanation =====
+const screenOverview=document.createElement('dialog');screenOverview.id='screenOverviewDialog';screenOverview.className='operation-guide usage-scene-guide screen-overview-guide';screenOverview.setAttribute('aria-labelledby','screenOverviewTitle');
+screenOverview.innerHTML='<div class="operation-guide-heading"><h2 id="screenOverviewTitle">画面の見方</h2><button type="button" class="btn" autofocus>閉じる</button></div><div class="operation-guide-body"><p>編集画面の主な場所を、PC版・スマホ版に分けて紹介します。目次で版を選ぶと、その画面の説明を表示します。</p></div>';
+const screenOverviewEntries=[
+ {id:'pc-materials',device:'PC版',art:'pc',name:'マテリアルペイン',region:[64,199,135,498],text:'配置する図形やアイコンを選ぶ場所です。カテゴリーを開いて素材を選び、キャンバスへドラッグするか、素材とキャンバスを順にクリックして配置します。'},
+ {id:'pc-content',device:'PC版',art:'pc',name:'コンテンツ管理ペイン',region:[207,199,158,486],text:'コンテンツやフェーズを選び、攻略の流れを整理する場所です。下のフェーズプロパティで名前・使用フィールド・ノートを編集します。見出し横の切替ボタンからフィールドモードへ移れます。'},
+ {id:'pc-canvas',device:'PC版',art:'pc',name:'キャンバス',region:[374,200,395,487],text:'オブジェクトを配置して攻略図を作る場所です。選択して移動・サイズ変更・回転を行います。戦闘エリアの形状や背景は、使用しているフィールドの設定で決まります。'},
+ {id:'pc-objects',device:'PC版',art:'pc',name:'オブジェクトリスト',region:[777,200,179,210],text:'現在のフェーズに配置したオブジェクトの一覧です。名前から選択し、重なり順・表示・編集可否やグループを整理できます。'},
+ {id:'pc-properties',device:'PC版',art:'pc',name:'オブジェクトプロパティ',region:[777,416,179,272],text:'選択したオブジェクトの位置・サイズ・色などを変更する場所です。表示される設定は種類によって変わります。'},
+ {id:'phone-canvas',device:'スマホ版',art:'phone',name:'キャンバス',region:[351,246,324,301],text:'素材を選んでタップすると配置できます。2本指で拡縮し、拡大中は表示位置をスワイプで動かせます。選択したオブジェクトの移動には十字ハンドルも使えます。'},
+ {id:'phone-objects',device:'スマホ版',art:'phone',name:'オブジェクトリスト／プロパティ',region:[330,575,366,189],text:'画面下の同じ欄を、⇄でリストとプロパティに切り替えます。リストで対象を選び、プロパティで数値や見た目を変更します。見出しの−／＋で欄を開閉できます。'},
+ {id:'phone-materials',device:'スマホ版',art:'phoneMaterials',name:'マテリアルペイン',region:[318,524,389,235],text:'配置する素材を選ぶ場所です。通常画面のオブジェクト欄の見出し左にある図形ボタンで開きます。アイコンでカテゴリーを切り替え、素材をタップします。選び直しは開いたまま行え、配置すると閉じます。'},
+ {id:'phone-content',device:'スマホ版',art:'phoneContent',name:'コンテンツ管理ペイン',region:[323,151,340,619],text:'キャンバス左側の矢印から開き、コンテンツやフェーズを選ぶ場所です。下の⇄でフェーズリストとプロパティを切り替え、名前・使用フィールド・ノートを編集します。上側は配置を確認するプレビューです。'},
+ {id:'pc-field-list',device:'PC版',art:'pcField',name:'フィールドリスト',region:[127,203,176,479],text:'コンテンツ見出し横の⇄でフィールドモードに切り替え、編集するフィールドを選ぶ場所です。追加・複製したフィールドは、コンテンツモードのフェーズプロパティで使用先に指定できます。'},
+ {id:'pc-field-properties',device:'PC版',art:'pcField',name:'フィールドプロパティ',region:[748,203,208,479],text:'選択したフィールドの形状・背景画像・ガイドなどを設定する場所です。変更は、そのフィールドを使うすべてのフェーズに反映されます。初期フィールドは変更できません。'},
+ {id:'phone-field-list',device:'スマホ版',art:'phoneFieldList',name:'フィールドリスト',region:[330,533,366,231],text:'左側の矢印でコンテンツ管理ペインを開き、見出し横の⇄でフィールドモードに切り替えます。この一覧で編集するフィールドを選び、ペインを閉じるとフィールドと設定欄に戻ります。'},
+ {id:'phone-field-properties',device:'スマホ版',art:'phoneFieldProperties',name:'フィールドプロパティ',region:[337,539,351,225],text:'画面下の設定欄で、選択したフィールドの形状・背景画像・ガイドなどを変更します。変更は、そのフィールドを使うすべてのフェーズに反映されます。見出しの−／＋で設定欄を開閉できます。初期フィールドは変更できません。'}
+];
+const screenOverviewPaneDefinitions=[
+ {id:'materials',name:'マテリアルペイン',text:'配置する素材を選ぶ場所です。'},
+ {id:'content',name:'コンテンツ管理ペイン',text:'コンテンツリスト・フェーズリスト・フェーズプロパティと、グループ選択時のグループプロパティを含みます。'},
+ {id:'phase',name:'フェーズペイン',text:'フェーズキャンバス・オブジェクトリスト・オブジェクトプロパティを含みます。'},
+ {id:'field-management',name:'フィールド管理ペイン',text:'フィールドリストと、グループ選択時のグループプロパティを含みます。'},
+ {id:'field',name:'フィールドペイン',text:'フィールドキャンバスとフィールドプロパティを含みます。'}
+];
+for(const entry of screenOverviewEntries){
+ const part=entry.id.slice(entry.id.indexOf('-')+1);
+ entry.pane=part==='materials'?'materials':part==='content'?'content':part==='field-list'?'field-management':part==='field-properties'?'field':'phase';
+ entry.order=part==='canvas'?1:part==='objects'?2:part==='properties'?3:1;
+ if(part==='content'){entry.overview=true;entry.order=0;entry.text='コンテンツやフェーズを選び、管理するペインです。内部にコンテンツリスト・フェーズリスト・フェーズプロパティがあり、グループを選ぶとグループプロパティを表示します。見出し横の⇄でフィールド管理へ切り替えます。'+(entry.device==='スマホ版'?'左側の矢印で開閉し、上側のプレビューで配置を確認できます。':'');}
+ if(part==='canvas')entry.name='フェーズキャンバス';
+}
+screenOverviewEntries.push(
+ {id:'pc-content-list',device:'PC版',pane:'content',order:1,art:'pcContentList',name:'コンテンツリスト',region:[207,266,158,149],text:'コンテンツ管理ペイン上部の選択欄を押すと開く一覧です。コンテンツの選択・追加・名前変更などを行います。'},
+ {id:'phone-content-list',device:'スマホ版',pane:'content',order:1,art:'phoneContentList',name:'コンテンツリスト',region:[336,556,318,163],text:'コンテンツ管理ペインのプレビュー下にある選択欄をタップすると開く一覧です。コンテンツの選択・追加・名前変更などを行います。'},
+ {id:'pc-phase-list',device:'PC版',pane:'content',order:2,art:'pc',name:'フェーズリスト',region:[207,265,158,200],text:'コンテンツ管理ペイン内でフェーズを選ぶ一覧です。追加・複製・並べ替え・グループ化で攻略の流れを整理します。'},
+ {id:'phone-phase-list',device:'スマホ版',pane:'content',order:2,art:'phoneContent',name:'フェーズリスト',region:[335,569,320,171],text:'コンテンツ管理ペイン内でフェーズを選び、追加・複製・並べ替えを行います。見出しの⇄でフェーズプロパティへ切り替えます。'},
+ {id:'pc-phase-properties',device:'PC版',pane:'content',order:3,art:'pc',name:'フェーズプロパティ',region:[207,472,158,213],text:'コンテンツ管理ペイン内で、フェーズ名・使用フィールド・フェーズノートを編集します。フェーズグループを選んだ場合は、そのグループの設定を表示します。'},
+ {id:'phone-phase-properties',device:'スマホ版',pane:'content',order:3,art:'phonePhaseProperties',name:'フェーズプロパティ',region:[336,510,318,242],text:'コンテンツ管理ペイン内でフェーズリストと切り替えて表示し、フェーズ名・使用フィールド・フェーズノートを編集します。フェーズグループの選択時はグループの設定を表示します。'},
+ {id:'pc-phase-group-properties',device:'PC版',pane:'content',order:4,art:'pcPhaseGroup',name:'グループプロパティ',region:[123,461,220,227],text:'コンテンツ管理ペインのフェーズリストでグループを選ぶと表示されます。グループ名とグループ概要を編集し、共通の方針やフェーズ間の流れを残せます。フィールド管理側のグループプロパティは名前のみを編集します。'},
+ {id:'phone-phase-group-properties',device:'スマホ版',pane:'content',order:4,art:'phonePhaseGroup',name:'グループプロパティ',region:[336,510,318,242],text:'フェーズグループを選び、一覧からプロパティへ切り替えると表示されます。グループ名とグループ概要を編集できます。フィールド管理側のグループプロパティは名前のみを編集します。'},
+ {id:'pc-phase',device:'PC版',pane:'phase',order:0,overview:true,art:'pc',name:'フェーズペイン',region:[374,199,582,489],text:'選択したフェーズを表示・編集するペインです。フェーズキャンバス、オブジェクトリスト、オブジェクトプロパティを含みます。'},
+ {id:'phone-phase',device:'スマホ版',pane:'phase',order:0,overview:true,art:'phone',name:'フェーズペイン',region:[330,157,366,607],text:'フェーズキャンバスと、下部のオブジェクトリスト／プロパティを含む編集用のペインです。下部の一覧と設定欄は⇄で切り替えます。'},
+ {id:'pc-field-management',device:'PC版',pane:'field-management',order:0,overview:true,art:'pcField',name:'フィールド管理ペイン',region:[127,203,176,479],text:'共有するフィールドを選び、追加・複製・グループ整理をするペインです。フィールドリストと、グループ選択時のグループプロパティを含みます。'},
+ {id:'phone-field-management',device:'スマホ版',pane:'field-management',order:0,overview:true,art:'phoneFieldList',name:'フィールド管理ペイン',region:[323,151,383,613],text:'コンテンツ管理ペインの見出し横の⇄で切り替える管理用のペインです。フィールドリストと、グループ選択時のグループプロパティを含みます。上部にはプレビューを表示します。'},
+ {id:'pc-field-group-properties',device:'PC版',pane:'field-management',order:2,art:'pcFieldGroup',name:'グループプロパティ',region:[127,574,176,107],text:'フィールドリストでグループを選ぶと、フィールド管理ペイン内に表示されます。グループ名を編集する場所です。個々のフィールドの設定とは別です。'},
+ {id:'phone-field-group-properties',device:'スマホ版',pane:'field-management',order:2,art:'phoneFieldGroup',name:'グループプロパティ',region:[329,678,367,84],text:'フィールド管理ペインの一覧でグループを選ぶと、一覧の下に表示されます。ここでグループ名を編集します。'},
+ {id:'pc-field',device:'PC版',pane:'field',order:0,overview:true,art:'pcField',name:'フィールドペイン',region:[314,203,642,479],text:'選択したフィールドを表示・編集するペインです。フィールドキャンバスとフィールドプロパティを含み、通常のオブジェクトは表示しません。'},
+ {id:'phone-field',device:'スマホ版',pane:'field',order:0,overview:true,art:'phoneFieldProperties',name:'フィールドペイン',region:[330,157,366,607],text:'管理ペインを閉じたときに表示する、フィールド編集用のペインです。フィールドキャンバスと下部のフィールドプロパティを含みます。'},
+ {id:'pc-field-canvas',device:'PC版',pane:'field',order:1,art:'pcField',name:'フィールドキャンバス',region:[314,239,425,443],text:'フィールドやガイドを確認・編集するキャンバスです。通常のオブジェクトを配置するフェーズキャンバスと区別して呼びます。'},
+ {id:'phone-field-canvas',device:'スマホ版',pane:'field',order:1,art:'phoneFieldProperties',name:'フィールドキャンバス',region:[357,236,311,290],text:'フィールドやガイドを確認・編集するキャンバスです。設定欄を閉じて広く表示することもできます。通常のオブジェクトは表示しません。'}
+);
+for(const entry of screenOverviewEntries){if(entry.id.endsWith('-field-properties'))entry.order=2;}
+// Use the actual tool logo instead of asking the illustration to reproduce it.
+const screenOverviewPcLogo='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(new XMLSerializer().serializeToString(document.querySelector('.app .brand .logo svg')));
+(()=>{
+ const body=screenOverview.querySelector('.operation-guide-body'),index=document.createElement('nav');index.className='help-contents';index.setAttribute('aria-label','端末別の画面の見方');
+ const cases=[],links=[],list=document.createElement('ul');index.append(list);
+ for(const device of ['PC版','スマホ版']){
+  const group=document.createElement('section');group.id=device==='PC版'?'screen-overview-pc':'screen-overview-phone';group.className='screen-overview-device';
+  const title=document.createElement('h3');title.textContent=device;group.append(title);body.append(group);cases.push(group);
+  const row=document.createElement('li'),link=document.createElement('a');link.href='#'+group.id;link.textContent=device;row.append(link);list.append(row);links.push(link);
+  for(const pane of screenOverviewPaneDefinitions){
+   const section=document.createElement('section');section.className='screen-overview-pane';section.dataset.pane=pane.id;
+   const paneTitle=document.createElement('h4'),summary=document.createElement('p'),cards=document.createElement('ol');paneTitle.textContent=pane.name;summary.textContent=pane.text;cards.className='usage-scene-steps';section.append(paneTitle,summary,cards);group.append(section);
+   for(const [position,entry] of screenOverviewEntries.filter(item=>item.device===device&&item.pane===pane.id).sort((a,b)=>a.order-b.order).entries()){
+   const item=document.createElement('li');item.id='screen-overview-'+entry.id;item.className='screen-overview-case';
+   const [x,y,w,h]=entry.region,cx=x+w/2;
+   item.innerHTML='<div class="usage-step-heading"><span class="usage-step-number" aria-hidden="true">'+(position+1)+'</span><h5>'+entry.name+'</h5></div><svg class="usage-scene-art screen-overview-art" viewBox="0 0 1024 1024" role="img" aria-label="'+entry.device+'の'+entry.name+'の位置"><image data-screen-art="'+entry.art+'" x="0" y="0" width="1024" height="1024"/><rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="8" fill="#a9dcf1" fill-opacity=".2" stroke="#174465" stroke-width="6"/><path d="M'+cx+' '+(y+h)+' V875 H512 V897" fill="none" stroke="#174465" stroke-width="5" stroke-linejoin="round"/><circle cx="'+cx+'" cy="'+(y+h)+'" r="9" fill="#174465" stroke="#fff" stroke-width="3"/><rect x="92" y="897" width="840" height="94" rx="30" fill="#d9f1fc" stroke="#174465" stroke-width="6"/><text x="512" y="944" dominant-baseline="central" text-anchor="middle" fill="#133452" font-size="40" font-weight="700">'+entry.name+'</text></svg><p class="screen-overview-description">'+entry.text+'</p>';
+   if(entry.art.startsWith('pc')){
+    const image=item.querySelector('image'),ns='http://www.w3.org/2000/svg',cover=document.createElementNS(ns,'rect'),logo=document.createElementNS(ns,'image');
+    for(const [name,value] of Object.entries({x:76,y:113,width:28,height:27,fill:'#1c1c1c'}))cover.setAttribute(name,value);
+    for(const [name,value] of Object.entries({x:75,y:112,width:30,height:30,href:screenOverviewPcLogo,'data-screen-logo':''}))logo.setAttribute(name,value);
+    image.after(cover,logo);
+   }
+   cards.append(item);
+   }
+  }
+ }
+ body.insertBefore(index,body.children[1]||null);
+ screenOverview.showCaseIndex=bindIllustratedHelpCases({body,cases,links,initial:()=>matchMedia('(max-width:850px)').matches?1:0,backLabel:'← 目次へ戻る',onSelect(item){for(const image of item.querySelectorAll('image[data-screen-art]'))if(!image.hasAttribute('href'))image.setAttribute('href',screenOverviewArtworkData[image.dataset.screenArt])}});
+ const note=document.createElement('p');note.className='usage-art-caption';note.textContent='絵は画面構成のイメージです。細かな操作は「操作ガイド」や画面の「？」を確認してください。';body.append(note);
+ screenOverview.querySelector('.operation-guide-heading button').onclick=()=>screenOverview.close();document.body.append(screenOverview);
+})();
 
 // One dialog owns both release notes and the download entry.
 const downloadDialog=changeLog;
@@ -481,7 +578,7 @@ const releaseBody=downloadDialog.querySelector('.operation-guide-body');
 const releaseHistorySection=document.createElement('section');releaseHistorySection.className='release-history';
 const historyTitle=document.createElement('h3');historyTitle.textContent='更新履歴';releaseHistorySection.append(historyTitle);
 while(releaseBody.firstChild)releaseHistorySection.append(releaseBody.firstChild);
-releaseBody.innerHTML='<p class="download-status" role="note">最新版Version 1.2.0のツール本体をダウンロードできます。</p><p>PCで直接開く場合も、PC経由でスマホから使う場合も、起動ファイルを含む同じZIPを使用します。</p><h3>ダウンロード</h3><div data-download-latest><article class="download-release"><div class="download-release-heading"><h4>Version 1.2.0</h4><a class="btn" data-download-version="1.2.0" href="https://iworiol.github.io/downloads/BOARD_OF_LIGHT_XIV/BOARD_OF_LIGHT_XIV_1.2.0.zip" download="BOARD_OF_LIGHT_XIV_1.2.0.zip">ZIPをダウンロード</a></div><p>2026/11/12　SVGプリセット再登録・グループ操作拡充・UI調整・不具合修正</p></article></div><details><summary>過去の正式版</summary><article class="download-release"><div class="download-release-heading"><h4>Version 1.1.0</h4><a class="btn" data-download-version="1.1.0" href="https://iworiol.github.io/downloads/BOARD_OF_LIGHT_XIV/BOARD_OF_LIGHT_XIV_1.1.0.zip" download="BOARD_OF_LIGHT_XIV_1.1.0.zip">ZIPをダウンロード</a></div><p>2026/11/10　2×2合成・SVGプリセット・AoE素材などを追加</p></article><article class="download-release"><div class="download-release-heading"><h4>Version 1.0.0</h4><a class="btn" data-download-version="1.0.0" href="https://iworiol.github.io/downloads/BOARD_OF_LIGHT_XIV/BOARD_OF_LIGHT_XIV_1.0.0.zip" download="BOARD_OF_LIGHT_XIV_1.0.0.zip">ZIPをダウンロード</a></div><p>2026/11/07　正式版公開</p><p>ツール本体とWindows用のローカルサーバー起動ファイルを同梱しています。ZIPを展開してから利用してください。</p></article><p>0.9.x以前は更新履歴のみ掲載します。</p></details><p>起動・更新の手順は、ヘルプの「オフライン利用方法」を確認してください。</p>';
+releaseBody.innerHTML='<p class="download-status" role="note">オフライン用のツール本体（Version 1.2.1）をダウンロードできます。</p><p>PCで直接開く場合も、PC経由でスマホから使う場合も、起動ファイルを含む同じZIPを使用します。</p><h3>ダウンロード</h3><div data-download-latest><article class="download-release"><div class="download-release-heading"><h4>Version 1.2.1</h4><a class="btn" data-download-version="1.2.1" href="https://iworiol.github.io/downloads/BOARD_OF_LIGHT_XIV/BOARD_OF_LIGHT_XIV_1.2.1.zip" download="BOARD_OF_LIGHT_XIV_1.2.1.zip">ZIPをダウンロード</a></div><p>2026/11/14　画面の見方追加・UI調整・不具合修正・処理負荷改善</p></article></div><details><summary>過去の正式版</summary><article class="download-release"><div class="download-release-heading"><h4>Version 1.2.0</h4><a class="btn" data-download-version="1.2.0" href="https://iworiol.github.io/downloads/BOARD_OF_LIGHT_XIV/BOARD_OF_LIGHT_XIV_1.2.0.zip" download="BOARD_OF_LIGHT_XIV_1.2.0.zip">ZIPをダウンロード</a></div><p>2026/11/12　SVGプリセット再登録・グループ操作拡充・UI調整・不具合修正</p></article><article class="download-release"><div class="download-release-heading"><h4>Version 1.1.0</h4><a class="btn" data-download-version="1.1.0" href="https://iworiol.github.io/downloads/BOARD_OF_LIGHT_XIV/BOARD_OF_LIGHT_XIV_1.1.0.zip" download="BOARD_OF_LIGHT_XIV_1.1.0.zip">ZIPをダウンロード</a></div><p>2026/11/10　2×2合成・SVGプリセット・AoE素材などを追加</p></article><article class="download-release"><div class="download-release-heading"><h4>Version 1.0.0</h4><a class="btn" data-download-version="1.0.0" href="https://iworiol.github.io/downloads/BOARD_OF_LIGHT_XIV/BOARD_OF_LIGHT_XIV_1.0.0.zip" download="BOARD_OF_LIGHT_XIV_1.0.0.zip">ZIPをダウンロード</a></div><p>2026/11/07　正式版公開</p><p>ツール本体とWindows用のローカルサーバー起動ファイルを同梱しています。ZIPを展開してから利用してください。</p></article><p>0.9.x以前は更新履歴のみ掲載します。</p></details><p>起動・更新の手順は、ヘルプの「オフライン利用方法」を確認してください。</p>';
 releaseBody.append(releaseHistorySection);
 downloadDialog.addEventListener('close',()=>{releaseBody.querySelector('details').open=false});
 
@@ -495,7 +592,7 @@ helpMenu.setAttribute('role','menu');
 
 helpMenu.hidden=true;
 
-helpMenu.innerHTML='<button type="button" role="menuitem" data-help-action="guide">操作ガイド</button><button type="button" role="menuitem" data-help-action="shortcuts">ショートカット一覧</button><div class="context-separator" role="separator"></div><button type="button" role="menuitem" data-help-action="usage">オフライン利用方法</button><button type="button" role="menuitem" data-help-action="download">更新履歴・ダウンロード</button><div class="context-separator" role="separator"></div><button type="button" role="menuitem" data-help-action="feedback">要望・不具合報告</button><button type="button" role="menuitem" data-help-action="about">ツールについて</button>';
+helpMenu.innerHTML='<button type="button" role="menuitem" data-help-action="screen">画面の見方</button><button type="button" role="menuitem" data-help-action="guide">操作ガイド</button><button type="button" role="menuitem" data-help-action="shortcuts">ショートカット一覧</button><div class="context-separator" role="separator"></div><button type="button" role="menuitem" data-help-action="usage">オフライン利用方法</button><button type="button" role="menuitem" data-help-action="download">更新履歴・ダウンロード</button><div class="context-separator" role="separator"></div><button type="button" role="menuitem" data-help-action="feedback">要望・不具合報告</button><button type="button" role="menuitem" data-help-action="about">ツールについて</button>';
 
 document.body.appendChild(helpMenu);
 
@@ -507,7 +604,7 @@ window.addEventListener('resize',()=>closeHelpMenu());
 
 helpMenu.addEventListener('keydown',e=>{const items=Array.from(helpMenu.querySelectorAll('button')),index=items.indexOf(document.activeElement);if(e.key==='Escape'){e.preventDefault();closeHelpMenu(true)}else if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();items[(index+(e.key==='ArrowDown'?1:items.length-1))%items.length].focus()}else if(e.key==='Tab')closeHelpMenu()});
 
-helpMenu.addEventListener('click',e=>{const item=e.target.closest('[data-help-action]');if(!item)return;closeHelpMenu(true);const dialog=item.dataset.helpAction==='shortcuts'?shortcutDialog:item.dataset.helpAction==='guide'?operationGuide:item.dataset.helpAction==='usage'?usageGuide:item.dataset.helpAction==='download'?downloadDialog:item.dataset.helpAction==='feedback'?feedbackDialog:aboutTool;if(dialog===usageGuide)usageGuide.showCaseIndex();if(dialog===usageGuide)for(const image of usageGuide.querySelectorAll('svg image'))if(!image.hasAttribute('href'))image.setAttribute('href',image.dataset.guideSheet==='detail'?offlineGuideDetailArtworkData:offlineGuideArtworkData);dialog.querySelector('.operation-guide-body').scrollTop=0;dialog.showModal()});
+helpMenu.addEventListener('click',e=>{const item=e.target.closest('[data-help-action]');if(!item)return;closeHelpMenu(true);const dialog=item.dataset.helpAction==='screen'?screenOverview:item.dataset.helpAction==='shortcuts'?shortcutDialog:item.dataset.helpAction==='guide'?operationGuide:item.dataset.helpAction==='usage'?usageGuide:item.dataset.helpAction==='download'?downloadDialog:item.dataset.helpAction==='feedback'?feedbackDialog:aboutTool;if(dialog===screenOverview)screenOverview.showCaseIndex();if(dialog===usageGuide)usageGuide.showCaseIndex();if(dialog===usageGuide)for(const image of usageGuide.querySelectorAll('svg image'))if(!image.hasAttribute('href'))image.setAttribute('href',image.dataset.guideSheet==='detail'?offlineGuideDetailArtworkData:offlineGuideArtworkData);dialog.querySelector('.operation-guide-body').scrollTop=0;dialog.showModal()});
 
 document.getElementById('closeShortcuts').onclick=()=>shortcutDialog.close();
 shortcutDialog.addEventListener('close',()=>{const help=document.getElementById('operationGuideBtn');(help.getClientRects().length?help:document.querySelector('.phone-menu-toggle'))?.focus({preventScroll:true})});
@@ -515,9 +612,9 @@ document.getElementById('closeOperationGuide').onclick=()=>operationGuide.close(
 
 document.getElementById('closeAboutTool').onclick=()=>aboutTool.close();
 
-for(const dialog of [operationGuide,aboutTool,shortcutDialog,usageGuide,downloadDialog,feedbackDialog])dialog.addEventListener('close',()=>{if(dialog.open)return;const help=document.getElementById('operationGuideBtn');(help.getClientRects().length?help:document.querySelector('.phone-menu-toggle'))?.focus({preventScroll:true})});
+for(const dialog of [operationGuide,aboutTool,shortcutDialog,usageGuide,downloadDialog,feedbackDialog,screenOverview])dialog.addEventListener('close',()=>{if(dialog.open)return;const help=document.getElementById('operationGuideBtn');(help.getClientRects().length?help:document.querySelector('.phone-menu-toggle'))?.focus({preventScroll:true})});
 
-document.addEventListener('keydown',e=>{const dialog=operationGuide.open?operationGuide:aboutTool.open?aboutTool:changeLog.open?changeLog:shortcutDialog.open?shortcutDialog:usageGuide.open?usageGuide:feedbackDialog.open?feedbackDialog:null;if(!dialog)return;if(e.key==='Escape'){e.preventDefault();dialog.close()}e.stopImmediatePropagation()},true);
+document.addEventListener('keydown',e=>{const dialog=screenOverview.open?screenOverview:operationGuide.open?operationGuide:aboutTool.open?aboutTool:changeLog.open?changeLog:shortcutDialog.open?shortcutDialog:usageGuide.open?usageGuide:feedbackDialog.open?feedbackDialog:null;if(!dialog)return;if(e.key==='Escape'){e.preventDefault();dialog.close()}e.stopImmediatePropagation()},true);
 
 ;
 // ===== js/runtime/canvas-pan.js =====
@@ -1187,7 +1284,7 @@ setBoardDisplayZoom(Number.isFinite(viewSettings.boardDisplayZoom)?viewSettings.
  update();
 })();
 
-{const layout=document.querySelector('.layout'),button=document.getElementById('contentObjectPin'),phoneHistory=matchMedia('(max-width:850px)'),historyHost=document.createElement('div');historyHost.className='header-history-actions';historyHost.setAttribute('role','group');historyHost.setAttribute('aria-label','操作履歴');historyHost.append(document.getElementById('undo'),document.getElementById('redo'));document.querySelector('.header-mode-status').prepend(historyHost);const sync=()=>{const closed=layout.classList.contains('content-collapsed');button.setAttribute('aria-expanded',String(!closed));button.setAttribute('aria-controls','battlePanel');button.title=closed?'コンテンツペインを開く':'コンテンツペインを閉じる';button.setAttribute('aria-label',button.title)};button.onclick=()=>{if(phoneHistory.matches&&layout.classList.contains('phone-content-open')){document.querySelector('.phone-content-close')?.click();return}const closed=layout.classList.toggle('content-collapsed');rememberViewSetting('contentPaneCollapsed',closed);sync()};if(typeof viewSettings.contentPaneCollapsed==='boolean')layout.classList.toggle('content-collapsed',viewSettings.contentPaneCollapsed);new MutationObserver(sync).observe(layout,{attributes:true,attributeFilter:['class']});sync()}
+{const layout=document.querySelector('.layout'),button=document.getElementById('contentObjectPin'),phoneHistory=matchMedia('(max-width:850px)'),historyHost=document.createElement('div');historyHost.className='header-history-actions';historyHost.setAttribute('role','group');historyHost.setAttribute('aria-label','操作履歴');historyHost.append(document.getElementById('undo'),document.getElementById('redo'));document.querySelector('.header-mode-status').prepend(historyHost);const sync=()=>{const closed=layout.classList.contains('content-collapsed');button.setAttribute('aria-expanded',String(!closed));button.setAttribute('aria-controls','battlePanel');button.title=closed?'管理ペインを開く':'管理ペインを閉じる';button.setAttribute('aria-label',button.title)};button.onclick=()=>{if(phoneHistory.matches&&layout.classList.contains('phone-content-open')){document.querySelector('.phone-content-close')?.click();return}const closed=layout.classList.toggle('content-collapsed');rememberViewSetting('contentPaneCollapsed',closed);sync()};if(typeof viewSettings.contentPaneCollapsed==='boolean')layout.classList.toggle('content-collapsed',viewSettings.contentPaneCollapsed);new MutationObserver(sync).observe(layout,{attributes:true,attributeFilter:['class']});sync()}
 
 (function setupCategoryMode(){const toggle=document.getElementById('categoryModeToggle');function update(){const multiple=!!viewSettings.objectCategoriesMultiple;toggle.setAttribute('aria-pressed',String(multiple));toggle.title=multiple?'複数展開：クリックで単独展開に切り替え':'単独展開：クリックで複数展開に切り替え';toggle.setAttribute('aria-label',toggle.title)}toggle.onclick=()=>{const multiple=!viewSettings.objectCategoriesMultiple;rememberViewSetting('objectCategoriesMultiple',multiple);if(!multiple){let kept=false;document.querySelectorAll('.left .accordion-toggle').forEach(button=>{if(button.getAttribute('aria-expanded')!=='true')return;if(!kept){kept=true;return}button.setAttribute('aria-expanded','false');document.getElementById(button.getAttribute('aria-controls')).hidden=true})}update()};update()})();
 
