@@ -88,7 +88,7 @@
  function finishGuideMemberEdit(){const id=shapeId;endSession();selectGuides([id]);drawOverlay();sync()}
  function guideBounds(s){const a=s.rotation*Math.PI/180,w=Math.abs(Math.cos(a))*s.width+Math.abs(Math.sin(a))*s.height,h=Math.abs(Math.sin(a))*s.width+Math.abs(Math.cos(a))*s.height;return {left:s.x-w/2,right:s.x+w/2,top:s.y-h/2,bottom:s.y+h/2}}
  function selectionShape(items){if(items.length===1)return items[0];const bounds=items.map(guideBounds),left=Math.min(...bounds.map(b=>b.left)),right=Math.max(...bounds.map(b=>b.right)),top=Math.min(...bounds.map(b=>b.top)),bottom=Math.max(...bounds.map(b=>b.bottom));return {id:'selection',type:'group',x:(left+right)/2,y:(top+bottom)/2,width:right-left,height:bottom-top,rotation:0}}
- function changeShapes(patches){const value=currentGuide(),map=new Map(patches.map(item=>[item.id,item]));value.shapes=value.shapes.map(shape=>map.has(shape.id)?{...shape,...map.get(shape.id)}:shape);data.pageFieldGuides[data.page]=fieldGuides({pageFieldGuides:[value]},0);renderFieldGuides();updateArtwork();sync()}
+ function changeShapes(patches){const value=currentGuide(),map=new Map(patches.map(item=>[item.id,item]));value.shapes=value.shapes.map(shape=>map.has(shape.id)?{...shape,...map.get(shape.id)}:shape);data.pageFieldGuides[data.page]=fieldGuides({pageFieldGuides:[value]},0);const shapes=currentGuide().shapes.filter(shape=>map.has(shape.id)),appearanceChanged=patches.some(patch=>Object.hasOwn(patch,'appearance'));if(appearanceChanged||!updateFieldGuideShapes(shapes))renderFieldGuides();updateArtwork(false,appearanceChanged?null:shapes);sync();return true}
  function allowed(){return !boardReadOnly&&!phaseComparisonActive()&&!data.activePhaseGroup&&!window.Bolxiv?.pngPreview?.active&&(window.Bolxiv?.phaseMasters?.active||activeBoardShape()!=='none')}
  function finishEdit(){if(!dialog.open)return;const next=JSON.stringify(currentGuide());if(next!==lastCommitted){commitPendingHistory();lastCommitted=next}sync()}
  function refreshFieldArtwork(){
@@ -104,20 +104,22 @@
   updateArtwork();
  }
  // Keep the live field pseudo-elements: computed px snapshots round fractional grid dimensions.
- function updateArtwork(full=false){
+ function updateArtwork(full=false,changedShapes=null){
   if(!dialog.open)return;
-  if(dialog.classList.contains('guide-editor-phone')){stage.append(overlay,guideControls);drawOverlay();return}
+  if(dialog.classList.contains('guide-editor-phone')){stage.append(overlay,guideControls);drawOverlay(changedShapes);return}
   if(full||!art.firstElementChild){let clone;artworkObserver.disconnect();try{clone=clonePngStage({preserveDisplay:true,liveField:true})}finally{observeArtwork()}for(const [key,value] of Object.entries({position:'absolute',left:'0',top:'0',right:'auto',bottom:'auto',width:'640px',height:'640px',margin:'0',transform:'none',zoom:'1',visibility:'visible',boxShadow:'none'}))clone.style.setProperty(key.replace(/[A-Z]/g,c=>'-'+c.toLowerCase()),value,'important');clone.classList.remove('selected');art.replaceChildren(clone)}
-  else{art.firstElementChild.querySelector('.field-guides')?.remove();const guides=stage.querySelector('.field-guides');if(guides)art.firstElementChild.insertBefore(guides.cloneNode(true),art.firstElementChild.querySelector('.object-clip'))}
-  if(dialog.classList.contains('guide-editor-phone'))stage.append(overlay);drawOverlay();fit();
+  else if(!changedShapes||!updateFieldGuideShapes(changedShapes,art.firstElementChild)){art.firstElementChild.querySelector('.field-guides')?.remove();const guides=stage.querySelector('.field-guides');if(guides)art.firstElementChild.insertBefore(guides.cloneNode(true),art.firstElementChild.querySelector('.object-clip'))}
+  if(dialog.classList.contains('guide-editor-phone'))stage.append(overlay);drawOverlay(changedShapes);fit();
  }
  function fit(){if(!dialog.open||dialog.classList.contains('guide-editor-phone'))return;const scale=guideZoom/100;canvas.style.width=canvas.style.height=640*scale+'px';art.style.transform='scale('+scale+')';guideControls.style.transform='scale('+scale+')';zoomValue.textContent=String(guideZoom);zoomGroup.querySelector('[data-source-id=zoomOut]').disabled=guideZoom<=5;zoomGroup.querySelector('[data-source-id=zoomIn]').disabled=guideZoom>=200}
  function svgNode(tag,attributes){const node=document.createElementNS('http://www.w3.org/2000/svg',tag);for(const [key,value] of Object.entries(attributes))node.setAttribute(key,value);return node}
- function drawOverlay(){
-  overlay.replaceChildren();guideControls.replaceChildren();(dialog.classList.contains('guide-editor-phone')?stage:canvas).append(guideControls);guideControls.style.transform='scale('+(dialog.classList.contains('guide-editor-phone')?1:guideZoom/100)+')';
-  for(const shape of currentGuide().shapes){const hit=createFieldGuideShape(shape);hit.setAttribute('fill',shape.type==='line'?'none':'transparent');hit.setAttribute('stroke','transparent');hit.setAttribute('stroke-width',String(Math.max(14,shape.type==='line'?shape.height:14)));hit.dataset.guideHit=shape.id;overlay.append(hit)}
+ function drawOverlay(changedShapes=null){
+  if(!changedShapes)overlay.replaceChildren();else overlay.querySelectorAll('.alignment-guide-svg,[data-guide-marquee]').forEach(node=>node.remove());
+  guideControls.replaceChildren();(dialog.classList.contains('guide-editor-phone')?stage:canvas).append(guideControls);guideControls.style.transform='scale('+(dialog.classList.contains('guide-editor-phone')?1:guideZoom/100)+')';
+  const hits=changedShapes?new Map([...overlay.querySelectorAll('[data-guide-hit]')].map(node=>[node.dataset.guideHit,node])):null;
+  for(const shape of changedShapes||currentGuide().shapes){const hit=createFieldGuideShape(shape);hit.setAttribute('fill',shape.type==='line'?'none':'transparent');hit.setAttribute('stroke','transparent');hit.setAttribute('stroke-width',String(Math.max(14,shape.type==='line'?shape.height:14)));hit.dataset.guideHit=shape.id;if(hits?.has(shape.id))hits.get(shape.id).replaceWith(hit);else overlay.append(hit)}
   if(gesture?.recorded&&gesture.action==='move'&&!gesture.shift){syncSvgAlignmentScale(overlay);const items=currentGuide().shapes.map(s=>({...s,x:s.x/640*100,y:s.y/640*100,bounds:guideBounds(s)})),ids=selectedGuides().map(s=>s.id);for(const guide of mergedAlignmentGuides([...objectAlignmentGuides(items,ids,[]),...boardCenterGuides(items,ids,[],640,640)])){overlay.append(svgNode('line',{x1:guide.x,y1:guide.y,x2:guide.axis==='x'?guide.x:guide.x+guide.length,y2:guide.axis==='x'?guide.y+guide.length:guide.y,class:'alignment-guide-svg'+(guide.centerMatch?' alignment-guide-svg-center':''),'pointer-events':'none'}))}}
-  if(gesture?.action==='marquee'&&gesture.position){const a=gesture.start,b=gesture.position;overlay.append(svgNode('rect',{x:Math.min(a.x,b.x),y:Math.min(a.y,b.y),width:Math.abs(a.x-b.x),height:Math.abs(a.y-b.y),fill:'#4769b322',stroke:'#4769b3','stroke-width':1,'pointer-events':'none'}))}
+  if(gesture?.action==='marquee'&&gesture.position){const a=gesture.start,b=gesture.position;overlay.append(svgNode('rect',{x:Math.min(a.x,b.x),y:Math.min(a.y,b.y),width:Math.abs(a.x-b.x),height:Math.abs(a.y-b.y),fill:'#4769b322',stroke:'#4769b3','stroke-width':1,'pointer-events':'none','data-guide-marquee':''}))}
   const items=selectedGuides();if(!items.length)return;
   if(individualGuideGroup){const members=currentGuide().shapes.filter(s=>s.objectGroupId===individualGuideGroup);if(members.length>1){const bounds=selectionShape(members),context=document.createElement('div');context.className='controlbox object-group-control object-group-context';context.setAttribute('aria-hidden','true');context.style.cssText='left:'+bounds.x+'px;top:'+bounds.y+'px;width:'+bounds.width+'px;height:'+bounds.height+'px;--rot:0deg';guideControls.append(context)}}
   const multiple=items.length>1&&!selectedGuideGroup().length;
@@ -129,8 +131,8 @@
   handle('rotate',0,0,'rotate',items.length>1?'回転（配置）：ドラッグ／回転（向き）：Shift＋ドラッグ':'回転').innerHTML=rotationHandleMarkup();
   if(!desktopEditor.matches)handle('move',0,0,'move-handle','ドラッグで移動').innerHTML=moveHandleMarkup();
  }
- function changeShape(patch){const value=currentGuide();value.shapes=value.shapes.map(shape=>shape.id===shapeId?{...shape,...patch}:shape);data.pageFieldGuides[data.page]=fieldGuides({pageFieldGuides:[value]},0);renderFieldGuides();updateArtwork();sync()}
- function transact(change){if(window.Bolxiv?.phaseMasters?.locked)return;if(!dialog.open||!allowed())return;endSession();recordHistory();change();renderFieldGuides();save();finishEdit();updateArtwork();sync()}
+ function changeShape(patch){return changeShapes([{...patch,id:shapeId}])}
+ function transact(change){if(window.Bolxiv?.phaseMasters?.locked)return;if(!dialog.open||!allowed())return;endSession();recordHistory();const locallyUpdated=change()===true;if(!locallyUpdated)renderFieldGuides();save();finishEdit();if(!locallyUpdated){updateArtwork();sync()}}
  function duplicateShape(){const shapes=selectedGuides();if(!shapes.length)return;pasteGuides(shapes)}
  function copyGuides(){const shapes=selectedGuides();if(!shapes.length)return;guideClipboard=JSON.parse(JSON.stringify(shapes));notify(shapes.length+'個のガイドをコピーしました')}
  function pasteGuides(shapes=guideClipboard){if(!shapes.length||currentGuide().shapes.length+shapes.length>500)return;transact(()=>{const value=currentGuide(),dx=Math.min(12,640-Math.max(...shapes.map(s=>s.x))),dy=Math.min(12,640-Math.max(...shapes.map(s=>s.y))),copies=remapCopiedObjectGroups(shapes.map(shape=>({...shape,id:createObjectId(),x:shape.x+dx,y:shape.y+dy})));value.shapes.push(...copies);data.pageFieldGuides[data.page]=fieldGuides({pageFieldGuides:[value]},0);selectGuides(copies.map(shape=>shape.id))})}
@@ -159,7 +161,7 @@
    value.shapes=value.shapes.filter(s=>!copies.has(s.id));for(const item of value.shapes){const copy=moving.get(item.id);if(copy){item.x=copy.x;item.y=copy.y}}
    g.items=g.originalIds.map(id=>({...value.shapes.find(s=>s.id===id)}));g.start=position;g.shape=selectionShape(g.items);g.copy=false;individualGuideGroup=g.individualGroup;
   }
-  data.pageFieldGuides[data.page]=value;selectGuides(g.items.map(s=>s.id),!enabled&&!!individualGuideGroup);
+  data.pageFieldGuides[data.page]=value;selectGuides(g.items.map(s=>s.id),!enabled&&!!individualGuideGroup);renderFieldGuides();updateArtwork();
  }
  function startPointer(event){if(window.Bolxiv?.phaseMasters?.locked)return;
   if(event.button!==0||!allowed())return;event.preventDefault();event.stopPropagation();endSession();
@@ -208,7 +210,7 @@
   button.addEventListener('pointerup',event=>{const g=paletteGesture;if(!g||g.id!==event.pointerId){setTimeout(()=>suppress=false,0);return}const held=!!g.preview;cancelPalette();if(held){suppress=true;setTimeout(()=>suppress=false,0);event.preventDefault();const r=overlay.getBoundingClientRect(),x=event.clientX,y=event.clientY-96;if(x>=r.left&&x<=r.right&&y>=r.top&&y<=r.bottom)placeGuide(g.type,point({clientX:x,clientY:y}))}});button.addEventListener('pointercancel',cancelPalette);button.addEventListener('touchmove',event=>{if(paletteGesture?.preview&&event.cancelable)event.preventDefault()},{passive:false});
  }
  for(const type of ['dragover','drop'])overlay.addEventListener(type,event=>{if(!event.dataTransfer?.types.includes('application/x-bolxiv-guide'))return;event.preventDefault();event.stopPropagation();if(type==='drop')placeGuide(event.dataTransfer.getData('application/x-bolxiv-guide'),point(event))});
- bindPropertyEditSession(properties.querySelectorAll('input[data-guide-shape-key]'),{onInput:input=>{const shape=currentShape(),key=input.dataset.guideShapeKey;if(!shape||input.disabled||!input.value.trim()||!Number.isFinite(Number(input.value)))return;const value=Math.max(Number(input.min),Math.min(Number(input.max),Math.round(Number(input.value))));if(value===Math.round(shape[key]))return;if(session&&(session.shape!==shape.id||session.key!==key))endSession();if(!session){recordHistory();session={board:data,page:data.page,shape:shape.id,key}}changeShape({[key]:value});renderFieldGuides();save();updateArtwork();sync()},onFinish:()=>{endSession();sync()}});
+ bindPropertyEditSession(properties.querySelectorAll('input[data-guide-shape-key]'),{onInput:input=>{const shape=currentShape(),key=input.dataset.guideShapeKey;if(!shape||input.disabled||!input.value.trim()||!Number.isFinite(Number(input.value)))return;const value=Math.max(Number(input.min),Math.min(Number(input.max),Math.round(Number(input.value))));if(value===Math.round(shape[key]))return;if(session&&(session.shape!==shape.id||session.key!==key))endSession();if(!session){recordHistory();session={board:data,page:data.page,shape:shape.id,key}}changeShape({[key]:value});save()},onFinish:()=>{endSession();sync()}});
  // Capture before normal canvas gestures and document shortcuts can see these events.
  // Keep document capture listeners (outside-menu dismissal) running while blocking canvas handlers below.
  document.addEventListener('pointerdown',event=>{

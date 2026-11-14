@@ -84,7 +84,10 @@
   let factor=1+((e.clientX-drag.startX)*drag.vx+(e.clientY-drag.startY)*drag.vy)/denominator;
   drag.spacing=e.shiftKey;
   factor=applyObjectGroupScale(drag.items,drag.cx,drag.cy,factor,drag.spacing,drag.geometry);drag.moved=drag.moved||Math.abs(factor-1)>.0001;
-  render();
+  const ids=new Set(drag.items.map(item=>item.id)),items=current().filter(item=>ids.has(item.id));
+  for(const item of items)updateShapeFromData(item,false);
+  renderObjectGroupControls();
+  const section=document.getElementById('objectGroupProperties');if(section)refreshObjectGroupDimensions(section,items);
  },true);
  function finish(e,cancel=false){
   if(!['group-scale','group-rotate'].includes(drag?.mode)||e&&drag.pointerId!==e.pointerId)return;e?.preventDefault();e?.stopImmediatePropagation();

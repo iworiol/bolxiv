@@ -328,6 +328,12 @@ function createFieldGuideShape(shape){
  if(shape.type==='line')node.setAttribute('stroke-width',Math.max(1.5,shape.height));
  node.setAttribute('transform','translate('+shape.x+' '+shape.y+') rotate('+shape.rotation+')');if(shape.type!=='line'&&(shape.fill===true||shape.fill==='solid')){node.setAttribute('fill','currentColor');node.setAttribute('fill-opacity',shape.fill==='solid'?'1':'0.25')}node.dataset.guideShapeId=shape.id;return node;
 }
+function updateFieldGuideShapes(shapes,root=stage){
+ const group=root?.querySelector('.field-guides .field-guide-shapes');if(!group)return false;
+ const nodes=new Map([...group.querySelectorAll('[data-guide-shape-id]')].map(node=>[node.dataset.guideShapeId,node]));
+ if(shapes.some(shape=>!nodes.has(shape.id)))return false;
+ for(const shape of shapes)nodes.get(shape.id).replaceWith(createFieldGuideShape(shape));return true;
+}
 function renderFieldGuides(){
  stage.querySelector('.field-guides')?.remove();
  const settings=fieldGuides(data,data.page),reference=fieldGuideReference(data,data.page),shape=reference.shape;
@@ -678,7 +684,9 @@ function objectGroupSpacingFactor(geometry,width){
  let low=0,high=20;for(let i=0;i<50;i++){const middle=(low+high)/2;if(groupWidthAtSpacing(geometry,middle)<width)low=middle;else high=middle}return (low+high)/2;
 }
 function objectGroupScaleLimits(items,geometry,spacing){
- const min=spacing?0:Math.max(...items.flatMap(o=>[8/o.width,8/o.height,o.type==='text'?6/(o.fontSize||12):0]));
+ // A segment's height is its stroke thickness, not a shape's minimum size.
+ // Existing smaller members must also remain valid at the start of a gesture.
+ const min=spacing?0:Math.min(1,Math.max(...items.flatMap(o=>[8/o.width,(o.type==='segment'?1:8)/o.height,o.type==='text'?6/(o.fontSize||12):0])));
  const widthLimit=Math.max(960,geometry.width),max=spacing?objectGroupSpacingFactor(geometry,widthLimit):Math.min(widthLimit/geometry.width,...items.flatMap(o=>[960/o.width,960/o.height]));
  return {min,max};
 }
