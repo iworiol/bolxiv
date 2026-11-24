@@ -380,7 +380,7 @@ function revealContentRow(index=editingContentIndex>=0?editingContentIndex:impor
 
 function fitContentOptionsViewport(options){
  if(!matchMedia('(max-width:850px)').matches)return;
- const viewport=window.visualViewport,top=viewport?.offsetTop||0,bottom=top+(viewport?.height||innerHeight);
+ const viewport=window.visualViewport,viewportTop=viewport?.offsetTop||0,bottom=viewportTop+(viewport?.height||innerHeight),headerBottom=document.querySelector('.app>.top')?.getBoundingClientRect().bottom||viewportTop,top=Math.max(viewportTop,headerBottom);
  const anchor=options.parentElement.getBoundingClientRect();
  const above=Math.max(0,anchor.top-top-11),below=Math.max(0,bottom-anchor.bottom-11),list=options.querySelector('.content-options-scroll'),style=getComputedStyle(options),pixels=value=>parseFloat(value)||0;
  const chrome=options.offsetHeight-(list?.offsetHeight||0),desired=Math.min(355,(bottom-top)*.45,list?.scrollHeight||0)+Math.max(chrome,pixels(style.paddingTop)+pixels(style.paddingBottom)+pixels(style.borderTopWidth)+pixels(style.borderBottomWidth));
