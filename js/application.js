@@ -8,5 +8,6 @@ window.BolxivApplicationFiles = [
   "js/interface.js",
   "js/png-preview.js",
   "js/panels.js",
-  "js/phase-tools.js"
+  "js/phase-tools.js",
+  "js/workspace-background.js"
 ];

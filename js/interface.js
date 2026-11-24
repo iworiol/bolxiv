@@ -273,12 +273,20 @@ function placeBuiltinFieldMarkers(cx,cy){
 ;
 // ===== js/canvas/palette-drag-state.js =====
 (()=>{
- const pane=document.querySelector('.left');let nativeDragImage=null;
+ const pane=document.querySelector('.left'),builtinBitmaps=new WeakMap();let nativeDragImage=null;
+ function prepareBuiltin(button){
+  const cached=builtinBitmaps.get(button);if(cached)return cached;
+  const entry={bitmap:null};builtinBitmaps.set(button,entry);
+  const host=document.createElement('div'),source=button.querySelector('.preset-thumbnail').cloneNode(true);host.className='left pinned';host.inert=true;host.setAttribute('aria-hidden','true');host.style.cssText='display:block!important;position:fixed!important;left:-10000px!important;top:0!important;width:26px!important;height:26px!important;padding:0!important;border:0!important;overflow:hidden!important;pointer-events:none!important';source.style.cssText='display:block;position:relative;width:26px;height:26px;overflow:hidden;background:transparent';const wrapper=document.createElement('div');wrapper.className='builtin-preset';wrapper.append(source);host.append(wrapper);document.body.append(host);
+  rasterizePngSource(source,3).then(bitmap=>{entry.bitmap=bitmap;button.dataset.dragPreviewReady='true';}).catch(()=>builtinBitmaps.delete(button)).finally(()=>host.remove());return entry;
+ }
+ const warmBuiltins=()=>pane.querySelectorAll('.builtin-preset').forEach(prepareBuiltin);if(window.requestIdleCallback)requestIdleCallback(warmBuiltins,{timeout:1000});else setTimeout(warmBuiltins,0);
+ pane.addEventListener('pointerover',event=>{const button=event.target.closest('.builtin-preset');if(button)prepareBuiltin(button);});
  function clear(){nativeDragImage?.remove();nativeDragImage=null;pane.querySelectorAll('.palette-dragging').forEach(button=>button.classList.remove('palette-dragging'))}
  pane.addEventListener('dragstart',e=>{
  clear();const button=e.target.closest('.tool[data-tool],.icon-choice');if(!button)return;button.classList.add('palette-dragging');
- if(button.classList.contains('user-preset')){
-  const bitmap=userPresetLibrary.dragImage(button.dataset.presetId);
+ if(button.matches('.user-preset,.builtin-preset')){
+  const bitmap=button.classList.contains('user-preset')?userPresetLibrary.dragImage(button.dataset.presetId):prepareBuiltin(button).bitmap;
   if(!bitmap){e.preventDefault();clear();notify('プリセットのプレビューを準備中です。少し待ってからもう一度ドラッグしてください。');return}
   // A flat bitmap has no transformed DOM bounds for Chromium to include.
   const image=document.createElement('canvas');image.width=image.height=48;image.className='palette-native-drag-image';image.setAttribute('aria-hidden','true');
@@ -289,15 +297,7 @@ function placeBuiltinFieldMarkers(cx,cy){
  const artwork=button.querySelector('.preset-thumbnail')||button.querySelector('img,.glyph');if(!artwork||!e.dataTransfer)return;
  const preview=document.createElement('div');preview.style.cssText='position:fixed;left:-10000px;top:0;width:48px;height:48px;display:grid;place-items:center;background:transparent;border:0;box-shadow:none;pointer-events:none;';
  const clone=artwork.cloneNode(true);clone.style.cssText='display:grid;place-items:center;width:48px;height:48px;max-width:none;max-height:none;background:transparent;border:0;box-shadow:none;color:#f39c12;font-size:32px;';
- if(artwork.classList.contains('preset-thumbnail')){
-  // Thumbnail scenes use a 26px coordinate system. Scale the whole frame,
-  // keeping the artwork center aligned with the 48px drag image hotspot.
-  clone.style.cssText='display:block;position:absolute;left:0;top:0;width:26px;height:26px;transform:scale('+(48/26)+');transform-origin:0 0;background:transparent;border:0;box-shadow:none;';
-  preview.style.display='block';
-  if(!artwork.querySelector('.user-preset-scene'))for(const img of clone.querySelectorAll('img')){
-   if(artwork.closest('.builtin-preset')){img.style.position='absolute';img.style.width=img.style.height='8px';img.style.maxWidth=img.style.maxHeight='none';img.style.transform='translate(-50%,-50%)'}
-  }
- }else{const svg=clone.querySelector('svg');if(svg){svg.style.width='48px';svg.style.height='48px'}}
+ const svg=clone.querySelector('svg');if(svg){svg.style.width='48px';svg.style.height='48px'}
  preview.append(clone);
  document.body.append(preview);e.dataTransfer.setDragImage(preview,24,24);setTimeout(()=>preview.remove(),0);
 });
@@ -564,7 +564,7 @@ function confirmPhoneLayerDeletion(id,individual=false){
   ],
   [
     ".phone-menu-toggle",
-    "保存・読み込み・ヘルプなどのメニューを開きます。要望・不具合報告はヘルプから送れます。"
+    "保存・読み込み・カスタマイズ・ヘルプなどのメニューを開きます。背景画像はカスタマイズから設定します。"
   ],
   [
     ".phone-content-icon",
@@ -920,10 +920,9 @@ function confirmPhoneLayerDeletion(id,individual=false){
    const row=document.createElement('div');row.className='phone-icon-help-row';row.dataset.helpFor=selector;
    const symbol=document.createElement('span');symbol.className='phone-icon-help-symbol';symbol.setAttribute('aria-hidden','true');
    const fallback=defaultSymbols[selector],svg=node?.querySelector('svg');
-   if(svg){const copy=svg.cloneNode(true),svgStyle=getComputedStyle(svg);for(const key of ['fill','stroke','stroke-width'])copy.style.setProperty(key,svgStyle.getPropertyValue(key),'important');symbol.append(copy);const style=getComputedStyle(node);const transparent=style.backgroundColor==='rgba(0, 0, 0, 0)';symbol.style.color=transparent&&fallback?fallback.color:style.color;symbol.style.backgroundColor=transparent&&fallback?fallback.background:style.backgroundColor}
+   if(svg){const copy=svg.cloneNode(true),sources=[svg,...svg.querySelectorAll('*')],copies=[copy,...copy.querySelectorAll('*')];sources.forEach((source,index)=>{const style=getComputedStyle(source),target=copies[index];for(const key of ['fill','stroke'])target.style.setProperty(key,style.getPropertyValue(key)==='none'?'none':'currentColor','important');target.style.setProperty('color','inherit','important');target.style.setProperty('stroke-width',style.strokeWidth,'important')});symbol.append(copy);symbol.style.color=fallback?.color||'#33445f';symbol.style.backgroundColor=fallback?.background||'#fff'}
    else if(fallback){symbol.style.color=fallback.color;symbol.style.backgroundColor=fallback.background;if(fallback.svg)symbol.innerHTML=fallback.svg;else symbol.textContent=fallback.text||'＋ / −'}
    else{symbol.textContent=selector==='#pngPreviewScale'?'1倍':selector==='#pngPreviewSave'?'保存':node?.textContent.trim().slice(0,5)||'＋ / −'}
-   if(fieldMode&&(node?.closest('.content-heading-row,.board-title-row,.guide-editor-heading')||['.phone-content-icon','.phone-content-close','#phaseMasterModeToggle','#gridToggle','#fieldToggle','#clipToggle','#fitBoardZoom','#zoomOut','#resetBoardZoom','#zoomIn','.phone-display-menu-toggle'].includes(selector))){const palette=getComputedStyle(document.querySelector('.content-heading-row'));symbol.style.color=palette.getPropertyValue('--board-header-text').trim();symbol.style.backgroundColor=palette.getPropertyValue('--accent').trim()}
    const text=document.createElement('div');text.className='phone-icon-help-text';
    const heading=document.createElement('h3');heading.className='phone-icon-help-item-title';heading.textContent=helpTitles[selector]||node?.getAttribute('aria-label')||'アイコンの操作';
    const detail=document.createElement('p');detail.textContent=description;text.append(heading,detail);row.append(symbol,text);list.append(row);
@@ -1055,6 +1054,13 @@ window.Bolxiv.selectionSurface=(()=>{
 })();
 
 // Shared structure/presentation only; callers own state and event lifecycles.
+function createGuideSectionHeading({label,body,actions=null}){
+ const heading=document.createElement('h3'),toggle=document.createElement('button'),title=document.createElement('span'),mark=document.createElement('span');
+ heading.className='guide-section-heading';toggle.type='button';toggle.className='guide-section-toggle';title.textContent=label;mark.className='guide-section-mark';mark.setAttribute('aria-hidden','true');
+ const sync=()=>{toggle.setAttribute('aria-expanded',String(!body.hidden));mark.textContent=body.hidden?'＋':'−'};
+ toggle.setAttribute('aria-controls',body.id);toggle.append(title,mark);heading.append(toggle);if(actions)heading.append(actions);
+ toggle.onclick=()=>{body.hidden=!body.hidden;sync()};sync();return {heading,toggle};
+}
 function createPanelHeader({barClass,titleClass,switchClass,collapseClass,titleTag='span'}){
  const bar=document.createElement('div');bar.className=barClass;
  const title=document.createElement(titleTag);title.className=titleClass;if(titleTag==='button')title.type='button';
@@ -1259,6 +1265,16 @@ const userPresetLibrary=(()=>{
  manager.addEventListener('keydown',event=>{if(event.key==='Escape'){event.preventDefault();event.stopPropagation();if(editingPreset)editingPreset.finish(true);else closeManager()}});
  document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!manager.hidden&&!event.defaultPrevented){event.preventDefault();if(editingPreset)editingPreset.finish(true);else closeManager()}});
  function movePreset(id,targetId,after=false){if(blocked()||editingPreset||id===targetId)return;const next=presets.slice(),from=next.findIndex(item=>item.id===id);if(from<0)return;const [item]=next.splice(from,1),at=next.findIndex(item=>item.id===targetId);if(at<0)return;next.splice(at+(after?1:0),0,item);save(next)}
+ // Native drag images are flat rows, never a live transformed thumbnail tree.
+ manager._createNativeDragImage=row=>{
+  const bitmap=dragImage(row.dataset.presetId);if(!bitmap)return null;
+  const bounds=row.getBoundingClientRect(),canvas=document.createElement('canvas');canvas.width=Math.ceil(bounds.width);canvas.height=Math.ceil(bounds.height);canvas.setAttribute('aria-label',row.querySelector('.preset-manager-name').textContent);const ctx=canvas.getContext('2d'),style=getComputedStyle(row);ctx.fillStyle=style.backgroundColor;ctx.beginPath();ctx.roundRect(0,0,bounds.width,bounds.height,parseFloat(style.borderRadius)||0);ctx.fill();
+  const thumb=row.querySelector('.preset-thumbnail'),icon=thumb.getBoundingClientRect();ctx.drawImage(bitmap,icon.left-bounds.left,icon.top-bounds.top,icon.width,icon.height);
+  const name=row.querySelector('.preset-manager-name'),label=name.getBoundingClientRect(),labelStyle=getComputedStyle(name);ctx.font=labelStyle.font;ctx.fillStyle=labelStyle.color;ctx.textBaseline='middle';let text=name.textContent;if(ctx.measureText(text).width>label.width){while(text&&ctx.measureText(text+'…').width>label.width)text=text.slice(0,-1);text+='…';}ctx.fillText(text,label.left-bounds.left,label.top-bounds.top+label.height/2);
+  for(const dot of row.querySelectorAll('.list-drag-grip circle')){const r=dot.getBoundingClientRect();if(!r.width)continue;ctx.fillStyle=getComputedStyle(dot).color;ctx.beginPath();ctx.arc(r.left-bounds.left+r.width/2,r.top-bounds.top+r.height/2,r.width/2,0,Math.PI*2);ctx.fill();}
+  for(const button of row.querySelectorAll('.preset-manager-desktop-delete')){const r=button.getBoundingClientRect();if(!r.width)continue;const b=getComputedStyle(button);ctx.font=b.font;ctx.fillStyle=b.color;ctx.textAlign='center';ctx.fillText('×',r.left-bounds.left+r.width/2,r.top-bounds.top+r.height/2);}
+  return canvas;
+ };
  function bindPresetReorder(row,preset){row.draggable=true;row.onpointerdown=event=>{row.draggable=!blocked()&&!editingPreset&&!event.target.closest('button,input')};row.ondragstart=event=>{if(blocked()||editingPreset){event.preventDefault();return}event.dataTransfer.setData('application/x-bolxiv-user-preset-order',preset.id);event.dataTransfer.effectAllowed='move'};row.ondragover=event=>{if(!event.dataTransfer.types.includes('application/x-bolxiv-user-preset-order')||blocked()||editingPreset)return;event.preventDefault();const after=event.clientY>row.getBoundingClientRect().top+row.offsetHeight/2;row.classList.toggle('drop-after',after);row.classList.toggle('drop-before',!after);row.classList.add('drag-over')};row.ondragleave=()=>row.classList.remove('drag-over','drop-before','drop-after');row.ondrop=event=>{event.preventDefault();row.classList.remove('drag-over','drop-before','drop-after');movePreset(event.dataTransfer.getData('application/x-bolxiv-user-preset-order'),preset.id,event.clientY>row.getBoundingClientRect().top+row.offsetHeight/2)};row.ondragend=()=>manager.querySelectorAll('.preset-manager-row.drag-over').forEach(node=>node.classList.remove('drag-over','drop-before','drop-after'))}
  window.bindTouchListReorder?.(['userPresetManager','.preset-manager-row','.preset-manager-leading,.preset-manager-menu','application/x-bolxiv-user-preset-order']);
  function renderManager(){
@@ -1333,7 +1349,7 @@ const userPresetLibrary=(()=>{
 })();
 
 // Match the mode button's left edge to the visible desktop property pane.
-(()=>{const header=document.querySelector('.app>.top'),button=document.getElementById('editModeToggle'),desktop=matchMedia('(min-width:851px)');let frame=0;function sync(){frame=0;if(!desktop.matches)return;const pane=window.Bolxiv?.pngPreview?.active?document.querySelector('.png-preview-settings'):(document.getElementById('desktopPhaseSidebar')||document.getElementById('toggleInspector')?.closest('.property-group'));if(!pane?.getClientRects().length)return;const target=pane.getBoundingClientRect(),rect=button.getBoundingClientRect();if(!target.width)return;const width=Math.max(148,Math.min(240,rect.right-target.left)),value=width+'px';if(header.style.getPropertyValue('--mode-button-width')!==value)header.style.setProperty('--mode-button-width',value)}function schedule(){if(!frame)frame=requestAnimationFrame(sync)}const observer=new ResizeObserver(schedule);for(const node of [header,document.querySelector('.layout'),document.getElementById('toggleInspector')?.closest('.property-group'),document.getElementById('propertyPanel'),document.querySelector('.png-preview-settings')])if(node)observer.observe(node);new MutationObserver(schedule).observe(document.body,{attributes:true,attributeFilter:['class']});desktop.addEventListener('change',schedule);window.addEventListener('resize',schedule);schedule()})();
+(()=>{const header=document.querySelector('.app>.top'),button=document.getElementById('editModeToggle'),desktop=matchMedia('(min-width:851px)');let frame=0;function sync(){frame=0;if(!desktop.matches)return;const pane=window.Bolxiv?.pngPreview?.active?document.querySelector('.png-preview-settings'):(document.getElementById('desktopPhaseSidebar')||document.getElementById('toggleInspector')?.closest('.property-group'));if(!pane?.getClientRects().length)return;const target=pane.getBoundingClientRect(),rect=button.getBoundingClientRect();if(!target.width)return;const detached=pane.id==='desktopPhaseSidebar'&&document.querySelector('.layout').classList.contains('desktop-tools-two-columns'),targetLeft=target.left+(detached?(parseFloat(getComputedStyle(pane).paddingLeft)||0):0);const width=Math.max(148,Math.min(240,rect.right-targetLeft)),value=width+'px';if(header.style.getPropertyValue('--mode-button-width')!==value)header.style.setProperty('--mode-button-width',value)}function schedule(){if(!frame)frame=requestAnimationFrame(sync)}const observer=new ResizeObserver(schedule);for(const node of [header,document.querySelector('.layout'),document.getElementById('toggleInspector')?.closest('.property-group'),document.getElementById('propertyPanel'),document.querySelector('.png-preview-settings')])if(node)observer.observe(node);const stateObserver=new MutationObserver(schedule);for(const node of [document.body,document.querySelector('.layout')])if(node)stateObserver.observe(node,{attributes:true,attributeFilter:['class']});desktop.addEventListener('change',schedule);window.addEventListener('resize',schedule);schedule()})();
 // ===== Object appearance clipboard =====
 (()=>{
  const menu=document.getElementById('objectContextMenu'),toggle=document.createElement('button'),sub=document.createElement('div');

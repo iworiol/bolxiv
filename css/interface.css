@@ -445,7 +445,7 @@
   border-color:transparent!important;
  }
  .app .layout[data-phone-pane="canvas"] #objectLayerPanel#objectLayerPanel#objectLayerPanel>.property-group{
-  border-color:#d0d4da!important;
+  border-color:var(--panel-frame-border,#d0d4da)!important;
  }
  .app .layout.phone-materials-open>.left :is(.tool,.icon-choice){border-color:transparent!important}
  .app .layout.phone-materials-open>.left :is(.tool,.icon-choice).active{
@@ -631,10 +631,10 @@
 .desktop-phase-sidebar[hidden]{display:none!important}
 .desktop-columns-toggle{display:none}
 @media(min-width:851px){
- .app .layout.desktop-phase-tools #objectLayerPanel .layer-list-group>.desktop-columns-toggle{display:grid;place-items:center;box-sizing:border-box;position:absolute;left:5px;top:5px;z-index:1;width:26px;height:26px;padding:3px;border:1px solid #d0d4da!important;border-radius:6px;background:#eef2f7!important;color:#33445f!important;-webkit-text-fill-color:#33445f!important;cursor:pointer;transition:background-color .12s ease}
+ .app .layout.desktop-phase-tools #objectLayerPanel .layer-list-group>.desktop-columns-toggle{display:grid;place-items:center;box-sizing:border-box;position:absolute;left:5px;top:5px;z-index:1;width:26px;height:26px;padding:3px;border:1px solid var(--property-button-border,#d0d4da)!important;border-radius:6px;background:var(--property-button-bg,#eef2f7)!important;color:var(--property-button-fg,#33445f)!important;-webkit-text-fill-color:var(--property-button-fg,#33445f)!important;cursor:pointer;transition:background-color .12s ease}
  .desktop-columns-toggle svg{display:block;width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
  .desktop-columns-toggle[aria-pressed="true"] svg{transform:rotate(180deg)}
- .app .layout.desktop-phase-tools #objectLayerPanel .layer-list-group>.desktop-columns-toggle:not(:disabled):is(:hover:not(:where(.phone-touch-mode *)),:focus-visible){background:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+ .app .layout.desktop-phase-tools #objectLayerPanel .layer-list-group>.desktop-columns-toggle:not(:disabled):is(:hover:not(:where(.phone-touch-mode *)),:focus-visible){background:var(--press-bg,var(--blue))!important;color:var(--press-fg,#fff)!important;-webkit-text-fill-color:var(--press-fg,#fff)!important}
  .app .layout.desktop-phase-tools #objectLayerPanel>.object-layout-rect{inset:0 260px 0 0!important}
 
  .app .layout.desktop-phase-tools #objectLayerPanel .desktop-phase-sidebar #toggleLayers{position:relative;display:flex!important;gap:0;align-items:center;padding-left:38px!important;padding-right:11px!important;white-space:nowrap;overflow:hidden}
@@ -644,7 +644,7 @@
  .app .layout.desktop-phase-tools.desktop-tools-two-columns #objectLayerPanel{grid-template-columns:minmax(0,1fr) minmax(0,554px)!important}
  .app .layout.desktop-phase-tools.desktop-tools-two-columns #objectLayerPanel>.object-layout-rect{inset:0 518px 0 0!important}
  .app .layout.desktop-phase-tools.desktop-tools-two-columns #objectLayerPanel>.desktop-phase-sidebar{width:min(510px,calc(100% - 16px));box-sizing:border-box;padding-left:258px}
- .app .layout.desktop-phase-tools.desktop-tools-two-columns #objectLayerPanel>.desktop-phase-sidebar>.layer-list-group{position:absolute!important;left:0!important;top:0!important;bottom:0!important;width:252px!important;height:100%!important;min-height:0!important;max-height:none!important;flex:none!important}
+ .app .layout.desktop-phase-tools.desktop-tools-two-columns #objectLayerPanel>.desktop-phase-sidebar>.layer-list-group{--workspace-card-position:absolute;position:absolute!important;left:0!important;top:0!important;bottom:0!important;width:252px!important;height:100%!important;min-height:0!important;max-height:none!important;flex:none!important}
  .app .layout.desktop-phase-tools.desktop-tools-two-columns #objectLayerPanel>.desktop-phase-sidebar>#layerPropertyResize{display:none!important}
  .app .layout.desktop-phase-tools.desktop-tools-two-columns .desktop-phase-sidebar #toggleLayers{pointer-events:none!important}
  .app .layout.desktop-phase-tools.desktop-tools-two-columns .desktop-phase-sidebar #toggleLayers::after{display:none!important}
@@ -694,10 +694,10 @@
  .app .layout.desktop-phase-tools .desktop-phase-sidebar>.phase-memo>.phase-memo-body{min-height:0;overflow:hidden;padding-right:8px}
  .app .layout.desktop-phase-tools .desktop-phase-sidebar>.phase-memo>.phase-memo-body>textarea{box-sizing:border-box}
  .app .layout.desktop-phase-tools .phase-memo-reading{flex:1;min-height:0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px;line-height:1.6;overflow:auto;scrollbar-gutter:stable;padding-right:6px}
- .app .layout.desktop-phase-tools .phase-memo-entry+.phase-memo-entry{margin-top:8px;padding-top:8px;border-top:1px solid #e5e9ef}
- .app .layout.desktop-phase-tools .phase-memo-entry-title{font-size:14px;font-weight:700;color:#33445f;margin-bottom:3px}
+ .app .layout.desktop-phase-tools .phase-memo-entry+.phase-memo-entry{margin-top:8px;padding-top:8px;border-top:1px solid var(--property-separator-color,#e5e9ef)}
+ .app .layout.desktop-phase-tools .phase-memo-entry-title{font-size:14px;font-weight:700;color:var(--property-label-fg,#33445f);margin-bottom:3px}
  .app .layout.desktop-phase-tools.desktop-reading-tools #objectLayerPanel .desktop-phase-sidebar :is(#toggleLayers,#toggleInspector,#toggleLayoutProperties,summary){
-  pointer-events:none!important;opacity:1!important;cursor:default!important;background:#eef2f7!important;color:#33445f!important;-webkit-text-fill-color:#33445f!important;
+  pointer-events:none!important;opacity:1!important;cursor:default!important;background:var(--panel-reading-heading-bg,#eef2f7)!important;color:var(--panel-reading-heading-fg,#33445f)!important;-webkit-text-fill-color:var(--panel-reading-heading-fg,#33445f)!important;
  }
  .app .layout.desktop-phase-tools.desktop-reading-tools .desktop-phase-sidebar :is(#toggleLayers,#toggleInspector,#toggleLayoutProperties,summary)::after{display:none!important}
  .app .layout.desktop-phase-tools .desktop-phase-sidebar>.layer-list-group>#layerListPanel,
@@ -818,7 +818,7 @@
  body .app .layout .phone-object-tabs button:is(:active,.phone-control-pressed){background:var(--press-bg,var(--blue))!important;color:var(--press-fg,#fff)!important;-webkit-text-fill-color:var(--press-fg,#fff)!important}
 
  .app .layout[data-phone-pane="canvas"] #objectLayerPanel#objectLayerPanel#objectLayerPanel.phone-object-tabbed[data-object-expanded="false"]{grid-template-rows:minmax(0,1fr) 38px!important;align-content:stretch!important}
- .app .layout[data-phone-pane="canvas"] #objectLayerPanel#objectLayerPanel#objectLayerPanel.phone-object-tabbed[data-object-expanded="false"]>.property-group{border:1px solid #d0d4da!important;background:#eef2f7!important;box-shadow:none!important}
+ .app .layout[data-phone-pane="canvas"] #objectLayerPanel#objectLayerPanel#objectLayerPanel.phone-object-tabbed[data-object-expanded="false"]>.property-group{border:1px solid var(--panel-frame-border,#d0d4da)!important;background:var(--phone-collapsed-panel-bg,#eef2f7)!important;box-shadow:none!important}
 
  .phone-object-tabbed[data-object-expanded="false"]>.property-group>.phone-object-tabs{box-sizing:border-box;flex:1 0 0;min-height:0;height:100%;border:0;box-shadow:none}
  .phone-object-tabs .phone-object-collapse{width:26px;padding:3px}
@@ -1037,7 +1037,7 @@
  @media(max-width:850px){.help-contents ul{grid-template-columns:minmax(0,1fr)}.help-contents a{padding:7px 0}.operation-guide .help-back-to-contents{min-height:32px}}
 
 /* ===== css/phase-groups.css ===== */
-.phase-group-heading.drag-over,#objectList>.object-group-row.drag-over:not(.drop-before,.drop-after){outline:2px solid #416da9;outline-offset:-2px}.phase-group-heading{display:flex;align-items:center;box-sizing:border-box;width:100%;height:34px;min-height:34px;flex-shrink:0;gap:9px;padding:0 5px 0 4px;border:1px solid transparent;border-radius:6px;background:#f0f4fa;color:#33445f;margin:2px 0;font-size:14px;font-weight:400}
+.phase-group-heading.drag-over,#objectList>.object-group-row.drag-over:not(.drop-before,.drop-after){outline:2px solid var(--list-drop-color,#416da9);outline-offset:-2px}.phase-group-heading{display:flex;align-items:center;box-sizing:border-box;width:100%;height:34px;min-height:34px;flex-shrink:0;gap:9px;padding:0 5px 0 4px;border:1px solid transparent;border-radius:6px;background:#f0f4fa;color:#33445f;margin:2px 0;font-size:14px;font-weight:400}
 .phase-group-heading button{box-sizing:border-box;border:0;background:transparent;color:inherit;height:32px;min-height:0;padding:0 3px;cursor:pointer;font:inherit}
 .phase-group-heading .phase-group-name{display:flex;align-items:center;flex:1;min-width:0;text-align:left;white-space:nowrap;overflow:hidden;font-weight:400}
 .phase-group-range{flex:0 0 var(--group-name-offset,38px);font:12px 'DM Mono';color:#111;font-variant-numeric:tabular-nums}
@@ -1080,7 +1080,7 @@
 .phase-group-heading.group-expanded::before{background:linear-gradient(#d0d4da,#d0d4da) left calc(var(--group-header-height,34px) - 1px)/100% 1px no-repeat;background-origin:border-box}
 :is(#pages,#phaseMasters) .page-tab[hidden]{display:none!important}
 :is(#pages,#phaseMasters):has(.phase-group-heading){padding-bottom:32px!important}
-:is(#pages,#phaseMasters).phase-drop-at-end{box-shadow:inset 0 -2px #416da9}
+:is(#pages,#phaseMasters).phase-drop-at-end{box-shadow:inset 0 -2px var(--list-drop-color,#416da9)}
 #addPhaseGroup{cursor:pointer}#addPhaseGroup>svg{display:block;margin:0;pointer-events:none}.phase-group-membership{grid-column:1/-1;width:100%;min-width:0;font:inherit;font-size:12px}.phase-group-tools{display:flex;justify-content:flex-end;padding:4px;gap:6px}
 .phase-group-tools button,:is(.phase-group-overview,.master-group-overview) button,:is(.phase-group-overview,.master-group-overview) select{font:inherit;padding:7px 10px;border:1px solid #ccd5e2;border-radius:6px;background:#eef2f7;color:#33445f;cursor:pointer}
 #objectLayerPanel{position:relative}
@@ -1295,8 +1295,8 @@ body .app .layout #contentSelect::after{
 }
 /* Distinguish the selected tab with text weight and color, without adding a fill. */
 @media(max-width:850px){
- body .app .layout :is(.phone-object-tabs,.phone-phase-tabs,.phone-reader-tabs):not(.phone-control-pressed):not(:has(:is(.phone-object-tabs-title,.phone-object-collapse,.phone-phase-switch-title,#phonePhaseSectionToggle,.phone-reader-title,.phone-reader-collapse):is(:active,.phone-control-pressed))) :is(.phone-object-tabs-title,.phone-phase-switch-title,.phone-reader-title){color:#626c7c!important;-webkit-text-fill-color:#626c7c!important;font-weight:400}
- body .app .layout :is(.phone-object-tabs,.phone-phase-tabs,.phone-reader-tabs):not(.phone-control-pressed):not(:has(:is(.phone-object-tabs-title,.phone-object-collapse,.phone-phase-switch-title,#phonePhaseSectionToggle,.phone-reader-title,.phone-reader-collapse):is(:active,.phone-control-pressed))) :is(.phone-object-tabs-title,.phone-phase-switch-title,.phone-reader-title) strong{color:#33445f!important;-webkit-text-fill-color:#33445f!important;font-weight:700}
+ body .app .layout :is(.phone-object-tabs,.phone-phase-tabs,.phone-reader-tabs):not(.phone-control-pressed):not(:has(:is(.phone-object-tabs-title,.phone-object-collapse,.phone-phase-switch-title,#phonePhaseSectionToggle,.phone-reader-title,.phone-reader-collapse):is(:active,.phone-control-pressed))) :is(.phone-object-tabs-title,.phone-phase-switch-title,.phone-reader-title){color:var(--panel-caption-muted,#626c7c)!important;-webkit-text-fill-color:var(--panel-caption-muted,#626c7c)!important;font-weight:400}
+ body .app .layout :is(.phone-object-tabs,.phone-phase-tabs,.phone-reader-tabs):not(.phone-control-pressed):not(:has(:is(.phone-object-tabs-title,.phone-object-collapse,.phone-phase-switch-title,#phonePhaseSectionToggle,.phone-reader-title,.phone-reader-collapse):is(:active,.phone-control-pressed))) :is(.phone-object-tabs-title,.phone-phase-switch-title,.phone-reader-title) strong{color:var(--panel-caption-strong,#33445f)!important;-webkit-text-fill-color:var(--panel-caption-strong,#33445f)!important;font-weight:700}
 }
 /* Let the current phase lead, while keeping its content name as context. */
 :is(#selectionTitle,#pngPreviewTitle,#guideEditorTitle){display:flex;align-items:center;min-width:0}
@@ -1555,8 +1555,8 @@ body .app .layout #objectList>.object-group-row>.object-delete{grid-column:5;gri
 
 /* Popup-open feedback overrides per-button themes without affecting disclosures. */
 @layer menu-open-state{
- button[aria-haspopup="menu"][aria-expanded="true"].menu-open-trigger:not(:disabled,[aria-controls="phaseItemMenu"]){transition:none!important;background:var(--blue)!important;border-color:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important;filter:none!important}
- button[aria-haspopup="menu"][aria-expanded="true"].menu-open-trigger:not(:disabled,[aria-controls="phaseItemMenu"]) *{color:#fff!important;-webkit-text-fill-color:#fff!important}
+ button[aria-haspopup="menu"][aria-expanded="true"].menu-open-trigger:not(:disabled,[aria-controls="phaseItemMenu"]){transition:none!important;background:var(--menu-open-bg,var(--blue))!important;border-color:var(--menu-open-border,var(--blue))!important;color:var(--menu-open-fg,#fff)!important;-webkit-text-fill-color:var(--menu-open-fg,#fff)!important;filter:none!important}
+ button[aria-haspopup="menu"][aria-expanded="true"].menu-open-trigger:not(:disabled,[aria-controls="phaseItemMenu"]) *{color:var(--menu-open-fg,#fff)!important;-webkit-text-fill-color:var(--menu-open-fg,#fff)!important}
 }
 
 @media(min-width:851px){.app>.top #editModeToggle{flex-basis:var(--mode-button-width,180px);width:var(--mode-button-width,180px);min-width:var(--mode-button-width,180px);max-width:var(--mode-button-width,180px);padding-left:8px;padding-right:4px;gap:4px}.app>.top #editModeToggle .mode-label{white-space:nowrap}}
@@ -1655,6 +1655,7 @@ body .app .layout #objectList>.object-group-row>.object-delete{grid-column:5;gri
 
 .left>#userPresetManager .preset-manager-row{border:0;border-radius:6px;cursor:grab;flex-shrink:0}
 .left>#userPresetManager .preset-manager-row:not(.renaming):hover:not(:where(.phone-touch-mode *)){background:#f0f4fa;color:#17212c}
+.left>#userPresetManager .preset-manager-row.dragging{background:#eaf3ff;color:#17212c}
 .left>#userPresetManager .preset-manager-row:not(.renaming):hover:not(:where(.phone-touch-mode *)) .preset-manager-name{color:#17212c;-webkit-text-fill-color:#17212c}
 .left>#userPresetManager .preset-manager-row>.preset-thumbnail{touch-action:none;cursor:grab}
 .left>#userPresetManager .preset-manager-row.preset-drop-target{box-shadow:inset 0 2px var(--blue)}
@@ -1993,7 +1994,7 @@ body .app .layout :is(#fieldGuideEditor,#pngPreview) .guide-section-toggle[aria-
    These rules also own normal/hover/pressed/disabled states for property buttons.
    Guide/output toolbar fallbacks below and above exclude property descendants. */
 .app .layout{--property-related-gap:6px;--property-field-gap:8px;--property-separator-space:4px;--property-separator-color:#e5e9ef;--property-input-bg:#f8fafc;--property-input-fg:#000;--property-input-border:#d5dce6;--property-input-radius:6px;--property-input-height:28px;--property-label-gap:4px;--property-button-bg:#eef2f7;--property-button-fg:#33445f;--property-button-border:#d0d4da}
-.app .layout :is(#inspector,#layoutPropertiesPanel,#phaseGroupProperties,#phaseMasterAssignment,#phaseMasterGroupProperties,#fieldGuideEditor .guide-editor-properties,#pngPreview .png-preview-settings) :is(.field>label:not(.property-icon-toggle),.coordinate-fields>div>label,.field-guide-check,.print-page-fields label,.print-page-fields legend,.output-note-row>label,.png-scale-field>label,.output-note-toggle,.phase-master-phase-body .phase-memo>summary){font-family:inherit!important;font-size:12px!important;font-weight:400!important;line-height:1.2!important;color:var(--property-input-fg)!important;-webkit-text-fill-color:var(--property-input-fg)!important}
+.app .layout :is(#inspector,#layoutPropertiesPanel,#phaseGroupProperties,#phaseMasterAssignment,#phaseMasterGroupProperties,#fieldGuideEditor .guide-editor-properties,#pngPreview .png-preview-settings) :is(.field>label:not(.property-icon-toggle),.coordinate-fields>div>label,.field-guide-check,.print-page-fields label,.print-page-fields legend,.output-note-row>label,.png-scale-field>label,.output-note-toggle,.phase-master-phase-body .phase-memo>summary){font-family:inherit!important;font-size:12px!important;font-weight:400!important;line-height:1.2!important;color:var(--property-label-fg,var(--property-input-fg))!important;-webkit-text-fill-color:var(--property-label-fg,var(--property-input-fg))!important}
 .app .layout :is(#inspector,#layoutPropertiesPanel,#phaseGroupProperties,#phaseMasterAssignment,#phaseMasterGroupProperties,#fieldGuideEditor .guide-editor-properties,#pngPreview .png-preview-settings) :is(.field>label:not(.property-icon-toggle):not(:has(input[type="checkbox"])),.coordinate-fields>div>label){margin-top:0!important;margin-bottom:var(--property-label-gap)!important}
 .app .layout :is(#inspector,#layoutPropertiesPanel,#phaseGroupProperties,#phaseMasterAssignment,#phaseMasterGroupProperties,#fieldGuideEditor .guide-editor-properties,#pngPreview .png-preview-settings) :is(input[type="number"],input[type="text"],input:not([type]),select,.color-trigger){box-sizing:border-box;font-family:inherit!important;font-size:14px!important;font-weight:400!important;line-height:normal!important;height:var(--property-input-height)!important;min-height:var(--property-input-height)!important;max-height:var(--property-input-height)!important;padding-top:3px!important;padding-bottom:3px!important;border:1px solid var(--property-input-border)!important;border-radius:var(--property-input-radius)!important;background:var(--property-input-bg)!important;color:var(--property-input-fg)!important;-webkit-text-fill-color:var(--property-input-fg)!important}
 .app .layout :is(#inspector,#layoutPropertiesPanel,#phaseGroupProperties,#phaseMasterAssignment,#phaseMasterGroupProperties,#fieldGuideEditor .guide-editor-properties,#pngPreview .png-preview-settings) .coordinate-control{height:var(--property-input-height);min-height:var(--property-input-height)}
@@ -2056,7 +2057,7 @@ body .app .layout :is(#fieldGuideEditor,#pngPreview) .guide-section-toggle[aria-
 @media(min-width:851px){[role="menu"]>button:focus-visible:not(:disabled){background:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important;outline:none}}
 
 .app>.top>.actions[hidden]{display:none!important}
-@media(min-width:851px){.app>.top.phone-menu-open>#headerActions{gap:0;padding:5px;min-width:190px;width:220px;border-radius:6px;box-shadow:0 5px 14px #0003}.app>.top.phone-menu-open>#headerActions>button.btn{font:inherit;font-size:14px;min-height:34px!important;padding:8px 10px;border:0;border-radius:4px;text-align:left!important;background:transparent;color:#000;justify-content:space-between}.app>.top.phone-menu-open>#headerActions>button.btn:enabled:is(:hover,:focus-visible){background:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important}}
+@media(min-width:851px){.app>.top.phone-menu-open>#headerActions{gap:0;padding:5px;min-width:190px;width:220px;border-radius:6px;box-shadow:0 5px 14px #0003}.app>.top.phone-menu-open>#headerActions>button.btn{font:inherit;font-size:14px;min-height:34px!important;padding:8px 10px;border:0;border-radius:4px;text-align:left!important;background:transparent;color:#000;justify-content:space-between}.app>.top.phone-menu-open>#headerActions>button.btn:enabled:is(:hover,:focus-visible){background:var(--press-bg,var(--blue))!important;color:var(--press-fg,#fff)!important;-webkit-text-fill-color:var(--press-fg,#fff)!important}}
 
 #headerActions .header-submenu-arrow{margin-left:6px}#headerActions .header-submenu-arrow::after{content:"▾"}@media(min-width:851px){#headerActions .header-submenu-arrow{float:right}#headerActions .header-submenu-arrow::after{content:"▸"}}
 /* Phone header rows use the same flat items as the other popup menus. */
@@ -2073,7 +2074,7 @@ body .app .layout :is(#fieldGuideEditor,#pngPreview) .guide-section-toggle[aria-
 #phaseMasterListPanel .page-list-box{min-height:0;flex:1;display:flex;flex-direction:column}
 #phaseMasters{min-height:0;overflow:auto;flex:1}
 :is(#phaseMasterAssignment,#phaseMasterGroupProperties){display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden}
-.phase-master-phase-body{padding:8px;display:flex;flex-direction:column;gap:var(--property-field-gap)}
+.phase-master-phase-body{padding:0 8px;display:flex;flex-direction:column;gap:var(--property-field-gap)}
 .phase-master-phase-body[hidden]{display:none}
 :is(#phaseMasterAssignment,#phaseMasterGroupProperties) input,:is(#phaseMasterAssignment,#phaseMasterGroupProperties) select,.phase-master-name input{box-sizing:border-box;width:100%}
 :is(#phaseMasterAssignment,#phaseMasterGroupProperties) #phaseMemo{display:flex!important;flex-direction:column;flex:1!important;height:auto!important;min-height:140px}
@@ -2150,7 +2151,7 @@ body .app .layout :is(#phaseMasterAssignment,#phaseMasterGroupProperties) #phase
 @media(min-width:851px){.app .layout.desktop-phase-tools #objectLayerPanel .layer-list-group>.desktop-columns-toggle:disabled{cursor:not-allowed!important}}
 
 /* Master list uses the phase list frame, heading actions and row appearance. */
-body.phase-master-editing .app .layout.desktop-phase-tools .battle #contentPanel>#phasePropertyResize{display:none!important}
+body.phase-master-editing .app:not(.workspace-background-active) .layout.desktop-phase-tools .battle #contentPanel>#phasePropertyResize{display:none!important}
 #phaseMasterListPanel #phaseMasterRowsPanel{padding:8px 0 8px 8px!important}
 #phaseMasterListPanel #phaseMasters{padding-right:calc(15px + var(--desktop-scroll-clearance,8px))!important;scrollbar-gutter:stable;margin:0}
 #phaseMasters .page-tab-x{flex:none}
@@ -2162,11 +2163,11 @@ body.phase-master-editing .app .layout.desktop-phase-tools .battle #contentPanel
 #phaseMasterListPanel>.phase-heading-row{flex:none;min-height:36px;border-radius:6px 6px 0 0;overflow:hidden}
 #phaseMasters .page-tab-x:disabled{opacity:.45;cursor:not-allowed;background:transparent!important}
 
-.app .layout .battle #contentPanel>#phaseMasterListPanel{box-sizing:border-box;border:1px solid #d0d4da!important;overflow:hidden;background:#fff}
+.app:not(.workspace-background-active) .layout .battle #contentPanel>#phaseMasterListPanel{box-sizing:border-box;border:1px solid #d0d4da!important;overflow:hidden;background:#fff}
 @media(min-width:851px){#phaseMasters .page-tab[draggable="true"],#phaseMasters .page-tab[draggable="true"] .page-tab-name{cursor:grab}}
 
 #phaseMasters .page-tab{position:relative}
-#phaseMasters .page-tab:is(.drop-before,.drop-after)::after{content:"";position:absolute;left:4px;right:4px;height:3px;background:var(--accent);z-index:20;pointer-events:none}
+#phaseMasters .page-tab:is(.drop-before,.drop-after)::after{content:"";position:absolute;left:4px;right:4px;height:3px;background:var(--list-drop-color,var(--accent));z-index:20;pointer-events:none}
 #phaseMasters .page-tab.drop-before::after{top:0;bottom:auto}
 #phaseMasters .page-tab.drop-after::after{bottom:0;top:auto}
 
@@ -2185,7 +2186,9 @@ body.phase-master-editing .app .layout.desktop-phase-tools .battle #contentPanel
 #fieldGuideEditor #guideShapeProperties>h3{position:relative;margin:0;padding:0}
 #fieldGuideEditor #guideShapeProperties>h3>.guide-shape-actions{position:absolute;right:var(--panel-action-inset,38px);top:5px;margin:0;padding:0;gap:var(--panel-action-gap,6px);z-index:1}
 
-.phase-master-editing #fieldGuideEditor .guide-properties-body{margin:8px 0 8px 8px;padding:0 12px 0 0}
+.phase-master-editing #fieldGuideEditor .guide-properties-body{margin-inline:8px 0;padding:0 12px 0 0}
+/* Keep clearance outside the scrolling box; content padding must not extend its track. */
+.phase-master-phase-body,.phase-master-editing #fieldGuideEditor .guide-properties-body,.app .layout .png-preview-panel .png-preview-settings-body{margin-block:8px;padding-block:0}
 @media(min-width:851px){.phase-master-editing #fieldGuideEditor .guide-properties-body{padding-right:calc(12px + var(--desktop-scroll-clearance,8px))}}
 
 body .app .layout #phaseMasterListPanel>.phase-heading-row{border-bottom:1px solid #d0d4da!important}
@@ -2197,7 +2200,6 @@ body .app .layout :is(#contentPanel,#objectLayerPanel,#fieldGuideEditor,#pngPrev
 body .app .layout :is(#contentPanel,#objectLayerPanel,#fieldGuideEditor,#pngPreview) .panel-disclosure[aria-expanded="false"]{border-radius:6px;border-bottom:1px solid transparent!important}
 body .app .layout :is(#contentPanel,#objectLayerPanel,#fieldGuideEditor,#pngPreview) .panel-disclosure::after,body .app .layout #fieldGuideEditor .panel-disclosure>.guide-section-mark{position:absolute!important;right:var(--disclosure-inset);top:50%;transform:translateY(-50%);display:block;width:var(--disclosure-size)!important;height:var(--disclosure-size);margin:0!important;float:none!important;font-family:monospace!important;font-size:var(--disclosure-font)!important;font-weight:var(--disclosure-weight)!important;line-height:var(--disclosure-size)!important;text-align:center}
 body .app .layout #fieldGuideEditor .panel-disclosure::after{content:none}
-body .app .layout #phaseMasterGroupProperties>.phase-master-phase-body{margin-bottom:8px}
 
 @media(max-width:850px){body .app .layout #phaseMasters .page-tab:not(.renaming)>.page-tab-x{display:grid!important;place-items:center}}
 
@@ -2219,7 +2221,7 @@ body .app .layout:not(.content-collapsed) .battle .content-heading-row>#contentO
 .master-group-selected .guide-properties-body,.master-group-selected .guide-editor-tools,.master-group-selected #stage,.master-group-selected .guide-editor-canvas{visibility:hidden}
 .master-group-selected .guide-properties-body{display:none!important}
 #phaseMasters .phase-group-heading[draggable=true],#phaseMasters .phase-group-heading[draggable=true] .phase-group-name{cursor:grab}
-#phaseMasters .phase-group-heading:is(.drop-before,.drop-after)::after{content:'';position:absolute;left:4px;right:4px;height:3px;background:var(--accent);z-index:20;pointer-events:none}
+#phaseMasters .phase-group-heading:is(.drop-before,.drop-after)::after{content:'';position:absolute;left:4px;right:4px;height:3px;background:var(--list-drop-color,var(--accent));z-index:20;pointer-events:none}
 #phaseMasters .phase-group-heading.drop-before::after{top:0}
 #phaseMasters .phase-group-heading.drop-after::after{bottom:0}
 
@@ -2255,21 +2257,21 @@ body .app .layout .content-heading-row>#phaseMasterModeToggle{margin-left:6px}
 #fieldUsageNote{margin:4px 0 0;font-size:12px;font-weight:400;line-height:1.5;color:#60718c;overflow-wrap:anywhere}
 
 /* Field-mode headers use the crystal palette for every interaction state. */
-body.phase-master-editing .app .layout :is(.content-heading-row,.right .board-title-row,#fieldGuideEditor .guide-editor-heading){--accent:#a8d8f5;--board-header-text:#183149;--press-bg:#8ec6ec;--press-fg:#183149;background:var(--accent)!important;color:#183149!important;box-shadow:inset 0 -1px #72a9ce}
-body.phase-master-editing .app .layout :is(#toggleContent,#selectionTitle,#guideEditorTitle){color:#183149!important;-webkit-text-fill-color:#183149!important}
-body.phase-master-editing .app .layout :is(.content-heading-row,.right .board-title-row,#fieldGuideEditor .guide-editor-heading) :is(button,.board-zoom-group):not(:where([role="menu"] *)){color:#183149!important;-webkit-text-fill-color:#183149!important;border-color:#6585a3!important;background:transparent!important}
-body.phase-master-editing .app .layout :is(.content-heading-row,.right .board-title-row,#fieldGuideEditor .guide-editor-heading) button:enabled:not(#toggleContent,#toggleObjectList):not(:where([role="menu"] *)):is(:hover:not(:where(.phone-touch-mode *)),:focus-visible,:active,.phone-control-pressed,[aria-haspopup="menu"][aria-expanded="true"]){background:#8ec6ec!important;color:#183149!important;-webkit-text-fill-color:#183149!important}
+body.phase-master-editing .app:not(.workspace-background-active) .layout :is(.content-heading-row,.right .board-title-row,#fieldGuideEditor .guide-editor-heading){--accent:#a8d8f5;--board-header-text:#183149;--press-bg:#8ec6ec;--press-fg:#183149;background:var(--accent)!important;color:#183149!important;box-shadow:inset 0 -1px #72a9ce}
+body.phase-master-editing .app:not(.workspace-background-active) .layout :is(#toggleContent,#selectionTitle,#guideEditorTitle){color:#183149!important;-webkit-text-fill-color:#183149!important}
+body.phase-master-editing .app:not(.workspace-background-active) .layout :is(.content-heading-row,.right .board-title-row,#fieldGuideEditor .guide-editor-heading) :is(button,.board-zoom-group):not(:where([role="menu"] *)){color:#183149!important;-webkit-text-fill-color:#183149!important;border-color:#6585a3!important;background:transparent!important}
+body.phase-master-editing .app:not(.workspace-background-active) .layout :is(.content-heading-row,.right .board-title-row,#fieldGuideEditor .guide-editor-heading) button:enabled:not(#toggleContent,#toggleObjectList):not(:where([role="menu"] *)):is(:hover:not(:where(.phone-touch-mode *)),:focus-visible,:active,.phone-control-pressed,[aria-haspopup="menu"][aria-expanded="true"]){background:#8ec6ec!important;color:#183149!important;-webkit-text-fill-color:#183149!important}
 
-body.phase-master-editing .app .layout .right .board-title-row #toggleObjectList,body.phase-master-editing .app .layout .right .board-title-row #toggleObjectList *{color:#183149!important;-webkit-text-fill-color:#183149!important;border-color:#6585a3!important}
+body.phase-master-editing .app:not(.workspace-background-active) .layout .right .board-title-row #toggleObjectList,body.phase-master-editing .app:not(.workspace-background-active) .layout .right .board-title-row #toggleObjectList *{color:#183149!important;-webkit-text-fill-color:#183149!important;border-color:#6585a3!important}
 
-@media(max-width:850px){body.phase-master-editing .app .layout :is(.phone-content-icon,.phone-content-close),body.phase-master-editing .app .layout :is(.phone-content-icon,.phone-content-close) svg{color:#183149!important;-webkit-text-fill-color:#183149!important;border-color:#6585a3!important}body.phase-master-editing .app .layout .phone-content-icon[aria-expanded="true"]{background:#8ec6ec!important}}
+@media(max-width:850px){body.phase-master-editing .app:not(.workspace-background-active) .layout :is(.phone-content-icon,.phone-content-close),body.phase-master-editing .app:not(.workspace-background-active) .layout :is(.phone-content-icon,.phone-content-close) svg{color:#183149!important;-webkit-text-fill-color:#183149!important;border-color:#6585a3!important}body.phase-master-editing .app:not(.workspace-background-active) .layout .phone-content-icon[aria-expanded="true"]{background:#8ec6ec!important}}
 
-body.phase-master-editing .app .layout :is(.phone-content-icon,.phone-content-close):enabled:is(:hover:not(:where(.phone-touch-mode *)),:focus-visible,:active,.phone-control-pressed){background:#8ec6ec!important;color:#183149!important;-webkit-text-fill-color:#183149!important}
-body.phase-master-editing .app .layout :is(.content-heading-row,.right .board-title-row,#fieldGuideEditor .guide-editor-heading) button:not(:where([role="menu"] *)) :not(img){color:inherit!important;-webkit-text-fill-color:inherit!important}
+body.phase-master-editing .app:not(.workspace-background-active) .layout :is(.phone-content-icon,.phone-content-close):enabled:is(:hover:not(:where(.phone-touch-mode *)),:focus-visible,:active,.phone-control-pressed){background:#8ec6ec!important;color:#183149!important;-webkit-text-fill-color:#183149!important}
+body.phase-master-editing .app:not(.workspace-background-active) .layout :is(.content-heading-row,.right .board-title-row,#fieldGuideEditor .guide-editor-heading) button:not(:where([role="menu"] *)) :not(img){color:inherit!important;-webkit-text-fill-color:inherit!important}
 
-body.phase-master-editing .app .layout :is(.phone-content-icon,.phone-content-close){--press-bg:#8ec6ec;--press-fg:#183149}
+body.phase-master-editing .app:not(.workspace-background-active) .layout :is(.phone-content-icon,.phone-content-close){--press-bg:#8ec6ec;--press-fg:#183149}
 
-body.phase-master-editing .app .layout :is(.content-heading-row,.right .board-title-row,#fieldGuideEditor .guide-editor-heading) button:not(:where([role="menu"] *)),body.phase-master-editing .app .layout :is(.phone-content-icon,.phone-content-close){filter:none!important}
+body.phase-master-editing .app:not(.workspace-background-active) .layout :is(.content-heading-row,.right .board-title-row,#fieldGuideEditor .guide-editor-heading) button:not(:where([role="menu"] *)),body.phase-master-editing .app:not(.workspace-background-active) .layout :is(.phone-content-icon,.phone-content-close){filter:none!important}
 
 @media(max-width:850px){
  .app>.layout.phone-content-open .battle #phaseMasterListPanel #phaseMasterRowsPanel{padding:8px!important}
@@ -2305,7 +2307,7 @@ body.phase-master-editing .app .layout :is(.content-heading-row,.right .board-ti
 
 /* Usage-scene guide: shared illustrations, responsive cards and selectable text. */
 .usage-scene-guide{width:min(1120px,calc(100vw - 32px))}
-.usage-scene-guide .operation-guide-body{padding:20px;background:#fff}
+:is(.usage-scene-guide,.workspace-background-dialog)>.operation-guide-body{padding:20px;background:#fff}
 .usage-scene-intro{position:relative;padding:2px 0 16px;border-bottom:1px solid #c9d9e7}
 .usage-scene-eyebrow{display:inline-block;font-size:12px;letter-spacing:.12em;color:#456780}
 .usage-scene-guide .usage-scene-intro h3{margin:6px 0 8px;font-size:24px;color:#25395f;line-height:1.4}
@@ -2328,7 +2330,7 @@ body.phase-master-editing .app .layout :is(.content-heading-row,.right .board-ti
 .usage-scene-guide .usage-art-caption{margin:12px 0 0;font-size:12px;color:#617087}
 @media(max-width:850px){
  .usage-scene-guide{width:calc(100vw - 16px);max-height:calc(100dvh - 24px)}
- .usage-scene-guide .operation-guide-body{padding:14px}
+ :is(.usage-scene-guide,.workspace-background-dialog)>.operation-guide-body{padding:14px!important}
  .usage-scene-guide .usage-scene-intro h3{font-size:21px}
  .usage-scene-steps{grid-template-columns:minmax(0,1fr);gap:16px;margin:16px 0}
  .usage-scene-steps>li,.screen-overview-case{padding:14px}
@@ -2336,8 +2338,8 @@ body.phase-master-editing .app .layout :is(.content-heading-row,.right .board-ti
 }
 
 /* Offline guide: selector and selected detail share one scrolling body. */
-.usage-scene-guide .help-contents a[aria-current="true"]{font-weight:700;text-decoration:underline}
-.usage-scene-guide>.operation-guide-body{min-height:0}
+.usage-scene-guide .help-contents a[aria-current="true"],.workspace-background-dialog .help-contents a[aria-current="true"]{font-weight:700;text-decoration:underline}
+:is(.usage-scene-guide,.workspace-background-dialog)>.operation-guide-body{min-height:0}
 .usage-case-footer{display:flex;justify-content:flex-end}
 
 /* Download catalogue shares the help dialog shell, scrolling body and buttons. */
@@ -2422,3 +2424,357 @@ body.phase-master-editing .app .layout :is(.content-heading-row,.right .board-ti
 /* Screen overview shares the help dialog, contents, case navigation and typography. */
 .screen-overview-art text{font-family:inherit}
 .screen-overview-description{max-width:720px;margin:12px auto!important}
+
+/* One viewport-anchored image shows only through the existing grey pane shells. */
+#workspaceBackground{display:none;pointer-events:none}
+.app.workspace-background-active{isolation:isolate}
+body .app.workspace-background-active>.top{border-bottom-color:transparent!important}
+.app.workspace-background-active>#workspaceBackground{display:block;position:fixed;inset:0;z-index:-1;background-position:center;background-size:cover;background-repeat:no-repeat;pointer-events:none}
+body .app.workspace-background-active>.layout,body .app.workspace-background-active>.layout :is(.center,.stagewrap){background-color:transparent!important}
+/* Pane shells are opaque windows onto the same fixed image: hide overlapping UI. */
+body .app.workspace-background-active>.layout :is(.left,.battle,.right,.battle #battlePanel>.content-group,.right>.layer-group,.battle #contentOptions,#pngPreview){background-color:var(--workspace-pane-surface,#e7e7e7)!important;background-image:var(--workspace-pane-surface-image,linear-gradient(var(--workspace-pane-shade,transparent),var(--workspace-pane-shade,transparent)),linear-gradient(var(--workspace-background-veil),var(--workspace-background-veil)),var(--workspace-background-image))!important;background-attachment:fixed!important;background-size:cover!important;background-position:center!important;background-repeat:no-repeat!important}
+body .app.workspace-background-active>.layout :is(.left,.battle #battlePanel>.content-group,.right>.layer-group,#pngPreview){--workspace-pane-shade:var(--workspace-pane-overlay,rgba(0,0,0,.5));border-color:transparent!important}
+body .app.workspace-background-active>.layout>.battle :is(#battlePanel,#contentPanel){background-color:transparent!important}
+body .app.workspace-background-active>.layout>.right #objectLayerPanel{background-color:transparent!important}
+body .app.workspace-background-active .left :is(.phone-material-help,.phone-material-help p){color:#fff!important;-webkit-text-fill-color:#fff!important}
+.workspace-background-dialog{width:min(520px,calc(100vw - 24px))}
+.workspace-background-actions{display:flex;flex-wrap:wrap;gap:8px}
+.workspace-background-dialog .field{margin:16px 0}
+
+
+.workspace-background-dialog .field>label{display:block;font-size:12px;color:var(--property-input-fg,#22344f);margin-bottom:4px}
+.workspace-background-dialog input[type=range]{display:block;width:100%;margin:0;accent-color:var(--blue);touch-action:pan-y}
+#workspaceBackgroundName{overflow-wrap:anywhere}
+#workspaceBackgroundStatus{font-size:12px;min-height:1.4em;color:#33445f}
+@media print{.app.workspace-background-active>#workspaceBackground{display:none!important}}
+
+/* Ivory content surfaces: one translucent card, transparent inner wrappers. */
+body.workspace-background-active .app.workspace-background-active #contentPanel>:is(.page-controls,.content-properties,.panel-view-frame){background:rgba(250,249,244,.96)!important;color:#17212c;border-color:#d3cebf!important}
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-ui).workspace-theme-ui :is(.page-list-box,#pageListPanel,#phaseMasterRowsPanel,.page-tabs,.phase-master-phase-body,#phaseMemo,#phaseGroupProperties,.master-group-settings,.panel-view-body,.phase-memo-reading){background:transparent!important}
+body.workspace-background-active .app.workspace-background-active #contentPanel :is(.phase-heading-row,.phone-object-tabs,.content-properties>.accordion-toggle){background:rgba(243,241,232,.92)!important;color:#33445f!important;-webkit-text-fill-color:#33445f!important}
+body.workspace-background-active .app.workspace-background-active #contentPanel :is(.phase-heading-row>:is(.battle-pages-toggle,#toggleBattlePages),.phone-object-collapse){background:transparent!important}
+body.workspace-background-active .app.workspace-background-active #contentPanel .panel-disclosure:is(:hover:not(:where(.phone-touch-mode *)),:focus-visible){background:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+
+/* Trial content window skin. Existing views, controls and dimensions stay shared. */
+body.workspace-background-active .app.workspace-background-active{--phone-collapsed-panel-bg:var(--workspace-inner-overlay,transparent);--workspace-content-ink:#f7eac3;--workspace-content-muted:#d8cdaa;--panel-reading-heading-bg:rgba(27,42,55,.65);--panel-reading-heading-fg:var(--workspace-content-ink);--board-header-text:var(--workspace-content-ink);--workspace-content-gold:#dec681;--workspace-control-hover:rgba(193,145,45,.3);--panel-caption-muted:var(--workspace-content-ink);--panel-caption-strong:var(--workspace-content-ink);--workspace-scroll-thumb:#dec68155;--workspace-scroll-thumb-hover:#dec681a6;--workspace-selection-shadow:inset 2px 0 0 var(--workspace-content-gold);--property-label-fg:var(--workspace-content-ink)}
+body.workspace-background-active .app.workspace-background-active :is(#fieldGuideEditor .guide-editor-heading,#fieldGuideEditor .guide-properties-title,#fieldGuideEditor .guide-section-heading,#fieldGuideEditor .panel-view-header,.content-heading-row,.right>.layer-group>.board-title-row,#objectLayerPanel .property-heading,.phone-view-content>.phone-reader-tabs,#pngPreview .png-preview-heading,#pngPreview .png-preview-settings>h3,#pngPreview .output-switch-tabs,.png-preview-settings #phaseMemo>summary,:is(#contentPanel,.workspace-theme-ui).workspace-theme-ui .phase-heading-row,:is(#contentPanel,.workspace-theme-ui).workspace-theme-ui .phone-object-tabs,:is(#contentPanel,.workspace-theme-ui).workspace-theme-ui .content-properties>.accordion-toggle){--workspace-content-ink:var(--workspace-title-ink,#f0f8fc);background:var(--workspace-title-bg,rgba(27,42,55,.65))!important;color:var(--workspace-content-ink)!important;-webkit-text-fill-color:var(--workspace-content-ink)!important;box-sizing:border-box;border:1px solid var(--workspace-frame)!important;box-shadow:none;text-shadow:0 1px 2px #000}
+body.workspace-background-active .app.workspace-background-active :is(.content-heading-row,.right>.layer-group>.board-title-row,#pngPreview .png-preview-heading,#pngPreview .png-preview-settings>h3,#pngPreview .output-switch-tabs,:is(#contentPanel,.workspace-theme-ui).workspace-theme-ui .phase-heading-row,:is(#contentPanel,.workspace-theme-ui).workspace-theme-ui .phone-object-tabs,:is(#contentPanel,.workspace-theme-ui).workspace-theme-ui .master-list-heading) :where(button,.phone-object-tabs-title,#toggleContent,#toggleBattlePages),body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-ui).workspace-theme-ui #editUsedField{background:transparent!important;color:var(--workspace-content-ink)!important;-webkit-text-fill-color:var(--workspace-content-ink)!important;border-color:var(--workspace-frame)!important}
+body.workspace-background-active .app.workspace-background-active :is(.content-heading-row,.right>.layer-group>.board-title-row,#pngPreview .png-preview-heading,#pngPreview .png-preview-settings>h3,#pngPreview .output-switch-tabs,:is(#contentPanel,.workspace-theme-ui).workspace-theme-ui .phase-heading-row,:is(#contentPanel,.workspace-theme-ui).workspace-theme-ui .phone-object-tabs) button:enabled:not(#toggleContent,#toggleObjectList):is(:hover:not(:where(.phone-touch-mode *)),:focus-visible,:active,.phone-control-pressed),body.workspace-background-active .app.workspace-background-active #objectLayerPanel #objectList .object-row .object-toggle:enabled:is(:hover:not(:where(.phone-touch-mode *)),:focus-visible,:active,.phone-control-pressed),body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-ui).workspace-theme-ui :is(#inspector,#layoutPropertiesPanel,#phaseGroupProperties,#phaseMasterAssignment,#phaseMasterGroupProperties,.png-preview-settings,#fieldGuideEditor .guide-editor-properties) .color-trigger:enabled:is(:hover:not(:where(.phone-touch-mode *)),:focus-visible,:active,.phone-control-pressed),body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-ui).workspace-theme-ui #editUsedField:enabled:is(:hover:not(:where(.phone-touch-mode *)),:focus-visible,:active,.phone-control-pressed),body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-ui).workspace-theme-ui #contentSelect:enabled:is(:hover:not(:where(.phone-touch-mode *)),:active,.phone-control-pressed){background:var(--workspace-control-hover)!important;color:var(--workspace-content-ink)!important;-webkit-text-fill-color:var(--workspace-content-ink)!important;border-color:var(--workspace-frame)!important;filter:none!important}
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-ui).workspace-theme-ui>:is(.page-controls,.content-properties,.panel-view-frame){background:var(--workspace-inner-overlay,transparent)!important;color:var(--workspace-content-ink);border:0!important;box-shadow:inset 0 0 0 1px var(--workspace-frame)!important}
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-ui).workspace-theme-ui :is(.phase-master-phase-body,#phaseGroupProperties){color:var(--workspace-content-ink)}
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-ui).workspace-theme-ui #fieldUsageNote{color:var(--workspace-content-muted)}
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-ui).workspace-theme-ui :is(#pages,#phaseMasters,#objectList) :is(.page-tab,.phase-group-heading,.object-row){background:transparent!important;color:var(--workspace-content-ink)!important;border-color:transparent!important;box-shadow:none!important}
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-ui).workspace-theme-ui :is(#pages,#phaseMasters,#objectList) :is(.phase-group-heading,.object-group-row){background:rgba(216,239,255,.12)!important}
+
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-ui).workspace-theme-ui :is(#pages,#phaseMasters,#objectList) :is(.page-tab,.phase-group-heading,.object-row) :is(.object-name,.object-name *,.object-index,.object-delete,.object-toggle,.object-group-disclosure,.page-index,.page-tab-name,.page-tab-edit,.page-tab-x,.phase-group-name,.phase-group-toggle,.phase-group-menu-trigger,.phase-group-delete){color:var(--workspace-content-ink)!important;-webkit-text-fill-color:var(--workspace-content-ink)!important}
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-ui).workspace-theme-ui :is(#pages,#phaseMasters,#objectList) :is(.page-tab,.phase-group-heading,.object-row):is(:hover:not(:where(.phone-touch-mode *)),:has(:focus-visible)){background:linear-gradient(90deg,#b2d6ec5c,#d8efff26,transparent)!important}
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-ui).workspace-theme-ui :is(#pages,#phaseMasters,#objectList) :is(.page-tab.selected,.page-tab.phase-selected,.phase-group-heading.active,.object-row.selected){background:linear-gradient(90deg,#6798b4b3,#9cc6df55,#b9dcee14)!important;border-top-color:transparent!important;border-right-color:transparent!important;border-bottom-color:transparent!important;border-left-color:var(--workspace-content-gold)!important;box-shadow:var(--workspace-selection-shadow)!important;color:var(--workspace-content-ink)!important}
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-ui).workspace-theme-ui :is(#pages,#phaseMasters,#objectList) .phase-group-heading.group-expanded::before{border-color:var(--workspace-frame);background-image:linear-gradient(var(--workspace-frame),var(--workspace-frame))}
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-ui).workspace-theme-ui :is(#pages,#phaseMasters) .phase-group-heading.active:not(.drop-before):not(.drop-after)::after{border-left-color:var(--workspace-content-gold)!important;box-shadow:var(--workspace-selection-shadow)!important}
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-ui).workspace-theme-ui .phone-object-tabs :is(.phone-object-tabs-title,.phone-object-tabs-title *,button,button *){color:var(--workspace-content-ink)!important;-webkit-text-fill-color:var(--workspace-content-ink)!important}
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-ui).workspace-theme-ui :is(#pages,#phaseMasters,#objectList) :is(.page-tab,.phase-group-heading,.object-row) button{color:var(--workspace-content-ink)!important;-webkit-text-fill-color:var(--workspace-content-ink)!important}
+
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-ui).workspace-theme-ui :is(#pages,#phaseMasters,#objectList){--list-drop-color:var(--workspace-content-gold);--list-move-color:var(--workspace-content-gold);--list-move-shadow:inset 0 0 0 3px color-mix(in srgb,var(--workspace-content-gold) 20%,transparent)}
+
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-ui).workspace-theme-ui #pages :is(.page-tab,.phase-group-heading,button):focus-visible{outline-color:var(--workspace-content-gold)}
+
+/* The content skin distinguishes keyboard/editing focus from the selected value. */
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-ui).workspace-theme-ui :where(input[type=text],input[type=number],input:not([type]),select,textarea,.color-trigger,#contentSelect){--property-input-bg:transparent;--property-input-fg:var(--workspace-content-ink);--property-input-border:var(--workspace-frame);background:var(--property-input-bg)!important;color:var(--property-input-fg)!important;-webkit-text-fill-color:var(--property-input-fg)!important;border-color:var(--property-input-border)!important}
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-ui).workspace-theme-ui :is(input[type=text],input[type=number],input:not([type]),textarea):focus{--property-input-bg:#f8fafc;--property-input-fg:#17212c;--property-input-border:var(--workspace-frame);outline-color:var(--workspace-content-gold)}
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-ui).workspace-theme-ui :is(input,textarea)::placeholder{color:#bdd4df;opacity:.8}
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-ui).workspace-theme-ui :is(input,textarea):focus::placeholder{color:#60718c}
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-ui).workspace-theme-ui select option{background:#f8fafc;color:#17212c;-webkit-text-fill-color:#17212c}
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-ui).workspace-theme-ui #contentOptions{--accent:var(--workspace-content-gold);--blue:var(--workspace-content-gold);--list-move-color:var(--workspace-content-gold);--list-move-shadow:inset 0 0 0 3px color-mix(in srgb,var(--workspace-content-gold) 20%,transparent);background:#f8fafc!important;border-color:var(--workspace-frame)!important;color:#17212c}
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-ui).workspace-theme-ui #contentOptions .content-option-row{--workspace-control-ink:#17212c;background:transparent!important;border-color:transparent!important}
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-ui).workspace-theme-ui #contentOptions .content-option-row.active{background:#dcecf5!important;border-left-color:var(--workspace-content-gold)!important}
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-ui).workspace-theme-ui #contentOptions .content-option-row:hover:not(:where(.phone-touch-mode *)){background:#eceff3!important}
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-ui).workspace-theme-ui #contentOptions :is(.content-option-row,button,.content-option-select,.content-option-select *,.content-option-index){color:var(--workspace-control-ink,var(--workspace-content-ink))!important;-webkit-text-fill-color:var(--workspace-control-ink,var(--workspace-content-ink))!important}
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-ui).workspace-theme-ui #contentOptions button{background:transparent!important}
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-ui).workspace-theme-ui #contentOptions .content-option-row:focus-within{--workspace-control-ink:#17212c;background:#f8fafc!important}
+
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-ui).workspace-theme-ui .phase-heading-row>.battle-pages-toggle{height:100%!important;min-height:0!important}
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-ui).workspace-theme-ui .phase-heading-row>.phase-heading-actions{top:50%;transform:translateY(-50%)}
+
+/* A gold heading owns its outline; its shell must not add an inset or closed second frame. */
+body.workspace-background-active .app.workspace-background-active .battle #battlePanel>.content-group{border-width:0!important}
+body.workspace-background-active .app.workspace-background-active .battle :is(#contentPanel,.workspace-theme-ui).workspace-theme-ui>.page-controls:has(>.phase-heading-row>#toggleBattlePages[aria-expanded="false"]){border:0!important;box-shadow:none!important;flex:0 0 var(--panel-heading-height,36px)!important;height:var(--panel-heading-height,36px)!important;min-height:var(--panel-heading-height,36px)!important}
+
+/* Gold content skin: transparent scroll tracks, without changing scrollbar geometry. */
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-scroll).workspace-theme-scroll,body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-scroll).workspace-theme-scroll *{scrollbar-color:var(--workspace-scroll-thumb) transparent}
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-scroll).workspace-theme-scroll::-webkit-scrollbar-track,body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-scroll).workspace-theme-scroll *::-webkit-scrollbar-track{background:transparent}
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-scroll).workspace-theme-scroll::-webkit-scrollbar-thumb,body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-scroll).workspace-theme-scroll *::-webkit-scrollbar-thumb{background:var(--workspace-scroll-thumb);border-color:transparent;background-clip:padding-box}
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-scroll).workspace-theme-scroll:hover:not(:where(.phone-touch-mode *)),body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-scroll).workspace-theme-scroll *:hover:not(:where(.phone-touch-mode *)){scrollbar-color:var(--workspace-scroll-thumb-hover) transparent}
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-scroll).workspace-theme-scroll::-webkit-scrollbar-thumb:hover:not(:where(.phone-touch-mode *)),body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-scroll).workspace-theme-scroll *::-webkit-scrollbar-thumb:hover:not(:where(.phone-touch-mode *)){background:var(--workspace-scroll-thumb-hover)!important}
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-scroll).workspace-theme-scroll::-webkit-scrollbar-corner,body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-scroll).workspace-theme-scroll *::-webkit-scrollbar-corner{background:transparent}
+
+/* Phone tab headers follow their shared frame corners rather than clipping a square gold border. */
+@media(max-width:850px){body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-ui).workspace-theme-ui.phone-phase-list-tabbed>.phone-list-property-group>.phone-object-tabs{border-radius:var(--panel-corner-radius) var(--panel-corner-radius) 0 0}}
+
+@media(min-width:851px){body.workspace-background-active .app.workspace-background-active .layout.content-collapsed .battle #battlePanel>.content-group>.content-heading-row{border-radius:var(--panel-corner-radius)!important}}
+
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-ui).workspace-theme-ui :is(#phasePropertyResize,#layerPropertyResize){background:var(--workspace-scroll-thumb)!important;border-color:transparent}
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-ui).workspace-theme-ui :is(#phasePropertyResize,#layerPropertyResize):is(:hover:not(:where(.phone-touch-mode *)),:focus-visible,.resizing){background:var(--workspace-scroll-thumb-hover)!important}
+
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-ui).workspace-theme-ui #contentOptions :is(input,textarea){--property-input-fg:#17212c;color:#17212c!important;-webkit-text-fill-color:#17212c!important}
+
+/* Readable names and setting labels on the trial translucent content surface. */
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-ui).workspace-theme-ui :is(.object-name,.object-name *,.page-tab-name,.phase-group-name,.phase-group-title,#contentSelect,label,#phaseMemo>summary,input[type=text],input[type=number],input:not([type]),select){font-weight:700!important}
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-ui).workspace-theme-ui #fieldUsageNote{font-weight:400!important}
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-ui).workspace-theme-ui :is(#phaseMemo textarea,#phaseGroupNoteInput){font-weight:700!important}
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-ui).workspace-theme-ui :is(#phaseMemo textarea,#phaseGroupNoteInput):focus{font-weight:400!important}
+
+/* Delete crosses keep the transparent content surface on hover, keyboard focus and press. */
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-ui).workspace-theme-ui :is(#pages,#phaseMasters,#objectList,#contentOptions) :is(.page-tab,.phase-group-heading,.object-row,.content-option-row) :is(.object-delete,.page-tab-x,.phase-group-delete,.phase-group-ungroup,.content-row-delete):enabled:is(:hover:not(:where(.phone-touch-mode *)),:focus-visible,:active,.phone-control-pressed){background:transparent!important;color:#ef7d7d!important;-webkit-text-fill-color:#ef7d7d!important;box-shadow:none!important}
+
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-ui).workspace-theme-ui :is(#phaseMemo textarea,#phaseGroupNoteInput)::placeholder{font-weight:400}
+
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-ui).workspace-theme-ui #contentOptions :is(.content-option-row,.content-option-select,.content-option-select *,input,textarea){font-weight:400!important}
+
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-ui).workspace-theme-ui :is(#phaseMasterPhaseName,#phaseGroupNameInput):focus,body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-ui).workspace-theme-ui :is(.page-tab,.phase-group-heading,.object-row).renaming :is(input,textarea){font-weight:400!important}
+
+/* Focus and expanded choice triggers use the content theme, including native controls. */
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-ui).workspace-theme-ui :is(input[type=text],input[type=number],input:not([type]),select,textarea,.color-trigger,#contentSelect):focus,body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-ui).workspace-theme-ui #contentSelect[aria-expanded="true"]{outline:2px solid var(--workspace-content-gold)!important;outline-offset:-2px!important}
+
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-ui).workspace-theme-ui #contentSelect{background:var(--workspace-title-bg,rgba(27,42,55,.65))!important;color:var(--workspace-content-ink)!important;-webkit-text-fill-color:var(--workspace-content-ink)!important}
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-ui).workspace-theme-ui #contentSelect::after{color:var(--workspace-content-ink)!important;-webkit-text-fill-color:var(--workspace-content-ink)!important}
+
+/* Additional hosts of the same pane parts (desktop sidebar, phone tabs and output settings). */
+body.workspace-background-active .app.workspace-background-active :is(#objectLayerPanel,.workspace-theme-properties){--property-label-fg:var(--workspace-content-ink);--property-separator-color:var(--workspace-frame);color:var(--workspace-content-ink);--property-button-bg:transparent;--property-button-fg:var(--workspace-content-ink);--property-button-border:var(--workspace-frame)}
+body.workspace-background-active .app.workspace-background-active :is(#objectLayerPanel,.workspace-theme-panels) :is(.property-group,.output-tab-group),body.workspace-background-active .app.workspace-background-active #pngPreview .png-preview-settings{background:var(--workspace-inner-overlay,transparent)!important;border:0!important;box-shadow:inset 0 0 0 1px var(--workspace-frame)!important}
+body.workspace-background-active .app.workspace-background-active :is(#objectLayerPanel,.workspace-theme-panels) :is(.property-content,.desktop-phase-sidebar,.phone-reader-properties,.panel-view-body),body.workspace-background-active .app.workspace-background-active #pngPreview :is(.png-preview-content,.png-preview-settings-body,.output-section,.phase-memo,.phase-memo-body){background:transparent!important;color:var(--workspace-content-ink)!important}
+body.workspace-background-active .app.workspace-background-active :is(#objectLayerPanel,.workspace-theme-properties) :is(label,legend,.field>span,.output-phase-gap>span){color:var(--workspace-content-ink)!important;font-weight:700!important}
+body.workspace-background-active .app.workspace-background-active :is(#objectLayerPanel,.workspace-theme-properties) :is(button,.btn):not(:where([role=menu] *,#contentOptions *,.color-popover *,.property-heading)){--press-bg:var(--workspace-control-hover);--press-fg:var(--workspace-content-ink);background:transparent!important;color:var(--workspace-content-ink)!important;-webkit-text-fill-color:var(--workspace-content-ink)!important;border-color:var(--workspace-frame)!important}
+body.workspace-background-active .app.workspace-background-active :is(#objectLayerPanel,.workspace-theme-properties) :is(button,.btn):enabled:not(:where(.object-name,.object-delete,.page-tab-x,.phase-group-ungroup,#toggleObjectList,#toggleContent,.object-group-disclosure,.property-heading,.content-properties>.accordion-toggle,.color-popover *)):is(:hover:not(:where(.phone-touch-mode *)),:focus-visible,:active,.phone-control-pressed){background:var(--workspace-control-hover)!important;color:var(--workspace-content-ink)!important;-webkit-text-fill-color:var(--workspace-content-ink)!important}
+body.workspace-background-active .app.workspace-background-active #objectList :is(.object-row,.object-name,.object-name *){color:var(--workspace-content-ink)!important;-webkit-text-fill-color:var(--workspace-content-ink)!important}
+body.workspace-background-active .app.workspace-background-active #objectList .object-row :is(button,.object-toggle){background:transparent!important;border-color:var(--workspace-frame)!important}
+body.workspace-background-active .app.workspace-background-active #objectList .object-row .object-delete:enabled:is(:hover:not(:where(.phone-touch-mode *)),:focus-visible,:active,.phone-control-pressed){background:transparent!important;color:#ef7d7d!important;-webkit-text-fill-color:#ef7d7d!important}
+body.workspace-background-active .app.workspace-background-active :is(#inspector,.png-preview-settings) input[type=range]:not(.property-value-mixed){accent-color:var(--workspace-content-gold)}
+body.workspace-background-active .app.workspace-background-active :is(#objectLayerPanel,.workspace-theme-properties) :is(p,.inspector-empty,.note){color:var(--workspace-content-ink)!important}
+body.workspace-background-active .app.workspace-background-active #objectLayerPanel .phone-object-tabs{border-radius:var(--panel-corner-radius) var(--panel-corner-radius) 0 0}
+body.workspace-background-active .app.workspace-background-active #objectLayerPanel .property-heading[aria-expanded=false]{border-radius:var(--panel-corner-radius)!important}
+body.workspace-background-active .app.workspace-background-active #objectLayerPanel .property-heading::after,body.workspace-background-active .app.workspace-background-active #pngPreview .png-properties-mark{color:var(--workspace-content-ink)!important;-webkit-text-fill-color:var(--workspace-content-ink)!important}
+body.workspace-background-active .app.workspace-background-active #pngPreview[data-output-mode=image] .png-preview-surface{background:transparent!important}
+
+/* Canvas drawing keeps its original inherited ink, independent of pane typography. */
+body.workspace-background-active .app.workspace-background-active #stage{color:#000}
+
+body.workspace-background-active .app.workspace-background-active :is(.content-heading-row,.right>.layer-group>.board-title-row,#objectLayerPanel .property-heading,#objectLayerPanel .phone-object-tabs,#pngPreview .png-preview-heading,#pngPreview .png-preview-settings>h3) :is(span,button,svg){color:var(--workspace-content-ink)!important;-webkit-text-fill-color:var(--workspace-content-ink)!important}
+
+body.workspace-background-active .app.workspace-background-active #pngPreview[data-output-mode=print] .png-preview-surface{color:#17212c!important}
+
+body.workspace-background-active .app.workspace-background-active #pngPreview #stage{color:#17212c}
+
+/* Two-row phone canvas headers retain their existing geometry. */
+body.workspace-background-active .app.workspace-background-active :is(#fieldGuideEditor .guide-section-heading,.content-heading-row,#contentPanel .phase-heading-row,#contentPanel .phone-object-tabs,#objectLayerPanel .property-heading,#objectLayerPanel .phone-object-tabs,.phone-view-content>.phone-reader-tabs,#pngPreview .png-preview-settings>h3,#pngPreview .output-switch-tabs){height:var(--panel-heading-height,36px)!important;min-height:var(--panel-heading-height,36px)!important;max-height:var(--panel-heading-height,36px)}
+
+/* Complete the shared frame and state treatment at the existing component boundaries. */
+body.workspace-background-active .app.workspace-background-active #objectLayerPanel .property-group{--panel-frame-border:transparent}
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-ui).workspace-theme-ui .phone-object-tabs :is(.phone-object-tabs-title,.phone-object-tabs-title *,button,button *){color:var(--workspace-content-ink)!important;-webkit-text-fill-color:var(--workspace-content-ink)!important}
+body.workspace-background-active .app.workspace-background-active .right #selectionTitle{color:var(--workspace-content-ink)!important;-webkit-text-fill-color:var(--workspace-content-ink)!important}
+body.workspace-background-active .app.workspace-background-active #inspector .property-icon-toggle{background:transparent!important;border-color:var(--workspace-frame)!important;color:var(--workspace-content-ink)!important}
+body.workspace-background-active .app.workspace-background-active #inspector .property-icon-toggle :is(svg,span){color:inherit!important;-webkit-text-fill-color:inherit!important}
+body.workspace-background-active .app.workspace-background-active #inspector .property-icon-toggle:is(:hover:not(:where(.phone-touch-mode *)),:focus-within,:active,.phone-control-pressed){background:var(--workspace-control-hover)!important}
+body.workspace-background-active .app.workspace-background-active #objectList>.object-group-row::before{border-color:var(--workspace-frame);background:none}
+body.workspace-background-active .app.workspace-background-active #objectList>.object-group-expanded::before{background:linear-gradient(var(--workspace-frame),var(--workspace-frame)) left calc(var(--object-group-header-height,34px) - 1px)/100% 1px no-repeat;background-origin:border-box}
+body.workspace-background-active .app.workspace-background-active #objectList>.object-group-row.selected:not(.drop-after)::after{border-left-color:var(--workspace-content-gold);box-shadow:var(--workspace-selection-shadow)}
+body.workspace-background-active .app.workspace-background-active #objectList>.object-group-expanded::after{border-bottom-color:var(--workspace-frame)}
+body.workspace-background-active .app.workspace-background-active #objectList>.object-group-member::before{border-color:var(--workspace-frame)}
+body.workspace-background-active .app.workspace-background-active :is(#objectLayerPanel,.workspace-theme-reading) .panel-view-frame[data-panel-expanded=false]{box-shadow:none!important}
+@media(max-width:850px){body.workspace-background-active .app.workspace-background-active .layout[data-phone-pane=canvas] .right .board-title-row{padding-top:1px!important;padding-bottom:3px!important}}
+
+body.workspace-background-active .app.workspace-background-active :is(.phone-view-content,.png-reader-controls){background:transparent!important;color:var(--workspace-content-ink)!important}
+
+body.workspace-background-active .app.workspace-background-active #inspector .property-icon-toggle :is(svg,svg *){color:inherit!important;stroke:currentColor!important}
+body.workspace-background-active .app.workspace-background-active #pngPreview .png-preview-settings :is(h4,p){color:var(--workspace-content-ink)!important}
+body.workspace-background-active .app.workspace-background-active #pngPreview .png-preview-settings #phaseMemo{background:transparent!important;border-color:var(--workspace-frame)!important}
+body.workspace-background-active .app.workspace-background-active :is(.board-title-row,.png-preview-heading) .board-zoom-group{background:transparent!important;color:var(--workspace-content-ink)!important;border-color:var(--workspace-frame)!important}
+
+body.workspace-background-active .app.workspace-background-active :is(#objectLayerPanel,.workspace-theme-properties) :is(input[type=checkbox],input[type=radio]){accent-color:var(--workspace-content-gold)}
+
+body.workspace-background-active .app.workspace-background-active :is(#objectLayerPanel,.workspace-theme-properties) .panel-view-header[data-expanded=false],body.workspace-background-active .app.workspace-background-active .right>.layer-group>.board-title-row:has(>#toggleObjectList[aria-expanded=false]){border-radius:var(--panel-corner-radius)!important}
+
+body.workspace-background-active .app.workspace-background-active #objectList .object-toggle :is(svg,svg *){color:inherit!important;stroke:currentColor!important}
+
+/* Group disclosure controls share ink, hover and a fixed-size arrow in both lists. */
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-lists) :is(#pages,#phaseMasters,#objectList) :is(.phase-group-toggle,.object-group-disclosure){cursor:pointer;background:transparent!important;border:0!important;color:var(--workspace-content-ink)!important;-webkit-text-fill-color:var(--workspace-content-ink)!important}
+body.workspace-background-active .app.workspace-background-active :is(#pages,#phaseMasters) .phase-group-heading:not(.group-expanded)::before{content:"";position:absolute;left:-1px;right:-1px;top:-1px;height:calc(100% + 2px);box-sizing:border-box;border:1px solid var(--workspace-frame);border-radius:6px;background:none;pointer-events:none;z-index:2}
+
+/* Retain the original desktop text / phone SVG appearance; stabilize only the arrow slot. */
+@media(min-width:851px){body.workspace-background-active .app.workspace-background-active :is(#pages,#phaseMasters,#objectList) :is(.phase-group-disclosure-text,.group-disclosure-text){box-sizing:border-box;width:18px;min-width:18px;height:22px;line-height:22px;text-align:center;margin-inline:auto}}
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-lists) :is(#pages,#phaseMasters,#objectList) :is(.phase-group-toggle,.object-group-disclosure) :is(span,svg,svg *){color:inherit!important;-webkit-text-fill-color:inherit!important}
+
+/* A standalone disclosure owns both its frame and its inner action surface.
+   Keep the frame/base identical to wrapped headings; paint hover only inside it. */
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-ui).workspace-theme-ui :is(#contentSelect,#phaseMasterAssignment>.accordion-toggle,#phaseMasterGroupProperties>.accordion-toggle,#toggleLayers,#toggleInspector,.png-preview-settings #phaseMemo>summary,#fieldGuideEditor .guide-section-heading),body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-ui).workspace-theme-ui :is(#contentSelect,#phaseMasterAssignment>.accordion-toggle,#phaseMasterGroupProperties>.accordion-toggle,#toggleLayers,#toggleInspector,.png-preview-settings #phaseMemo>summary,#fieldGuideEditor .guide-section-heading):is(:hover:not(:where(.phone-touch-mode *)),:focus-visible,:active,.phone-control-pressed){color:var(--workspace-content-ink)!important;-webkit-text-fill-color:var(--workspace-content-ink)!important;background-color:var(--workspace-title-bg,rgba(27,42,55,.65))!important;background-image:linear-gradient(var(--workspace-heading-overlay,transparent),var(--workspace-heading-overlay,transparent))!important;background-clip:padding-box!important;border-color:var(--workspace-frame)!important;filter:none!important}
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-ui).workspace-theme-ui :is(#contentSelect,#phaseMasterAssignment>.accordion-toggle,#phaseMasterGroupProperties>.accordion-toggle,#toggleLayers,#toggleInspector,.png-preview-settings #phaseMemo>summary,#fieldGuideEditor .guide-section-heading:not(:has(.guide-shape-actions :is(:hover,:focus-visible,:active,.phone-control-pressed)))):is(:hover:not(:where(.phone-touch-mode *)),:focus-visible,:active,.phone-control-pressed){--workspace-heading-overlay:var(--workspace-control-hover)}
+
+body.workspace-background-active .app.workspace-background-active .right>.layer-group{border-width:0!important}
+
+/* Native spin controls follow the unfocused dark surface and focused light input. */
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-ui).workspace-theme-ui input[type=number]{color-scheme:dark}
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel,.workspace-theme-ui).workspace-theme-ui input[type=number]:focus{color-scheme:light}
+
+/* Output settings use the same rounded heading/frame and subtle setting lines. */
+body.workspace-background-active .app.workspace-background-active #pngPreview :is(.png-preview-settings>h3,.output-switch-tabs){border-radius:var(--panel-corner-radius) var(--panel-corner-radius) 0 0}
+body.workspace-background-active .app.workspace-background-active #pngPreview .png-preview-settings.png-properties-collapsed>h3{border-radius:var(--panel-corner-radius)}
+body.workspace-background-active .app.workspace-background-active #pngPreview .png-preview-settings :is(.output-section-separator,.output-print-section,fieldset){border-color:var(--property-button-border)!important}
+body.workspace-background-active .app.workspace-background-active #pngPreview .png-preview-settings :is(#printActualSize,#printImageDpi){color:var(--workspace-content-muted)!important;-webkit-text-fill-color:var(--workspace-content-muted)!important}
+
+/* Output phase titles share the main pane outer edge and corner geometry. */
+body.workspace-background-active .app.workspace-background-active #pngPreview{border-width:0!important}
+body.workspace-background-active .app.workspace-background-active #pngPreview>.png-preview-heading{border-radius:var(--panel-corner-radius) var(--panel-corner-radius) 0 0!important}
+@media(max-width:850px){body.workspace-background-active .app.workspace-background-active #pngPreview,body.workspace-background-active .app.workspace-background-active #pngPreview>.png-preview-heading{border-radius:0!important}}
+
+/* Preserve the output canvas content box when its former window border is removed. */
+@media(min-width:851px){body.workspace-background-active .app.workspace-background-active #pngPreview{padding:1px!important}body.workspace-background-active .app.workspace-background-active #pngPreview>.png-preview-heading{margin:-1px -1px 1px}}
+
+/* Material category palette: only while a workspace image is active. */
+body.workspace-background-active .app.workspace-background-active .layout>.left :is(#leftRailToggle,#presetUndo,#presetRedo,#categoryModeToggle,#registerUserPreset,.preset-manager-heading,.preset-manage,[aria-controls="toolsPanel"],[aria-controls="aoePanel"],[aria-controls="enemyPanel"],[aria-controls="rolePanel"],[aria-controls="targetPanel"],[aria-controls="fieldPanel"],[aria-controls="presetPanel"]){background:var(--material-heading-bg,#7c252d)!important;border-color:var(--material-heading-frame,var(--workspace-button-frame))!important;color:var(--workspace-content-gold)!important;-webkit-text-fill-color:var(--workspace-content-gold)!important;filter:none!important}
+body.workspace-background-active .app.workspace-background-active .layout>.left #leftRailToggle :is(.rail-icon,svg,path){color:var(--workspace-content-gold)!important}
+body.workspace-background-active .app.workspace-background-active .layout>.left #leftRailToggle svg path{fill:none!important;stroke:var(--workspace-content-gold)!important}
+body.workspace-background-active .app.workspace-background-active .layout>.left :is(#leftRailToggle,#presetUndo,#presetRedo,#categoryModeToggle,#registerUserPreset,.preset-manager-heading,.preset-manage,[aria-controls="toolsPanel"],[aria-controls="aoePanel"],[aria-controls="enemyPanel"],[aria-controls="rolePanel"],[aria-controls="targetPanel"],[aria-controls="fieldPanel"],[aria-controls="presetPanel"]):enabled:is(:hover:not(:where(.phone-touch-mode *)),:active,:focus-visible,.phone-control-pressed){background:#98343d!important;border-color:var(--workspace-content-gold)!important;color:var(--workspace-content-gold)!important;-webkit-text-fill-color:var(--workspace-content-gold)!important}
+body.workspace-background-active .app.workspace-background-active .layout>.left :is(#leftRailToggle,#presetUndo,#presetRedo,#categoryModeToggle,#registerUserPreset,.preset-manager-heading,.preset-manage,[aria-controls="toolsPanel"],[aria-controls="aoePanel"],[aria-controls="enemyPanel"],[aria-controls="rolePanel"],[aria-controls="targetPanel"],[aria-controls="fieldPanel"],[aria-controls="presetPanel"]):focus-visible{outline:2px solid var(--workspace-content-gold);outline-offset:-2px}
+
+body.workspace-background-active .app.workspace-background-active .layout>.left :is(#leftRailToggle,#presetUndo,#presetRedo,#categoryModeToggle,#registerUserPreset,.preset-manager-heading,.preset-manage,[aria-controls="toolsPanel"],[aria-controls="aoePanel"],[aria-controls="enemyPanel"],[aria-controls="rolePanel"],[aria-controls="targetPanel"],[aria-controls="fieldPanel"],[aria-controls="presetPanel"])::after{color:var(--workspace-content-gold)!important;-webkit-text-fill-color:var(--workspace-content-gold)!important}
+body.workspace-background-active .app.workspace-background-active .layout>.left :is(#leftRailToggle,#presetUndo,#presetRedo,#categoryModeToggle,#registerUserPreset,.preset-manager-heading,.preset-manage,[aria-controls="toolsPanel"],[aria-controls="aoePanel"],[aria-controls="enemyPanel"],[aria-controls="rolePanel"],[aria-controls="targetPanel"],[aria-controls="fieldPanel"],[aria-controls="presetPanel"]) :is(.palette-category-icon,svg,svg *){color:var(--workspace-content-gold)!important;stroke:var(--workspace-content-gold)!important}
+
+/* Each material category card shares the pin border and uses the window shade only once. */
+body.workspace-background-active .app.workspace-background-active .layout>.left .accordion-group:has(>:is(#toolsPanel,#aoePanel,#enemyPanel,#rolePanel,#targetPanel,#fieldPanel,#presetPanel)){background:var(--material-group-surface,var(--workspace-inner-overlay,transparent))!important;border-color:var(--workspace-button-frame)!important;outline-color:var(--workspace-button-frame)!important}
+body.workspace-background-active .app.workspace-background-active .layout>.left :is(#toolsPanel,#aoePanel,#enemyPanel,#rolePanel,#targetPanel,#fieldPanel,#presetPanel),body.workspace-background-active .app.workspace-background-active .layout>.left :is(#toolsPanel,#aoePanel,#enemyPanel,#rolePanel,#targetPanel,#fieldPanel,#presetPanel) :is(.tools,.icon-grid,.icon-picker,.tool,.icon-choice,.glyph){background:transparent!important}
+body.workspace-background-active .app.workspace-background-active .layout>.left #toolsPanel :is(.tool,.glyph,svg){color:var(--workspace-content-gold)!important;-webkit-text-fill-color:var(--workspace-content-gold)!important}
+body.workspace-background-active .app.workspace-background-active .layout>.left :is(#toolsPanel,#aoePanel,#enemyPanel,#rolePanel,#targetPanel,#fieldPanel,#presetPanel) :is(.tool,.icon-choice):is(.active,.palette-dragging,:hover:not(:where(.phone-touch-mode *)),:focus-visible,:active,.phone-control-pressed){background:var(--workspace-control-hover,rgba(193,145,45,.3))!important;border-color:var(--workspace-button-frame)!important;filter:none!important}
+body.workspace-background-active .app.workspace-background-active .layout>.left :is(#toolsPanel,#aoePanel,#enemyPanel,#rolePanel,#targetPanel,#fieldPanel,#presetPanel) :is(.tool,.icon-choice):focus-visible{outline:2px solid var(--workspace-content-gold)!important;outline-offset:-2px}
+body.workspace-background-active .app.workspace-background-active .layout>.left #presetPanel :is(.preset-empty,.preset-section-separator){color:var(--workspace-content-gold)!important;border-color:var(--workspace-frame)!important}
+
+/* Job controls keep their original geometry while adopting the material palette. */
+body.workspace-background-active .app.workspace-background-active .layout>.left #rolePanel .job-select-row label{color:var(--workspace-content-gold)!important;-webkit-text-fill-color:var(--workspace-content-gold)!important}
+body.workspace-background-active .app.workspace-background-active .layout>.left #rolePanel #iconGroup{background:transparent!important;color:var(--workspace-content-gold)!important;-webkit-text-fill-color:var(--workspace-content-gold)!important;border-color:var(--workspace-button-frame)!important}
+body.workspace-background-active .app.workspace-background-active .layout>.left #rolePanel #iconGroup:focus{outline:2px solid var(--workspace-content-gold)!important;outline-offset:-2px!important}
+body.workspace-background-active .app.workspace-background-active .layout>.left #rolePanel #iconGroup option{background:#f8fafc;color:#17212c;-webkit-text-fill-color:#17212c}
+
+body.workspace-background-active .app.workspace-background-active #contentPaneResize:focus-visible{outline-color:var(--workspace-content-gold)}
+body.workspace-background-active .app.workspace-background-active #contentPaneResize:is(:hover:not(:where(.phone-touch-mode *)),:focus-visible,.resizing){background:var(--workspace-scroll-thumb-hover)}
+
+/* Phase navigation keeps its existing geometry and disabled behavior. */
+body.workspace-background-active.workspace-theme-root .phone-phase-navigation>button{background:transparent!important;border-color:var(--workspace-frame)!important;color:var(--workspace-content-ink,#f7eac3)!important;-webkit-text-fill-color:var(--workspace-content-ink,#f7eac3)!important;filter:none!important;--press-bg:var(--workspace-control-hover,rgba(193,145,45,.3));--press-fg:var(--workspace-content-ink,#f7eac3)}
+body.workspace-background-active.workspace-theme-root .phone-phase-navigation>button:enabled:is(:hover:not(:where(.phone-touch-mode *)),:focus-visible,:active,.phone-control-pressed){background:var(--workspace-control-hover,rgba(193,145,45,.3))!important}
+body.workspace-background-active.workspace-theme-root .phone-phase-navigation>button:focus-visible{outline:2px solid var(--workspace-content-gold);outline-offset:-2px}
+
+/* Workspace text and frames stay pale; materials retain the red/gold palette. */
+body.workspace-background-active.workspace-theme-root,body.workspace-background-active .app.workspace-background-active{--workspace-menu-hover:#d8efff;--workspace-menu-ink:#17212c;--workspace-control-hover:rgba(216,239,255,.22);--workspace-content-ink:#f0f8fc;--workspace-content-muted:#d4e2ea;--workspace-content-gold:#d8efff;--workspace-frame:#d8efff55;--workspace-button-frame:#d8efff99;--workspace-scroll-hover:#d8efffa6;--panel-reading-heading-fg:var(--workspace-content-ink);--board-header-text:var(--workspace-content-ink);--panel-caption-muted:var(--workspace-content-ink);--panel-caption-strong:var(--workspace-content-ink);--property-label-fg:var(--workspace-content-ink);--property-button-fg:var(--workspace-content-ink);--property-button-border:var(--workspace-frame);--property-separator-color:var(--workspace-frame);--workspace-scroll-thumb:var(--workspace-frame);--workspace-scroll-thumb-hover:var(--workspace-scroll-hover);--workspace-selection-shadow:inset 2px 0 0 var(--workspace-content-gold);}
+body.workspace-background-active .app.workspace-background-active .left{--phone-material-surface:var(--workspace-inner-overlay,transparent);--phone-material-frame:var(--workspace-button-frame);--workspace-control-hover:rgba(193,145,45,.3);--workspace-content-ink:#f7eac3;--workspace-content-muted:#d8cdaa;--workspace-content-gold:#dec681;--workspace-frame:#dec68155;--workspace-button-frame:#dec68199;--workspace-scroll-hover:#dec681a6;--panel-reading-heading-fg:var(--workspace-content-ink);--board-header-text:var(--workspace-content-ink);--panel-caption-muted:var(--workspace-content-ink);--panel-caption-strong:var(--workspace-content-ink);--property-label-fg:var(--workspace-content-ink);--property-button-fg:var(--workspace-content-ink);--property-button-border:var(--workspace-frame);--property-separator-color:var(--workspace-frame);--workspace-scroll-thumb:var(--workspace-frame);--workspace-scroll-thumb-hover:var(--workspace-scroll-hover);--workspace-selection-shadow:inset 2px 0 0 var(--workspace-content-gold);}
+
+/* Preset management is the other view of the material pane. */
+body.workspace-background-active .app.workspace-background-active .left>#userPresetManager{--blue:var(--workspace-content-gold);--accent:var(--workspace-content-gold);--press-bg:var(--workspace-control-hover);--press-fg:var(--workspace-content-ink);color:var(--workspace-content-ink)}
+body.workspace-background-active .app.workspace-background-active .left>#userPresetManager>.preset-manager-frame{background:var(--workspace-inner-overlay,transparent);border-color:var(--workspace-button-frame)}
+body.workspace-background-active .app.workspace-background-active .left>#userPresetManager :is(.preset-manager-body,.preset-manager-list,.preset-manager-row){background:transparent;color:var(--workspace-content-ink)}
+body.workspace-background-active .app.workspace-background-active .left>#userPresetManager :is(.preset-manager-name,.preset-manager-hint,.preset-manager-empty){color:var(--workspace-content-ink)!important;-webkit-text-fill-color:var(--workspace-content-ink)!important}
+body.workspace-background-active .app.workspace-background-active .left>#userPresetManager .preset-manager-row:not(.renaming):is(.dragging,:hover:not(:where(.phone-touch-mode *)),:focus-visible){background:var(--workspace-control-hover);outline-color:var(--workspace-content-gold)}
+body.workspace-background-active .app.workspace-background-active .left>#userPresetManager .preset-manager-row>button{background:transparent!important;color:var(--workspace-content-ink)!important;-webkit-text-fill-color:var(--workspace-content-ink)!important;border-color:transparent!important}
+body.workspace-background-active .app.workspace-background-active .left>#userPresetManager .preset-manager-row>button:enabled:is(:hover:not(:where(.phone-touch-mode *)),:focus-visible,:active,.phone-control-pressed){background:var(--workspace-control-hover)!important;outline-color:var(--workspace-content-gold)}
+body.workspace-background-active .app.workspace-background-active .left>#userPresetManager .preset-manager-row:not(.renaming)>.preset-manager-desktop-delete:enabled:hover{background:transparent!important;color:#ef7d7d!important;-webkit-text-fill-color:#ef7d7d!important}
+body.workspace-background-active .app.workspace-background-active .left>#userPresetManager .preset-manager-name-input{border-color:var(--workspace-button-frame)!important;background:#f8fafc!important;color:#17212c!important;-webkit-text-fill-color:#17212c!important}
+body.workspace-background-active .app.workspace-background-active .left>#userPresetManager .preset-manager-name-input:focus{outline:2px solid var(--workspace-content-gold);outline-offset:-2px}
+
+body.workspace-background-active .app.workspace-background-active .left>#userPresetManager .preset-manager-row:not(.renaming)>.preset-manager-desktop-delete:not(:hover),body.workspace-background-active .app.workspace-background-active .left>#userPresetManager .preset-manager-row:not(.renaming):hover>.preset-manager-desktop-delete:not(:hover){background:transparent!important;border-color:transparent!important;color:var(--workspace-content-ink)!important;-webkit-text-fill-color:var(--workspace-content-ink)!important}
+
+/* Shared list/property cards own one outline; open headers own the separator. */
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel.content-panel>:is(.page-controls,#phaseMasterAssignment),:is(#objectLayerPanel,.workspace-theme-panels) .property-group:has(>#toggleLayers,>#toggleInspector),#fieldGuideEditor .guide-editor-properties,#fieldGuideEditor .guide-property-frame):is(.page-controls,.content-properties,.property-group,.guide-editor-properties,.guide-property-frame){position:var(--workspace-card-position,relative)!important;border-radius:var(--panel-corner-radius)!important;box-shadow:none!important}
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel.content-panel>:is(.page-controls,#phaseMasterAssignment),:is(#objectLayerPanel,.workspace-theme-panels) .property-group:has(>#toggleLayers,>#toggleInspector),#fieldGuideEditor .guide-editor-properties,#fieldGuideEditor .guide-property-frame):is(.page-controls,.content-properties,.property-group,.guide-editor-properties,.guide-property-frame)::after{content:"";position:absolute;inset:0;border:1px solid var(--workspace-frame);border-radius:inherit;box-sizing:border-box;pointer-events:none;z-index:3}
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel.content-panel>:is(.page-controls,#phaseMasterAssignment),:is(#objectLayerPanel,.workspace-theme-panels) .property-group:has(>#toggleLayers,>#toggleInspector),#fieldGuideEditor .guide-editor-properties,#fieldGuideEditor .guide-property-frame):is(.page-controls,.content-properties,.property-group,.guide-editor-properties,.guide-property-frame)>:is(.phase-heading-row,.accordion-toggle,.panel-view-header,.guide-properties-title,.guide-section-toggle,.guide-section-heading),body.workspace-background-active .app.workspace-background-active :is(#contentPanel.content-panel>:is(.page-controls,#phaseMasterAssignment),:is(#objectLayerPanel,.workspace-theme-panels) .property-group:has(>#toggleLayers,>#toggleInspector),#fieldGuideEditor .guide-editor-properties,#fieldGuideEditor .guide-property-frame):is(.page-controls,.content-properties,.property-group,.guide-editor-properties,.guide-property-frame)>:is(.phase-heading-row,.accordion-toggle,.panel-view-header,.guide-properties-title,.guide-section-toggle,.guide-section-heading):is(:hover,:focus-visible,:active,.phone-control-pressed){border-color:transparent!important;border-radius:var(--panel-corner-radius) var(--panel-corner-radius) 0 0!important}
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel.content-panel>:is(.page-controls,#phaseMasterAssignment),:is(#objectLayerPanel,.workspace-theme-panels) .property-group:has(>#toggleLayers,>#toggleInspector),#fieldGuideEditor .guide-editor-properties,#fieldGuideEditor .guide-property-frame):is(.page-controls,.content-properties,.property-group,.guide-editor-properties,.guide-property-frame)>:is(.phase-heading-row:has(>[aria-expanded="true"],>.master-list-heading),.accordion-toggle[aria-expanded="true"],.panel-view-header[data-expanded="true"],.guide-properties-title[aria-expanded="true"],.guide-section-toggle[aria-expanded="true"],.guide-section-heading:has(>.guide-section-toggle[aria-expanded="true"])){border-bottom-color:var(--workspace-frame)!important}
+body.workspace-background-active .app.workspace-background-active :is(#contentPanel.content-panel>:is(.page-controls,#phaseMasterAssignment),:is(#objectLayerPanel,.workspace-theme-panels) .property-group:has(>#toggleLayers,>#toggleInspector),#fieldGuideEditor .guide-editor-properties,#fieldGuideEditor .guide-property-frame):is(.page-controls,.content-properties,.property-group,.guide-editor-properties,.guide-property-frame):is(:has(>.phase-heading-row>[aria-expanded="false"]),:has(>.accordion-toggle[aria-expanded="false"]),:has(>.guide-section-toggle[aria-expanded="false"]),:has(>.guide-section-heading>.guide-section-toggle[aria-expanded="false"]),:has(>.guide-properties-title[aria-expanded="false"]),[data-panel-expanded="false"])>:is(.phase-heading-row,.accordion-toggle,.panel-view-header,.guide-properties-title,.guide-section-toggle,.guide-section-heading){border-radius:var(--panel-corner-radius)!important}
+body.workspace-background-active .app.workspace-background-active #contentPanel.content-panel>.page-controls>.phase-heading-row>#toggleBattlePages{border-bottom:0!important}
+
+/* Field mode shares the workspace skin; only headings use a quiet teal accent. */
+body.phase-master-editing .app.workspace-background-active{--workspace-title-ink:#f0f8fc;--workspace-title-frame:#b9dff555;--workspace-title-bg:rgba(29,50,67,.65)}
+body.phase-master-editing .app.workspace-background-active #fieldGuideEditor{background:transparent!important;color:var(--workspace-content-ink)}
+body.phase-master-editing .app.workspace-background-active #fieldGuideEditor .guide-editor-properties{background:var(--workspace-inner-overlay,transparent)!important;border:0!important}
+body.phase-master-editing .app.workspace-background-active #fieldGuideEditor :is(.guide-properties-body,.guide-property-frame,.guide-section-body,#layoutPropertiesPanel,#masterGroupSettings){background:transparent!important;color:var(--workspace-content-ink)!important;border-color:var(--workspace-frame)!important}
+body.phase-master-editing .app.workspace-background-active #fieldGuideEditor .guide-properties-body{border:0!important}
+body.phase-master-editing .app.workspace-background-active #fieldGuideEditor :is(label,legend,.guide-editor-hint,#guideNoSelection,#fieldUsageNote){color:var(--workspace-content-ink)!important;-webkit-text-fill-color:var(--workspace-content-ink)!important}
+body.phase-master-editing .app.workspace-background-active #fieldGuideEditor :is(button.btn,.guide-section-toggle){--press-bg:var(--workspace-control-hover);--press-fg:var(--workspace-content-ink)}
+body.phase-master-editing .app.workspace-background-active #fieldGuideEditor .guide-properties-body .btn{background:transparent!important;color:var(--workspace-content-ink)!important;-webkit-text-fill-color:var(--workspace-content-ink)!important;border-color:var(--workspace-frame)!important}
+body.phase-master-editing .app.workspace-background-active #fieldGuideEditor .guide-properties-body .btn:enabled:is(:hover:not(:where(.phone-touch-mode *)),:focus-visible,:active,.phone-control-pressed,[aria-pressed=true]){background:var(--workspace-control-hover)!important;border-color:var(--workspace-frame)!important}
+body.phase-master-editing .app.workspace-background-active #fieldGuideEditor input:is([type=range],[type=checkbox],[type=radio]){accent-color:var(--workspace-content-gold)}
+body.phase-master-editing .app.workspace-background-active #phaseMasterListPanel .master-list-heading{background:transparent!important;border:0!important;color:inherit!important;-webkit-text-fill-color:inherit!important}
+body.phase-master-editing .app.workspace-background-active :is(#guideEditorTitle,#selectionTitle,#toggleContent){color:var(--workspace-title-ink)!important;-webkit-text-fill-color:var(--workspace-title-ink)!important}
+body.phase-master-editing .app.workspace-background-active #fieldGuideEditor .guide-editor-heading :is(button,.board-zoom-group,svg,span){color:var(--workspace-title-ink)!important;-webkit-text-fill-color:var(--workspace-title-ink)!important;border-color:var(--workspace-title-frame)!important;background:transparent!important}
+body.phase-master-editing .app.workspace-background-active #fieldGuideEditor .guide-editor-heading button:enabled:is(:hover:not(:where(.phone-touch-mode *)),:focus-visible,:active){background:var(--workspace-control-hover)!important}
+body.phase-master-editing .app.workspace-background-active #fieldGuideEditor :is(#masterFieldSettings,.guide-property-frame){border:0!important}
+body.phase-master-editing .app.workspace-background-active #fieldGuideEditor .guide-editor-viewport{background:transparent}
+
+/* Wrapped guide headings use the same frame owner; the inner button is only an action. */
+body.phase-master-editing .app.workspace-background-active #fieldGuideEditor .guide-section-heading>.guide-section-toggle{height:100%;min-height:0;border:0!important;border-radius:inherit!important;background:transparent!important;background-image:none!important;color:inherit!important;-webkit-text-fill-color:inherit!important}
+body.phase-master-editing .app.workspace-background-active #fieldGuideEditor .guide-section-heading:has(>.guide-section-toggle:focus-visible){--workspace-heading-overlay:var(--workspace-control-hover)}
+
+/* All field sections share the same heading DOM and dimensions. */
+#fieldGuideEditor .guide-section-heading{margin:0;padding:0;font:inherit}
+body.phase-master-editing .app.workspace-background-active #phaseMasterListPanel .master-list-heading{height:100%;min-height:0}
+
+/* Transparent layout borders must not inset the visible shared outline. */
+body.phase-master-editing .app.workspace-background-active #fieldGuideEditor .guide-section-heading{background-clip:border-box!important}
+
+/* Keep control widths while the frame itself stays flush, like content cards. */
+body.phase-master-editing .app.workspace-background-active #fieldGuideEditor .guide-properties-body{margin-inline:9px 1px}
+body.phase-master-editing .app.workspace-background-active #fieldGuideEditor .guide-property-frame>.guide-section-body{padding:11px}
+
+body.phase-master-editing .app.workspace-background-active #fieldGuideEditor .guide-properties-body .btn[data-guide-tool][aria-pressed="true"]{border-color:var(--workspace-content-gold)!important}
+body.phase-master-editing .app.workspace-background-active #fieldGuideEditor .guide-properties-body .btn:focus-visible{outline-color:var(--workspace-content-gold)!important;outline-offset:-2px}
+
+/* Background-theme separators and canvas-shaped quadrant selection. */
+body.workspace-background-active .app.workspace-background-active .layout{--property-separator-color:var(--workspace-frame)}
+body.workspace-background-active .app.workspace-background-active :is(#inspector>.inspector-section-start,.object-group-properties>.field:not(.group-width-property)+.group-width-property,.object-group-properties>.group-width-property+.object-group-rotation,#fieldGuideSettings){border-top-color:var(--property-separator-color)!important;border-bottom-color:var(--property-separator-color)!important}
+body.workspace-background-active .app.workspace-background-active :is(.image4-action-separator,.board-toolbar-separator,.board-zoom-separator,.content-history-separator,.phone-help-separator){background:var(--property-separator-color)!important}
+body.workspace-background-active .app.workspace-background-active .image4-image-choices{gap:0;background:transparent;border-color:var(--workspace-frame)}
+body.workspace-background-active .app.workspace-background-active :is(#layoutPropertiesPanel,#fieldGuideEditor) .image4-quadrant{background:transparent!important;color:var(--workspace-content-ink)!important;-webkit-text-fill-color:var(--workspace-content-ink)!important;border-color:var(--workspace-frame)}
+body.workspace-background-active .app.workspace-background-active :is(#layoutPropertiesPanel,#fieldGuideEditor) .image4-quadrant:nth-child(odd){border-right:1px solid var(--workspace-frame)}
+body.workspace-background-active .app.workspace-background-active :is(#layoutPropertiesPanel,#fieldGuideEditor) .image4-quadrant:nth-child(-n+2){border-bottom:1px solid var(--workspace-frame)}
+body.workspace-background-active .app.workspace-background-active :is(#layoutPropertiesPanel,#fieldGuideEditor) .image4-quadrant:is([aria-pressed="true"],:enabled:hover:not(:where(.phone-touch-mode *)),.phone-control-pressed){background:var(--workspace-control-hover)!important}
+body.workspace-background-active .app.workspace-background-active :is(#layoutPropertiesPanel,#fieldGuideEditor) .image4-quadrant[aria-pressed="true"]{box-shadow:inset 0 0 0 1px var(--workspace-content-gold)}
+body.workspace-background-active .app.workspace-background-active :is(#layoutPropertiesPanel,#fieldGuideEditor) .image4-quadrant:focus-visible{outline:2px solid var(--workspace-content-gold);outline-offset:-2px}
+
+/* Phone content uses the same image-theme feedback and transparent preview surround. */
+@media(max-width:850px){
+ body.workspace-background-active .app.workspace-background-active #contentSelect{--press-bg:var(--workspace-control-hover);--press-fg:var(--workspace-content-ink);-webkit-tap-highlight-color:transparent}
+ body.workspace-background-active .app.workspace-background-active #contentPanel .phase-select-check{accent-color:var(--workspace-content-gold)}
+ body.workspace-background-active .app.workspace-background-active #contentPanel .phone-content-preview,body.workspace-background-active .app.workspace-background-active #contentPanel .phone-content-preview>.object-layout-rect{background:transparent!important}
+}
+
+/* An open phone pane retains the shared title width even when desktop is collapsed. */
+@media(max-width:850px){body .app .layout.phone-content-open .battle .content-heading-row>#toggleContent{box-sizing:border-box!important;flex:0 0 var(--mode-title-width,123px)!important;width:var(--mode-title-width,123px)!important;padding-right:0!important}}
+
+/* Theme feedback is inherited by controls; material keeps its own gold palette. */
+body.workspace-background-active .app.workspace-background-active{--press-bg:var(--workspace-control-hover);--press-fg:var(--workspace-content-ink);--menu-open-bg:var(--workspace-control-hover);--menu-open-fg:var(--workspace-content-ink);--menu-open-border:var(--workspace-frame)}
+body.workspace-background-active .app.workspace-background-active .left{--press-bg:var(--workspace-control-hover);--press-fg:var(--workspace-content-ink);--menu-open-bg:var(--workspace-control-hover);--menu-open-fg:var(--workspace-content-ink);--menu-open-border:var(--workspace-frame)}
+body.workspace-background-active .app.workspace-background-active :is(#undo,#redo,.top #editModeToggle,.top>.phone-menu-toggle,#resetBoardZoom,.board-display-toolbar button,.content-heading-row button,.phone-content-icon,.phone-content-close):enabled:not(#toggleContent,#toggleObjectList):is(:hover:not(:where(.phone-touch-mode *)),:focus-visible,:active,.phone-control-pressed,[aria-haspopup="menu"][aria-expanded="true"],.phone-menu-open>.phone-menu-toggle){background:var(--workspace-feedback-bg,var(--workspace-control-hover))!important;color:var(--workspace-feedback-ink,var(--workspace-content-ink))!important;-webkit-text-fill-color:var(--workspace-feedback-ink,var(--workspace-content-ink))!important;border-color:var(--workspace-feedback-frame,var(--workspace-frame))!important;filter:none!important}
+
+/* Opaque menus retain dark text; only their interaction accent follows the image theme. */
+body.workspace-background-active [role="menu"]{--blue:var(--workspace-menu-hover);--press-bg:var(--workspace-menu-hover);--press-fg:var(--workspace-menu-ink);--menu-open-bg:var(--workspace-menu-hover);--menu-open-fg:var(--workspace-menu-ink);--menu-open-border:var(--workspace-menu-hover)}
+body.workspace-background-active :is([role="menu"],#headerActions)>button:enabled:not(.context-delete):is(:hover:not(:where(.phone-touch-mode *)),:focus-visible,:active,.phone-control-pressed,[aria-haspopup="menu"][aria-expanded="true"]){background:var(--workspace-menu-hover)!important;color:var(--workspace-menu-ink)!important;-webkit-text-fill-color:var(--workspace-menu-ink)!important;border-color:var(--workspace-menu-hover)!important;filter:none!important}
+
+/* Screen-only paper surround; exported paper and artwork retain their own colors. */
+body.workspace-background-active .app.workspace-background-active #pngPreview[data-output-mode=print] .png-preview-surface.print-paper-active{background:transparent!important;background-image:none!important}
+body.workspace-background-active .app.workspace-background-active #pngPreview .print-paper-dimension{color:var(--workspace-content-ink);border-color:var(--workspace-frame);background:none;display:flex;align-items:center;justify-content:center}
+body.workspace-background-active .app.workspace-background-active #pngPreview .print-paper-dimension>span{position:static;left:auto;top:auto;transform:none;background:transparent;flex:none;text-shadow:0 1px 2px #000}
+body.workspace-background-active .app.workspace-background-active #pngPreview .print-paper-dimension::before,body.workspace-background-active .app.workspace-background-active #pngPreview .print-paper-dimension::after{content:"";display:block;flex:1;background:var(--workspace-frame)}
+body.workspace-background-active .app.workspace-background-active #pngPreview .print-paper-width::before,body.workspace-background-active .app.workspace-background-active #pngPreview .print-paper-width::after{height:1px}
+body.workspace-background-active .app.workspace-background-active #pngPreview .print-paper-height{flex-direction:column}
+body.workspace-background-active .app.workspace-background-active #pngPreview .print-paper-height>span{writing-mode:vertical-rl;transform:rotate(180deg);padding:5px 0}
+body.workspace-background-active .app.workspace-background-active #pngPreview .print-paper-height::before,body.workspace-background-active .app.workspace-background-active #pngPreview .print-paper-height::after{width:1px}
+
+/* Selected phone categories stay distinct after the touch feedback ends. */
+@media(max-width:850px){body.workspace-background-active .app.workspace-background-active .left .phone-material-category-tabs>button[aria-selected="true"]{--material-heading-bg:var(--workspace-control-hover);--material-heading-frame:var(--workspace-content-gold);box-shadow:none}}
+
+/* The phone material drawer overlays the canvas; only its shade is painted here. */
+@media(max-width:850px){body.workspace-background-active .app.workspace-background-active>.layout.phone-materials-open>.left{--workspace-pane-surface:var(--workspace-pane-overlay,rgba(0,0,0,.4));--workspace-pane-surface-image:none}}
+/* Fixed background images change attachment while the phone drawer is transformed. */
+@media(max-width:850px){
+ body.workspace-background-active .app.workspace-background-active>.layout.phone-content-open>.battle{--workspace-pane-surface:transparent;--workspace-pane-surface-image:none}
+ body.workspace-background-active .app.workspace-background-active>.layout.phone-content-open>.battle #battlePanel>.content-group{--workspace-pane-surface:var(--workspace-pane-overlay,rgba(0,0,0,.4));--workspace-pane-surface-image:none}
+}
+
+/* Title controls share the opaque menu accent; pane controls keep their translucent accent. */
+body.workspace-background-active .app.workspace-background-active>.top{--workspace-feedback-bg:var(--workspace-menu-hover);--workspace-feedback-ink:var(--workspace-menu-ink);--workspace-feedback-frame:var(--workspace-menu-hover);--press-bg:var(--workspace-menu-hover);--press-fg:var(--workspace-menu-ink);--menu-open-bg:var(--workspace-menu-hover);--menu-open-fg:var(--workspace-menu-ink);--menu-open-border:var(--workspace-menu-hover)}
+
+@media(min-width:851px){body.workspace-background-active .app.workspace-background-active .layout>.left:not(.preset-registering):not(.pinned):not(.palette-hover-open):not(:focus-within){--material-group-surface:transparent}}
