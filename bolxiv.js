@@ -1,5 +1,13 @@
 // Aggregate independent content and user-preset persistence without merging their data.
-window.BolxivSaveStatus=(()=>{const states=new Map([['content','保存済み'],['presets','保存済み']]);function set(source,text){states.set(source,text);const values=[...states.values()],combined=values.includes('未保存')?'未保存':values.includes('未保存の変更あり')?'未保存の変更あり':values.includes('保存中…')?'保存中…':'保存済み',node=document.getElementById('saved');if(node&&node.textContent!==combined)node.textContent=combined;document.dispatchEvent(new CustomEvent('bolxiv-save-status',{detail:{source,text:combined}}));return combined}return {set,get:source=>states.get(source)}})();
+window.BolxivSaveStatus=(()=>{
+ const states=new Map([['content','保存済み'],['presets','保存済み'],['drive','保存済み']]);
+ function set(source,text){
+  states.set(source,text);const values=[...states.values()],combined=values.includes('未保存')?'未保存':values.includes('再ログインが必要')?'再ログインが必要':values.includes('同期を確認')?'同期を確認':values.includes('未保存の変更あり')?'未保存の変更あり':values.includes('保存中…')?'保存中…':'保存済み',node=document.getElementById('saved');
+  if(node){if(node.textContent!==combined)node.textContent=combined;node.title='端末内：'+(states.get('content')==='保存済み'&&states.get('presets')==='保存済み'?'保存済み':'保存処理中または未保存')+'／Drive：'+states.get('drive')}
+  document.dispatchEvent(new CustomEvent('bolxiv-save-status',{detail:{source,text:combined}}));return combined;
+ }
+ return {set,get:source=>states.get(source)};
+})();
 // One editor per browser storage origin. Web Locks survive background throttling;
 // LAN HTTP uses an IndexedDB lease, checked atomically before every write.
 window.BolxivSession=(()=>{

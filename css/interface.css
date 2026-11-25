@@ -2788,5 +2788,3 @@ body.workspace-background-active{--property-active-bg:var(--workspace-control-ho
 .drive-sync-dialog select{max-width:100%;width:100%;padding:6px}
 .drive-sync-dialog section{border-top:1px solid var(--line);margin-top:16px;padding-top:12px}
 .drive-sync-dialog [role=status]{overflow-wrap:anywhere}
-.drive-sync-badge{font-size:11px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-@media(max-width:850px){.drive-sync-badge{max-width:90px;font-size:10px}}
