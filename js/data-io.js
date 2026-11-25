@@ -455,8 +455,9 @@ function flushScheduledBoardSave(){
 function scheduleBoardSave(navigationOnly=false){
  if(boardSaveSuspended)return;
  if(phaseComparisonRendering)return;
- const state=boardSaveState();
- if(!boardSavePending&&!boardSaveCheckpointDirty&&window.BolxivSaveStatus.get('content')!=='未保存'&&sameBoardSaveState(boardSaveCheckpoint,state))return;
+ // Pending edits already require a fresh snapshot at flush; do not clone the workspace here.
+ if(!window.Bolxiv?.phaseMasters?.active)contentBoards[activeContent]=data;
+ if(!boardSavePending&&!boardSaveCheckpointDirty&&window.BolxivSaveStatus.get('content')!=='未保存'&&sameBoardSaveState(boardSaveCheckpoint,boardSaveState()))return;
  // The immutable checkpoint is refreshed once at flush, not for every drag event.
  boardSaveCheckpointDirty=true;
  // Navigation must not postpone an outstanding note edit.
@@ -597,12 +598,12 @@ function parseImportedBoards(text){
  return window.Bolxiv?.phaseMasters?window.Bolxiv.phaseMasters.prepareImport(imported,value):imported;
 }
 
-function applyImportedBoards(imported,mode){if(window.Bolxiv?.phaseMasters?.active)window.Bolxiv.phaseMasters.leave();if(boardReadOnly)throw new Error("閲覧中はインポートできません");
+function applyImportedBoards(imported,mode,{preserveFieldIds=false}={}){if(window.Bolxiv?.phaseMasters?.active)window.Bolxiv.phaseMasters.leave();if(boardReadOnly)throw new Error("閲覧中はインポートできません");
  flushScheduledBoardSave();storeContentHistory();contentBoards[activeContent]=data;
- const before=captureContentList();window.Bolxiv?.phaseMasters?.acceptImport(imported,mode);if(mode==='append'){contentBoards=[...contentBoards,...imported]}
+ const before=captureContentList();if(preserveFieldIds){const fields=imported.phaseMasterImport;if(!fields?.modern||mode!=='replace')throw Error('同期データのフィールド形式が不正です');window.Bolxiv.phaseMasters.restoreRecords(fields.records,fields.groups,true)}else window.Bolxiv?.phaseMasters?.acceptImport(imported,mode);if(mode==='append'){contentBoards=[...contentBoards,...imported]}
  else{contentBoards=imported;activeContent=0;data=contentBoards[0];restoreContentHistory()}
  selected=null;selectedIds=[];selectedPhaseIndexes=[];phaseSelectionOwner=data;
- recordContentListChange(mode==='append'?'JSONによる追加':'JSONによる置換',before);
+ recordContentListChange(preserveFieldIds?'Driveによる置換':mode==='append'?'JSONによる追加':'JSONによる置換',before);
  renderAllIconGrids();renderAndSave();flushScheduledBoardSave();
  importedContentToReveal=imported[0]||null;revealContentRow();
 }

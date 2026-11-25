@@ -9,5 +9,6 @@ window.BolxivApplicationFiles = [
   "js/png-preview.js",
   "js/panels.js",
   "js/phase-tools.js",
-  "js/workspace-background.js"
+  "js/workspace-background.js",
+  "js/drive-sync.js"
 ];
