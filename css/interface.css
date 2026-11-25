@@ -2001,7 +2001,7 @@ body .app .layout :is(#fieldGuideEditor,#pngPreview) .guide-section-toggle[aria-
 .app .layout :is(#inspector,#layoutPropertiesPanel,#phaseGroupProperties,#phaseMasterAssignment,#phaseMasterGroupProperties,#fieldGuideEditor .guide-editor-properties,#pngPreview .png-preview-settings) :is(input[type="number"],input[type="text"],input:not([type]),select,.color-trigger):focus-visible{outline:2px solid var(--blue)!important;outline-offset:1px}
 .app .layout :is(#inspector,#layoutPropertiesPanel,#phaseGroupProperties,#phaseMasterAssignment,#phaseMasterGroupProperties,#fieldGuideEditor .guide-editor-properties,#pngPreview .png-preview-settings) .btn:not(.primary){border-color:var(--property-button-border)!important;background:var(--property-button-bg)!important;color:var(--property-button-fg)!important;-webkit-text-fill-color:var(--property-button-fg)!important;filter:none!important}
 .app .layout :is(#inspector,#layoutPropertiesPanel,#phaseGroupProperties,#phaseMasterAssignment,#phaseMasterGroupProperties,#fieldGuideEditor .guide-editor-properties,#pngPreview .png-preview-settings) .phone-number-step-buttons>.btn{font-family:inherit!important;font-size:20px!important;font-weight:400!important;line-height:1!important;box-sizing:border-box;width:40px!important;min-width:40px!important;height:40px!important;min-height:40px!important;padding:0!important;border:1px solid var(--property-button-border)!important;border-radius:var(--property-input-radius)!important;background:var(--property-button-bg)!important;color:var(--property-button-fg)!important;-webkit-text-fill-color:var(--property-button-fg)!important;filter:none!important}
-.app .layout :is(#inspector,#layoutPropertiesPanel,#phaseGroupProperties,#phaseMasterAssignment,#phaseMasterGroupProperties,#fieldGuideEditor .guide-editor-properties,#pngPreview .png-preview-settings) :is(.color-trigger,.btn:not(.primary)):enabled:is([aria-pressed="true"],:hover:not(:where(.phone-touch-mode *)),:focus-visible,:active,.phone-control-pressed){background:var(--blue)!important;border-color:var(--blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important;filter:none!important}
+.app .layout :is(#inspector,#layoutPropertiesPanel,#phaseGroupProperties,#phaseMasterAssignment,#phaseMasterGroupProperties,#fieldGuideEditor .guide-editor-properties,#pngPreview .png-preview-settings) :is(.color-trigger,.btn:not(.primary)):enabled:is([aria-pressed="true"],:hover:not(:where(.phone-touch-mode *)),:focus-visible,:active,.phone-control-pressed){background:var(--property-active-bg,var(--blue))!important;border-color:var(--property-active-border,var(--blue))!important;color:var(--property-active-ink,#fff)!important;-webkit-text-fill-color:var(--property-active-ink,#fff)!important;filter:none!important}
 .app .layout :is(#inspector,#layoutPropertiesPanel,#phaseGroupProperties,#phaseMasterAssignment,#phaseMasterGroupProperties,#fieldGuideEditor .guide-editor-properties,#pngPreview .png-preview-settings) :is(button,input,select):disabled{opacity:.45!important;cursor:not-allowed!important}
 @media(max-width:850px){
  .app .layout{--property-input-height:40px}
@@ -2307,7 +2307,7 @@ body.phase-master-editing .app:not(.workspace-background-active) .layout :is(.co
 
 /* Usage-scene guide: shared illustrations, responsive cards and selectable text. */
 .usage-scene-guide{width:min(1120px,calc(100vw - 32px))}
-:is(.usage-scene-guide,.workspace-background-dialog)>.operation-guide-body{padding:20px;background:#fff}
+:is(.usage-scene-guide,.workspace-background-dialog,.drive-sync-dialog)>.operation-guide-body{padding:20px;background:#fff}
 .usage-scene-intro{position:relative;padding:2px 0 16px;border-bottom:1px solid #c9d9e7}
 .usage-scene-eyebrow{display:inline-block;font-size:12px;letter-spacing:.12em;color:#456780}
 .usage-scene-guide .usage-scene-intro h3{margin:6px 0 8px;font-size:24px;color:#25395f;line-height:1.4}
@@ -2330,7 +2330,7 @@ body.phase-master-editing .app:not(.workspace-background-active) .layout :is(.co
 .usage-scene-guide .usage-art-caption{margin:12px 0 0;font-size:12px;color:#617087}
 @media(max-width:850px){
  .usage-scene-guide{width:calc(100vw - 16px);max-height:calc(100dvh - 24px)}
- :is(.usage-scene-guide,.workspace-background-dialog)>.operation-guide-body{padding:14px!important}
+ :is(.usage-scene-guide,.workspace-background-dialog,.drive-sync-dialog)>.operation-guide-body{padding:14px!important}
  .usage-scene-guide .usage-scene-intro h3{font-size:21px}
  .usage-scene-steps{grid-template-columns:minmax(0,1fr);gap:16px;margin:16px 0}
  .usage-scene-steps>li,.screen-overview-case{padding:14px}
@@ -2339,7 +2339,7 @@ body.phase-master-editing .app:not(.workspace-background-active) .layout :is(.co
 
 /* Offline guide: selector and selected detail share one scrolling body. */
 .usage-scene-guide .help-contents a[aria-current="true"],.workspace-background-dialog .help-contents a[aria-current="true"]{font-weight:700;text-decoration:underline}
-:is(.usage-scene-guide,.workspace-background-dialog)>.operation-guide-body{min-height:0}
+:is(.usage-scene-guide,.workspace-background-dialog,.drive-sync-dialog)>.operation-guide-body{min-height:0}
 .usage-case-footer{display:flex;justify-content:flex-end}
 
 /* Download catalogue shares the help dialog shell, scrolling body and buttons. */
@@ -2778,3 +2778,15 @@ body.workspace-background-active .app.workspace-background-active #pngPreview .p
 body.workspace-background-active .app.workspace-background-active>.top{--workspace-feedback-bg:var(--workspace-menu-hover);--workspace-feedback-ink:var(--workspace-menu-ink);--workspace-feedback-frame:var(--workspace-menu-hover);--press-bg:var(--workspace-menu-hover);--press-fg:var(--workspace-menu-ink);--menu-open-bg:var(--workspace-menu-hover);--menu-open-fg:var(--workspace-menu-ink);--menu-open-border:var(--workspace-menu-hover)}
 
 @media(min-width:851px){body.workspace-background-active .app.workspace-background-active .layout>.left:not(.preset-registering):not(.pinned):not(.palette-hover-open):not(:focus-within){--material-group-surface:transparent}}
+
+/* Shared property feedback, including deferred phone number-step flashes. */
+body.workspace-background-active{--property-active-bg:var(--workspace-control-hover);--property-active-border:var(--workspace-frame);--property-active-ink:var(--workspace-content-ink)}
+
+/* Optional cloud login uses the existing help-dialog shell and controls. */
+.drive-sync-dialog{width:min(620px,calc(100vw - 24px))}
+.drive-sync-dialog .drive-sync-actions{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.drive-sync-dialog select{max-width:100%;width:100%;padding:6px}
+.drive-sync-dialog section{border-top:1px solid var(--line);margin-top:16px;padding-top:12px}
+.drive-sync-dialog [role=status]{overflow-wrap:anywhere}
+.drive-sync-badge{font-size:11px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media(max-width:850px){.drive-sync-badge{max-width:90px;font-size:10px}}
