@@ -1263,11 +1263,12 @@ input[type="number"] {
 .layout:has(.left.pinned) {
   grid-template-columns:270px var(--content-pane-width) minmax(0,1fr)!important;
 }
+@media(min-width:851px){.battle{position:relative}}
 .content-pane-resize {
   position:absolute;
   top:0;
   bottom:0;
-  right:0;
+  right:3.5px;
   width:7px;
   z-index:10020;
   cursor:ew-resize;
