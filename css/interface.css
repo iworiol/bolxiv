@@ -2788,3 +2788,7 @@ body.workspace-background-active{--property-active-bg:var(--workspace-control-ho
 .drive-sync-dialog select{max-width:100%;width:100%;padding:6px}
 .drive-sync-dialog section{border-top:1px solid var(--line);margin-top:16px;padding-top:12px}
 .drive-sync-dialog [role=status]{overflow-wrap:anywhere}
+
+.phone-menu-toggle{position:relative}.phone-menu-toggle .drive-connection-mark{position:absolute;right:2px;bottom:2px;min-width:9px;height:9px;border-radius:50%;background:#278344;border:1px solid #fff;font-size:9px;line-height:9px;color:#fff;-webkit-text-fill-color:#fff;text-align:center}.phone-menu-toggle[data-drive-state="disconnected"] .drive-connection-mark{display:none}.phone-menu-toggle:is([data-drive-state="reauth"],[data-drive-state="offline"]) .drive-connection-mark{background:#a45c00}.phone-menu-toggle[data-drive-state="checking"] .drive-connection-mark{background:#666}
+
+.toast.persistent-toast{display:flex;align-items:center;gap:10px;pointer-events:auto;padding-right:6px;z-index:10000}.toast.persistent-toast[hidden]{display:none}.persistent-toast-close{flex:none;border:0;background:transparent;color:inherit;font:inherit;font-size:22px;min-width:32px;min-height:32px;cursor:pointer;border-radius:50%}.persistent-toast-close:hover{background:rgba(255,255,255,.15)}
