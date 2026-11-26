@@ -944,6 +944,7 @@ function confirmPhoneLayerDeletion(id,individual=false){
 (function setupPhoneMenu(){
  const mobile=matchMedia('(max-width:850px)'),header=document.querySelector('.top'),actions=header.querySelector('.actions');
  actions.id='headerActions';actions.setAttribute('role','menu');actions.setAttribute('aria-label','操作メニュー');actions.hidden=true;
+ for(const id of ['importBtn','clearUserDataBtn','operationGuideBtn']){const separator=document.createElement('div');separator.className='context-separator';separator.setAttribute('role','separator');actions.insertBefore(separator,document.getElementById(id))}
  for(const item of actions.querySelectorAll(':scope>button'))item.setAttribute('role','menuitem');
  const button=document.createElement('button');button.type='button';button.className='phone-menu-toggle';button.title='操作メニューを開閉';button.setAttribute('aria-label','操作メニュー');button.setAttribute('aria-controls',actions.id);button.setAttribute('aria-haspopup','menu');button.setAttribute('aria-expanded','false');
  button.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg><span class="header-menu-label">メニュー</span>';header.insertBefore(button,actions);
