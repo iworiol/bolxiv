@@ -227,13 +227,15 @@
   changeRevision++;dirty=true;if(store)schedule();
  }
  document.addEventListener('bolxiv-save-status',changed);
- function disconnect(update=true,{forget=true,reason='signed-out'}={}){if(forget){resumePending=false;forgetAuth(reason)}epoch++;clearTimeout(timer);clearTimeout(expires);store?.stop();store=null;client=null;base=null;account='';choice.hidden=true;reloadRequired=false;if(update)say(dirty?'ログアウト。Drive未反映の変更があります':'未接続');paint()}
+ function disconnect(update=true,{forget=true,reason='signed-out'}={}){if(forget){resumePending=false;forgetAuth(reason)}epoch++;clearTimeout(timer);clearTimeout(expires);store?.stop();store=null;connectionExpiresAt=0;client=null;base=null;account='';choice.hidden=true;reloadRequired=false;if(update)say(dirty?'ログアウト。Drive未反映の変更があります':'未接続');paint()}
  async function loadSdk(){
   if(window.google?.accounts?.oauth2)return;
   if(!sdk)sdk=new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='https://accounts.google.com/gsi/client';script.async=true;script.referrerPolicy='no-referrer';let timer=setTimeout(()=>{script.remove();sdk=null;reject(Error('Googleへの接続がタイムアウトしました'))},20000);script.onload=()=>{clearTimeout(timer);resolve()};script.onerror=()=>{clearTimeout(timer);script.remove();sdk=null;reject(Error('Googleのログイン機能を読み込めません。接続を確認して開き直してください'))};document.head.append(script)});return sdk;
  }
  async function activate(token,expiresAt,{restoring=false,owner=null,readAtConnect=true}={}){
   busy=true;paint();const session=++epoch;
+  // Register the new token deadline before exposing a connection to lifecycle events.
+  connectionExpiresAt=expiresAt;clearTimeout(expires);
   try{
    store=new DriveStore(token,progress=>{if(session!==epoch)return;const text=progress.stage==='prepare'?'保存する変更を確認中…':progress.stage==='commit'?'Driveの保存を確定中…':'Driveへ保存中（'+progress.done+' / '+progress.total+'）';say(text,{saving:true})});account=await store.account();if(session!==epoch)return;
    if(owner&&owner!==account)throw Error('接続先のアカウントが一致しません。再ログインしてください');
@@ -242,6 +244,7 @@
    connectionExpiresAt=expiresAt;clearTimeout(expires);expires=setTimeout(()=>{disconnect(false,{reason:'reauth'});say('接続期限切れ。再ログインしてください')},Math.max(0,expiresAt-Date.now()-30000));
    say(readAtConnect?'読み込み中…':'接続を復元しました');
   }catch(error){
+   if(session!==epoch)return;
    const retry=restoring&&error.status!==401&&(error instanceof TypeError||error.name==='AbortError'||!navigator.onLine||error.status===403||error.status===429||error.status>=500);
    disconnect(false,{forget:!retry,reason:'reauth'});resumePending=retry;say(retry?'接続を再開できません。オンライン復帰後に再試行します':error.message);
   }finally{busy=false;paint()}
@@ -268,7 +271,7 @@
  dialog.querySelector('[data-drive-close]').onclick=()=>{if(!busy)dialog.close()};dialog.addEventListener('cancel',event=>{if(busy)event.preventDefault()});
  dialog.addEventListener('close',()=>document.querySelector('.phone-menu-toggle')?.focus({preventScroll:true}));dialog.addEventListener('keydown',e=>e.stopPropagation());
  for(const [id,key,name]of [['googleDriveBackupContents','content','コンテンツ'],['googleDriveBackupPresets','presets','ユーザープリセット']])node(id).onclick=async()=>{try{if(!backedUp)return;await saveExportBlob(new Blob([JSON.stringify(backedUp[key])],{type:'application/json'}),'BOARD_OF_LIGHT_XIV_退避_'+name+'.json','application/json','退避'+name)}catch(error){say('退避データを書き出せません：'+error.message)}};
- document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){if(store&&connectionExpiresAt<=Date.now()+30000){disconnect(false,{reason:'reauth'});say('接続期限切れ。再ログインしてください')}else paintConnection()}});
+ document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){if(store&&connectionExpiresAt>0&&connectionExpiresAt<=Date.now()+30000){disconnect(false,{reason:'reauth'});say('接続期限切れ。再ログインしてください')}else paintConnection()}});
  window.addEventListener('offline',paintConnection);
  window.addEventListener('online',()=>{paintConnection();if(store&&dirty&&!reloadRequired){retries=0;schedule()}else if(resumePending)restoreConnection()});
  window.addEventListener('beforeunload',event=>{if(store&&(dirty||busy)){event.preventDefault();event.returnValue=''}});
