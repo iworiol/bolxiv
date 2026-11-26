@@ -38,7 +38,7 @@
     const bytes=await r.arrayBuffer();return new Response(bytes.byteLength?bytes:null,{status:r.status,statusText:r.statusText,headers:r.headers});
    }finally{clearTimeout(timer);this.controller.signal.removeEventListener('abort',abort)}
   }
-  async account(){const r=await this.request('https://www.googleapis.com/drive/v3/about?fields=user(permissionId)');const value=await r.json();if(!value.user?.permissionId)throw Error('接続先アカウントを確認できません');return value.user.permissionId}
+  async account(){const r=await this.request('https://www.googleapis.com/drive/v3/about?fields=user(permissionId,photoLink)');const value=await r.json();if(!value.user?.permissionId)throw Error('接続先アカウントを確認できません');this.photoLink=typeof value.user.photoLink==='string'&&value.user.photoLink.startsWith('https://')?value.user.photoLink:'';return value.user.permissionId}
   async list(marker=MARKER){
    const result=[];let next='';do{
     const q=new URLSearchParams({spaces:'appDataFolder',q:"trashed=false and appProperties has { key='bolxiv' and value='"+marker+"' }",fields:'nextPageToken,files(id,createdTime,appProperties)',pageSize:'100',orderBy:'createdTime desc'});if(next)q.set('pageToken',next);
@@ -141,12 +141,13 @@
   const state=!allowed?'disconnected':authHistory()==='reauth'&&!store?'reauth':!store&&(busy||authHistory()==='connected'&&!authDisabled()&&!resumePending)?'checking':resumePending||store&&!navigator.onLine?'offline':store?'connected':'disconnected';
   const labels={disconnected:'未接続',connected:'接続中',reauth:'再ログインが必要',checking:'接続確認中',offline:'通信できません'};
   if(button.dataset.driveState!==state){button.dataset.driveState=state;const svg=button.querySelector('svg');if(svg)svg.innerHTML=state==='disconnected'?'<path d="M4 6h16M4 12h16M4 18h16"/>':'<circle cx="12" cy="8" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2"/>';let badge=button.querySelector('.drive-connection-mark');if(!badge){badge=document.createElement('span');badge.className='drive-connection-mark';badge.setAttribute('aria-hidden','true');button.append(badge)}badge.textContent=state==='reauth'?'!':state==='checking'?'…':state==='offline'?'!':'';}
+  let photo=button.querySelector('.drive-profile-photo');const url=store?.photoLink||'';if(url){if(!photo){photo=document.createElement('img');photo.className='drive-profile-photo';photo.alt='';photo.referrerPolicy='no-referrer';photo.onerror=()=>{photo.hidden=true;button.querySelector('svg').style.display=''};button.prepend(photo)}if(photo.getAttribute('src')!==url){photo.hidden=false;photo.src=url}button.querySelector('svg').style.display=photo.hidden?'':'none'}else{photo?.remove();button.querySelector('svg').style.display=''}
   button.title='操作メニュー：'+labels[state];button.setAttribute('aria-label',button.title);
  }
  function say(text,{saving=false}={}){
   if(status.textContent!==text)status.textContent=text;
   const saved=text.startsWith('保存済み'),needsLogin=text.startsWith('接続期限切れ')||text.startsWith('再ログインが必要');
-  const state=needsLogin?'再ログインが必要':resumePending?'同期を確認':!store||saved?'保存済み':text==='保存待ち'?'未保存の変更あり':(saving||['保存中…','読み込み中…'].includes(text))?'保存中…':'同期を確認';
+  const state=needsLogin?'再ログインが必要':resumePending?'同期を確認':!store||saved?'保存済み':text==='保存待ち'?'未保存の変更あり':(saving||text==='保存中…')?'保存中…':text==='読み込み中…'?'読み込み中…':'同期を確認';
   if(window.BolxivSaveStatus.get('drive')!==state)window.BolxivSaveStatus.set('drive',state);
   const label=store?'ログイン・同期状態':'ログイン';if(trigger.textContent!==label)trigger.textContent=label;paintConnection();
  }
