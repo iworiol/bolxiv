@@ -2795,7 +2795,11 @@ body.workspace-background-active{--property-active-bg:var(--workspace-control-ho
 
 .phone-menu-toggle>.drive-profile-photo{display:block;width:22px;height:22px;object-fit:cover;border-radius:50%;flex:none}.phone-menu-toggle>.drive-profile-photo[hidden]{display:none}
 
-@media(min-width:851px){.app>.top>.phone-menu-toggle{padding-left:8px;padding-right:4px;gap:8px;width:calc(4em + 42px);min-width:calc(4em + 42px);max-width:calc(4em + 42px);justify-content:flex-start}.app>.top>.phone-menu-toggle>svg{flex:none}.phone-menu-toggle>.drive-profile-photo{width:20px;height:20px}}
+@media(min-width:851px){.app>.top>.phone-menu-toggle{padding-left:8px;padding-right:15px;gap:8px;width:auto;min-width:0;max-width:none;justify-content:flex-start}.app>.top>.phone-menu-toggle>svg{flex:none}.phone-menu-toggle>.drive-profile-photo{width:20px;height:20px}}
 @media(max-width:850px){.app>.top>.phone-menu-toggle{padding:0;grid-template-columns:1fr;grid-template-rows:1fr}.phone-menu-toggle>:is(svg,.drive-profile-photo){grid-area:1 / 1;justify-self:center;align-self:center}}
 
 @media(max-width:850px){.phone-menu-toggle .drive-connection-mark{left:calc(50% + 5px);bottom:calc(50% - 16px)}}
+
+.drive-account-status{display:flex;align-items:center;gap:10px;margin:12px 0}.drive-account-status>img{display:block;width:36px;height:36px;flex:none;object-fit:cover;border-radius:50%}.drive-account-status>img[hidden]{display:none}.drive-account-status>p{margin:0;min-width:0}
+
+.usage-scene-guide .help-contents>.context-separator{margin:12px 0;background:#d0d4da}.usage-scene-guide .usage-contents-group>.help-contents-title{margin-bottom:4px;font-weight:700}

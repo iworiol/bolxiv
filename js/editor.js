@@ -214,7 +214,7 @@ const offlineUsageCases=[
  {
   "id": "usagePcCase",
   "tag": "PC・オフライン",
-  "title": "PCでオフライン利用",
+  "title": "オフライン：PCで使う",
   "intro": "初回はオンラインで本体を入手します。準備ができたら、次回からはPC内のファイルを開くだけで使えます。ここではWindowsの操作を例に説明します。",
   "steps": [
    [
@@ -258,7 +258,7 @@ const offlineUsageCases=[
  {
   "id": "usageLanCase",
   "tag": "Windows PC・スマホ",
-  "title": "スマホでオフライン利用（PC経由）",
+  "title": "オフライン：PC経由でスマホから使う",
   "intro": "PCを起動したまま、同じネットワークのスマホで使う方法です。初回はオンラインで本体を入手し、使う間はPCとスマホ間の通信を保ちます。",
   "steps": [
    [
@@ -309,7 +309,7 @@ const offlineUsageCases=[
  {
   "id": "usagePhoneCase",
   "tag": "スマホ・タブレット",
-  "title": "スマホでオフライン利用（スマホ単体）",
+  "title": "オフライン：スマホだけで使う",
   "intro": "スマホ内のサーバーアプリで本体を開きます。本体とアプリの入手にはインターネット接続が必要です。準備後はPCなしで利用できます。",
   "steps": [
    [
@@ -445,19 +445,19 @@ const offlineUsageCases=[
  }
 ];
 const onlineUsageCases=[
- {id:'usageBrowserCase',tag:'オンライン・ログイン不要',title:'ブラウザーで使う',intro:'公開ページを開けば、PC・スマホからそのまま使えます。現在利用できる方法です。',status:'Googleアカウントへの接続は不要です。',steps:[
+ {id:'usageBrowserCase',tag:'オンライン・ログイン不要',title:'オンラインで使う',intro:'公開ページを開けば、PC・スマホからそのまま使えます。現在利用できる方法です。',status:'Googleアカウントへの接続は不要です。',steps:[
  ['公開ページを開く','PCまたはスマホのブラウザーで公開ページを開きます。','ツールの画面が表示され、編集できます。','利用する端末はインターネットへ接続します。',2],
  ['編集して、JSONを保存する','編集内容は使用中のブラウザー内へ自動保存されます。作業の区切りにはエクスポートからJSONも保存します。','端末内にバックアップ用のJSONファイルがあることを確認します。','ユーザープリセット一覧は専用JSONで別に保存します。',10],
- ['別の端末へ引き継ぐ','保存したJSONを別の端末へ渡し、その端末でツールを開いてインポートします。','読み込んだコンテンツから編集を続けられます。','現在は端末間で自動同期されません。',19]
+ ['別の端末へ引き継ぐ','保存したJSONを別の端末へ渡し、その端末でツールを開いてインポートします。','読み込んだコンテンツから編集を続けられます。','Google Driveへ接続せずに使う場合、端末間で自動同期されません。',19]
  ],note:'<h4>同じブラウザー・同じURLで使います</h4><p>ブラウザーのデータ消去や接続先の変更に備え、JSONを残してください。</p>'},
- {id:'usageGoogleCase',tag:'オンライン公開版・Google Drive',title:'Google DriveでPC・スマホ間を引き継ぐ',intro:'メニューの「ログイン」からGoogleアカウントに接続します。同じアカウントで、PC・スマホから続きを編集できます。別の端末で保存した続きは、起動・リロード時に読み込みます。',status:'オンライン公開版で利用できます。Googleとの接続と、Driveへの保存許可が必要です。',steps:[
- ['PCで公開ページを開く','PCのブラウザーでオンライン公開ページを開きます。','編集画面が表示されます。','オフライン版ではGoogleログインを利用しません。',2],
- ['メニューからログインする','ハンバーガーメニューの「ログイン」を開き、「Googleアカウントでログイン」を押します。','Googleのアカウント選択画面が開きます。','自分のGoogleアカウントを選びます。',2],
- ['保存の許可と初回データを確認する','このツール専用のDrive領域へのアクセスを許可します。両方にデータがある初回は、引き継ぐ内容を選びます。','以後はDriveのデータを自動で読み込みます。','端末とDriveの両方を別々に編集した場合も、上書きせず選択を案内します。',2],
- ['編集し、自動保存を確認する','編集すると、端末内への保存に加えて、変更をまとめてDriveへ自動保存します。','「保存済み」を確認してから別の端末へ移ります。','操作のたびに送信するのではなく、数秒待ってまとめます。',10],
- ['スマホで同じアカウントにログインする','スマホで公開ページを開き、メニューの「ログイン」から同じアカウントで接続します。','Driveに保存したデータを自動で読み込みます。','PCを起動しておく必要はありません。初回に端末内データがあれば、使う内容を選びます。',19],
- ['続きを編集する','スマホで編集した内容もDriveへ自動保存します。次にPCを起動・リロードすると続きを読み込めます。','保存済みの表示を確認します。','接続期限切れは再ログイン、通信失敗時は再試行を案内します。JSONへのバックアップも残してください。',19]
- ],note:'<h4>保存対象</h4><p>全コンテンツ・フィールド・使用画像・ユーザープリセットをまとめて保存します。背景画像・画面配置・Undo履歴は端末ごとの設定として残します。</p><h4>接続が切れたとき・同時編集したとき</h4><p>端末内の内容は保持します。同時編集で別の保存データができたときは、自動上書きせず選択を案内します。選択前の端末データはログイン画面から退避JSONとして保存できます。Driveには直近10世代を保持し、保存容量を使用します。ログアウトしてもDriveのデータは削除しません。</p>'}
+ {id:'usageGoogleCase',tag:'オンライン公開版・Google Drive',title:'複数の端末で続きを編集する',intro:'同じGoogleアカウントで接続すると、PC・スマホ間で続きを編集できます。編集後は自動保存し、別の端末で保存した内容は、起動・リロード・ログイン時に読み込みます。',status:'オンライン公開版で利用できます。Googleアカウントへの接続と、Driveへの保存許可が必要です。',steps:[
+ ['PCで公開ページを開く','PCのブラウザーでオンライン公開ページを開きます。','編集画面が表示されます。','オフライン版ではGoogle Drive連携を利用できません。ログインせずに端末内へ保存して使うこともできます。',2],
+ ['メニューからログインする','画面右上のメニューから「ログイン」を開き、「Googleアカウントでログイン」を押して、自分のアカウントを選びます。','Googleの認証・保存許可の画面が開きます。','接続するとメニューボタンはプロフィール画像と緑の丸に変わります。画像が取得できない場合は人型になります。',2],
+ ['保存の許可と初回データを確認する','このツール専用のDrive領域へのアクセスを許可します。初回に端末とDriveの両方にデータがある場合は、使う内容を選びます。','選んだ内容がツールへ反映されます。','使う内容を確認して選んでください。読み込み前の端末データは退避され、ログイン画面からJSONとして保存できます。',2],
+ ['編集し、自動保存を確認する','編集内容は端末内に保存され、変更をまとめてDriveへも自動保存されます。','「保存済み」を確認してから別の端末へ移ります。','ログイン画面の「この端末からの最終保存」で、Driveへ保存できた日時を確認できます。読み込んだだけでは、この日時は更新されません。',10],
+ ['スマホで同じアカウントにログインする','スマホで公開ページを開き、メニューから同じGoogleアカウントでログインします。','PCからDriveへ保存した内容を読み込めます。','PCを起動しておく必要はありません。スマホにもデータがある場合は、使う内容を確認することがあります。',19],
+ ['続きを編集し、別端末で読み直す','スマホで編集した後も「保存済み」を確認します。PCで続きを編集するときは、ツールを開くか、開いたままならリロードします。','Driveに保存された続きを読み込めます。','画面を開いたまま待つだけでは、別端末の変更は読み込みません。前回の接続情報が有効なら、リロード後も接続を復元します。',19]
+ ],note:'<h4>保存されるもの・端末ごとに残るもの</h4><p>全コンテンツ・フィールド・使用画像・ユーザープリセットを保存します。カスタマイズで指定した背景画像・画面配置・倍率・Undo／Redo履歴は共有しません。バックアップ用のJSONも残してください。コンテンツとユーザープリセット一覧のJSONは別々に書き出します。</p><h4>約1時間で再ログインが必要になります</h4><p>Googleの認証情報は発行から通常約1時間で期限が切れ、保存・読み込みをしても延長されません。期限の30秒前にDrive接続を停止し、×で閉じるまで残る通知でお知らせします。再ログインは画面右上のメニューから行います。</p><h4>接続が切れても編集は続けられます</h4><p>編集内容は引き続き端末内へ保存されます。期限切れの場合は再ログイン、通信が切れた場合は復帰後の再試行で、未反映の変更をDriveへ保存します。状態メッセージの案内に従い、「保存済み」を確認してください。</p><h4>別の端末でも編集していた場合</h4><p>前回同期してから片方だけ変更されていれば、保存または読み込みを行います。両方で変更されていれば、自動で上書きせず使う内容を確認します。編集中の保存で別端末の更新を検出した場合は、上書きを止めてリロードを案内します。同時編集は避け、端末を切り替える前に保存完了を確認してください。</p><h4>ログアウトとDriveの保存データ</h4><p>ログアウトしても、端末内・Drive内のデータは削除されません。Driveには直近10世代の保存データと共有する画像等を保持し、ご自身のDrive容量を使用します。Drive内の保存データを削除する操作は、現在用意していません。</p>'}
 
 ];
 let offlineUsageArtworkSerial=0;
@@ -466,7 +466,13 @@ let offlineUsageArtworkSerial=0;
 const offlineUsageArtworkCrops={19:[724,1448,656,724],20:[1380,1448,792,724],22:[724,2172,676,724],23:[1400,2172,772,724]};
 function offlineUsageArtwork(scene){const cell=scene%12,[x,y,w,h]=offlineUsageArtworkCrops[scene]||[cell%3*724,Math.floor(cell/3)*724,724,724],sheet=scene>=12?'detail':'base',clip='usage-art-clip-'+offlineUsageArtworkSerial++;return `<svg class="usage-scene-art" viewBox="0 0 ${w} ${h}" aria-hidden="true" focusable="false"><defs><clipPath id="${clip}" clipPathUnits="userSpaceOnUse"><rect width="${w}" height="${h}"/></clipPath></defs><g clip-path="url(#${clip})"><image data-guide-sheet="${sheet}" x="${-x}" y="${-y}" width="2172" height="2896"/></g></svg>`}
 function offlineUsageCaseHTML(item){return `<header class="usage-scene-intro"><span class="usage-scene-eyebrow">${item.tag}</span><h3>${item.title}</h3><p>${item.intro}</p></header><p class="usage-download-status">${item.status||'α版はダウンロード配布を行っていません。以下は正式版を入手済みの場合の利用・更新手順です。'}</p><ol class="usage-scene-steps">${item.steps.map(([title,action,result,tip,scene],i)=>`<li><div class="usage-step-heading"><span class="usage-step-number" aria-hidden="true">${i+1}</span><h4>${title}</h4></div>${offlineUsageArtwork(scene)}<p>${action}</p><p class="usage-step-result"><strong>確認：</strong>${result}</p>${tip?`<p class="usage-scene-tip">${tip}</p>`:''}</li>`).join('')}</ol><section class="usage-data-note">${item.note}</section><p class="usage-art-caption">絵は操作のイメージです。画面や操作名は端末・環境で異なる場合があります。</p>`}
-usageGuide.innerHTML=`<div class="operation-guide-heading"><h2 id="usageSceneTitle">利用方法</h2><button id="closeUsageSceneGuide" type="button" class="btn" autofocus>閉じる</button></div><div class="operation-guide-body">${[...onlineUsageCases,...offlineUsageCases].map(item=>`<section id="${item.id}">${offlineUsageCaseHTML(item)}</section>`).join('')}</div>`;
+const usageGuideGroups=[
+ {title:'ログインせずに使う',ids:['usageBrowserCase','usagePcCase','usageLanCase','usagePhoneCase']},
+ {title:'Googleアカウントでログインして使う',ids:['usageGoogleCase']},
+ {title:'バージョンアップ',ids:['usageUpdateCase']}
+];
+const usageGuideItems=new Map([...onlineUsageCases,...offlineUsageCases].map(item=>[item.id,item]));
+usageGuide.innerHTML=`<div class="operation-guide-heading"><h2 id="usageSceneTitle">利用方法</h2><button id="closeUsageSceneGuide" type="button" class="btn" autofocus>閉じる</button></div><div class="operation-guide-body">${usageGuideGroups.flatMap(group=>group.ids.map(id=>usageGuideItems.get(id))).map(item=>`<section id="${item.id}">${offlineUsageCaseHTML(item)}</section>`).join('')}</div>`;
 
 document.body.append(usageGuide);
 // Each help dialog keeps one DOM view per case; only visibility and scroll change.
@@ -489,9 +495,10 @@ function bindIllustratedHelpCases({body,cases,links,initial=()=>0,onSelect=()=>{
 (()=>{
  const body=usageGuide.querySelector('.operation-guide-body'),cases=[...body.querySelectorAll(':scope>section')];
  const index=document.createElement('nav');index.className='help-contents';index.setAttribute('aria-label','利用シーン一覧');
- const title=document.createElement('p');title.className='help-contents-title';title.textContent='利用方法を選ぶ';index.append(title);
- const list=document.createElement('ul');index.append(list);body.prepend(index);
- const links=cases.map(item=>{const row=document.createElement('li'),link=document.createElement('a');link.href='#'+item.id;link.textContent=item.querySelector('h3').textContent;row.append(link);list.append(row);return link});
+ const linkById=new Map();
+ for(const [groupIndex,group] of usageGuideGroups.entries()){if(groupIndex){const separator=document.createElement('div');separator.className='context-separator';separator.setAttribute('role','separator');index.append(separator)}const section=document.createElement('div');section.className='usage-contents-group';const heading=document.createElement('p');heading.className='help-contents-title';heading.textContent=group.title;const list=document.createElement('ul');section.append(heading,list);index.append(section);for(const id of group.ids){const row=document.createElement('li'),link=document.createElement('a');link.href='#'+id;link.textContent=usageGuideItems.get(id).title;row.append(link);list.append(row);linkById.set(id,link)}}
+ body.prepend(index);
+ const links=cases.map(item=>linkById.get(item.id));
  usageGuide.showCaseIndex=bindIllustratedHelpCases({body,cases,links});
 })();
 

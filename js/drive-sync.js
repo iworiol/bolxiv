@@ -5,6 +5,20 @@
  const SCOPE='https://www.googleapis.com/auth/drive.appdata',FORMAT='bolxiv-drive-workspace',MARKER='workspace-v1';
  const allowed=location.origin==='https://iworiol.github.io';
   const canonical=value=>JSON.stringify(value,(_,v)=>v&&typeof v==='object'&&!Array.isArray(v)?Object.fromEntries(Object.keys(v).sort().map(k=>[k,v[k]])):v);
+ function driveErrorMessage(error){
+  const type=error?.type||error?.name;
+  if(type==='popup_closed')return 'Googleの認証画面が閉じられました。再度ログインしてください';
+  if(type==='popup_failed_to_open')return 'Googleの認証画面を開けませんでした。ブラウザーでポップアップを許可して再度ログインしてください';
+  if(type==='TimeoutError')return 'Google Driveとの通信がタイムアウトしました。通信状態を確認して再試行してください';
+  if(type==='AbortError')return 'Google Driveとの通信が中断されました。接続状態を確認して再試行してください';
+  if(error?.status===401)return 'Googleへの再ログインが必要です。ログイン画面から再接続してください';
+  if(error?.status===403)return 'Driveへのアクセスが拒否されました。保存の許可・空き容量・利用制限を確認してください';
+  if(error?.status===429)return 'Googleの利用制限に達しました。少し待ってから再試行してください';
+  if(error?.status>=500)return 'Google Driveで一時的な障害が発生しています。少し待ってから再試行してください';
+  if(type==='TypeError')return 'Google Driveへ接続できません。通信状態を確認して再試行してください';
+  if(['QuotaExceededError','SecurityError','DataCloneError','InvalidStateError','OperationError'].includes(type))return 'このブラウザーに接続情報を保存・復元できません。サイトデータの保存設定や空き容量を確認して再度ログインしてください';
+  return /[ぁ-んァ-ヶ一-龠]/.test(error?.message||'')?error.message:'処理を完了できませんでした。接続状態を確認して再試行してください';
+ }
  async function fingerprint(value){const bytes=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(canonical(value)));return [...new Uint8Array(bytes)].map(n=>n.toString(16).padStart(2,'0')).join('')}
  // Save immutable generations rather than race-prone replacement of one file. Concurrent
  // writers produce separate tips, so neither copy is silently overwritten. Retain 10 versions.
@@ -36,7 +50,7 @@
     if(!r.ok){const error=new Error(r.status===401?'Googleへの再ログインが必要です':r.status===403?'Driveへの許可・空き容量・利用制限を確認してください':r.status===429?'Googleの利用制限です。少し待って再試行します':'Driveとの通信に失敗しました（'+r.status+'）');error.status=r.status;throw error}
     // Keep the timeout active until the response body has arrived as well.
     const bytes=await r.arrayBuffer();return new Response(bytes.byteLength?bytes:null,{status:r.status,statusText:r.statusText,headers:r.headers});
-   }finally{clearTimeout(timer);this.controller.signal.removeEventListener('abort',abort)}
+   }catch(error){if(error.name==='AbortError'&&timeout.signal.aborted&&!this.controller.signal.aborted)throw new DOMException('Drive request timed out','TimeoutError');throw error}finally{clearTimeout(timer);this.controller.signal.removeEventListener('abort',abort)}
   }
   async account(){const r=await this.request('https://www.googleapis.com/drive/v3/about?fields=user(permissionId,photoLink)');const value=await r.json();if(!value.user?.permissionId)throw Error('接続先アカウントを確認できません');this.photoLink=typeof value.user.photoLink==='string'&&value.user.photoLink.startsWith('https://')?value.user.photoLink:'';return value.user.permissionId}
   async list(marker=MARKER){
@@ -104,13 +118,13 @@
  }
 
  const trigger=document.createElement('button');trigger.type='button';trigger.id='googleLoginButton';trigger.className='btn';trigger.textContent='ログイン';trigger.setAttribute('role','menuitem');
- document.getElementById('headerActions').insertBefore(trigger,document.getElementById('workspaceBackgroundButton'));
+ document.getElementById('headerActions').prepend(trigger);
  const dialog=document.createElement('dialog');dialog.id='googleLoginDialog';dialog.className='operation-guide drive-sync-dialog';dialog.setAttribute('aria-labelledby','googleLoginTitle');
- dialog.innerHTML='<div class="operation-guide-heading"><h2 id="googleLoginTitle">ログイン</h2><button type="button" class="btn" data-drive-close autofocus>閉じる</button></div><div class="operation-guide-body"><p>Google Driveへ編集内容を自動保存します。Driveのデータを読み込むのは起動・リロード時と初回ログイン時です。</p><p class="hint">ご自身のDrive内のアプリ専用領域を使用します。データと認証情報を開発者のサーバーへ送信・保管しません。背景画像・画面配置・Undo履歴は同期しません。</p><p id="googleDriveStatus" role="status" aria-live="polite"></p><div class="drive-sync-actions"><button type="button" class="btn" id="googleDriveConnect">Googleアカウントでログイン</button><button type="button" class="btn" id="googleDriveRetry" hidden>再試行</button><button type="button" class="btn" id="googleDriveDisconnect" hidden>ログアウト</button></div><section id="googleDriveChoice" hidden><h3>引き継ぐデータを選んでください</h3><p id="googleDriveChoiceText"></p><label for="googleDriveVersion">Driveの保存データ</label><select id="googleDriveVersion"></select><div class="drive-sync-actions"><button type="button" class="btn" id="googleDriveUseRemote">Driveのデータを使う</button><button type="button" class="btn" id="googleDriveUseLocal">この端末のデータを使う</button></div><p class="hint">選択前の端末内データは、このブラウザーに1世代退避します。Driveには直近10世代を保持します。選ばなかった内容は自動で合成しません。</p></section><section id="googleDriveRecovery" hidden><h3>読み込み前の端末データ</h3><p>直前に退避したデータをJSONへ書き出せます。新しい読み込み時には退避データも更新されます。</p><div class="drive-sync-actions"><button type="button" class="btn" id="googleDriveBackupContents">コンテンツを保存</button><button type="button" class="btn" id="googleDriveBackupPresets">プリセットを保存</button></div></section><p class="hint">編集中は変更をまとめて自動保存します。「保存済み」を確認してから別端末へ移ってください。別の端末で保存した続きはリロードして読み込みます。同時編集は推奨しません。接続は有効期限内ならリロード後も自動で復元します。期限が切れたら再ログインが必要です。オフラインでも端末内の保存とJSONは使えます。</p></div>';
+ dialog.innerHTML='<div class="operation-guide-heading"><h2 id="googleLoginTitle">ログイン</h2><button type="button" class="btn" data-drive-close autofocus>閉じる</button></div><div class="operation-guide-body"><p>Google Driveへ編集内容を自動保存します。Driveのデータを読み込むのは起動・リロード時と初回ログイン時です。</p><p class="hint">ご自身のDrive内のアプリ専用領域を使用します。データと認証情報を開発者のサーバーへ送信・保管しません。背景画像・画面配置・Undo履歴は同期しません。</p><hr class="help-section-separator"><div class="drive-account-status"><img id="googleDriveProfile" width="36" height="36" alt="接続中のGoogleアカウントのプロフィール画像" referrerpolicy="no-referrer" hidden><p id="googleDriveStatus" role="status" aria-live="polite"></p></div><p id="googleDriveLastSaved" class="hint" hidden></p><div class="drive-sync-actions"><button type="button" class="btn" id="googleDriveConnect">Googleアカウントでログイン</button><button type="button" class="btn" id="googleDriveRetry" hidden>再試行</button><button type="button" class="btn" id="googleDriveDisconnect" hidden>ログアウト</button></div><section id="googleDriveChoice" hidden><h3>引き継ぐデータを選んでください</h3><p id="googleDriveChoiceText"></p><label for="googleDriveVersion">Driveの保存データ</label><select id="googleDriveVersion"></select><div class="drive-sync-actions"><button type="button" class="btn" id="googleDriveUseRemote">Driveのデータを使う</button><button type="button" class="btn" id="googleDriveUseLocal">この端末のデータを使う</button></div><p class="hint">選択前の端末内データは、このブラウザーに1世代退避します。Driveには直近10世代を保持します。選ばなかった内容は自動で合成しません。</p></section><section id="googleDriveRecovery" hidden><h3>読み込み前の端末データ</h3><p>直前に退避したデータをJSONへ書き出せます。新しい読み込み時には退避データも更新されます。</p><div class="drive-sync-actions"><button type="button" class="btn" id="googleDriveBackupContents">コンテンツを保存</button><button type="button" class="btn" id="googleDriveBackupPresets">プリセットを保存</button></div></section><hr class="help-section-separator"><h3>保存・読み込みについて</h3><p class="hint">編集中は変更をまとめて自動保存します。「保存済み」を確認してから別端末へ移ってください。別の端末で保存した続きはリロードして読み込みます。同時編集は推奨しません。接続は有効期限内ならリロード後も自動で復元します。</p><hr class="help-section-separator"><h3>接続の有効期限について</h3><p class="hint">Googleの認証情報は、発行されてから通常約1時間で期限切れになります。保存・読み込みをしても期限は延長されません。このツールでは期限の30秒前にDrive接続を止め、再ログインを案内します。接続が切れている間も編集内容は端末内へ保存され、再ログイン後にDriveへ未反映の変更を保存します。他端末でも更新されている場合は、使うデータを確認します。オフラインでも端末内の保存とJSONは使えます。</p></div>';
  document.body.append(dialog);
  const node=id=>document.getElementById(id),connect=node('googleDriveConnect'),retry=node('googleDriveRetry'),logout=node('googleDriveDisconnect'),choice=node('googleDriveChoice'),versions=node('googleDriveVersion'),status=node('googleDriveStatus');
  let store=null,account='',base=null,baseline='',busy=false,applying=false,dirty=false,epoch=0,timer=null,expires=null,lastUpload=0,retries=0,sdk=null,client=null,meta=null,backedUp=null,changeRevision=0,readLock=null,resumePending=false,restoreTask=null,reloadRequired=false;
- let dbPromise=null,connectionExpiresAt=0;
+ let dbPromise=null,connectionExpiresAt=0,lastSavedAt=null;
  function database(){return dbPromise??=new Promise((resolve,reject)=>{const request=indexedDB.open('bolxiv-drive-sync',1);request.onupgradeneeded=()=>request.result.createObjectStore('settings');request.onsuccess=()=>resolve(request.result);request.onerror=()=>{dbPromise=null;reject(request.error)}})}
  async function localRecord(key,value,write=false){const db=await database();return new Promise((resolve,reject)=>{const tx=db.transaction('settings',write?'readwrite':'readonly'),r=write?tx.objectStore('settings').put(value,key):tx.objectStore('settings').get(key);tx.oncomplete=()=>resolve(r.result);tx.onabort=()=>reject(tx.error||Error('同期状態を保存できません'));tx.onerror=()=>{}})}
  const authDisabledKey='bolxiv-drive-auth-disabled';
@@ -134,6 +148,11 @@
   }catch{await forgetAuth('reauth');say('再ログインが必要。接続情報を復元できませんでした')}finally{busy=false;paint()}
  }
  function authHistory(){try{return localStorage.getItem('bolxiv-drive-auth-state')||''}catch{return ''}}
+ function paintProfilePhoto(image,url,onUnavailable){
+  if(!url){image.hidden=true;image.removeAttribute('src');return}
+  image.onerror=()=>{image.hidden=true;onUnavailable?.()};
+  if(image.getAttribute('src')!==url){image.hidden=false;image.src=url}
+ }
  function paintConnection(){
   let dismissed=false;try{dismissed=localStorage.getItem('bolxiv-drive-notice-dismissed')==='1'}catch{}
   persistentNotice(allowed&&authHistory()==='reauth'&&!dismissed?'Google Driveへの再ログインが必要です。再ログインすると自動保存を再開します。編集内容は端末内に保存されます。':null,()=>{try{localStorage.setItem('bolxiv-drive-notice-dismissed','1')}catch{}});
@@ -141,7 +160,8 @@
   const state=!allowed?'disconnected':authHistory()==='reauth'&&!store?'reauth':!store&&(busy||authHistory()==='connected'&&!authDisabled()&&!resumePending)?'checking':resumePending||store&&!navigator.onLine?'offline':store?'connected':'disconnected';
   const labels={disconnected:'未接続',connected:'接続中',reauth:'再ログインが必要',checking:'接続確認中',offline:'通信できません'};
   if(button.dataset.driveState!==state){button.dataset.driveState=state;const svg=button.querySelector('svg');if(svg)svg.innerHTML=state==='disconnected'?'<path d="M4 6h16M4 12h16M4 18h16"/>':'<circle cx="12" cy="8" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2"/>';let badge=button.querySelector('.drive-connection-mark');if(!badge){badge=document.createElement('span');badge.className='drive-connection-mark';badge.setAttribute('aria-hidden','true');button.append(badge)}badge.textContent=state==='reauth'?'!':state==='checking'?'…':state==='offline'?'!':'';}
-  let photo=button.querySelector('.drive-profile-photo');const url=store?.photoLink||'';if(url){if(!photo){photo=document.createElement('img');photo.className='drive-profile-photo';photo.alt='';photo.referrerPolicy='no-referrer';photo.onerror=()=>{photo.hidden=true;button.querySelector('svg').style.display=''};button.prepend(photo)}if(photo.getAttribute('src')!==url){photo.hidden=false;photo.src=url}button.querySelector('svg').style.display=photo.hidden?'':'none'}else{photo?.remove();button.querySelector('svg').style.display=''}
+  let photo=button.querySelector('.drive-profile-photo');const url=store?.photoLink||'';if(url){if(!photo){photo=document.createElement('img');photo.className='drive-profile-photo';photo.alt='';photo.referrerPolicy='no-referrer';button.prepend(photo)}paintProfilePhoto(photo,url,()=>{button.querySelector('svg').style.display=''});button.querySelector('svg').style.display=photo.hidden?'':'none'}else{photo?.remove();button.querySelector('svg').style.display=''}
+  paintProfilePhoto(node('googleDriveProfile'),account?url:'');
   button.title='操作メニュー：'+labels[state];button.setAttribute('aria-label',button.title);
  }
  function say(text,{saving=false}={}){
@@ -154,7 +174,9 @@
  function lockForRead(){if(readLock)return;const app=document.querySelector('.app');readLock={app,inert:app.inert,busy:app.getAttribute('aria-busy')};app.inert=true;app.setAttribute('aria-busy','true')}
  function unlockRead(){if(!readLock)return;const {app,inert,busy}=readLock;readLock=null;app.inert=inert;if(busy===null)app.removeAttribute('aria-busy');else app.setAttribute('aria-busy',busy)}
 
- function paint(){paintConnection();connect.hidden=!!store;logout.hidden=!store;retry.hidden=(!store&&!resumePending)||busy||!choice.hidden;retry.textContent=reloadRequired?'再読み込み':'再試行';node('googleDriveRecovery').hidden=!backedUp;dialog.querySelector('[data-drive-close]').disabled=busy;connect.disabled=busy||!allowed||!window.google?.accounts?.oauth2;logout.disabled=busy;node('googleDriveUseRemote').disabled=node('googleDriveUseLocal').disabled=busy}
+ async function recordLastUpload(){lastSavedAt=Date.now();paintLastSaved();try{await localRecord('last-upload:'+account,lastSavedAt,true)}catch{console.warn('Drive保存時刻を端末に記録できませんでした')}}
+ function paintLastSaved(){const label=node('googleDriveLastSaved');label.hidden=!account;const text=lastSavedAt?'この端末からの最終保存：'+new Date(lastSavedAt).toLocaleString('ja-JP'):'この端末からの最終保存：まだありません';if(label.textContent!==text)label.textContent=text}
+ function paint(){paintLastSaved();paintConnection();connect.hidden=!!store;logout.hidden=!store;retry.hidden=(!store&&!resumePending)||busy||!choice.hidden;retry.textContent=reloadRequired?'再読み込み':'再試行';node('googleDriveRecovery').hidden=!backedUp;dialog.querySelector('[data-drive-close]').disabled=busy;connect.disabled=busy||!allowed||!window.google?.accounts?.oauth2;logout.disabled=busy;node('googleDriveUseRemote').disabled=node('googleDriveUseLocal').disabled=busy}
  function payload(){if(window.Bolxiv.phaseMasters.active)window.Bolxiv.phaseMasters.commit();if(!window.Bolxiv.phaseMasters.active)contentBoards[activeContent]=data;return {content:jsonExportPayload(contentBoards,true),presets:userPresetLibrary.syncPayload()}}
  function empty(value){const c=value.content;return !c.phaseMasters.length&&!c.phaseMasterGroups.length&&!value.presets.presets.length&&c.contents.length===1&&c.contents[0].title==='新規コンテンツ1'&&c.contents[0].pages.length===1&&!c.contents[0].pages[0].length&&(c.contents[0].pageNames||[]).every(n=>n==='新規フェーズ')&&!(c.contents[0].phaseGroups||[]).length&&!(c.contents[0].pageNotes||[]).some(Boolean)}
  function editing(){return !!document.querySelector('input:focus,textarea:focus,[contenteditable="true"]:focus,.selection-marquee')||!!window.Bolxiv.pngPreview?.active||!!document.querySelector('dialog[open]:not(#googleLoginDialog)')}
@@ -181,7 +203,7 @@
  function fail(error,action='auto'){
   clearTimeout(timer);if(error.name==='AbortError'&&!store)return;
   if(error.status===401){disconnect(false,{reason:'reauth'});dirty=true;say('再ログインが必要。端末内の内容は保持しています');paint();return}
-  say((navigator.onLine?'同期できません：'+error.message:'オフライン。端末内に保存しています')+'。JSONへの保存も利用できます');
+  say((navigator.onLine?'同期できません：'+driveErrorMessage(error):'オフライン。端末内に保存しています')+'。JSONへの保存も利用できます');
   if(action==='startup'){reloadRequired=true;paint();return}
   if(store&&!reloadRequired&&choice.hidden&&retries<5){timer=setTimeout(()=>run(action),Math.min(60000,5000*2**retries++))}paint();
  }
@@ -195,7 +217,7 @@
     const id=versions.value,file=tips.find(f=>f.id===id);if(!file)throw Error('Driveが更新されました。再試行してください');
     const remote=await store.read(id,current);if(session!==epoch)return;validate(remote);
     // Publish the explicit choice before changing local data; preserve every competing version.
-    const resolved=tips.length>1?await store.write(remote,tips.map(f=>f.id)):id;if(session!==epoch)return;
+    const resolved=tips.length>1?await store.write(remote,tips.map(f=>f.id)):id;if(session!==epoch)return;if(tips.length>1)await recordLastUpload();
     await install(remote);base=resolved;await remember(await fingerprint(payload()));dirty=false;choice.hidden=true;say('保存済み');return;
    }
    if(action==='auto'){const expected=base||(meta?.account===account?meta.base:null);if(tips.length>1||(tips[0]?.id||null)!==expected){pauseForReload('別の端末でDriveのデータが更新されているため、上書きを止めました。');return}if(!base&&expected)base=expected}
@@ -212,7 +234,7 @@
     offer(tips,'この端末とDriveの両方で変更されています。自動上書きせず停止しました。');return;
    }
    if(action!=='local'&&hash===baseline){dirty=false;say('保存済み');return}
-   say('保存中…');const id=await store.write(current,tips.map(f=>f.id));if(session!==epoch)return;base=id;lastUpload=Date.now();await remember(hash);dirty=changeRevision!==revision;choice.hidden=true;retries=0;
+   say('保存中…');const id=await store.write(current,tips.map(f=>f.id));if(session!==epoch)return;base=id;lastUpload=Date.now();await recordLastUpload();await remember(hash);dirty=changeRevision!==revision;choice.hidden=true;retries=0;
    const after=await store.list();if(session!==epoch)return;if(store.tips(after).length>1){if(action==='auto')pauseForReload('同時編集を検出しました。両方の保存データを保持して停止しました。');else offer(store.tips(after),'同時編集を検出しました。両方の保存データを保持しています。');return}
    say(dirty?'保存待ち':'保存済み');if(dirty)schedule();
    // Cleanup failure must never turn a successful upload into an automatic duplicate write.
@@ -239,14 +261,15 @@
   try{
    store=new DriveStore(token,progress=>{if(session!==epoch)return;const text=progress.stage==='prepare'?'保存する変更を確認中…':progress.stage==='commit'?'Driveの保存を確定中…':'Driveへ保存中（'+progress.done+' / '+progress.total+'）';say(text,{saving:true})});account=await store.account();if(session!==epoch)return;
    if(owner&&owner!==account)throw Error('接続先のアカウントが一致しません。再ログインしてください');
+   lastSavedAt=await localRecord('last-upload:'+account).catch(()=>null);if(!Number.isFinite(lastSavedAt)||lastSavedAt<=0)lastSavedAt=null;
    meta=await localRecord('state');baseline=meta?.account===account?meta.hash:'';base=null;
    if(!restoring)await persistAuth(token,expiresAt,account);if(session!==epoch)return;resumePending=false;
    connectionExpiresAt=expiresAt;clearTimeout(expires);expires=setTimeout(()=>{disconnect(false,{reason:'reauth'});say('接続期限切れ。再ログインしてください')},Math.max(0,expiresAt-Date.now()-30000));
    say(readAtConnect?'読み込み中…':'接続を復元しました');
   }catch(error){
    if(session!==epoch)return;
-   const retry=restoring&&error.status!==401&&(error instanceof TypeError||error.name==='AbortError'||!navigator.onLine||error.status===403||error.status===429||error.status>=500);
-   disconnect(false,{forget:!retry,reason:'reauth'});resumePending=retry;say(retry?'接続を再開できません。オンライン復帰後に再試行します':error.message);
+   const retry=restoring&&error.status!==401&&(error instanceof TypeError||['AbortError','TimeoutError'].includes(error.name)||!navigator.onLine||error.status===403||error.status===429||error.status>=500);
+   disconnect(false,{forget:!retry,reason:'reauth'});resumePending=retry;say(retry?'接続を再開できません。オンライン復帰後に再試行します。'+driveErrorMessage(error):driveErrorMessage(error));
   }finally{busy=false;paint()}
   if(store)await run(readAtConnect?'startup':'auto');
  }
@@ -260,12 +283,12 @@
  trigger.onclick=async()=>{
   if(!dialog.open)dialog.showModal();backedUp=await localRecord('backup').catch(()=>null);paint();
   if(!allowed){say('ログインはオンライン公開版で利用できます。オフライン版は従来どおり使えます');return}
-  if(store)return;say('Googleへの接続を準備しています…');try{await loadSdk();say(authHistory()==='reauth'?'再ログインが必要。Googleアカウントでログインしてください':'未接続。Googleアカウントでログインしてください')}catch(error){say(error.message)}paint();
+  if(store)return;say('Googleへの接続を準備しています…');try{await loadSdk();say(authHistory()==='reauth'?'再ログインが必要。Googleアカウントでログインしてください':'未接続。Googleアカウントでログインしてください')}catch(error){say(driveErrorMessage(error))}paint();
  };
  connect.onclick=()=>{
   if(!allowed||busy||!window.google?.accounts?.oauth2)return;busy=true;paint();say('Googleで認証中…');
-  client=window.google.accounts.oauth2.initTokenClient({client_id:CLIENT_ID,scope:SCOPE,include_granted_scopes:false,callback:connected,error_callback:()=>{busy=false;say('ログインを完了できませんでした。ポップアップを許可して再試行してください');paint()}});
-  try{client.requestAccessToken({prompt:'select_account'})}catch(error){busy=false;say(error.message);paint()}
+  try{client=window.google.accounts.oauth2.initTokenClient({client_id:CLIENT_ID,scope:SCOPE,include_granted_scopes:false,callback:connected,error_callback:error=>{busy=false;say(driveErrorMessage(error));paint()}});
+  client.requestAccessToken({prompt:'select_account'})}catch(error){busy=false;say(driveErrorMessage(error));paint()}
  };
  retry.onclick=()=>{if(reloadRequired){location.reload();return}retries=0;if(resumePending&&!store)restoreConnection();else run()};logout.onclick=()=>disconnect();node('googleDriveUseRemote').onclick=()=>run('remote');node('googleDriveUseLocal').onclick=()=>run('local');
  dialog.querySelector('[data-drive-close]').onclick=()=>{if(!busy)dialog.close()};dialog.addEventListener('cancel',event=>{if(busy)event.preventDefault()});
